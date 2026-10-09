@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Kentico.Xperience.Core" />
+    <PackageReference Include="Kentico.Xperience.Lucene.Core" />
+  </ItemGroup>
+</Project>

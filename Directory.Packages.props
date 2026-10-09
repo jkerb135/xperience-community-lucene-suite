@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Kentico.Xperience.Admin" Version="31.9.1" />
+    <PackageVersion Include="Kentico.Xperience.Core" Version="31.9.1" />
+    <PackageVersion Include="Kentico.Xperience.Lucene.Core" Version="15.0.5" />
+  </ItemGroup>
+</Project>

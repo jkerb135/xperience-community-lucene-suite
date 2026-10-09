@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/XperienceCommunity.Lucene.Suite.Admin/XperienceCommunity.Lucene.Suite.Admin.csproj" />
+    <Project Path="src/XperienceCommunity.Lucene.Suite/XperienceCommunity.Lucene.Suite.csproj" />
+  </Folder>
+</Solution>

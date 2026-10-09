@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Kentico.Xperience.Admin" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XperienceCommunity.Lucene.Suite\XperienceCommunity.Lucene.Suite.csproj" />
+  </ItemGroup>
+</Project>
