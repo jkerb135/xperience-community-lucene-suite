@@ -5,27 +5,27 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 2 Event Capture, ready to plan
+**Current focus:** v0.1 Tune & Capture — Phase 2 Event Capture, 02-01 complete, 02-02 next
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 2 of 5 (Event Capture) — Planning
-Plan: 02-01 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-09 — Enterprise audit of 02-01-PLAN.md (02-01-AUDIT.md)
+Phase: 2 of 5 (Event Capture) — In progress
+Plan: 02-01 complete (1 of 3)
+Status: Loop closed, ready for next PLAN (02-02)
+Last activity: 2026-10-09 — UNIFY 02-01 (02-01-SUMMARY.md)
 
 Progress:
 - Milestone: [██░░░░░░░░] 20% (1 of 5 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
-- Phase 2: [░░░░░░░░░░] 0%
+- Phase 2: [███░░░░░░░] 33% (1/3 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: 02-01 cookie via Configure<CookieLevelOptions> + CookieLevelConstants (RegisterCookie/CookieLevel obsolete in 31.9.1); Suite core references Kentico.Xperience.WebApp | Phase 2 | Core package depends on the live-site WebApp package |
 | 2026-10-09: Enterprise audit on 02-01-PLAN.md. Applied 4 must-have, 5 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 2 | Capture can never break search; installer safe on web-farm startup |
 | 2026-10-09: Phase 2 design: module classes + Kentico bulk APIs; hosted single-runner rollup job; session cookie at Visitor/All (option a); merge at rollup per as-you-type-merge-analysis.md with the 5 recommended choices | Phase 2 | Split into 02-01 capture / 02-02 interactions / 02-03 rollups |
 | 2026-10-09: Search tuning section placed under IndexListingPage as sibling of IndexEditPage (user option A); entry via TableActions.AddLink | Phase 1 | URL /admin/lucene/indexes/search-tuning/{id}/…; Phases 3–5 add pages to this section |
@@ -54,6 +55,9 @@ See PROJECT.md Key Decisions.
 | Strategy/FacetsConfig built per search; captive scoped deps in strategies; full stored-field payloads; no failure logging | 01-02 audit | S–M | Phase 2 (timing data, logging) |
 | Stored fields visible to Lucene VIEW users; Node.js required for non-Debug builds; npm vulnerability scanning in CI (5 dev-only highs in KNOWN-LIMITATIONS); no client unit tests | 01-03 audit | S–M | Phase 3 permissions / Release-CI phase |
 | AC-5 (permissions) approved by user without reported observations | 01-03 UNIFY | S | Re-check with a real role when custom permissions land (Phase 3) |
+| When Response.HasStarted, SearchSessionCookie still calls Kentico GetCurrentCookieLevel (documented to set CMSCookieLevel cookie); tested only with a fake; a throw loses the event, search unaffected | 02-01 UNIFY | S | 02-02 (beacon shares cookie code): verify with the real provider |
+| Installer lock-removal mutation not run (concurrency test not proven to fail without sp_getapplock) | 02-01 UNIFY | S | 02-03 (installer gains rollup tables) |
+| 02-01 audit deferrals: language/channel dimensions; clock drift beyond NTP (KNOWN-LIMITATIONS); unit-level DB writer test (covered E2E) | 02-01 audit | S–M | When the search API carries language/channel |
 
 ### Deviations
 #### Skill Audit (Phase 1, plan 01-01)
@@ -61,24 +65,25 @@ See PROJECT.md Key Decisions.
 |----------|---------|-------|
 | /dotnet:csharp-refactoring | ○ | Not evidenced in APPLY record; edit was one builder-chain call in xbk/Program.cs |
 
-Plans 01-02 and 01-03: all required skills invoked.
+Plans 01-02, 01-03 and 02-01: all required skills invoked.
 
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
 | Phase 1: Tuning UI inherits Lucene Search app permissions (Development category). Marketers need Lucene app access; future rule/synonym editing would need UPDATE, which also allows editing/rebuilding/deleting indexes | Core value "marketers without a developer" vs. index-admin rights | Revisit before Phase 3 editing pages: custom permission on suite commands, or role guidance |
+| Open product question (unanswered): Suite search widget/page for real traffic in v0.1? xbk has no production path into ISuiteSearchService, only the dev-only demo controller | Capture/rollups only see demo traffic until a Suite front end exists | User decision; raise before 02-02 planning |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 01-03, close Phase 1)
+Last commit: see `git log -1` (docs(paul): unify plan 02-01)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Plan 02-01 created
-Next action: /paul:audit .paul/phases/02-event-capture/02-01-PLAN.md, then /paul:apply
-Resume file: .paul/phases/02-event-capture/02-01-PLAN.md
+Stopped at: Plan 02-01 unified (loop closed)
+Next action: /paul:plan 02-02 Interaction endpoint
+Resume file: .paul/phases/02-event-capture/02-01-SUMMARY.md
 
 ---
 *STATE.md — Updated after every significant action*

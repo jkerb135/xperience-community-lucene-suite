@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phase 1 complete, Phase 2 ready to plan |
+| Status | v0.1 in progress — Phase 1 complete, Phase 2 1/3 (capture shipped) |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -33,9 +33,10 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Isolated build (net10.0, own props/CPM), Kentico Lucene ≥ 15.0.5 coexisting with XpSearch in xbk — Phase 1
 - ✓ Suite search API over ILuceneSearchService (query text, field boosts, paging limits, facets with sideways counts, hit count, timing) — Phase 1
 - ✓ Per-index "Search tuning" admin section with query tester; client Proxy in dev, embedded on non-Debug builds — Phase 1
+- ✓ Identity-free search capture: one scrubbed raw row per tracked search in module class LuceneSuite.SearchEvent via background BulkInsert; searchId/sequence contract; session cookie only at Visitor/All; bot/prefetch/untracked/empty-index exclusions; web-farm-safe installer — Phase 2 (02-01)
 
 ### Active (In Progress)
-- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events (not yet planned)
+- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events — capture done (02-01); interactions (02-02) and rollups/retention (02-03) remaining
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -126,6 +127,7 @@ Marketers tune, test and measure site search without a developer.
 | Engine | Lucene.NET 4.8.0-beta00017 | Suggest/Analysis.Common at exact same beta |
 | Admin UI | `@kentico/xperience-admin-components` + XbyK admin client module | Design kit repo: Personal/xperience-by-kentico-admin-design-components |
 | Storage | SQL Server via module classes; SqlBulkCopy for raw events | |
+| Live-site deps | Kentico.Xperience.WebApp 31.9.1 + Microsoft.AspNetCore.App framework reference in Suite core | Added 02-01 for cookie levels; acceptable because the core package is the live-site package |
 | Host for testing | xbk (Dancing Goat) | |
 
 ## Links
@@ -136,4 +138,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | ../project-sidecar/docs/research/ |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-09 after Phase 1*
+*Created: 2026-10-08 · Last updated: 2026-10-09 after 02-01*
