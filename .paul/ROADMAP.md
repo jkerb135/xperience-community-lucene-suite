@@ -12,7 +12,7 @@ Phases: 0 of 5 complete
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 1 | Foundation | 3 | Planning | - |
+| 1 | Foundation | 1/3 | In progress | - |
 | 2 | Event Capture | TBD | Not started | - |
 | 3 | Rules Engine | TBD | Not started | - |
 | 4 | Synonyms | TBD | Not started | - |
@@ -31,7 +31,7 @@ Phases: 0 of 5 complete
 - Database installer moved to Phase 2 (first tables)
 
 **Plans:**
-- [ ] 01-01: Skeleton + xbk wiring (planned)
+- [x] 01-01: Skeleton + xbk wiring (complete 2026-10-08)
 - [ ] 01-02: Search API + test project
 - [ ] 01-03: Admin application + client pipeline + query tester
 
