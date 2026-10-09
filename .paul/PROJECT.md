@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phases 1–2 complete (2 of 6); Phase 3 Rules Engine ready to plan |
+| Status | v0.1 in progress — Phases 1–2 complete (2 of 6); Phase 3 Rules Engine 1/4 (03-01 complete) |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -42,9 +42,10 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Hosted web-farm-safe rollup job: every node runs it, one wins a non-blocking sp_getapplock per tick; completed UTC days rolled idempotently behind a transactional watermark; completeness floor never re-rolls a day from purged input — Phase 2 (02-04)
 - ✓ Retention: raw purge never ahead of the next day's input window, RawHardLimit privacy ceiling for a stuck job, SearchDaily purge after DailyRetention, batched deletes — Phase 2 (02-04)
 - ✓ Sub-threshold fold of SearchDaily rows into per-day "(other)" rows (QueryText NULL) with every per-day total preserved; browse ('') never folded — Phase 2 (02-04)
+- ✓ Suite-owned "Site Search" admin application (Digital marketing) with its own permissions — View + Manage rules / Manage synonyms / Manage experiments; per-index section + query tester moved into it; role with only Site Search → View can tune search, Lucene-only role is refused; Lucene listing cogwheel is a permission-aware shortcut — Phase 3 (03-01)
 
 ### Active (In Progress)
-- [ ] Phase 3 Rules Engine: pin/boost/bury/hide/attach data by query, facets and context — ready to plan; resolve the editing-permission concern (custom permission vs. Lucene app UPDATE) during planning
+- [ ] Phase 3 Rules Engine: pin/boost/bury/hide/attach data by query, facets and context — 03-01 placement & permissions done; next 03-02 rule model + pure engine
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -73,7 +74,7 @@ Marketers tune, test and measure site search without a developer.
 - Analytics dedup must be web-farm safe: no in-memory cross-request state; browser-issued searchId, merged at rollup
 - Never bucket A/B variants or identify users by server IP; honor forwarded headers
 - Use the `@kentico/xperience-admin-components` design library; distinct object-type prefix from XpSearch so both can run in xbk during switchover
-- Admin UI extends Kentico Lucene's admin: a per-index "Search tuning" section beside IndexEditPage under IndexListingPage (/lucene/indexes/search-tuning/{indexId}/…), reached by a table link per index; Kentico forbids section children of Edit-template pages. Couples Suite.Admin to Kentico.Xperience.Lucene.Admin public page types; access follows the Lucene Search application (listing = VIEW)
+- Admin UI lives in the Suite-owned "Site Search" application (Digital marketing): read-only index listing → per-index "Search tuning" section (/admin/site-search/indexes/{indexId}/…); no Suite page is parented to a Kentico Lucene page; access follows Site Search permissions (VIEW + custom LuceneSuite.Manage*). Only link to Kentico Lucene's admin: a PageExtender cogwheel on its index listing, hidden without Site Search → View via the Kentico-internal CMS.Membership.Internal.IApplicationPermissionEvaluator (public cross-app evaluator is internal in 31.9.1). Every routed node carries its own [UIEvaluatePermission] and index-exists ValidatePage (Kentico validates only the requested node)
 - Admin client: Proxy mode (webpack dev server, port 3011) in development; Release build runs npm and embeds the bundle
 
 ### Business Constraints
@@ -151,4 +152,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | ../project-sidecar/docs/research/ |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-09 after Phase 2*
+*Created: 2026-10-08 · Last updated: 2026-10-09 after 03-01*

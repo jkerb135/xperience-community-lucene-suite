@@ -5,28 +5,28 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, ready to plan
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-01 complete; ready to plan 03-02
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 3 of 6 (Rules Engine) — Planning
-Plan: 03-01 created + audited (1 must-have, 1 strongly-recommended applied; 2 deferred), awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-09 — Created .paul/phases/03-rules-engine/03-01-PLAN.md (permissions resolved: option A)
+Phase: 3 of 6 (Rules Engine) — In progress
+Plan: 03-01 complete (1 of 4)
+Status: Loop closed, ready for next PLAN (03-02)
+Last activity: 2026-10-09 — Unified 03-01 (.paul/phases/03-rules-engine/03-01-SUMMARY.md)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [░░░░░░░░░░] 0%
+- Phase 3: [██▌░░░░░░░] 25% (1/4 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -36,6 +36,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: 03-01 Site Search app (site-search, Digital marketing) with View + LuceneSuite.ManageRules/ManageSynonyms/ManageExperiments; cogwheel hidden via Kentico-internal IApplicationPermissionEvaluator (user option a; IUITreeNodeUIPermissionEvaluator internal in 31.9.1); permissions enforced by [UIEvaluatePermission], ValidatePage = index-exists on every routed node (user change b362fa0) | Phase 3 | 03-04 adds pages under SearchTuningSectionPage and enforces the custom permissions on its commands |
 | 2026-10-09: 02-04 rollup job: session applock on unpooled connection; watermark = hidden settings key read uncached in the lock, written in the day's CMSTransactionScope (Kentico bulk ops enlist); RawRetention minimum tightened to 1 day + 3W + flush + 5 min + RollupInterval + 1 h; collation-equal texts merged; volume within budget (no streaming); SessionId/Position getter null bug fixed | Phase 2 | v0.2 reports read SearchDaily incl. (other) (QueryText NULL) |
 | 2026-10-09: Sub-threshold prune folds into per-day (other) bucket (QueryText NULL) to preserve totals; xbk DB subject to retention when it next runs this code | Phase 2 | 02-04 |
 | 2026-10-09: 02-03 options bound via Configure<IServiceProvider> + optional IConfiguration (not BindConfiguration; no live reload); SearchDaily = installer v3; engine input contract + duration cap + tie-break implemented; 02-02 mint conflicts resolved as settings (vectors prove both flips) | Phase 2 | 02-04 maps Info rows to the documented engine input contract |
@@ -48,7 +49,7 @@ See PROJECT.md Key Decisions.
 | 2026-10-09: 02-01 cookie via Configure<CookieLevelOptions> + CookieLevelConstants (RegisterCookie/CookieLevel obsolete in 31.9.1); Suite core references Kentico.Xperience.WebApp | Phase 2 | Core package depends on the live-site WebApp package |
 | 2026-10-09: Enterprise audit on 02-01-PLAN.md. Applied 4 must-have, 5 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 2 | Capture can never break search; installer safe on web-farm startup |
 | 2026-10-09: Phase 2 design: module classes + Kentico bulk APIs; hosted single-runner rollup job; session cookie at Visitor/All (option a); merge at rollup per as-you-type-merge-analysis.md with the 5 recommended choices | Phase 2 | Split into 02-01 capture / 02-02 interactions / 02-03 rollups |
-| 2026-10-09: Search tuning section placed under IndexListingPage as sibling of IndexEditPage (user option A); entry via TableActions.AddLink | Phase 1 | URL /admin/lucene/indexes/search-tuning/{id}/…; Phases 3–5 add pages to this section |
+| 2026-10-09: Search tuning section placed under IndexListingPage as sibling of IndexEditPage (user option A); entry via TableActions.AddLink — SUPERSEDED by 03-01 (Site Search app) | Phase 1 | URL now /admin/site-search/indexes/{id}/…; Phases 3–5 add pages to this section |
 | 2026-10-09: Checkpoint fixes 1–3 applied in-loop (accessible facet checkboxes, narrow-width layout, clean validation text) | Phase 1 | Query tester usable at ~790 px |
 | 2026-10-08: xbk NoWarn += XPSEARCH002 (user option a) — pre-existing break from XpSearch's [Experimental] UseMcp() | Phase 1 | xbk opts into an experimental XpSearch API |
 | 2026-10-08: Enterprise audit on 01-03-PLAN.md. Applied 2 must-have, 5 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 1 | Permission check mandatory; npm embed for all non-Debug configs with --ignore-scripts |
@@ -63,12 +64,12 @@ See PROJECT.md Key Decisions.
 | xbk/packages.lock.json is rewritten by every SeparatedAdmin=true build (both modes share one lock file; restored to default shape 2026-10-08) | 01-01 UNIFY | S | Only matters if xbk ever adopts locked-mode restore |
 | NuGet PackageId availability; CI pipeline; root global.json 8.0.101 | 01-01 audit | S–M | Release phase / outside Suite |
 | Strategy/FacetsConfig built per search; captive scoped deps in strategies; full stored-field payloads; no failure logging | 01-02 audit | S–M | Phase 2 (timing data, logging) |
-| Stored fields visible to Lucene VIEW users; Node.js required for non-Debug builds; npm vulnerability scanning in CI (5 dev-only highs in KNOWN-LIMITATIONS); no client unit tests | 01-03 audit | S–M | Phase 3 permissions / Release-CI phase |
-| AC-5 (permissions) approved by user without reported observations | 01-03 UNIFY | S | Re-check with a real role when custom permissions land (Phase 3) |
+| Stored fields visible to Site Search VIEW users; Node.js required for non-Debug builds; npm vulnerability scanning in CI (5 dev-only highs in KNOWN-LIMITATIONS); no client unit tests | 01-03 audit | S–M | Phase 3 permissions / Release-CI phase |
 | 02-01 audit deferrals: language/channel dimensions; clock drift beyond NTP (KNOWN-LIMITATIONS); unit-level DB writer test (covered E2E) | 02-01 audit | S–M | When the search API carries language/channel |
 | 02-02 audit deferrals: shared queue capacity (drops logged per kind); custom-endpoint rate limiting (developer-owned) | 02-02 audit | S | Phase 6 Widgets traffic |
 | No config change tracking / live reload: merge-setting changes only affect days rolled afterwards | 02-03 UNIFY | S | v0.2 reports |
-| Admin settings page | 02-03 audit | M | With Phase 3 permissions concern |
+| Admin settings page | 02-03 audit | M | After 03-04 (Site Search app + custom permissions now exist) |
+| 03-01 audit deferrals: existing roles must be granted Site Search → View; old /admin/lucene/indexes/search-tuning/… URLs no longer resolve | 03-01 audit | S | README at packaging |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -79,22 +80,28 @@ See PROJECT.md Key Decisions.
 
 Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 
+#### Skill Audit (Phase 3, plan 03-01)
+| Expected | Invoked | Notes |
+|----------|---------|-------|
+| /dotnet:csharp-refactoring | ✓ | Both APPLY runs |
+| /kentico-web-development:content-retrieval | ○ | Not evidenced; listing reads LuceneIndexItemInfo via Kentico ListingPage ObjectType, no hand-written query |
+
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
-| Permissions concern — RESOLVED in planning 2026-10-09 (option A): Suite-owned Site Search app with custom permissions; implemented and role-verified in 03-01 | — | 03-01 |
+| Admin UI has not been formally validated against the admin design components repo (C:\Users\jkerb\RiderProjects\Personal\xperience-by-kentico-admin-design-components); 01-03 only consulted registry/stories and imported npm components — design validation pass pending (user question 2026-10-09) | Query tester / Site Search pages may diverge from the design kit | Open — user to decide when to run a design validation pass |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 02-04, close Phase 2; Phase 2 code in d5261ec, 18add8d and earlier)
+Last commit: see `git log -1` (docs(paul): unify plan 03-01; 03-01 code in 0aa45f2, b362fa0)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Phase 2 complete (4/4), ready to plan Phase 3 Rules Engine
-Next action: /paul:audit .paul/phases/03-rules-engine/03-01-PLAN.md, then /paul:apply
-Resume file: .paul/ROADMAP.md
+Stopped at: Plan 03-01 unified (Phase 3: 1/4)
+Next action: /paul:plan 03-02 Rule model + pure engine
+Resume file: .paul/phases/03-rules-engine/03-01-SUMMARY.md
 Environment: 2026-10-09 (02-04 APPLY): no xbk process running; DB `xperience` already at LuceneSuiteInstalledVersion = 3 (SELECT only). When xbk next runs this code, the installer adds the watermark key and the rollup job applies retention to its raw rows (by design)
 
 ---
