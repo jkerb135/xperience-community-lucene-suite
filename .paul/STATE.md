@@ -43,7 +43,6 @@ See PROJECT.md Key Decisions.
 | PDF export of reports | Init | M | When reports ship (v0.2) |
 | xbk/Program.cs:65 hard-codes Management API secret | Research | S | Outside this repo — user to move to user secrets |
 | Solution-root Directory.build.targets still imports into Suite projects (.targets resolve separately from .props); Suite-only clone/CI won't have it | 01-01 UNIFY | S | Next plan touching build files — add empty Suite Directory.Build.targets |
-| LICENSE holder "Citro Digital" (copied from GEO) not explicitly confirmed by user | 01-01 | S | Before first publish; ask user |
 | xbk/packages.lock.json is rewritten by every SeparatedAdmin=true build (both modes share one lock file; restored to default shape 2026-10-08) | 01-01 UNIFY | S | Only matters if xbk ever adopts locked-mode restore |
 | NuGet PackageId availability; CI pipeline; root global.json 8.0.101 | 01-01 audit | S–M | Release phase / outside Suite |
 
