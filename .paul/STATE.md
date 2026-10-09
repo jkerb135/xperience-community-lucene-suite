@@ -5,27 +5,28 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 2 Event Capture, 02-03 complete, 02-04 next
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, ready to plan
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 2 of 6 (Event Capture) — In progress
-Plan: 02-04 applied (02-01..02-03 complete)
-Status: APPLY complete, ready for UNIFY
-Last activity: 2026-10-09 — APPLY of 02-04 (rollup job, store, retention + fold): all ACs verified on a disposable DB copy; 254 tests (233 + 19 DB-gated + 2 opt-in volume)
+Phase: 3 of 6 (Rules Engine) — Not started
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-09 — Phase 2 complete (02-04 unified: rollup job, store, retention + fold), transitioned to Phase 3
 
 Progress:
-- Milestone: [██░░░░░░░░] 17% (1 of 6 phases)
+- Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
-- Phase 2: [████████░░] 75% (3/4 plans)
+- Phase 2: [██████████] 100% (4/4 plans)
+- Phase 3: [░░░░░░░░░░] 0%
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Applied, ready for UNIFY]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -35,6 +36,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: 02-04 rollup job: session applock on unpooled connection; watermark = hidden settings key read uncached in the lock, written in the day's CMSTransactionScope (Kentico bulk ops enlist); RawRetention minimum tightened to 1 day + 3W + flush + 5 min + RollupInterval + 1 h; collation-equal texts merged; volume within budget (no streaming); SessionId/Position getter null bug fixed | Phase 2 | v0.2 reports read SearchDaily incl. (other) (QueryText NULL) |
 | 2026-10-09: Sub-threshold prune folds into per-day (other) bucket (QueryText NULL) to preserve totals; xbk DB subject to retention when it next runs this code | Phase 2 | 02-04 |
 | 2026-10-09: 02-03 options bound via Configure<IServiceProvider> + optional IConfiguration (not BindConfiguration; no live reload); SearchDaily = installer v3; engine input contract + duration cap + tie-break implemented; 02-02 mint conflicts resolved as settings (vectors prove both flips) | Phase 2 | 02-04 maps Info rows to the documented engine input contract |
 | 2026-10-09: 02-02 interaction logger: validation throws synchronously, storage never throws; real Kentico cookie-level provider writes no CMSCookieLevel on a started response (SearchSessionCookie kept) | Phase 2 | Closes 02-01 HasStarted concern |
@@ -65,10 +67,9 @@ See PROJECT.md Key Decisions.
 | AC-5 (permissions) approved by user without reported observations | 01-03 UNIFY | S | Re-check with a real role when custom permissions land (Phase 3) |
 | 02-01 audit deferrals: language/channel dimensions; clock drift beyond NTP (KNOWN-LIMITATIONS); unit-level DB writer test (covered E2E) | 02-01 audit | S–M | When the search API carries language/channel |
 | 02-02 audit deferrals: shared queue capacity (drops logged per kind); custom-endpoint rate limiting (developer-owned) | 02-02 audit | S | Phase 6 Widgets traffic |
-| Rollup engine holds a whole day in memory (O(D²·L) fragment check); volume unmeasured | 02-03 audit / UNIFY | S–M | 02-04: measure with synthetic volume, stream per SearchId if needed |
-| No config change tracking / live reload: merge-setting changes only affect days recomputed afterwards | 02-03 UNIFY | S | 02-04 / v0.2 reports |
-| Segmentation can differ when a day is recomputed after its raw rows were partly purged | 02-03 UNIFY | S | 02-04 watermark + retention ordering |
+| No config change tracking / live reload: merge-setting changes only affect days rolled afterwards | 02-03 UNIFY | S | v0.2 reports |
 | Admin settings page | 02-03 audit | M | With Phase 3 permissions concern |
+| 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
 #### Skill Audit (Phase 1, plan 01-01)
@@ -76,24 +77,24 @@ See PROJECT.md Key Decisions.
 |----------|---------|-------|
 | /dotnet:csharp-refactoring | ○ | Not evidenced in APPLY record; edit was one builder-chain call in xbk/Program.cs |
 
-Plans 01-02, 01-03, 02-01, 02-02 and 02-03: all required skills invoked.
+Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
-| Phase 1: Tuning UI inherits Lucene Search app permissions (Development category). Marketers need Lucene app access; future rule/synonym editing would need UPDATE, which also allows editing/rebuilding/deleting indexes | Core value "marketers without a developer" vs. index-admin rights | Revisit before Phase 3 editing pages: custom permission on suite commands, or role guidance |
+| Phase 1: Tuning UI inherits Lucene Search app permissions (Development category). Marketers need Lucene app access; future rule/synonym editing would need UPDATE, which also allows editing/rebuilding/deleting indexes | Core value "marketers without a developer" vs. index-admin rights | Must be resolved during Phase 3 planning (before editing pages): custom permission for editing pages / suite commands, or role guidance |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 02-03; code in d5261ec)
+Last commit: see `git log -1` (docs(paul): unify plan 02-04, close Phase 2; Phase 2 code in d5261ec, 18add8d and earlier)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Plan 02-04 applied (code committed on main, not pushed)
-Next action: /paul:unify .paul/phases/02-event-capture/02-04-PLAN.md
-Resume file: .paul/phases/02-event-capture/02-04-PLAN.md
+Stopped at: Phase 2 complete (4/4), ready to plan Phase 3 Rules Engine
+Next action: /paul:plan for Phase 3 (resolve the permissions concern first)
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-09 (02-04 APPLY): no xbk process running; DB `xperience` already at LuceneSuiteInstalledVersion = 3 (SELECT only). When xbk next runs this code, the installer adds the watermark key and the rollup job applies retention to its raw rows (by design)
 
 ---

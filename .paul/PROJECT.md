@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phase 1 complete, Phase 2 3/4 (capture, interactions, merge engine shipped) |
+| Status | v0.1 in progress — Phases 1–2 complete (2 of 6); Phase 3 Rules Engine ready to plan |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -39,9 +39,12 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Every analytics/merge/attribution/retention/surfacing/job setting configurable from appsettings "LuceneSuite" with startup validation naming the key (histogram edges + UTC day fixed) — Phase 2 (02-03)
 - ✓ Pure, deterministic rollup engine (dedupe, logical-search segmentation with duration cap, counted text, attribution with page window) driven by the shared vectors under default and non-default settings — Phase 2 (02-03)
 - ✓ Daily KPI module class LuceneSuite.SearchDaily (unique Day/Index/Query), installer v3 — Phase 2 (02-03)
+- ✓ Hosted web-farm-safe rollup job: every node runs it, one wins a non-blocking sp_getapplock per tick; completed UTC days rolled idempotently behind a transactional watermark; completeness floor never re-rolls a day from purged input — Phase 2 (02-04)
+- ✓ Retention: raw purge never ahead of the next day's input window, RawHardLimit privacy ceiling for a stuck job, SearchDaily purge after DailyRetention, batched deletes — Phase 2 (02-04)
+- ✓ Sub-threshold fold of SearchDaily rows into per-day "(other)" rows (QueryText NULL) with every per-day total preserved; browse ('') never folded — Phase 2 (02-04)
 
 ### Active (In Progress)
-- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events — capture (02-01), interactions (02-02) and merge engine (02-03) done; job & retention (02-04) remaining
+- [ ] Phase 3 Rules Engine: pin/boost/bury/hide/attach data by query, facets and context — ready to plan; resolve the editing-permission concern (custom permission vs. Lucene app UPDATE) during planning
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -109,6 +112,8 @@ Marketers tune, test and measure site search without a developer.
 | Buffered bulk writes for raw events, drop on overflow | Never slow search | 2026-10-08 | Active |
 | Consented visitors get a Suite session cookie (option a), not the contact GUID | Cross-page session merging without making analytics personal data; no collector/eraser | 2026-10-09 | Active |
 | Rollups/retention run as a hosted background job on every node, single-runner via sp_getapplock, idempotent per-day recompute | User decision; no admin setup, web-farm safe | 2026-10-09 | Active |
+| Rollup watermark is a hidden settings key read uncached inside the lock and written in the day's CMSTransactionScope with BulkDelete/BulkInsert (enlistment proven) | Stale or reset watermark can never wipe correct KPIs | 2026-10-09 | Active |
+| RawRetention minimum = 1 day + 3 × AttributionWindow + FlushInterval + 5 min + RollupInterval + 1 h; RawHardLimit (7 d) caps raw query text when the job is stuck | Every day stays rollable; privacy bound holds under failure | 2026-10-09 | Active |
 | Analytics tables are Kentico module classes written via InfoProviderBulkExtensions (BulkInsert/BulkUpdate/BulkDelete), CI/CD explicitly disabled; no plain SQL tables | User decision; Kentico 31.9.1 bulk APIs verified | 2026-10-09 | Active |
 | Consent delegated entirely to Kentico cookie level / activity tracking | Platform-consistent; works for US and EU without suite-specific logic | 2026-10-08 | Active |
 | Analytics are identity-free KPI data; no suite collector/eraser needed | No personal data stored → nothing to access/erase; counts all visitors | 2026-10-08 | Active |
@@ -145,4 +150,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | ../project-sidecar/docs/research/ |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-09 after 02-03*
+*Created: 2026-10-08 · Last updated: 2026-10-09 after Phase 2*

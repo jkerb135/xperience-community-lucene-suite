@@ -6,14 +6,14 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.1 Tune & Capture** (v0.1.0)
 Status: In progress
-Phases: 1 of 6 complete (17%)
+Phases: 2 of 6 complete (33%)
 
 ## Phases
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
-| 2 | Event Capture | 3/4 | In progress | - |
+| 2 | Event Capture | 4/4 | ✅ Complete | 2026-10-09 |
 | 3 | Rules Engine | TBD | Not started | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
@@ -36,7 +36,7 @@ Phases: 1 of 6 complete (17%)
 - [x] 01-02: Search API + test project (complete 2026-10-08)
 - [x] 01-03: Admin application + client pipeline + query tester (complete 2026-10-09)
 
-### Phase 2: Event Capture
+### Phase 2: Event Capture ✅ (complete 2026-10-09)
 **Goal:** Identity-free, web-farm-safe search/click event capture.
 **Depends on:** Phase 1 (search API)
 **Research:** Done (query-analytics-dedup.md)
@@ -46,12 +46,13 @@ Phases: 1 of 6 complete (17%)
 - [x] 02-01: Capture — module class + installer, request/response searchId contract, scrubber, session cookie, decorator + bulk writer (complete 2026-10-09)
 - [x] 02-02: Interactions — ISearchInteractionLogger (LogClick/LogConversion) through the capture pipeline, installer v2, client contract doc + test vectors (complete 2026-10-09)
 - [x] 02-03: Merge engine — configurable options + validation, SearchDaily class (installer v3), pure rollup engine, parameterized vectors (complete 2026-10-09)
-- [ ] 02-04: Job & retention — hosted single-runner job, watermark, idempotent persistence, raw/daily purge, sub-threshold fold into (other), E2E + volume on a disposable DB (planned)
+- [x] 02-04: Job & retention — hosted single-runner job, watermark, idempotent persistence, raw/daily purge, sub-threshold fold into (other), E2E + volume on a disposable DB (complete 2026-10-09)
 
 ### Phase 3: Rules Engine
 **Goal:** Marketers pin/boost/bury/hide/attach data by query, facets and context.
 **Depends on:** Phase 1
 **Research:** Done (search-merchandising-standards.md)
+**Open concern (resolve during planning):** editing pages need a custom permission (or role guidance) — Lucene app UPDATE would also allow editing/rebuilding/deleting indexes
 
 ### Phase 4: Synonyms
 **Goal:** Query-time synonym rewrite managed in admin.
@@ -73,4 +74,4 @@ Phases: 1 of 6 complete (17%)
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-09 after 02-03*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-09 after Phase 2*
