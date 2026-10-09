@@ -3,8 +3,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Kentico.Xperience.Core" />
     <PackageReference Include="Kentico.Xperience.Lucene.Core" />
+    <PackageReference Include="Kentico.Xperience.WebApp" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Tests" />

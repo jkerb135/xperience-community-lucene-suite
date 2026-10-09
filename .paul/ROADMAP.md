@@ -13,7 +13,7 @@ Phases: 1 of 5 complete (20%)
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
-| 2 | Event Capture | TBD | 🔵 Next (ready to plan) | - |
+| 2 | Event Capture | 0/3 | Planning | - |
 | 3 | Rules Engine | TBD | Not started | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
@@ -39,7 +39,12 @@ Phases: 1 of 5 complete (20%)
 **Goal:** Identity-free, web-farm-safe search/click event capture.
 **Depends on:** Phase 1 (search API)
 **Research:** Done (query-analytics-dedup.md)
-**Scope:** identity-free events (page-memory searchId, no contact/IP stored), forwarded-headers-aware in-memory bot/rate filter, PII scrub, buffered bulk writes, 48 h raw retention → daily KPI rollups (25 months), surfacing threshold (≥ 5 searches on ≥ 2 days) + 30-day prune of sub-threshold rows
+**Scope:** identity-free events (page-memory searchId; Suite session cookie only at Visitor/All; no contact/IP stored), forwarded-headers-aware in-memory bot/rate filter, PII scrub, Kentico bulk writes to module classes, hosted single-runner rollup job, 48 h raw retention → daily KPI rollups (25 months), surfacing threshold (≥ 5 searches on ≥ 2 days) + 30-day prune of sub-threshold rows. Merge spec: project-sidecar/docs/research/as-you-type-merge-analysis.md
+
+**Plans:**
+- [ ] 02-01: Capture — module class + installer, request/response searchId contract, scrubber, session cookie, decorator + bulk writer (planned)
+- [ ] 02-02: Interaction endpoint — click/conversion beacon, rate/bot filter, client contract
+- [ ] 02-03: Rollups & retention — hosted job, merge rule, histograms, purge/prune, xbk checkpoint
 
 ### Phase 3: Rules Engine
 **Goal:** Marketers pin/boost/bury/hide/attach data by query, facets and context.

@@ -9,7 +9,14 @@ public sealed record SuiteSearchResponse(
     IReadOnlyList<SuiteSearchHit> Hits,
     int TotalHits,
     IReadOnlyList<SuiteFacet> Facets,
-    TimeSpan Elapsed);
+    TimeSpan Elapsed)
+{
+    /// <summary>Id of the logical search this request was recorded under (the request's, or a newly minted one).</summary>
+    public Guid SearchId { get; init; }
+
+    // Null when unknown (a replaced inner service); 0 means the index is empty or rebuilding.
+    internal int? IndexDocumentCount { get; init; }
+}
 
 /// <summary>One search hit.</summary>
 /// <param name="ItemGuid">The document's ItemGuid, or null when missing or unparsable.</param>

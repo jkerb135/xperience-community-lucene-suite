@@ -72,7 +72,7 @@ Marketers tune, test and measure site search without a developer.
 - XpSearch (Personal/xperience-community-lucene-instant-search) is loose reference only — never a basis for decisions
 
 ### Compliance Constraints
-- Analytics/reporting store KPI/metric data only — never contact IDs, IPs, hashes or device-stored IDs; searches correlated by a random per-search ID held in page memory
+- Analytics/reporting store KPI/metric data only — never contact IDs, IPs or hashes. Identity-free is bounded by Kentico cookie level/consent: below Visitor, searches correlate only by a random per-search ID held in page memory; at Visitor/All, a Suite session cookie (random, registered with Kentico at Visitor level, 30-min sliding, no contact link) additionally groups searches across page loads
 - IP used in memory for bot rate limiting only, never persisted
 - Custom activities go through Kentico activity tracking and its consent/cookie level — the suite adds no gate of its own
 - A/B participation uses a suite variant cookie (test + variant only, no identifier) registered with Kentico at a configurable cookie level; it is set only when the current Kentico cookie level allows it. Visitors without it are served control and excluded from experiment metrics. Events carry the variant only
@@ -99,6 +99,9 @@ Marketers tune, test and measure site search without a developer.
 | Admin UI is a per-index section inside the Lucene app, sibling of IndexEditPage (option A) | Per-index tuning (user); Edit-template pages only allow side-panel/dialog children | 2026-10-09 | Active |
 | Admin client Proxy in dev, embedded on Release via MSBuild npm step | User decision; matches Kentico's documented dev/deploy split | 2026-10-08 | Active |
 | Buffered bulk writes for raw events, drop on overflow | Never slow search | 2026-10-08 | Active |
+| Consented visitors get a Suite session cookie (option a), not the contact GUID | Cross-page session merging without making analytics personal data; no collector/eraser | 2026-10-09 | Active |
+| Rollups/retention run as a hosted background job on every node, single-runner via sp_getapplock, idempotent per-day recompute | User decision; no admin setup, web-farm safe | 2026-10-09 | Active |
+| Analytics tables are Kentico module classes written via InfoProviderBulkExtensions (BulkInsert/BulkUpdate/BulkDelete), CI/CD explicitly disabled; no plain SQL tables | User decision; Kentico 31.9.1 bulk APIs verified | 2026-10-09 | Active |
 | Consent delegated entirely to Kentico cookie level / activity tracking | Platform-consistent; works for US and EU without suite-specific logic | 2026-10-08 | Active |
 | Analytics are identity-free KPI data; no suite collector/eraser needed | No personal data stored → nothing to access/erase; counts all visitors | 2026-10-08 | Active |
 | Surfacing threshold = count + distinct days, not distinct people | Identity-free data can't count people; one visitor can't satisfy multi-day | 2026-10-08 | Active |

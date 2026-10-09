@@ -40,6 +40,14 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
         {
             throw new ArgumentOutOfRangeException(nameof(request), request.Query.Length, $"Query must not exceed {MaxTextLength} characters.");
         }
+        if (request.SearchId == Guid.Empty)
+        {
+            throw new ArgumentException("SearchId must not be an empty GUID.", nameof(request));
+        }
+        if (request.Sequence < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(request), request.Sequence, "Sequence must be 1 or greater.");
+        }
         if (request.Facets is null)
         {
             throw new ArgumentException("Facets must not be null.", nameof(request));
@@ -127,7 +135,7 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
             .Select(scoreDoc => ToHit(searcher.Doc(scoreDoc.Doc), scoreDoc.Score))
             .ToArray();
 
-        return new SuiteSearchResponse(hits, topDocs.TotalHits, facets, TimeSpan.Zero);
+        return new SuiteSearchResponse(hits, topDocs.TotalHits, facets, TimeSpan.Zero) { IndexDocumentCount = searcher.IndexReader.NumDocs };
     }
 
     private static SuiteSearchHit ToHit(Document document, float score)

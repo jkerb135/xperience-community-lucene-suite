@@ -17,4 +17,16 @@ public sealed record SuiteSearchRequest
 
     /// <summary>Hits per page (1–100).</summary>
     public int PageSize { get; init; } = 10;
+
+    /// <summary>Browser-minted id of the logical search; null lets the server mint one (server-rendered / no-JS request).</summary>
+    public Guid? SearchId { get; init; }
+
+    /// <summary>1-based position of this request within <see cref="SearchId"/>; ignored when <see cref="SearchId"/> is null.</summary>
+    public int? Sequence { get; init; }
+
+    /// <summary>Whether the visitor explicitly submitted (Enter / button) rather than typed, paged or filtered.</summary>
+    public bool IsSubmit { get; init; }
+
+    /// <summary>Whether to record this search in analytics; false for admin tools, previews and probes.</summary>
+    public bool TrackAnalytics { get; init; } = true;
 }

@@ -66,6 +66,7 @@ public sealed class QueryTesterPage(
                 Facets = (arguments.Facets ?? []).ToDictionary(f => f.Key, f => (IReadOnlyList<string>)(f.Value ?? [])),
                 Page = arguments.Page,
                 PageSize = PageSize,
+                TrackAnalytics = false,
             });
 
             return Task.FromResult(ResponseFrom(new QueryTesterResult

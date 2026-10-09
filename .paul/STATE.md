@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 2 of 5 (Event Capture) — Not started
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-09 — Plan 01-03 unified; Phase 1 complete, transitioned to Phase 2
+Phase: 2 of 5 (Event Capture) — Planning
+Plan: 02-01 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-09 — Enterprise audit of 02-01-PLAN.md (02-01-AUDIT.md)
 
 Progress:
 - Milestone: [██░░░░░░░░] 20% (1 of 5 phases)
@@ -25,7 +25,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: Enterprise audit on 02-01-PLAN.md. Applied 4 must-have, 5 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 2 | Capture can never break search; installer safe on web-farm startup |
+| 2026-10-09: Phase 2 design: module classes + Kentico bulk APIs; hosted single-runner rollup job; session cookie at Visitor/All (option a); merge at rollup per as-you-type-merge-analysis.md with the 5 recommended choices | Phase 2 | Split into 02-01 capture / 02-02 interactions / 02-03 rollups |
 | 2026-10-09: Search tuning section placed under IndexListingPage as sibling of IndexEditPage (user option A); entry via TableActions.AddLink | Phase 1 | URL /admin/lucene/indexes/search-tuning/{id}/…; Phases 3–5 add pages to this section |
 | 2026-10-09: Checkpoint fixes 1–3 applied in-loop (accessible facet checkboxes, narrow-width layout, clean validation text) | Phase 1 | Query tester usable at ~790 px |
 | 2026-10-08: xbk NoWarn += XPSEARCH002 (user option a) — pre-existing break from XpSearch's [Experimental] UseMcp() | Phase 1 | xbk opts into an experimental XpSearch API |
@@ -74,9 +76,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Phase 1 complete, ready to plan Phase 2
-Next action: /paul:plan for Phase 2 (Event Capture)
-Resume file: .paul/ROADMAP.md
+Stopped at: Plan 02-01 created
+Next action: /paul:audit .paul/phases/02-event-capture/02-01-PLAN.md, then /paul:apply
+Resume file: .paul/phases/02-event-capture/02-01-PLAN.md
 
 ---
 *STATE.md — Updated after every significant action*
