@@ -61,7 +61,9 @@ None yet.
 - No-op Lucene lock factory across servers when indexes share external storage
 - Analytics dedup must be web-farm safe: no in-memory cross-request state; browser-issued searchId, merged at rollup
 - Never bucket A/B variants or identify users by server IP; honor forwarded headers
-- Use the `@kentico/xperience-admin-components` design library; distinct object-type prefix and admin application from XpSearch so both can run in xbk during switchover
+- Use the `@kentico/xperience-admin-components` design library; distinct object-type prefix from XpSearch so both can run in xbk during switchover
+- Admin UI extends Kentico Lucene's admin: a per-index "Search tuning" section beside IndexEditPage under IndexListingPage (/lucene/indexes/search-tuning/{indexId}/…), reached by a table link per index; Kentico forbids section children of Edit-template pages. Couples Suite.Admin to Kentico.Xperience.Lucene.Admin public page types; access follows the Lucene Search application (listing = VIEW)
+- Admin client: Proxy mode (webpack dev server, port 3011) in development; Release build runs npm and embeds the bundle
 
 ### Business Constraints
 - Public community package (MIT, matching upstream)
@@ -92,6 +94,8 @@ None yet.
 | Algolia metric definitions (30 s as-you-type, 1 h attribution, 1-based positions) | Reference standard | 2026-10-08 | Active |
 | Reports: recompute on condition change (no polling, no push) | "Live" = filter-driven; no push infra | 2026-10-08 | Active |
 | Search API returns generic hits (ItemGuid, score, stored fields); default query from per-index field boosts via QueryBuilder, replaceable ISearchQueryFactory | No QueryParser dependency; admin + rules need a generic shape | 2026-10-08 | Active |
+| Admin UI is a per-index section inside the Lucene app, sibling of IndexEditPage (option A) | Per-index tuning (user); Edit-template pages only allow side-panel/dialog children | 2026-10-09 | Active |
+| Admin client Proxy in dev, embedded on Release via MSBuild npm step | User decision; matches Kentico's documented dev/deploy split | 2026-10-08 | Active |
 | Buffered bulk writes for raw events, drop on overflow | Never slow search | 2026-10-08 | Active |
 | Consent delegated entirely to Kentico cookie level / activity tracking | Platform-consistent; works for US and EU without suite-specific logic | 2026-10-08 | Active |
 | Analytics are identity-free KPI data; no suite collector/eraser needed | No personal data stored → nothing to access/erase; counts all visitors | 2026-10-08 | Active |

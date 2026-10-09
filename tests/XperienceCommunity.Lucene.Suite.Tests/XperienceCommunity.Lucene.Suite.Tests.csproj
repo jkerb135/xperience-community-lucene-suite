@@ -12,5 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\XperienceCommunity.Lucene.Suite\XperienceCommunity.Lucene.Suite.csproj" />
+    <ProjectReference Include="..\..\src\XperienceCommunity.Lucene.Suite.Admin\XperienceCommunity.Lucene.Suite.Admin.csproj" />
   </ItemGroup>
 </Project>

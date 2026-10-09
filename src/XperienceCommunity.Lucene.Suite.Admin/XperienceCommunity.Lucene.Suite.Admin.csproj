@@ -1,8 +1,64 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- AdminOrgName + AdminClientPath ProjectName must match RegisterClientModule and Client/webpack.config.js. -->
+    <AdminOrgName>xperience-community</AdminOrgName>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Client\node_modules\**;Client\dist\**</DefaultItemExcludes>
+    <SuiteAdminClientDir>$(MSBuildThisFileDirectory)Client\</SuiteAdminClientDir>
+    <SuiteAdminClientStamp>$(SuiteAdminClientDir)dist\.suite-build.stamp</SuiteAdminClientStamp>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Kentico.Xperience.Admin" />
+    <PackageReference Include="Kentico.Xperience.Lucene.Admin" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XperienceCommunity.Lucene.Suite\XperienceCommunity.Lucene.Suite.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AdminClientPath Include="Client\dist\**" Exclude="$(SuiteAdminClientStamp)">
+      <ProjectName>lucene-suite</ProjectName>
+    </AdminClientPath>
+    <SuiteAdminClientInput Include="Client\src\**;Client\package.json;Client\package-lock.json;Client\webpack.config.js;Client\babel.config.json;Client\tsconfig.json" />
+  </ItemGroup>
+
+  <!-- Every configuration except Debug builds the client and embeds it; Debug relies on Proxy mode. -->
+  <Target Name="CheckSuiteAdminClientNode" Condition="'$(Configuration)' != 'Debug'">
+    <Exec Command="node --version" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ExitCode" PropertyName="_SuiteAdminNodeExitCode" />
+    </Exec>
+    <Error Condition="'$(_SuiteAdminNodeExitCode)' != '0'" Text="Node.js is required to build the Suite admin client ($(SuiteAdminClientDir)) for configuration '$(Configuration)'. Install Node.js, or build with -c Debug and serve the client in Proxy mode." />
+  </Target>
+
+  <!-- node_modules/.package-lock.json is written by npm ci, so it is missing or older when a restore is due. -->
+  <Target Name="RestoreSuiteAdminClient" Condition="'$(Configuration)' != 'Debug'" DependsOnTargets="CheckSuiteAdminClientNode"
+          Inputs="$(SuiteAdminClientDir)package.json;$(SuiteAdminClientDir)package-lock.json" Outputs="$(SuiteAdminClientDir)node_modules\.package-lock.json">
+    <Exec Command="npm ci --ignore-scripts" WorkingDirectory="$(SuiteAdminClientDir)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="_SuiteAdminNpmCiExitCode" />
+    </Exec>
+    <Error Condition="'$(_SuiteAdminNpmCiExitCode)' != '0'" Text="'npm ci --ignore-scripts' failed in $(SuiteAdminClientDir) (exit code $(_SuiteAdminNpmCiExitCode))." />
+    <Touch Files="$(SuiteAdminClientDir)node_modules\.package-lock.json" />
+  </Target>
+
+  <Target Name="BuildSuiteAdminClient" Condition="'$(Configuration)' != 'Debug'" DependsOnTargets="RestoreSuiteAdminClient"
+          Inputs="@(SuiteAdminClientInput)" Outputs="$(SuiteAdminClientStamp)">
+    <Exec Command="npm run build" WorkingDirectory="$(SuiteAdminClientDir)" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="_SuiteAdminNpmBuildExitCode" />
+    </Exec>
+    <Error Condition="'$(_SuiteAdminNpmBuildExitCode)' != '0'" Text="'npm run build' failed in $(SuiteAdminClientDir) (exit code $(_SuiteAdminNpmBuildExitCode)); run 'npm ci --ignore-scripts &amp;&amp; npm run build' there to see the error." />
+    <Touch Files="$(SuiteAdminClientStamp)" AlwaysCreate="true" />
+  </Target>
+
+  <!-- Re-globs dist after the npm build, because AdminClientPath was evaluated before the bundle existed. -->
+  <Target Name="IncludeSuiteAdminClient" Condition="'$(Configuration)' != 'Debug' And '$(DesignTimeBuild)' != 'true'" DependsOnTargets="BuildSuiteAdminClient" BeforeTargets="IncludeEmbededResource">
+    <ItemGroup>
+      <AdminClientPath Remove="@(AdminClientPath)" />
+      <AdminClientPath Include="$(SuiteAdminClientDir)dist\**" Exclude="$(SuiteAdminClientStamp)">
+        <ProjectName>lucene-suite</ProjectName>
+      </AdminClientPath>
+      <_SuiteAdminClientBundle Include="$(SuiteAdminClientDir)dist\*.js" />
+    </ItemGroup>
+    <Error Condition="'@(_SuiteAdminClientBundle)' == ''" Text="The Suite admin client bundle is missing: no .js in $(SuiteAdminClientDir)dist. Run 'npm ci --ignore-scripts &amp;&amp; npm run build' in $(SuiteAdminClientDir)." />
+  </Target>
 </Project>

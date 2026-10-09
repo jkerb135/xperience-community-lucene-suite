@@ -20,6 +20,16 @@
           "NJsonSchema": "11.6.1"
         }
       },
+      "Kentico.Xperience.Lucene.Admin": {
+        "type": "Direct",
+        "requested": "[15.0.5, )",
+        "resolved": "15.0.5",
+        "contentHash": "HQ6BUokrpYprXFBNSOBdVlYXY8gACdQ397yIfkwTyLQ51XQCTT/ilabRgImMKJO6K3xKpf6Pt0VUndYP/iPk/g==",
+        "dependencies": {
+          "Kentico.Xperience.Admin": "31.0.0",
+          "Kentico.Xperience.Lucene.Core": "15.0.5"
+        }
+      },
       "AngleSharp": {
         "type": "Transitive",
         "resolved": "1.8.1",
