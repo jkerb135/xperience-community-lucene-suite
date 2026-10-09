@@ -13,7 +13,7 @@ Phases: 1 of 6 complete (17%)
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
-| 2 | Event Capture | 1/3 | In progress | - |
+| 2 | Event Capture | 2/3 | In progress | - |
 | 3 | Rules Engine | TBD | Not started | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
@@ -44,7 +44,7 @@ Phases: 1 of 6 complete (17%)
 
 **Plans:**
 - [x] 02-01: Capture — module class + installer, request/response searchId contract, scrubber, session cookie, decorator + bulk writer (complete 2026-10-09)
-- [ ] 02-02: Interactions — ISearchInteractionLogger (LogClick/LogConversion) through the capture pipeline, installer v2, client contract doc + test vectors (planned)
+- [x] 02-02: Interactions — ISearchInteractionLogger (LogClick/LogConversion) through the capture pipeline, installer v2, client contract doc + test vectors (complete 2026-10-09)
 - [ ] 02-03: Rollups & retention — hosted job, merge rule, histograms, purge/prune, xbk checkpoint
 
 ### Phase 3: Rules Engine
@@ -72,4 +72,4 @@ Phases: 1 of 6 complete (17%)
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-09 after 02-01*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-09 after 02-02*

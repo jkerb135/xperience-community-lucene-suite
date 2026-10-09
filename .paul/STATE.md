@@ -5,27 +5,27 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 2 Event Capture, 02-01 complete, 02-02 next
+**Current focus:** v0.1 Tune & Capture — Phase 2 Event Capture, 02-02 complete, 02-03 next
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
 Phase: 2 of 5 (Event Capture) — In progress
-Plan: 02-02 created + audited, awaiting approval (02-01 complete)
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-09 — Enterprise audit of 02-02-PLAN.md (02-02-AUDIT.md)
+Plan: 02-02 complete (2 of 3)
+Status: Loop closed, ready for next PLAN
+Last activity: 2026-10-09 — UNIFY 02-02 (02-02-SUMMARY.md)
 
 Progress:
 - Milestone: [██░░░░░░░░] 17% (1 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
-- Phase 2: [███░░░░░░░] 33% (1/3 plans)
+- Phase 2: [██████░░░░] 67% (2/3 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: 02-02 interaction logger: validation throws synchronously, storage never throws; real Kentico cookie-level provider writes no CMSCookieLevel on a started response (SearchSessionCookie kept) | Phase 2 | Closes 02-01 HasStarted concern |
 | 2026-10-09: Enterprise audit on 02-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 2 | Destructive tests only on a disposable DB copy; cross-page conversion attribution via URL ids |
 | 2026-10-09: Widgets/tag helpers/endpoint/JS client → optional package (Phase 6, end of v0.1); core exposes ISearchInteractionLogger | Phase 2 | Resolves the real-traffic question; 02-02 is API + contract only |
 | 2026-10-09: 02-01 cookie via Configure<CookieLevelOptions> + CookieLevelConstants (RegisterCookie/CookieLevel obsolete in 31.9.1); Suite core references Kentico.Xperience.WebApp | Phase 2 | Core package depends on the live-site WebApp package |
@@ -57,9 +58,8 @@ See PROJECT.md Key Decisions.
 | Strategy/FacetsConfig built per search; captive scoped deps in strategies; full stored-field payloads; no failure logging | 01-02 audit | S–M | Phase 2 (timing data, logging) |
 | Stored fields visible to Lucene VIEW users; Node.js required for non-Debug builds; npm vulnerability scanning in CI (5 dev-only highs in KNOWN-LIMITATIONS); no client unit tests | 01-03 audit | S–M | Phase 3 permissions / Release-CI phase |
 | AC-5 (permissions) approved by user without reported observations | 01-03 UNIFY | S | Re-check with a real role when custom permissions land (Phase 3) |
-| When Response.HasStarted, SearchSessionCookie still calls Kentico GetCurrentCookieLevel (documented to set CMSCookieLevel cookie); tested only with a fake; a throw loses the event, search unaffected | 02-01 UNIFY | S | 02-02 (beacon shares cookie code): verify with the real provider |
-| Installer lock-removal mutation not run (concurrency test not proven to fail without sp_getapplock) | 02-01 UNIFY | S | 02-03 (installer gains rollup tables) |
 | 02-01 audit deferrals: language/channel dimensions; clock drift beyond NTP (KNOWN-LIMITATIONS); unit-level DB writer test (covered E2E) | 02-01 audit | S–M | When the search API carries language/channel |
+| 02-02 audit deferrals: shared queue capacity (drops logged per kind); custom-endpoint rate limiting (developer-owned) | 02-02 audit | S | Phase 6 Widgets traffic |
 
 ### Deviations
 #### Skill Audit (Phase 1, plan 01-01)
@@ -67,24 +67,26 @@ See PROJECT.md Key Decisions.
 |----------|---------|-------|
 | /dotnet:csharp-refactoring | ○ | Not evidenced in APPLY record; edit was one builder-chain call in xbk/Program.cs |
 
-Plans 01-02, 01-03 and 02-01: all required skills invoked.
+Plans 01-02, 01-03, 02-01 and 02-02: all required skills invoked.
 
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
 | Phase 1: Tuning UI inherits Lucene Search app permissions (Development category). Marketers need Lucene app access; future rule/synonym editing would need UPDATE, which also allows editing/rebuilding/deleting indexes | Core value "marketers without a developer" vs. index-admin rights | Revisit before Phase 3 editing pages: custom permission on suite commands, or role guidance |
+| Pending user confirmation: mint rule "ipad" → "ipod" is ONE search under the approved rule (≤ 1 edit at ≥ 4 chars); research prose (and an earlier orchestrator chat message) said two | Vectors/contract follow the literal rule | User confirms rule or prose; adjust vectors + contract. Not a blocker for 02-03 planning |
+| Pending user confirmation: "coffee grinder" → "coffee " → "coffee beans" is TWO searches under the literal deep-backspace rule with trimmed input; research prose says one | Vectors/contract follow the literal rule | User confirms; adjust vectors + contract. Not a blocker for 02-03 planning |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 02-01)
+Last commit: see `git log -1` (docs(paul): unify plan 02-02)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Plan 02-02 created
-Next action: /paul:audit .paul/phases/02-event-capture/02-02-PLAN.md, then /paul:apply
-Resume file: .paul/phases/02-event-capture/02-02-PLAN.md
+Stopped at: Plan 02-02 unified (loop closed)
+Next action: /paul:plan 02-03 Rollups & retention
+Resume file: .paul/phases/02-event-capture/02-02-SUMMARY.md
 
 ---
 *STATE.md — Updated after every significant action*

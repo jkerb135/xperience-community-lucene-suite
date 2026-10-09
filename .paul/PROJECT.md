@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phase 1 complete, Phase 2 1/3 (capture shipped) |
+| Status | v0.1 in progress — Phase 1 complete, Phase 2 2/3 (capture + interactions shipped) |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -34,9 +34,11 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Suite search API over ILuceneSearchService (query text, field boosts, paging limits, facets with sideways counts, hit count, timing) — Phase 1
 - ✓ Per-index "Search tuning" admin section with query tester; client Proxy in dev, embedded on non-Debug builds — Phase 1
 - ✓ Identity-free search capture: one scrubbed raw row per tracked search in module class LuceneSuite.SearchEvent via background BulkInsert; searchId/sequence contract; session cookie only at Visitor/All; bot/prefetch/untracked/empty-index exclusions; web-farm-safe installer — Phase 2 (02-01)
+- ✓ Public ISearchInteractionLogger (LogClick/LogConversion): identity-free click/conversion rows in LuceneSuite.SearchInteraction via the same background pipeline; synchronous argument validation, storage never throws; installer v2 with downgrade guard — Phase 2 (02-02)
+- ✓ Analytics client contract (docs/analytics-client-contract.md) + shared executable test vectors (docs/analytics-test-vectors.json) for searchId minting, attribution and EventIds — Phase 2 (02-02)
 
 ### Active (In Progress)
-- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events — capture done (02-01); interactions (02-02) and rollups/retention (02-03) remaining
+- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events — capture (02-01) and interactions (02-02) done; rollups/retention (02-03) remaining
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -139,4 +141,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | ../project-sidecar/docs/research/ |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-09 after 02-01*
+*Created: 2026-10-08 · Last updated: 2026-10-09 after 02-02*
