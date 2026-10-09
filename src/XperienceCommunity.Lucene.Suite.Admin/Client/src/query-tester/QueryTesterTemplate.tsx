@@ -159,13 +159,17 @@ export const QueryTesterTemplate = ({ indexName, isFaceted, pageSize, maxResultW
       )}
       {result && !result.error && (
         <Row spacingX={Spacing.XL}>
-          <TextWithLabel label="Total hits" value={String(result.totalHits)} />
-          <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
+          <Column>
+            <TextWithLabel label="Total hits" value={String(result.totalHits)} />
+          </Column>
+          <Column>
+            <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
+          </Column>
         </Row>
       )}
-      <Row spacingX={Spacing.XL}>
+      <Row spacingX={Spacing.XL} spacingY={Spacing.XL}>
         {facets.length > 0 && (
-          <Column cols={Cols.Col3}>
+          <Column cols={Cols.Col12} colsMd={Cols.Col3} colsLg={Cols.Col3}>
             <Stack spacing={Spacing.L}>
               {facets.map((facet) => (
                 <Stack key={facet.dimension} spacing={Spacing.S}>
@@ -174,6 +178,7 @@ export const QueryTesterTemplate = ({ indexName, isFaceted, pageSize, maxResultW
                     <Checkbox
                       key={value.label}
                       label={`${value.label} (${value.count})`}
+                      aria-label={`${facet.dimension}: ${value.label} (${value.count})`}
                       checked={selection[facet.dimension]?.includes(value.label) ?? false}
                       onChange={(_, checked) => toggleFacet(facet.dimension, value.label, checked)}
                     />
@@ -183,9 +188,11 @@ export const QueryTesterTemplate = ({ indexName, isFaceted, pageSize, maxResultW
             </Stack>
           </Column>
         )}
-        <Column cols={facets.length > 0 ? Cols.Col9 : Cols.Col12}>
+        <Column cols={Cols.Col12} colsMd={facets.length > 0 ? Cols.Col9 : Cols.Col12} colsLg={facets.length > 0 ? Cols.Col9 : Cols.Col12}>
           <Stack spacing={Spacing.L}>
-            <Table columns={columns} rows={rows} onRowClick={(id) => setExpanded(id as number)} />
+            <div style={{ overflowX: "auto" }}>
+              <Table columns={columns} rows={rows} onRowClick={(id) => setExpanded(id as number)} />
+            </div>
             {totalPages > 1 && (
               <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(query, p, selection)} />
             )}

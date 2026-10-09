@@ -15,6 +15,9 @@
   <ItemGroup>
     <ProjectReference Include="..\XperienceCommunity.Lucene.Suite\XperienceCommunity.Lucene.Suite.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Tests" />
+  </ItemGroup>
 
   <ItemGroup>
     <AdminClientPath Include="Client\dist\**" Exclude="$(SuiteAdminClientStamp)">

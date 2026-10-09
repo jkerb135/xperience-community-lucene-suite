@@ -78,8 +78,25 @@ public sealed class QueryTesterPage(
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
         {
-            return Task.FromResult(ResponseFrom(new QueryTesterResult { Error = exception.Message }).AddErrorMessage(exception.Message));
+            var message = ValidationMessage(exception);
+            return Task.FromResult(ResponseFrom(new QueryTesterResult { Error = message }).AddErrorMessage(message));
         }
+    }
+
+    /// <summary>The exception's own message, without the runtime-appended parameter name and actual value.</summary>
+    internal static string ValidationMessage(Exception exception)
+    {
+        // Rebuilding the suffix from an empty-message twin keeps this correct under any runtime resource language.
+        var suffix = exception switch
+        {
+            ArgumentOutOfRangeException e => new ArgumentOutOfRangeException(e.ParamName, e.ActualValue, string.Empty).Message,
+            ArgumentException e => new ArgumentException(string.Empty, e.ParamName).Message,
+            _ => string.Empty,
+        };
+
+        return suffix.Length > 0 && exception.Message.EndsWith(suffix, StringComparison.Ordinal)
+            ? exception.Message[..^suffix.Length]
+            : exception.Message;
     }
 
     private LuceneIndex GetIndex() =>

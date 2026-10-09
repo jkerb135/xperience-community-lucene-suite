@@ -89,6 +89,17 @@ public sealed class SearchExecutorTests
     }
 
     [Theory]
+    [InlineData("query257", "Query must not exceed 256 characters.")]
+    [InlineData("indexEmpty", "IndexName is required.")]
+    public void QueryTesterValidationMessage_DropsRuntimeSuffixes(string scenario, string expected)
+    {
+        var index = BuildFacetedIndex();
+        var exception = Assert.ThrowsAny<ArgumentException>(() => Search(index, InvalidRequest(scenario)));
+
+        Assert.Equal(expected, Admin.UIPages.QueryTesterPage.ValidationMessage(exception));
+    }
+
+    [Theory]
     [InlineData("the")]
     [InlineData("!!!")]
     public void QueryWithNoTokensAfterAnalysis_ReturnsNoHits(string query)
