@@ -36,7 +36,7 @@ Phases: 0 of 5 complete
 - [ ] 01-03: Admin application + client pipeline + query tester
 
 ### Phase 2: Event Capture
-**Goal:** Consent-gated, web-farm-safe search/click event capture.
+**Goal:** Identity-free, web-farm-safe search/click event capture.
 **Depends on:** Phase 1 (search API)
 **Research:** Done (query-analytics-dedup.md)
 **Scope:** identity-free events (page-memory searchId, no contact/IP stored), forwarded-headers-aware in-memory bot/rate filter, PII scrub, buffered bulk writes, 48 h raw retention → daily KPI rollups (25 months), surfacing threshold (≥ 5 searches on ≥ 2 days) + 30-day prune of sub-threshold rows
