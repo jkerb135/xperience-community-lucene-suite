@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phase 1 complete, Phase 2 2/3 (capture + interactions shipped) |
+| Status | v0.1 in progress — Phase 1 complete, Phase 2 3/4 (capture, interactions, merge engine shipped) |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -36,9 +36,12 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Identity-free search capture: one scrubbed raw row per tracked search in module class LuceneSuite.SearchEvent via background BulkInsert; searchId/sequence contract; session cookie only at Visitor/All; bot/prefetch/untracked/empty-index exclusions; web-farm-safe installer — Phase 2 (02-01)
 - ✓ Public ISearchInteractionLogger (LogClick/LogConversion): identity-free click/conversion rows in LuceneSuite.SearchInteraction via the same background pipeline; synchronous argument validation, storage never throws; installer v2 with downgrade guard — Phase 2 (02-02)
 - ✓ Analytics client contract (docs/analytics-client-contract.md) + shared executable test vectors (docs/analytics-test-vectors.json) for searchId minting, attribution and EventIds — Phase 2 (02-02)
+- ✓ Every analytics/merge/attribution/retention/surfacing/job setting configurable from appsettings "LuceneSuite" with startup validation naming the key (histogram edges + UTC day fixed) — Phase 2 (02-03)
+- ✓ Pure, deterministic rollup engine (dedupe, logical-search segmentation with duration cap, counted text, attribution with page window) driven by the shared vectors under default and non-default settings — Phase 2 (02-03)
+- ✓ Daily KPI module class LuceneSuite.SearchDaily (unique Day/Index/Query), installer v3 — Phase 2 (02-03)
 
 ### Active (In Progress)
-- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events — capture (02-01) and interactions (02-02) done; rollups/retention (02-03) remaining
+- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events — capture (02-01), interactions (02-02) and merge engine (02-03) done; job & retention (02-04) remaining
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -142,4 +145,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | ../project-sidecar/docs/research/ |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-09 after 02-02*
+*Created: 2026-10-08 · Last updated: 2026-10-09 after 02-03*

@@ -13,7 +13,7 @@ Phases: 1 of 6 complete (17%)
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
-| 2 | Event Capture | 2/4 | In progress | - |
+| 2 | Event Capture | 3/4 | In progress | - |
 | 3 | Rules Engine | TBD | Not started | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
@@ -45,7 +45,7 @@ Phases: 1 of 6 complete (17%)
 **Plans:**
 - [x] 02-01: Capture — module class + installer, request/response searchId contract, scrubber, session cookie, decorator + bulk writer (complete 2026-10-09)
 - [x] 02-02: Interactions — ISearchInteractionLogger (LogClick/LogConversion) through the capture pipeline, installer v2, client contract doc + test vectors (complete 2026-10-09)
-- [ ] 02-03: Merge engine — configurable options + validation, SearchDaily class (installer v3), pure rollup engine, parameterized vectors (planned)
+- [x] 02-03: Merge engine — configurable options + validation, SearchDaily class (installer v3), pure rollup engine, parameterized vectors (complete 2026-10-09)
 - [ ] 02-04: Job & retention — hosted single-runner job, watermark, idempotent persistence, raw/daily purge, sub-threshold prune, E2E on a disposable DB
 
 ### Phase 3: Rules Engine
@@ -73,4 +73,4 @@ Phases: 1 of 6 complete (17%)
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-09 after 02-02*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-09 after 02-03*

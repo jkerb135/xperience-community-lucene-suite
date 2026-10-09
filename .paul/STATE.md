@@ -5,27 +5,27 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 2 Event Capture, 02-02 complete, 02-03 next
+**Current focus:** v0.1 Tune & Capture — Phase 2 Event Capture, 02-03 complete, 02-04 next
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 2 of 5 (Event Capture) — In progress
-Plan: 02-03 created + audited, awaiting approval (02-01, 02-02 complete)
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-09 — Enterprise audit of 02-03-PLAN.md (02-03-AUDIT.md)
+Phase: 2 of 6 (Event Capture) — In progress
+Plan: 02-03 complete (3 of 4; 02-01, 02-02, 02-03 complete)
+Status: Loop closed, ready for next PLAN (02-04)
+Last activity: 2026-10-09 — UNIFY of 02-03 (02-03-SUMMARY.md)
 
 Progress:
 - Milestone: [██░░░░░░░░] 17% (1 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
-- Phase 2: [█████░░░░░] 50% (2/4 plans)
+- Phase 2: [████████░░] 75% (3/4 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: 02-03 options bound via Configure<IServiceProvider> + optional IConfiguration (not BindConfiguration; no live reload); SearchDaily = installer v3; engine input contract + duration cap + tie-break implemented; 02-02 mint conflicts resolved as settings (vectors prove both flips) | Phase 2 | 02-04 maps Info rows to the documented engine input contract |
 | 2026-10-09: 02-02 interaction logger: validation throws synchronously, storage never throws; real Kentico cookie-level provider writes no CMSCookieLevel on a started response (SearchSessionCookie kept) | Phase 2 | Closes 02-01 HasStarted concern |
 | 2026-10-09: Enterprise audit on 02-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 2 | Destructive tests only on a disposable DB copy; cross-page conversion attribution via URL ids |
 | 2026-10-09: Enterprise audit on 02-03-PLAN.md. Applied 3 must-have, 2 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 2 | Logical searches capped at AttributionWindow; engine input contract defined; retention can't purge before rollup |
@@ -63,6 +64,10 @@ See PROJECT.md Key Decisions.
 | AC-5 (permissions) approved by user without reported observations | 01-03 UNIFY | S | Re-check with a real role when custom permissions land (Phase 3) |
 | 02-01 audit deferrals: language/channel dimensions; clock drift beyond NTP (KNOWN-LIMITATIONS); unit-level DB writer test (covered E2E) | 02-01 audit | S–M | When the search API carries language/channel |
 | 02-02 audit deferrals: shared queue capacity (drops logged per kind); custom-endpoint rate limiting (developer-owned) | 02-02 audit | S | Phase 6 Widgets traffic |
+| Rollup engine holds a whole day in memory (O(D²·L) fragment check); volume unmeasured | 02-03 audit / UNIFY | S–M | 02-04: measure with synthetic volume, stream per SearchId if needed |
+| No config change tracking / live reload: merge-setting changes only affect days recomputed afterwards | 02-03 UNIFY | S | 02-04 / v0.2 reports |
+| Segmentation can differ when a day is recomputed after its raw rows were partly purged | 02-03 UNIFY | S | 02-04 watermark + retention ordering |
+| Admin settings page | 02-03 audit | M | With Phase 3 permissions concern |
 
 ### Deviations
 #### Skill Audit (Phase 1, plan 01-01)
@@ -70,7 +75,7 @@ See PROJECT.md Key Decisions.
 |----------|---------|-------|
 | /dotnet:csharp-refactoring | ○ | Not evidenced in APPLY record; edit was one builder-chain call in xbk/Program.cs |
 
-Plans 01-02, 01-03, 02-01 and 02-02: all required skills invoked.
+Plans 01-02, 01-03, 02-01, 02-02 and 02-03: all required skills invoked.
 
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
@@ -78,16 +83,17 @@ Plans 01-02, 01-03, 02-01 and 02-02: all required skills invoked.
 | Phase 1: Tuning UI inherits Lucene Search app permissions (Development category). Marketers need Lucene app access; future rule/synonym editing would need UPDATE, which also allows editing/rebuilding/deleting indexes | Core value "marketers without a developer" vs. index-admin rights | Revisit before Phase 3 editing pages: custom permission on suite commands, or role guidance |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 02-02)
+Last commit: see `git log -1` (docs(paul): unify plan 02-03; code in d5261ec)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Plan 02-03 created
-Next action: /paul:audit .paul/phases/02-event-capture/02-03-PLAN.md, then /paul:apply
-Resume file: .paul/phases/02-event-capture/02-03-PLAN.md
+Stopped at: Plan 02-03 unified (loop closed)
+Next action: /paul:plan 02-04 Job & retention
+Resume file: .paul/phases/02-event-capture/02-03-SUMMARY.md
+Environment: an xbk.exe (PID 13160) started outside the loop listens on port 55709, running pre-02-03 code against DB `xperience` at installer version 2 — left untouched; its next start on current code runs the additive v2 → v3 step
 
 ---
 *STATE.md — Updated after every significant action*
