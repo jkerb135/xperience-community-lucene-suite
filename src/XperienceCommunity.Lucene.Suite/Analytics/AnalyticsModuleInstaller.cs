@@ -23,11 +23,13 @@ internal sealed class AnalyticsModuleInstaller(
     internal const string VersionKeyName = "LuceneSuiteInstalledVersion";
 
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
-    internal const int Version = 2;
+    internal const int Version = 3;
 
     internal const string ReceivedIndexName = "IX_LuceneSuite_SearchEvent_ReceivedUtc_SearchId";
 
     internal const string InteractionReceivedIndexName = "IX_LuceneSuite_SearchInteraction_ReceivedUtc_SearchId";
+
+    internal const string DailyKeyIndexName = "IX_LuceneSuite_SearchDaily_Day_IndexName_QueryText";
 
     private const string LockResource = "LuceneSuite.Install";
     private const int LockTimeoutMs = 120_000;
@@ -60,6 +62,16 @@ internal sealed class AnalyticsModuleInstaller(
         // Version 2: click and conversion events.
         EnsureClass(resource, SearchInteractionInfo.TYPEINFO, "Lucene Suite search interaction", SearchInteractionForm());
         EnsureReceivedIndex(InteractionReceivedIndexName, SearchInteractionInfo.CLASS_NAME);
+
+        // Version 3: daily KPIs.
+        EnsureClass(resource, SearchDailyInfo.TYPEINFO, "Lucene Suite search daily KPIs", SearchDailyForm());
+        CreateAscendingIndex(
+            DailyKeyIndexName,
+            SearchDailyInfo.CLASS_NAME,
+            true,
+            nameof(SearchDailyInfo.Day),
+            nameof(SearchDailyInfo.IndexName),
+            nameof(SearchDailyInfo.QueryText));
 
         if (installed < Version)
         {
@@ -102,13 +114,36 @@ internal sealed class AnalyticsModuleInstaller(
         return form;
     }
 
-    // The tuple bool is "ascending" (undocumented; false produced a DESC index in 02-01).
+    internal static FormInfo SearchDailyForm()
+    {
+        var form = FormHelper.GetBasicFormDefinition(nameof(SearchDailyInfo.SearchDailyID));
+        Add(form, nameof(SearchDailyInfo.Day), FieldDataType.Date);
+        Add(form, nameof(SearchDailyInfo.IndexName), FieldDataType.Text, SearchEventInfo.IndexNameMaxLength);
+        // Nullable like SearchEvent.QueryText; the browse bucket is stored as ''.
+        Add(form, nameof(SearchDailyInfo.QueryText), FieldDataType.Text, SearchEventInfo.QueryTextMaxLength, allowEmpty: true);
+        Add(form, nameof(SearchDailyInfo.Searches), FieldDataType.Integer);
+        Add(form, nameof(SearchDailyInfo.ZeroResultSearches), FieldDataType.Integer);
+        Add(form, nameof(SearchDailyInfo.SubmittedSearches), FieldDataType.Integer);
+        Add(form, nameof(SearchDailyInfo.ClickedSearches), FieldDataType.Integer);
+        Add(form, nameof(SearchDailyInfo.Clicks), FieldDataType.Integer);
+        Add(form, nameof(SearchDailyInfo.ClickPositionSum), FieldDataType.LongInteger);
+        Add(form, nameof(SearchDailyInfo.ConvertedSearches), FieldDataType.Integer);
+        Add(form, nameof(SearchDailyInfo.Conversions), FieldDataType.Integer);
+        Add(form, nameof(SearchDailyInfo.SessionCount), FieldDataType.Integer);
+        for (int i = 0; i < SearchDailyInfo.LatencyBucketCount; i++)
+        {
+            Add(form, $"LatencyBucket{i}", FieldDataType.Integer);
+        }
+
+        return form;
+    }
+
     private static void EnsureReceivedIndex(string indexName, string className) =>
-        new TableManager(null).CreateIndex(
-            indexName,
-            className.Replace('.', '_'),
-            false,
-            [(nameof(SearchEventInfo.ReceivedUtc), true), (nameof(SearchEventInfo.SearchId), true)]);
+        CreateAscendingIndex(indexName, className, false, nameof(SearchEventInfo.ReceivedUtc), nameof(SearchEventInfo.SearchId));
+
+    // The tuple bool is "ascending" (undocumented; false produced a DESC index in 02-01). No-op when the index exists.
+    private static void CreateAscendingIndex(string indexName, string className, bool isUnique, params string[] columns) =>
+        new TableManager(null).CreateIndex(indexName, className.Replace('.', '_'), isUnique, columns.Select(column => (column, true)).ToList());
 
     private static void AcquireLock(SqlConnection connection, SqlTransaction transaction)
     {

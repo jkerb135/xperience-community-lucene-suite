@@ -45,7 +45,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     public void FreshDatabase_ConcurrentInstalls_CreateEachObjectOnce_AndRerunIsIdempotent()
     {
         var services = Kentico.Value;
-        RemoveSuiteObjects(keepSearchEvent: false);
+        RemoveSuiteObjects(keep: []);
         var installers = Enumerable.Range(0, 4).Select(_ => CreateInstaller(services)).ToArray();
         using var start = new Barrier(installers.Length);
 
@@ -61,25 +61,66 @@ public sealed class AnalyticsInstallerDatabaseTests
     }
 
     [DatabaseFact]
-    public void Version1Database_UpgradesToVersion2_LeavingVersion1ObjectsUntouched()
+    public void Version1Database_UpgradesToCurrent_LeavingVersion1ObjectsUntouched()
     {
         var services = Kentico.Value;
         CreateInstaller(services).Install();
-        RemoveSuiteObjects(keepSearchEvent: true);
+        RemoveSuiteObjects(keep: [SearchEventInfo.CLASS_NAME]);
         SetInstalledVersion(1);
         Execute(
             """
             INSERT INTO LuceneSuite_SearchEvent (SearchId, Sequence, ReceivedUtc, IndexName, QueryText, Page, PageSize, FacetFilterCount, ResultCount, LatencyMs, IsSubmit, Origin)
             VALUES (NEWID(), 1, SYSUTCDATETIME(), 'upgrade-test', 'kept', 1, 10, 0, 0, 0, 0, 1)
             """);
-        string searchEventDefinition = SearchEventDefinition();
+        string searchEventDefinition = ClassDefinition(SearchEventInfo.CLASS_NAME);
         int searchEventRows = Scalar("SELECT COUNT(*) FROM LuceneSuite_SearchEvent");
 
         CreateInstaller(services).Install();
 
         AssertInstalledOnce();
-        Assert.Equal(searchEventDefinition, SearchEventDefinition());
+        Assert.Equal(searchEventDefinition, ClassDefinition(SearchEventInfo.CLASS_NAME));
         Assert.Equal(searchEventRows, Scalar("SELECT COUNT(*) FROM LuceneSuite_SearchEvent"));
+    }
+
+    [DatabaseFact]
+    public void Version2Database_UpgradesToVersion3_LeavingVersion2ObjectsUntouched()
+    {
+        var services = Kentico.Value;
+        CreateInstaller(services).Install();
+        RemoveSuiteObjects(keep: [SearchEventInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME]);
+        SetInstalledVersion(2);
+        Execute(
+            """
+            INSERT INTO LuceneSuite_SearchEvent (SearchId, Sequence, ReceivedUtc, IndexName, QueryText, Page, PageSize, FacetFilterCount, ResultCount, LatencyMs, IsSubmit, Origin)
+            VALUES (NEWID(), 1, SYSUTCDATETIME(), 'upgrade-test', 'kept', 1, 10, 0, 0, 0, 0, 1);
+            INSERT INTO LuceneSuite_SearchInteraction (SearchId, Sequence, ItemGuid, Position, Type, EventId, ReceivedUtc)
+            VALUES (NEWID(), 1, NEWID(), 1, 1, NEWID(), SYSUTCDATETIME());
+            """);
+        string[] definitions = [ClassDefinition(SearchEventInfo.CLASS_NAME), ClassDefinition(SearchInteractionInfo.CLASS_NAME)];
+        int[] rows = [Scalar("SELECT COUNT(*) FROM LuceneSuite_SearchEvent"), Scalar("SELECT COUNT(*) FROM LuceneSuite_SearchInteraction")];
+
+        CreateInstaller(services).Install();
+
+        AssertInstalledOnce();
+        Assert.Equal(definitions, new[] { ClassDefinition(SearchEventInfo.CLASS_NAME), ClassDefinition(SearchInteractionInfo.CLASS_NAME) });
+        Assert.Equal(rows, new[] { Scalar("SELECT COUNT(*) FROM LuceneSuite_SearchEvent"), Scalar("SELECT COUNT(*) FROM LuceneSuite_SearchInteraction") });
+    }
+
+    [DatabaseFact]
+    public void SearchDaily_RejectsADuplicateDayIndexAndQuery()
+    {
+        CreateInstaller(Kentico.Value).Install();
+        Execute("DELETE FROM LuceneSuite_SearchDaily WHERE IndexName = 'unique-test'");
+        const string insert =
+            """
+            INSERT INTO LuceneSuite_SearchDaily (Day, IndexName, QueryText, Searches, ZeroResultSearches, SubmittedSearches, ClickedSearches, Clicks, ClickPositionSum, ConvertedSearches, Conversions, SessionCount,
+                LatencyBucket0, LatencyBucket1, LatencyBucket2, LatencyBucket3, LatencyBucket4, LatencyBucket5, LatencyBucket6, LatencyBucket7, LatencyBucket8, LatencyBucket9)
+            VALUES ('2026-10-09', 'unique-test', 'coffee', 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            """;
+        Execute(insert);
+
+        Assert.Throws<SqlException>(() => Execute(insert));
+        Execute("DELETE FROM LuceneSuite_SearchDaily WHERE IndexName = 'unique-test'");
     }
 
     [DatabaseFact]
@@ -87,14 +128,14 @@ public sealed class AnalyticsInstallerDatabaseTests
     {
         var services = Kentico.Value;
         CreateInstaller(services).Install();
-        RemoveSuiteObjects(keepSearchEvent: true);
+        RemoveSuiteObjects(keep: [SearchEventInfo.CLASS_NAME]);
         SetInstalledVersion(AnalyticsModuleInstaller.Version + 1);
         var logger = new RecordingLogger();
 
         CreateInstaller(services, logger).Install();
 
         Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Warning);
-        Assert.Equal(0, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{SearchInteractionInfo.CLASS_NAME}'"));
+        Assert.Equal(0, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName IN ('{SearchInteractionInfo.CLASS_NAME}', '{SearchDailyInfo.CLASS_NAME}')"));
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}' AND KeyValue = '{AnalyticsModuleInstaller.Version + 1}'"));
 
         // Leave the database fully installed for the other tests.
@@ -109,18 +150,16 @@ public sealed class AnalyticsInstallerDatabaseTests
             logger ?? NullLogger<AnalyticsModuleInstaller>.Instance);
 
     // Raw SQL because Kentico refuses to delete a class whose Info type is compiled in; the caches are cleared afterwards.
-    private static void RemoveSuiteObjects(bool keepSearchEvent)
+    private static void RemoveSuiteObjects(string[] keep)
     {
-        string[] classNames = keepSearchEvent
-            ? [SearchInteractionInfo.CLASS_NAME]
-            : [SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
-        foreach (string className in classNames)
+        string[] all = [SearchDailyInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
+        foreach (string className in all.Except(keep))
         {
             Execute($"DROP TABLE IF EXISTS [{className.Replace('.', '_')}]; DELETE FROM CMS_Class WHERE ClassName = '{className}';");
             ClassStructureInfo.Remove(className, false);
         }
 
-        if (!keepSearchEvent)
+        if (keep.Length == 0)
         {
             Execute(
                 $"""
@@ -134,7 +173,7 @@ public sealed class AnalyticsInstallerDatabaseTests
             ProviderHelper.ClearHashtables(objectType, false);
         }
 
-        Assert.Equal(keepSearchEvent ? 1 : 0, Scalar("SELECT COUNT(*) FROM sys.tables WHERE name LIKE 'LuceneSuite[_]%'"));
+        Assert.Equal(keep.Length, Scalar("SELECT COUNT(*) FROM sys.tables WHERE name LIKE 'LuceneSuite[_]%'"));
     }
 
     private static void SetInstalledVersion(int version)
@@ -145,10 +184,10 @@ public sealed class AnalyticsInstallerDatabaseTests
         keys.Set(key);
     }
 
-    private static string SearchEventDefinition()
+    private static string ClassDefinition(string className)
     {
         using var connection = Open();
-        using var command = new SqlCommand($"SELECT ClassFormDefinition FROM CMS_Class WHERE ClassName = '{SearchEventInfo.CLASS_NAME}'", connection);
+        using var command = new SqlCommand($"SELECT ClassFormDefinition FROM CMS_Class WHERE ClassName = '{className}'", connection);
         return (string)command.ExecuteScalar();
     }
 
@@ -156,18 +195,19 @@ public sealed class AnalyticsInstallerDatabaseTests
     {
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Resource WHERE ResourceName = '{AnalyticsModuleInstaller.ResourceName}'"));
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}' AND KeyValue = '{AnalyticsModuleInstaller.Version}'"));
-        foreach (var (className, indexName) in new[]
+        foreach (var (className, indexName, columns, unique) in new[]
         {
-            (SearchEventInfo.CLASS_NAME, AnalyticsModuleInstaller.ReceivedIndexName),
-            (SearchInteractionInfo.CLASS_NAME, AnalyticsModuleInstaller.InteractionReceivedIndexName),
+            (SearchEventInfo.CLASS_NAME, AnalyticsModuleInstaller.ReceivedIndexName, 2, 0),
+            (SearchInteractionInfo.CLASS_NAME, AnalyticsModuleInstaller.InteractionReceivedIndexName, 2, 0),
+            (SearchDailyInfo.CLASS_NAME, AnalyticsModuleInstaller.DailyKeyIndexName, 3, 1),
         })
         {
             Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{className}'"));
             Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM sys.tables WHERE name = '{className.Replace('.', '_')}'"));
-            Assert.Equal(2, Scalar(
+            Assert.Equal(columns, Scalar(
                 $"""
                 SELECT COUNT(*) FROM sys.indexes i JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
-                WHERE i.name = '{indexName}' AND ic.is_descending_key = 0
+                WHERE i.name = '{indexName}' AND ic.is_descending_key = 0 AND i.is_unique = {unique}
                 """));
         }
     }

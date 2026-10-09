@@ -2,8 +2,10 @@ using CMS.Websites;
 
 using Kentico.Web.Mvc;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Search;
@@ -13,7 +15,7 @@ namespace XperienceCommunity.Lucene.Suite;
 /// <summary>Registers the Lucene Suite services.</summary>
 public static class LuceneSuiteServiceCollectionExtensions
 {
-    /// <summary>Adds suite search, search event capture and <see cref="ISearchInteractionLogger"/>; call after AddKenticoLucene.</summary>
+    /// <summary>Adds suite search, search event capture and <see cref="ISearchInteractionLogger"/>; options bind from configuration section "LuceneSuite", then <paramref name="configure"/>, and are validated on start. Call after AddKenticoLucene.</summary>
     public static IServiceCollection AddLuceneSuite(this IServiceCollection services, Action<SuiteSearchOptions>? configure = null)
     {
         services.TryAddSingleton<ISearchQueryFactory, DefaultSearchQueryFactory>();
@@ -30,7 +32,11 @@ public static class LuceneSuiteServiceCollectionExtensions
         services.AddHostedService<SearchEventWriter>();
         services.Configure<CookieLevelOptions>(cookies =>
             cookies.CookieConfigurations[SearchSessionCookie.Name] = new CookieLevel(CookieLevelConstants.VISITOR));
-        var options = services.AddOptions<SuiteSearchOptions>();
+        // Bound by hand rather than BindConfiguration so a container without IConfiguration still works.
+        var options = services.AddOptions<SuiteSearchOptions>()
+            .Configure<IServiceProvider>((o, provider) => provider.GetService<IConfiguration>()?.GetSection(SuiteSearchOptions.SectionName).Bind(o))
+            .ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SuiteSearchOptions>, SuiteSearchOptionsValidator>());
         if (configure is not null)
         {
             options.Configure(configure);
