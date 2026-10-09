@@ -17,9 +17,8 @@ namespace XperienceCommunity.Lucene.Suite.Admin.UIPages;
 
 /// <summary>The Search tuning section of one Lucene index; its children are the tuning pages.</summary>
 [UIEvaluatePermission(SystemPermissions.VIEW)]
-public sealed class SearchTuningSectionPage(IUIPermissionEvaluator permissionEvaluator, ILuceneIndexManager indexManager) : SecondaryMenuSectionPage
+public sealed class SearchTuningSectionPage(ILuceneIndexManager indexManager) : SecondaryMenuSectionPage
 {
-    internal const string AccessDeniedMessageKey = "base.application.permission.missing.label";
     internal const string IndexMissingMessageKey = "base.forms.error.objectnotinitialized";
 
     /// <summary>Identifier of the tuned Lucene index (the index listing's row identifier).</summary>
@@ -27,7 +26,7 @@ public sealed class SearchTuningSectionPage(IUIPermissionEvaluator permissionEva
     public int IndexIdentifier { get; set; }
 
     /// <inheritdoc />
-    public override Task<PageValidationResult> ValidatePage() => Validate(permissionEvaluator, indexManager, IndexIdentifier);
+    public override Task<PageValidationResult> ValidatePage() => Task.FromResult(Validate(indexManager, IndexIdentifier));
 
     /// <inheritdoc />
     public override async Task<TemplateClientProperties> ConfigureTemplateProperties(TemplateClientProperties properties)
@@ -40,18 +39,10 @@ public sealed class SearchTuningSectionPage(IUIPermissionEvaluator permissionEva
         return await base.ConfigureTemplateProperties(properties);
     }
 
-    /// <summary>Site Search View for the current user (the current application is Site Search), then the index's existence.</summary>
-    internal static async Task<PageValidationResult> Validate(IUIPermissionEvaluator permissionEvaluator, ILuceneIndexManager indexManager, int indexIdentifier)
+    /// <summary>The index must exist; Site Search → View is enforced by <see cref="UIEvaluatePermissionAttribute"/> before validation.</summary>
+    internal static PageValidationResult Validate(ILuceneIndexManager indexManager, int indexIdentifier) => new()
     {
-        if (!(await permissionEvaluator.Evaluate(SystemPermissions.VIEW)).Succeeded)
-        {
-            return new PageValidationResult { IsValid = false, ErrorMessageKey = AccessDeniedMessageKey };
-        }
-
-        return new PageValidationResult
-        {
-            IsValid = indexManager.GetIndex(indexIdentifier) is not null,
-            ErrorMessageKey = IndexMissingMessageKey,
-        };
-    }
+        IsValid = indexManager.GetIndex(indexIdentifier) is not null,
+        ErrorMessageKey = IndexMissingMessageKey,
+    };
 }

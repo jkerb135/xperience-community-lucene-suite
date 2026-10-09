@@ -33,65 +33,41 @@ public class SiteSearchAccessTests
         Assert.Equal(1, evaluations);
     }
 
-    [Fact]
-    public async Task Validate_WithoutSiteSearchView_DeniesAccessBeforeLookingUpTheIndex()
-    {
-        var indexes = new FakeIndexManager();
-
-        var result = await SearchTuningSectionPage.Validate(new FakePermissions(false), indexes, ExistingIndex);
-
-        Assert.False(result.IsValid);
-        Assert.Equal(SearchTuningSectionPage.AccessDeniedMessageKey, result.ErrorMessageKey);
-        Assert.Equal(0, indexes.Lookups);
-    }
-
     [Theory]
     [InlineData(ExistingIndex, true)]
     [InlineData(404, false)]
-    public async Task Validate_WithSiteSearchView_RequiresAnExistingIndex(int indexIdentifier, bool valid)
+    public void Validate_RequiresAnExistingIndex(int indexIdentifier, bool valid)
     {
-        var result = await SearchTuningSectionPage.Validate(new FakePermissions(true), new FakeIndexManager(), indexIdentifier);
+        var result = SearchTuningSectionPage.Validate(new FakeIndexManager(), indexIdentifier);
 
         Assert.Equal(valid, result.IsValid);
         Assert.Equal(SearchTuningSectionPage.IndexMissingMessageKey, result.ErrorMessageKey);
     }
 
     [Fact]
-    public async Task SectionAndQueryTester_BothDenyAccessOnTheirOwnRoute()
+    public async Task SectionAndQueryTester_BothRejectAMissingIndexOnTheirOwnRoute()
     {
         // Kentico validates only the requested page, so the child route must not rely on the section.
-        var permissions = new FakePermissions(false);
         var indexes = new FakeIndexManager();
         Func<Task<PageValidationResult>>[] validations =
         [
-            new SearchTuningSectionPage(permissions, indexes) { IndexIdentifier = ExistingIndex }.ValidatePage,
-            new QueryTesterPage(permissions, indexes, null!, null!, null!) { IndexIdentifier = ExistingIndex }.ValidatePage,
+            new SearchTuningSectionPage(indexes) { IndexIdentifier = 404 }.ValidatePage,
+            new QueryTesterPage(indexes, null!, null!, null!) { IndexIdentifier = 404 }.ValidatePage,
         ];
 
         foreach (var validate in validations)
         {
             var result = await validate();
             Assert.False(result.IsValid);
-            Assert.Equal(SearchTuningSectionPage.AccessDeniedMessageKey, result.ErrorMessageKey);
+            Assert.Equal(SearchTuningSectionPage.IndexMissingMessageKey, result.ErrorMessageKey);
         }
-    }
-
-    private sealed class FakePermissions(bool granted) : IUIPermissionEvaluator
-    {
-        public Task<UIPermissionEvaluationResult> Evaluate(string permission) =>
-            Task.FromResult(new UIPermissionEvaluationResult(granted && permission == CMS.Membership.SystemPermissions.VIEW));
     }
 
     private sealed class FakeIndexManager : ILuceneIndexManager
     {
-        public int Lookups { get; private set; }
-
-        public LuceneIndex? GetIndex(int identifier)
-        {
-            Lookups++;
+        public LuceneIndex? GetIndex(int identifier) =>
             // LuceneIndex has only an internal constructor; existence is all the validation reads.
-            return identifier == ExistingIndex ? (LuceneIndex)RuntimeHelpers.GetUninitializedObject(typeof(LuceneIndex)) : null;
-        }
+            identifier == ExistingIndex ? (LuceneIndex)RuntimeHelpers.GetUninitializedObject(typeof(LuceneIndex)) : null;
 
         public IEnumerable<LuceneIndex> GetAllIndices() => throw new NotSupportedException();
 

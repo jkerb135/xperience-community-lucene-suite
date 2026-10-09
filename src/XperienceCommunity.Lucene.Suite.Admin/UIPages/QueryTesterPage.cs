@@ -22,7 +22,6 @@ namespace XperienceCommunity.Lucene.Suite.Admin.UIPages;
 /// <summary>Runs ad-hoc searches against one index through <see cref="ISuiteSearchService"/>.</summary>
 [UIEvaluatePermission(SystemPermissions.VIEW)]
 public sealed class QueryTesterPage(
-    IUIPermissionEvaluator permissionEvaluator,
     ILuceneIndexManager indexManager,
     IServiceProvider serviceProvider,
     ISuiteSearchService searchService,
@@ -36,9 +35,9 @@ public sealed class QueryTesterPage(
     [PageParameter(typeof(IntPageModelBinder), typeof(SearchTuningSectionPage))]
     public int IndexIdentifier { get; set; }
 
-    /// <summary>Repeats the section's checks: Kentico validates only the requested page, never its parents, for page loads and commands alike.</summary>
+    /// <summary>Repeats the section's index check: Kentico validates only the requested page, never its parents, for page loads and commands alike.</summary>
     public override Task<PageValidationResult> ValidatePage() =>
-        SearchTuningSectionPage.Validate(permissionEvaluator, indexManager, IndexIdentifier);
+        Task.FromResult(SearchTuningSectionPage.Validate(indexManager, IndexIdentifier));
 
     /// <inheritdoc />
     public override Task<QueryTesterClientProperties> ConfigureTemplateProperties(QueryTesterClientProperties properties)
