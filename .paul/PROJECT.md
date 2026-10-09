@@ -14,8 +14,8 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | Initializing |
-| Last Updated | 2026-10-08 |
+| Status | v0.1 in progress — Phase 1 complete, Phase 2 ready to plan |
+| Last Updated | 2026-10-09 |
 
 ## Requirements
 
@@ -30,10 +30,12 @@ Marketers tune, test and measure site search without a developer.
 - Custom activity tracking (consent-gated)
 
 ### Validated (Shipped)
-None yet.
+- ✓ Isolated build (net10.0, own props/CPM), Kentico Lucene ≥ 15.0.5 coexisting with XpSearch in xbk — Phase 1
+- ✓ Suite search API over ILuceneSearchService (query text, field boosts, paging limits, facets with sideways counts, hit count, timing) — Phase 1
+- ✓ Per-index "Search tuning" admin section with query tester; client Proxy in dev, embedded on non-Debug builds — Phase 1
 
 ### Active (In Progress)
-None yet.
+- [ ] Phase 2 Event Capture: identity-free, web-farm-safe search/click events (not yet planned)
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -131,4 +133,4 @@ None yet.
 | Research | ../project-sidecar/docs/research/ |
 
 ---
-*Created: 2026-10-08*
+*Created: 2026-10-08 · Last updated: 2026-10-09 after Phase 1*
