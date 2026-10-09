@@ -1,6 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Kentico.Xperience.Core" />
     <PackageReference Include="Kentico.Xperience.Lucene.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Tests" />
   </ItemGroup>
 </Project>
