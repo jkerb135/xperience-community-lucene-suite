@@ -15,7 +15,8 @@ using XperienceCommunity.Lucene.Suite.Search;
     uiPageType: typeof(QueryTesterPage),
     name: "Query tester",
     templateName: "@xperience-community/lucene-suite/QueryTester",
-    order: 100)]
+    order: 100,
+    Icon = Icons.Magnifier)]
 
 namespace XperienceCommunity.Lucene.Suite.Admin.UIPages;
 
@@ -45,7 +46,6 @@ public sealed class QueryTesterPage(
         var index = GetIndex();
         var strategy = (ILuceneIndexingStrategy)serviceProvider.GetRequiredService(index.LuceneIndexingStrategyType);
 
-        properties.IndexName = index.IndexName;
         properties.IsFaceted = strategy.FacetsConfigFactory() is not null;
         properties.PageSize = PageSize;
         properties.MaxResultWindow = MaxResultWindow;
@@ -79,8 +79,7 @@ public sealed class QueryTesterPage(
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
         {
-            var message = ValidationMessage(exception);
-            return Task.FromResult(ResponseFrom(new QueryTesterResult { Error = message }).AddErrorMessage(message));
+            return Task.FromResult(ResponseFrom(new QueryTesterResult { Error = ValidationMessage(exception) }));
         }
     }
 
@@ -107,9 +106,6 @@ public sealed class QueryTesterPage(
 /// <summary>Template properties of the query tester.</summary>
 public sealed class QueryTesterClientProperties : TemplateClientProperties
 {
-    /// <summary>Name of the searched index.</summary>
-    public string IndexName { get; set; } = string.Empty;
-
     /// <summary>Whether the index's strategy defines facets.</summary>
     public bool IsFaceted { get; set; }
 

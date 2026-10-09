@@ -10,14 +10,14 @@ using XperienceCommunity.Lucene.Suite.Admin.UIPages;
     identifier: SiteSearchApplication.IDENTIFIER,
     type: typeof(SiteSearchApplication),
     slug: SiteSearchApplication.SLUG,
-    name: "Site Search",
+    name: "Site search",
     category: BaseApplicationCategories.DIGITAL_MARKETING,
-    icon: Icons.MagnifierPlus,
+    icon: Icons.Magnifier,
     templateName: TemplateNames.SECTION_LAYOUT)]
 
 namespace XperienceCommunity.Lucene.Suite.Admin.UIPages;
 
-/// <summary>Root of the Site Search application; owns the permissions every Suite admin page evaluates.</summary>
+/// <summary>Root of the Site search application; owns the permissions every Suite admin page evaluates.</summary>
 [UIPermission(SystemPermissions.VIEW)]
 [UIPermission(SiteSearchPermissions.MANAGE_RULES, SiteSearchPermissions.MANAGE_RULES_DISPLAY_NAME)]
 [UIPermission(SiteSearchPermissions.MANAGE_SYNONYMS, SiteSearchPermissions.MANAGE_SYNONYMS_DISPLAY_NAME)]

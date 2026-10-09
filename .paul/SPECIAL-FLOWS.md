@@ -2,7 +2,7 @@
 
 **Project:** XperienceCommunity.Lucene.Suite
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-08
+**Last Updated:** 2026-10-09
 
 ---
 
@@ -14,6 +14,7 @@
 | C# implementation and refactoring | /dotnet:csharp-refactoring | required | Any non-trivial C# change | |
 | MSBuild / central package management | /dotnet:msbuild | optional | Editing props/targets/csproj | Lucene.Net.* must match host beta exactly |
 | Page Builder widgets (search box, results) | /kentico-web-development:page-builder-widgets | optional | Live-site widgets | |
+| Admin UI design validation | Admin design kit (asset below) + browser pane | required | Any admin UI change (client templates, C# page configuration, listings, callouts, icons) | Before markup: check the component story in the kit and its export + props in `@kentico/xperience-admin-components` `dist/entry.d.ts`; copy kit source only as a recorded last resort. Tokens only (`--color-*` at runtime; no hard-coded colour, font or spacing). Kit loading / empty / error states. Accessibility: labels, programmatic headings, focus moves and returns. Visual check in the browser pane at ~790 px and 1440 px content width against `previews/*.webp`. The design-validation skill script does not apply (authenticated admin pages) |
 
 **Priority Legend:**
 - `required` - Gap documented if not invoked during UNIFY
@@ -53,6 +54,7 @@ During UNIFY, confirm:
 | Date | Change | Reason |
 |------|--------|--------|
 | 2026-10-08 | Initial creation | Project setup |
+| 2026-10-09 | Admin UI design validation made required | Plan 03-02: design review found state bugs and kit drift in the query tester |
 
 ---
 

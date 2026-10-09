@@ -25,7 +25,9 @@ public sealed class SiteSearchIndexListingPage(
     ILuceneIndexManager indexManager,
     ILogger<SiteSearchIndexListingPage> logger) : ListingPage
 {
-    private const string EntriesCaption = "Entries";
+    internal const string NoIndexesHeadline = "No Lucene indexes registered";
+
+    private Dictionary<string, int> entries = [];
 
     /// <inheritdoc />
     protected override string ObjectType => LuceneIndexItemInfo.OBJECT_TYPE;
@@ -37,8 +39,12 @@ public sealed class SiteSearchIndexListingPage(
             .AddColumn(nameof(LuceneIndexItemInfo.LuceneIndexItemIndexName), "Name", sortable: true, searchable: true, defaultSortDirection: SortTypeEnum.Asc)
             .AddColumn(nameof(LuceneIndexItemInfo.LuceneIndexItemStrategyName), "Index strategy", sortable: true, searchable: true)
             .AddColumn(nameof(LuceneIndexItemInfo.LuceneIndexItemAnalyzerName), "Analyzer", sortable: true, searchable: true)
-            // Placeholder column; LoadData replaces its value with the live document count.
-            .AddColumn(nameof(LuceneIndexItemInfo.LuceneIndexItemId), EntriesCaption);
+            .AddColumn(nameof(LuceneIndexItemInfo.LuceneIndexItemId), "Entries", formatter: (id, _) => FormatEntries(entries, int.TryParse(id?.ToString(), out int i) ? indexManager.GetIndex(i)?.IndexName : null));
+
+        if (!indexManager.GetAllIndices().Any())
+        {
+            PageConfiguration.Callouts = [NoIndexesCallout()];
+        }
 
         PageConfiguration.AddEditRowAction<SearchTuningSectionPage>();
         await base.ConfigurePage();
@@ -47,25 +53,22 @@ public sealed class SiteSearchIndexListingPage(
     /// <inheritdoc />
     protected override async Task<LoadDataResult> LoadData(LoadDataSettings settings, CancellationToken cancellationToken)
     {
-        var result = await base.LoadData(settings, cancellationToken);
-        if (PageConfiguration.ColumnConfigurations is not List<ColumnConfiguration> columns)
-        {
-            return result;
-        }
-
-        var entries = await GetEntries(cancellationToken);
-        int entriesColumn = columns.FindIndex(c => c.Caption == EntriesCaption);
-        foreach (var row in result.Rows)
-        {
-            if (row.Cells is List<Cell> cells && cells[entriesColumn] is StringCell cell)
-            {
-                string? name = int.TryParse(row.Identifier?.ToString(), out int id) ? indexManager.GetIndex(id)?.IndexName : null;
-                cell.Value = name is not null && entries.TryGetValue(name, out int count) ? count.ToString() : string.Empty;
-            }
-        }
-
-        return result;
+        entries = await GetEntries(cancellationToken);
+        return await base.LoadData(settings, cancellationToken);
     }
+
+    /// <summary>The live document count of the named index, or empty when statistics are unavailable.</summary>
+    internal static string FormatEntries(IReadOnlyDictionary<string, int> entries, string? indexName) =>
+        indexName is not null && entries.TryGetValue(indexName, out int count) ? count.ToString() : string.Empty;
+
+    /// <summary>Shown when no index is registered, so an empty install does not render a bare table.</summary>
+    internal static CalloutConfiguration NoIndexesCallout() => new()
+    {
+        Headline = NoIndexesHeadline,
+        Content = "Register a Lucene index in the Lucene Search application; it then appears here for search tuning.",
+        Type = CalloutType.QuickTip,
+        Placement = CalloutPlacement.OnDesk,
+    };
 
     private async Task<Dictionary<string, int>> GetEntries(CancellationToken cancellationToken)
     {

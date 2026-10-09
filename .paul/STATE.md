@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-09)
 
 Milestone: v0.1 Tune & Capture
 Phase: 3 of 6 (Rules Engine) — In progress
-Plan: 03-01 complete (1 of 4)
-Status: Loop closed, ready for next PLAN (03-02)
-Last activity: 2026-10-09 — Unified 03-01 (.paul/phases/03-rules-engine/03-01-SUMMARY.md)
+Plan: 03-02 created + audited (1 must-have, 2 strongly-recommended applied; 1 deferred), awaiting approval (03-01 complete; Phase 3 now 5 plans)
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-09 — Created .paul/phases/03-rules-engine/03-02-PLAN.md (query tester design & state fixes from the design review)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
@@ -26,7 +26,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -89,7 +89,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
-| Admin UI has not been formally validated against the admin design components repo (C:\Users\jkerb\RiderProjects\Personal\xperience-by-kentico-admin-design-components); 01-03 only consulted registry/stories and imported npm components — design validation pass pending (user question 2026-10-09) | Query tester / Site Search pages may diverge from the design kit | Open — user to decide when to run a design validation pass |
+| Admin UI has not been formally validated against the admin design components repo (C:\Users\jkerb\RiderProjects\Personal\xperience-by-kentico-admin-design-components); 01-03 only consulted registry/stories and imported npm components — design validation pass pending (user question 2026-10-09) | Query tester / Site Search pages may diverge from the design kit | Review done 2026-10-09 (project-sidecar/docs/design-review-2026-10-09.md: 2 high, 11 medium, 10 low + visual pass); fixes in 03-02; design validation becomes required in SPECIAL-FLOWS |
 
 ### Git State
 Last commit: see `git log -1` (docs(paul): unify plan 03-01; 03-01 code in 0aa45f2, b362fa0)
@@ -100,7 +100,7 @@ Feature branches merged: none
 
 Last session: 2026-10-09
 Stopped at: Plan 03-01 unified (Phase 3: 1/4)
-Next action: /paul:plan 03-02 Rule model + pure engine
+Next action: /paul:audit .paul/phases/03-rules-engine/03-02-PLAN.md, then /paul:apply
 Resume file: .paul/phases/03-rules-engine/03-01-SUMMARY.md
 Environment: 2026-10-09 (02-04 APPLY): no xbk process running; DB `xperience` already at LuceneSuiteInstalledVersion = 3 (SELECT only). When xbk next runs this code, the installer adds the watermark key and the rollup job applies retention to its raw rows (by design)
 

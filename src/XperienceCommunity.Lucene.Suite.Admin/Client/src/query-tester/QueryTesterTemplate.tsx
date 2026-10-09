@@ -1,13 +1,12 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { usePageCommandProvider } from "@kentico/xperience-admin-base";
 import {
   Button,
   ButtonColor,
-  ButtonType,
+  ButtonSize,
   Callout,
   CalloutPlacementType,
   CalloutType,
-  Card,
   CellType,
   Checkbox,
   Cols,
@@ -15,20 +14,33 @@ import {
   ColumnContentType,
   Headline,
   HeadlineSize,
+  Icon,
+  Inline,
   Input,
   Pagination,
   Row,
+  SidePanel,
+  SidePanelSize,
   Spacing,
   Stack,
   Table,
+  Tag,
   TextWithLabel,
   type StringCell,
   type TableColumn,
   type TableRow,
 } from "@kentico/xperience-admin-components";
+import {
+  humanizeFieldName,
+  latestRequest,
+  mergeSelectedIntoFacets,
+  toggleSelection,
+  visibleValues,
+  type Facet,
+  type FacetSelection,
+} from "./state";
 
 interface QueryTesterProps {
-  readonly indexName: string;
   readonly isFaceted: boolean;
   readonly pageSize: number;
   readonly maxResultWindow: number;
@@ -41,11 +53,6 @@ interface Hit {
   readonly fields: Record<string, string[]>;
 }
 
-interface Facet {
-  readonly dimension: string;
-  readonly values: { readonly label: string; readonly count: number }[];
-}
-
 interface SearchResult {
   readonly hits: Hit[];
   readonly totalHits: number;
@@ -54,7 +61,7 @@ interface SearchResult {
   readonly error: string | null;
 }
 
-type FacetSelection = Record<string, string[]>;
+const collapsedFacetValues = 5;
 
 const column = (name: string, caption: string): TableColumn => ({
   name,
@@ -72,32 +79,43 @@ const cell = (value: string, columnName: string): StringCell => ({ type: CellTyp
 
 const fieldText = (hit: Hit, field: string) => (hit.fields[field] ?? []).join(", ");
 
-export const QueryTesterTemplate = ({ indexName, isFaceted, pageSize, maxResultWindow, keyFields }: QueryTesterProps) => {
+export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyFields }: QueryTesterProps) => {
   const { executeCommand } = usePageCommandProvider();
+  const [request] = useState(latestRequest);
   const [query, setQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
   const [page, setPage] = useState(1);
   const [selection, setSelection] = useState<FacetSelection>({});
   const [result, setResult] = useState<SearchResult>();
-  const [expanded, setExpanded] = useState<number>();
+  const [failed, setFailed] = useState(false);
   const [inProgress, setInProgress] = useState(false);
+  const [expandedFacets, setExpandedFacets] = useState<Record<string, boolean>>({});
+  const [detail, setDetail] = useState<number>();
+  const detailTrigger = useRef<HTMLElement | null>(null);
 
   const search = useCallback(
     async (searchQuery: string, searchPage: number, facets: FacetSelection) => {
       setInProgress(true);
-      try {
-        const response = await executeCommand<SearchResult, { query: string; page: number; facets: FacetSelection }>("Search", {
-          query: searchQuery,
-          page: searchPage,
-          facets,
-        });
-        setResult(response);
+      const { latest, value } = await request((abort) =>
+        executeCommand<SearchResult, { query: string; page: number; facets: FacetSelection }>(
+          "Search",
+          { query: searchQuery, page: searchPage, facets },
+          undefined,
+          abort,
+        ),
+      );
+      if (!latest) {
+        return;
+      }
+      setInProgress(false);
+      setFailed(value === undefined);
+      if (value !== undefined) {
+        setResult(value);
         setPage(searchPage);
-        setExpanded(undefined);
-      } finally {
-        setInProgress(false);
+        setDetail(undefined);
       }
     },
-    [executeCommand],
+    [executeCommand, request],
   );
 
   useEffect(() => {
@@ -106,108 +124,186 @@ export const QueryTesterTemplate = ({ indexName, isFaceted, pageSize, maxResultW
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
+    setSubmittedQuery(query);
     void search(query, 1, selection);
   };
 
-  const toggleFacet = (dimension: string, label: string, checked: boolean) => {
-    const values = (selection[dimension] ?? []).filter((v) => v !== label);
-    const next = { ...selection, [dimension]: checked ? [...values, label] : values };
-    if (next[dimension].length === 0) {
-      delete next[dimension];
-    }
+  const applySelection = (next: FacetSelection) => {
     setSelection(next);
-    void search(query, 1, next);
+    void search(submittedQuery, 1, next);
   };
 
-  const columns = [column("itemGuid", "ItemGuid"), column("score", "Score"), ...keyFields.map((f) => column(f, f))];
+  const openDetail = (index: number) => {
+    detailTrigger.current = document.activeElement as HTMLElement | null;
+    setDetail(index);
+  };
+
+  const closeDetail = () => {
+    setDetail(undefined);
+    detailTrigger.current?.focus();
+  };
+
   const hits = result?.hits ?? [];
+  const firstField = keyFields[0];
+  const columns = [...keyFields.map((f) => column(f, f)), column("score", "Score"), column("itemGuid", "Item GUID")];
   const rows: TableRow[] = hits.map((hit, i) => ({
     identifier: i,
     disabled: false,
     cells: [
-      cell(hit.itemGuid ?? "(none)", "itemGuid"),
-      cell(hit.score.toFixed(4), "score"),
       ...keyFields.map((f) => cell(fieldText(hit, f), f)),
+      cell(hit.score.toFixed(4), "score"),
+      cell(hit.itemGuid ?? "(none)", "itemGuid"),
     ],
   }));
   const totalPages = Math.min(Math.ceil((result?.totalHits ?? 0) / pageSize), Math.floor(maxResultWindow / pageSize));
-  const expandedHit = expanded === undefined ? undefined : hits[expanded];
-  const facets = isFaceted ? (result?.facets ?? []) : [];
+  const detailHit = detail === undefined ? undefined : hits[detail];
+  const facets = isFaceted ? mergeSelectedIntoFacets(result?.facets ?? [], selection) : [];
+  const applied = Object.entries(selection).flatMap(([dimension, labels]) => labels.map((label) => ({ dimension, label })));
+  const noHits = result !== undefined && !result.error && result.totalHits === 0 && !inProgress;
 
   return (
     <Stack spacing={Spacing.XL}>
-      <Headline size={HeadlineSize.M}>Query tester: {indexName}</Headline>
-      <form onSubmit={submit}>
-        <Row spacingX={Spacing.M}>
-          <Column cols={Cols.Col12} colsMd={Cols.Col10}>
-            <Input
-              label="Query"
-              placeholder="Leave empty to list all documents"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </Column>
-          <Column>
-            <Button type={ButtonType.Submit} color={ButtonColor.Primary} label="Search" inProgress={inProgress} />
-          </Column>
-        </Row>
-      </form>
+      <div role="heading" aria-level={1}>
+        <Headline size={HeadlineSize.M}>Query tester</Headline>
+      </div>
+      {failed && (
+        <Callout type={CalloutType.FriendlyWarning} placement={CalloutPlacementType.OnDesk} headline="Search failed">
+          The previous results are still shown. Try again.
+        </Callout>
+      )}
       {result?.error && (
         <Callout type={CalloutType.FriendlyWarning} placement={CalloutPlacementType.OnDesk} headline="Search rejected">
           {result.error}
         </Callout>
       )}
-      {result && !result.error && (
-        <Row spacingX={Spacing.XL}>
-          <Column>
-            <TextWithLabel label="Total hits" value={String(result.totalHits)} />
-          </Column>
-          <Column>
-            <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
-          </Column>
-        </Row>
+      <form onSubmit={submit} role="search">
+        <Input
+          label="Query"
+          explanationText="Leave empty to list all documents. Press Enter to search."
+          actionElement={<Icon name="xp-magnifier" />}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </form>
+      {applied.length > 0 && (
+        <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
+          <span>Applied filters:</span>
+          <Button
+            label="Clear all"
+            icon="xp-times-circle"
+            size={ButtonSize.S}
+            color={ButtonColor.Tertiary}
+            disabled={inProgress}
+            onClick={() => applySelection({})}
+          />
+          {applied.map(({ dimension, label }) => (
+            <Tag
+              key={`${dimension}\u0000${label}`}
+              label={`${humanizeFieldName(dimension)}: ${label}`}
+              disabled={inProgress}
+              onRemoveClick={() => applySelection(toggleSelection(selection, dimension, label, false))}
+            />
+          ))}
+        </Inline>
       )}
       <Row spacingX={Spacing.XL} spacingY={Spacing.XL}>
         {facets.length > 0 && (
-          <Column cols={Cols.Col12} colsMd={Cols.Col3} colsLg={Cols.Col3}>
+          <Column cols={Cols.Col3}>
             <Stack spacing={Spacing.L}>
-              {facets.map((facet) => (
-                <Stack key={facet.dimension} spacing={Spacing.S}>
-                  <Headline size={HeadlineSize.S}>{facet.dimension}</Headline>
-                  {facet.values.map((value) => (
-                    <Checkbox
-                      key={value.label}
-                      label={`${value.label} (${value.count})`}
-                      aria-label={`${facet.dimension}: ${value.label} (${value.count})`}
-                      checked={selection[facet.dimension]?.includes(value.label) ?? false}
-                      onChange={(_, checked) => toggleFacet(facet.dimension, value.label, checked)}
-                    />
-                  ))}
-                </Stack>
-              ))}
+              {facets.map((facet) => {
+                const selected = selection[facet.dimension] ?? [];
+                const expanded = expandedFacets[facet.dimension] ?? false;
+                const shown = visibleValues(facet.values, selected, expanded, collapsedFacetValues);
+                const heading = humanizeFieldName(facet.dimension);
+                return (
+                  <div key={facet.dimension} role="group" aria-label={heading}>
+                    <Stack spacing={Spacing.S}>
+                      <div role="heading" aria-level={2}>
+                        <Headline size={HeadlineSize.S}>{heading}</Headline>
+                      </div>
+                      {shown.map((value) => (
+                        <Checkbox
+                          key={value.label}
+                          label={`${value.label} (${value.count.toLocaleString()})`}
+                          checked={selected.includes(value.label)}
+                          disabled={inProgress}
+                          onChange={(_, checked) => applySelection(toggleSelection(selection, facet.dimension, value.label, checked))}
+                        />
+                      ))}
+                      {facet.values.length > collapsedFacetValues && (
+                        <div>
+                          <Button
+                            label={expanded ? "Show less" : "Show more"}
+                            size={ButtonSize.S}
+                            color={ButtonColor.Tertiary}
+                            aria-expanded={expanded}
+                            onClick={() => setExpandedFacets({ ...expandedFacets, [facet.dimension]: !expanded })}
+                          />
+                        </div>
+                      )}
+                    </Stack>
+                  </div>
+                );
+              })}
             </Stack>
           </Column>
         )}
-        <Column cols={Cols.Col12} colsMd={facets.length > 0 ? Cols.Col9 : Cols.Col12} colsLg={facets.length > 0 ? Cols.Col9 : Cols.Col12}>
+        <Column cols={facets.length > 0 ? Cols.Col9 : Cols.Col12}>
           <Stack spacing={Spacing.L}>
-            <div style={{ overflowX: "auto" }}>
-              <Table columns={columns} rows={rows} onRowClick={(id) => setExpanded(id as number)} />
-            </div>
-            {totalPages > 1 && (
-              <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(query, p, selection)} />
+            {result && !result.error && (
+              <Row spacingX={Spacing.XL}>
+                <Column>
+                  <TextWithLabel label="Total hits" value={result.totalHits.toLocaleString()} />
+                </Column>
+                <Column>
+                  <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
+                </Column>
+              </Row>
             )}
-            {expandedHit && (
-              <Card headline={`All stored fields: ${expandedHit.itemGuid ?? "(no ItemGuid)"}`}>
-                <Stack spacing={Spacing.M}>
-                  {Object.keys(expandedHit.fields).map((field) => (
-                    <TextWithLabel key={field} label={field} value={fieldText(expandedHit, field)} />
-                  ))}
-                </Stack>
-              </Card>
+            {noHits ? (
+              <Callout
+                type={CalloutType.QuickTip}
+                placement={CalloutPlacementType.OnDesk}
+                headline="No documents match"
+                actionButton={
+                  applied.length > 0 ? (
+                    <Button label="Clear filters" color={ButtonColor.Secondary} onClick={() => applySelection({})} />
+                  ) : undefined
+                }
+              >
+                {applied.length > 0 ? "Try removing a filter or changing the query." : "Try a different query."}
+              </Callout>
+            ) : (
+              <Table
+                columns={columns}
+                rows={inProgress || (result === undefined && !failed) ? undefined : rows}
+                onRowClick={(id) => openDetail(id as number)}
+              />
+            )}
+            {totalPages > 1 && !noHits && (
+              <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(submittedQuery, p, selection)} />
             )}
           </Stack>
         </Column>
       </Row>
+      <SidePanel
+        headline={(detailHit && firstField && fieldText(detailHit, firstField)) || detailHit?.itemGuid || "Document"}
+        size={SidePanelSize.Stackable}
+        isVisible={detailHit !== undefined}
+        autofocusCancelButton
+        tooltips={{ close: "Close" }}
+        onClose={closeDetail}
+      >
+        {detailHit && (
+          <Stack spacing={Spacing.M}>
+            <TextWithLabel label="Item GUID" value={detailHit.itemGuid ?? "(none)"} />
+            <TextWithLabel label="Score" value={detailHit.score.toFixed(4)} />
+            {Object.keys(detailHit.fields).map((field) => (
+              <TextWithLabel key={field} label={field} value={fieldText(detailHit, field)} />
+            ))}
+          </Stack>
+        )}
+      </SidePanel>
     </Stack>
   );
 };

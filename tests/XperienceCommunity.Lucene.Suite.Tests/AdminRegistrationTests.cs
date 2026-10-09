@@ -23,10 +23,12 @@ public class AdminRegistrationTests
     {
         var application = Assert.Single(AdminAssembly.GetCustomAttributes<UIApplicationAttribute>());
 
-        Assert.Equal(SiteSearchApplication.IDENTIFIER, application.Identifier);
+        // Literals, not constants: role grants are stored under these names, so they must never change.
+        Assert.Equal("XperienceCommunity.Lucene.Suite.SiteSearch", application.Identifier);
         Assert.Equal(typeof(SiteSearchApplication), application.Type);
         Assert.Equal("site-search", application.Slug);
-        Assert.Equal("Site Search", application.Name);
+        Assert.Equal("Site search", application.Name);
+        Assert.Equal(Icons.Magnifier, application.Icon);
         Assert.Equal(BaseApplicationCategories.DIGITAL_MARKETING, application.Category);
     }
 
@@ -37,12 +39,11 @@ public class AdminRegistrationTests
             .ToDictionary(p => p.Name, p => p.DisplayName);
 
         Assert.Equal(
-            new HashSet<string> { SystemPermissions.VIEW, SiteSearchPermissions.MANAGE_RULES, SiteSearchPermissions.MANAGE_SYNONYMS, SiteSearchPermissions.MANAGE_EXPERIMENTS },
+            new HashSet<string> { SystemPermissions.VIEW, "LuceneSuite.ManageRules", "LuceneSuite.ManageSynonyms", "LuceneSuite.ManageExperiments" },
             permissions.Keys.ToHashSet());
         Assert.Equal("Manage rules", permissions[SiteSearchPermissions.MANAGE_RULES]);
         Assert.Equal("Manage synonyms", permissions[SiteSearchPermissions.MANAGE_SYNONYMS]);
         Assert.Equal("Manage experiments", permissions[SiteSearchPermissions.MANAGE_EXPERIMENTS]);
-        Assert.All(permissions.Keys.Where(k => k != SystemPermissions.VIEW), k => Assert.StartsWith("LuceneSuite.", k, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -69,5 +70,23 @@ public class AdminRegistrationTests
     {
         Assert.All(Pages, p => Assert.Equal(SystemPermissions.VIEW, p.Type.GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission));
         Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.Search))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
+    }
+
+    [Fact]
+    public void QueryTester_HasAMenuIcon() =>
+        Assert.Equal(Icons.Magnifier, Assert.Single(Pages, p => p.Type == typeof(QueryTesterPage)).Icon);
+
+    [Fact]
+    public void IndexListing_FormatsEntriesByIndexNameAndHasAnEmptyStateCallout()
+    {
+        var entries = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase) { ["dancinggoat"] = 38 };
+
+        Assert.Equal("38", SiteSearchIndexListingPage.FormatEntries(entries, "DancingGoat"));
+        Assert.Equal(string.Empty, SiteSearchIndexListingPage.FormatEntries(entries, "missing"));
+        Assert.Equal(string.Empty, SiteSearchIndexListingPage.FormatEntries(entries, null));
+
+        var callout = SiteSearchIndexListingPage.NoIndexesCallout();
+        Assert.Equal(SiteSearchIndexListingPage.NoIndexesHeadline, callout.Headline);
+        Assert.Equal(CalloutType.QuickTip, callout.Type);
     }
 }
