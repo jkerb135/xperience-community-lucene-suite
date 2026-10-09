@@ -14,7 +14,7 @@ Phases: 2 of 6 complete (33%)
 |-------|------|-------|--------|-----------|
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
 | 2 | Event Capture | 4/4 | ✅ Complete | 2026-10-09 |
-| 3 | Rules Engine | TBD | Not started | - |
+| 3 | Rules Engine | 0/4 | Planning | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
 | 6 | Widgets Package | TBD | Not started | - |
@@ -52,7 +52,13 @@ Phases: 2 of 6 complete (33%)
 **Goal:** Marketers pin/boost/bury/hide/attach data by query, facets and context.
 **Depends on:** Phase 1
 **Research:** Done (search-merchandising-standards.md)
-**Open concern (resolve during planning):** editing pages need a custom permission (or role guidance) — Lucene app UPDATE would also allow editing/rebuilding/deleting indexes
+**Permissions resolved (2026-10-09):** Suite-owned "Site Search" app (Digital Marketing) with custom permissions (option A)
+
+**Plans:**
+- [ ] 03-01: Placement & permissions — Site Search app, custom permissions, move section/query tester, role checkpoint (planned)
+- [ ] 03-02: Rule model + pure engine — module classes, conditions, actions, priority/conflicts, validity
+- [ ] 03-03: Search integration — rules hook, boost/bury rewrite, pin/hide post-processing, contexts, cache invalidation, overhead
+- [ ] 03-04: Rules admin UI — listing, ConditionBuilder editor, content picker pins, query tester shows fired rules
 
 ### Phase 4: Synonyms
 **Goal:** Query-time synonym rewrite managed in admin.

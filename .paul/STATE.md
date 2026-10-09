@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 3 of 6 (Rules Engine) — Not started
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-09 — Phase 2 complete (02-04 unified: rollup job, store, retention + fold), transitioned to Phase 3
+Phase: 3 of 6 (Rules Engine) — Planning
+Plan: 03-01 created + audited (1 must-have, 1 strongly-recommended applied; 2 deferred), awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-09 — Created .paul/phases/03-rules-engine/03-01-PLAN.md (permissions resolved: option A)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
@@ -26,7 +26,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -82,7 +82,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
-| Phase 1: Tuning UI inherits Lucene Search app permissions (Development category). Marketers need Lucene app access; future rule/synonym editing would need UPDATE, which also allows editing/rebuilding/deleting indexes | Core value "marketers without a developer" vs. index-admin rights | Must be resolved during Phase 3 planning (before editing pages): custom permission for editing pages / suite commands, or role guidance |
+| Permissions concern — RESOLVED in planning 2026-10-09 (option A): Suite-owned Site Search app with custom permissions; implemented and role-verified in 03-01 | — | 03-01 |
 
 ### Git State
 Last commit: see `git log -1` (docs(paul): unify plan 02-04, close Phase 2; Phase 2 code in d5261ec, 18add8d and earlier)
@@ -93,7 +93,7 @@ Feature branches merged: none
 
 Last session: 2026-10-09
 Stopped at: Phase 2 complete (4/4), ready to plan Phase 3 Rules Engine
-Next action: /paul:plan for Phase 3 (resolve the permissions concern first)
+Next action: /paul:audit .paul/phases/03-rules-engine/03-01-PLAN.md, then /paul:apply
 Resume file: .paul/ROADMAP.md
 Environment: 2026-10-09 (02-04 APPLY): no xbk process running; DB `xperience` already at LuceneSuiteInstalledVersion = 3 (SELECT only). When xbk next runs this code, the installer adds the watermark key and the rollup job applies retention to its raw rows (by design)
 
