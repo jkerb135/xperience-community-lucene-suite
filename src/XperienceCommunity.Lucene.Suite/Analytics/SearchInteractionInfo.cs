@@ -99,7 +99,7 @@ public class SearchInteractionInfo : AbstractInfo<SearchInteractionInfo, IInfoPr
     [DatabaseField]
     public virtual int? Position
     {
-        get => ValidationHelper.GetValue<int?>(GetValue(nameof(Position)));
+        get => GetValue(nameof(Position)) as int?;
         set => SetValue(nameof(Position), value);
     }
 
@@ -123,7 +123,7 @@ public class SearchInteractionInfo : AbstractInfo<SearchInteractionInfo, IInfoPr
     [DatabaseField]
     public virtual Guid? SessionId
     {
-        get => ValidationHelper.GetValue<Guid?>(GetValue(nameof(SessionId)));
+        get => GetValue(nameof(SessionId)) as Guid?;
         set => SetValue(nameof(SessionId), value);
     }
 

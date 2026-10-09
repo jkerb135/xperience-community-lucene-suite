@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
 
+using static XperienceCommunity.Lucene.Suite.Tests.DatabaseTestHost;
+
 namespace XperienceCommunity.Lucene.Suite.Tests;
 
 /// <summary>Runs only when LUCENESUITE_TEST_CONNECTIONSTRING points at a disposable Xperience database whose name contains "test".</summary>
@@ -37,14 +39,65 @@ public sealed class DatabaseFactAttribute : FactAttribute
     }
 }
 
+/// <summary>Shared Kentico initialization and raw SQL helpers for the database tests.</summary>
+internal static class DatabaseTestHost
+{
+    public static readonly Lazy<IServiceProvider> KenticoServices = new(InitializeKentico);
+
+    public static int Scalar(string sql)
+    {
+        using var connection = Open();
+        using var command = new SqlCommand(sql, connection);
+        return (int)command.ExecuteScalar();
+    }
+
+    public static void Execute(string sql)
+    {
+        using var connection = Open();
+        using var command = new SqlCommand(sql, connection);
+        command.ExecuteNonQuery();
+    }
+
+    public static SqlConnection Open()
+    {
+        var connection = new SqlConnection(Environment.GetEnvironmentVariable(DatabaseFactAttribute.Variable));
+        connection.Open();
+        return connection;
+    }
+
+    // Kentico's documented external-application initialization; without AddLuceneSuite the module installs nothing itself.
+    private static IServiceProvider InitializeKentico()
+    {
+        var builder = Host.CreateApplicationBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:CMSConnectionString"] = Environment.GetEnvironmentVariable(DatabaseFactAttribute.Variable),
+        });
+        // Kentico Lucene's module, discovered from the referenced packages, needs its own services.
+        builder.Services.AddKenticoLucene();
+        CMSApplication.PreInit(false);
+        Service.MergeDescriptors(builder.Services);
+        var host = builder.Build();
+        Service.SetProvider(host.Services);
+        CMSApplication.Init();
+        return host.Services;
+    }
+}
+
+/// <summary>Database tests must not run in parallel: some drop and recreate the Suite tables.</summary>
+[CollectionDefinition(Name, DisableParallelization = true)]
+public sealed class DatabaseCollection
+{
+    internal const string Name = "Database";
+}
+
+[Collection(DatabaseCollection.Name)]
 public sealed class AnalyticsInstallerDatabaseTests
 {
-    private static readonly Lazy<IServiceProvider> Kentico = new(InitializeKentico);
-
     [DatabaseFact]
     public void FreshDatabase_ConcurrentInstalls_CreateEachObjectOnce_AndRerunIsIdempotent()
     {
-        var services = Kentico.Value;
+        var services = KenticoServices.Value;
         RemoveSuiteObjects(keep: []);
         var installers = Enumerable.Range(0, 4).Select(_ => CreateInstaller(services)).ToArray();
         using var start = new Barrier(installers.Length);
@@ -63,7 +116,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     [DatabaseFact]
     public void Version1Database_UpgradesToCurrent_LeavingVersion1ObjectsUntouched()
     {
-        var services = Kentico.Value;
+        var services = KenticoServices.Value;
         CreateInstaller(services).Install();
         RemoveSuiteObjects(keep: [SearchEventInfo.CLASS_NAME]);
         SetInstalledVersion(1);
@@ -85,7 +138,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     [DatabaseFact]
     public void Version2Database_UpgradesToVersion3_LeavingVersion2ObjectsUntouched()
     {
-        var services = Kentico.Value;
+        var services = KenticoServices.Value;
         CreateInstaller(services).Install();
         RemoveSuiteObjects(keep: [SearchEventInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME]);
         SetInstalledVersion(2);
@@ -109,7 +162,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     [DatabaseFact]
     public void SearchDaily_RejectsADuplicateDayIndexAndQuery()
     {
-        CreateInstaller(Kentico.Value).Install();
+        CreateInstaller(KenticoServices.Value).Install();
         Execute("DELETE FROM LuceneSuite_SearchDaily WHERE IndexName = 'unique-test'");
         const string insert =
             """
@@ -126,7 +179,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     [DatabaseFact]
     public void NewerInstalledVersion_LogsWarning_AndChangesNothing()
     {
-        var services = Kentico.Value;
+        var services = KenticoServices.Value;
         CreateInstaller(services).Install();
         RemoveSuiteObjects(keep: [SearchEventInfo.CLASS_NAME]);
         SetInstalledVersion(AnalyticsModuleInstaller.Version + 1);
@@ -163,7 +216,7 @@ public sealed class AnalyticsInstallerDatabaseTests
         {
             Execute(
                 $"""
-                DELETE FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}';
+                DELETE FROM CMS_SettingsKey WHERE KeyName IN ('{AnalyticsModuleInstaller.VersionKeyName}', '{AnalyticsModuleInstaller.WatermarkKeyName}');
                 DELETE FROM CMS_Resource WHERE ResourceName = '{AnalyticsModuleInstaller.ResourceName}';
                 """);
         }
@@ -178,7 +231,7 @@ public sealed class AnalyticsInstallerDatabaseTests
 
     private static void SetInstalledVersion(int version)
     {
-        var keys = Kentico.Value.GetRequiredService<IInfoProvider<SettingsKeyInfo>>();
+        var keys = KenticoServices.Value.GetRequiredService<IInfoProvider<SettingsKeyInfo>>();
         var key = keys.Get().WhereEquals(nameof(SettingsKeyInfo.KeyName), AnalyticsModuleInstaller.VersionKeyName).First();
         key.KeyValue = version.ToString(CultureInfo.InvariantCulture);
         keys.Set(key);
@@ -195,6 +248,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     {
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Resource WHERE ResourceName = '{AnalyticsModuleInstaller.ResourceName}'"));
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}' AND KeyValue = '{AnalyticsModuleInstaller.Version}'"));
+        Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.WatermarkKeyName}'"));
         foreach (var (className, indexName, columns, unique) in new[]
         {
             (SearchEventInfo.CLASS_NAME, AnalyticsModuleInstaller.ReceivedIndexName, 2, 0),
@@ -210,45 +264,6 @@ public sealed class AnalyticsInstallerDatabaseTests
                 WHERE i.name = '{indexName}' AND ic.is_descending_key = 0 AND i.is_unique = {unique}
                 """));
         }
-    }
-
-    private static int Scalar(string sql)
-    {
-        using var connection = Open();
-        using var command = new SqlCommand(sql, connection);
-        return (int)command.ExecuteScalar();
-    }
-
-    private static void Execute(string sql)
-    {
-        using var connection = Open();
-        using var command = new SqlCommand(sql, connection);
-        command.ExecuteNonQuery();
-    }
-
-    private static SqlConnection Open()
-    {
-        var connection = new SqlConnection(Environment.GetEnvironmentVariable(DatabaseFactAttribute.Variable));
-        connection.Open();
-        return connection;
-    }
-
-    // Kentico's documented external-application initialization; without AddLuceneSuite the module installs nothing itself.
-    private static IServiceProvider InitializeKentico()
-    {
-        var builder = Host.CreateApplicationBuilder();
-        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            ["ConnectionStrings:CMSConnectionString"] = Environment.GetEnvironmentVariable(DatabaseFactAttribute.Variable),
-        });
-        // Kentico Lucene's module, discovered from the referenced packages, needs its own services.
-        builder.Services.AddKenticoLucene();
-        CMSApplication.PreInit(false);
-        Service.MergeDescriptors(builder.Services);
-        var host = builder.Build();
-        Service.SetProvider(host.Services);
-        CMSApplication.Init();
-        return host.Services;
     }
 
     private sealed class RecordingLogger : ILogger<AnalyticsModuleInstaller>

@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Options;
 
+using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
+
 namespace XperienceCommunity.Lucene.Suite.Search;
 
 /// <summary>Rejects analytics settings that would skew or lose data; each failure names its configuration key.</summary>
@@ -47,11 +49,18 @@ internal sealed class SuiteSearchOptionsValidator : IValidateOptions<SuiteSearch
 
         Positive(a.Attribution.AttributionWindow, "Attribution:" + nameof(a.Attribution.AttributionWindow));
         Positive(a.Job.RollupInterval, "Job:" + nameof(a.Job.RollupInterval));
+        AtLeastOne(a.Job.MaxDaysPerRun, "Job:" + nameof(a.Job.MaxDaysPerRun));
 
-        var minimumRaw = TimeSpan.FromDays(1) + a.Attribution.AttributionWindow + a.Job.RollupInterval + TimeSpan.FromHours(1);
+        // A day becomes rollable after 1 day + 2 × window + flush + margin and stops being rollable once its input window (start − window) leaves raw retention.
+        var minimumRaw = TimeSpan.FromDays(1) + (3 * a.Attribution.AttributionWindow) + a.FlushInterval + RollupScheduler.Margin + a.Job.RollupInterval + TimeSpan.FromHours(1);
         if (a.Retention.RawRetention < minimumRaw)
         {
-            failures.Add($"{Prefix}Retention:{nameof(a.Retention.RawRetention)} must be at least 1 day + Attribution:AttributionWindow + Job:RollupInterval + 1 h = {minimumRaw}, so raw rows outlive the rollup of their day (was {a.Retention.RawRetention}).");
+            failures.Add($"{Prefix}Retention:{nameof(a.Retention.RawRetention)} must be at least 1 day + 3 × Attribution:AttributionWindow + FlushInterval + 5 min + Job:RollupInterval + 1 h = {minimumRaw}, so every day stays rollable for at least one run (was {a.Retention.RawRetention}).");
+        }
+
+        if (a.Retention.RawHardLimit < a.Retention.RawRetention)
+        {
+            failures.Add($"{Prefix}Retention:{nameof(a.Retention.RawHardLimit)} must be at least Retention:RawRetention = {a.Retention.RawRetention} (was {a.Retention.RawHardLimit}).");
         }
 
         if (a.Retention.DailyRetention < TimeSpan.FromDays(1))

@@ -83,7 +83,7 @@ Marketers tune, test and measure site search without a developer.
 - Custom activities go through Kentico activity tracking and its consent/cookie level — the suite adds no gate of its own
 - A/B participation uses a suite variant cookie (test + variant only, no identifier) registered with Kentico at a configurable cookie level; it is set only when the current Kentico cookie level allows it. Visitors without it are served control and excluded from experiment metrics. Events carry the variant only
 - Surfacing threshold: a query appears in reports, seeds suggestions or prompts rule creation only after ≥ 5 searches on ≥ 2 distinct days (both configurable); counted from the first search; covers both business noise and k-anonymity
-- Rollup rows still below threshold 30 days after last seen are pruned
+- Rollup rows still below threshold 30 days after last seen are folded into a per-day "(other)" bucket (QueryText NULL) and deleted, so totals are preserved while rare query text disappears
 - Scrub PII from query text at ingestion; raw events 48 h (until attribution closes), daily KPI rollups 25 months
 - Market-neutral (primary use case USA): the suite never stores identity in analytics and never sets a cookie or tracks above the current Kentico cookie level; legal compliance (GDPR, CCPA, GPC handling) is the site's consent/cookie-level configuration, as with Kentico itself
 - Rollup retention 25 months is a configurable default for year-over-year comparison, not a legal ceiling

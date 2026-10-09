@@ -97,7 +97,7 @@ public class SearchEventInfo : AbstractInfo<SearchEventInfo, IInfoProvider<Searc
     [DatabaseField]
     public virtual Guid? SessionId
     {
-        get => ValidationHelper.GetValue<Guid?>(GetValue(nameof(SessionId)));
+        get => GetValue(nameof(SessionId)) as Guid?;
         set => SetValue(nameof(SessionId), value);
     }
 

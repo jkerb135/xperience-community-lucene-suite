@@ -16,7 +16,7 @@ Every number below is a server setting, bound from the `LuceneSuite` configurati
 | Deep-backspace ratio | 0.5, range (0, 1) | `LuceneSuite:Analytics:Merge:DeepBackspaceRatio` | client rule 6 |
 | Attribution window | 1 h | `LuceneSuite:Analytics:Attribution:AttributionWindow` | §3; also the longest a logical search lasts |
 
-Server-only settings (no client impact): `Enabled`, `QueueCapacity`, `FlushInterval`, `BatchSize` under `LuceneSuite:Analytics`; `Retention:RawRetention` (48 h; at least 1 day + attribution window + rollup interval + 1 h), `Retention:DailyRetention` (25 months), `Retention:SubThresholdPruneAfter` (30 days), `Surfacing:MinSearches` (5), `Surfacing:MinDistinctDays` (2), `Job:RollupInterval` (15 min). Time spans use the .NET format, e.g. `"00:00:30"` or `"2.00:00:00"`.
+Server-only settings (no client impact): `Enabled`, `QueueCapacity`, `FlushInterval`, `BatchSize` under `LuceneSuite:Analytics`; `Retention:RawRetention` (48 h; at least 1 day + 3 × attribution window + flush interval + 5 min + rollup interval + 1 h), `Retention:RawHardLimit` (7 days; at least RawRetention), `Retention:DailyRetention` (25 months), `Retention:SubThresholdPruneAfter` (30 days), `Surfacing:MinSearches` (5), `Surfacing:MinDistinctDays` (2), `Job:RollupInterval` (15 min), `Job:MaxDaysPerRun` (7). Time spans use the .NET format, e.g. `"00:00:30"` or `"2.00:00:00"`.
 
 Two things are deliberately **not** configurable, because changing them would make stored daily history incomparable: days are UTC days (a logical search belongs to the UTC day of its first request; reports may convert for display), and the latency histogram buckets are fixed at 10, 25, 50, 100, 250, 500, 1000, 2500 and 5000 ms (inclusive upper bounds) plus an overflow bucket.
 

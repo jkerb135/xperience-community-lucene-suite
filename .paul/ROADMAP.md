@@ -46,7 +46,7 @@ Phases: 1 of 6 complete (17%)
 - [x] 02-01: Capture — module class + installer, request/response searchId contract, scrubber, session cookie, decorator + bulk writer (complete 2026-10-09)
 - [x] 02-02: Interactions — ISearchInteractionLogger (LogClick/LogConversion) through the capture pipeline, installer v2, client contract doc + test vectors (complete 2026-10-09)
 - [x] 02-03: Merge engine — configurable options + validation, SearchDaily class (installer v3), pure rollup engine, parameterized vectors (complete 2026-10-09)
-- [ ] 02-04: Job & retention — hosted single-runner job, watermark, idempotent persistence, raw/daily purge, sub-threshold prune, E2E on a disposable DB
+- [ ] 02-04: Job & retention — hosted single-runner job, watermark, idempotent persistence, raw/daily purge, sub-threshold fold into (other), E2E + volume on a disposable DB (planned)
 
 ### Phase 3: Rules Engine
 **Goal:** Marketers pin/boost/bury/hide/attach data by query, facets and context.

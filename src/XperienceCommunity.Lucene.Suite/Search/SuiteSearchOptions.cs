@@ -19,7 +19,7 @@ public sealed class SuiteSearchOptions
 /// <summary>Search analytics settings; the capture settings sit directly on this class, the rest in groups.</summary>
 public sealed class SuiteAnalyticsOptions
 {
-    /// <summary>Whether searches are recorded. Default true.</summary>
+    /// <summary>Whether searches are recorded and rolled up. Default true.</summary>
     public bool Enabled { get; set; } = true;
 
     /// <summary>Maximum buffered events; further events are dropped until the writer catches up. Read once at startup. Default 10 000.</summary>
@@ -73,14 +73,17 @@ public sealed class SuiteAttributionOptions
 /// <summary>Retention settings (<c>LuceneSuite:Analytics:Retention</c>).</summary>
 public sealed class SuiteRetentionOptions
 {
-    /// <summary>How long raw search and interaction rows are kept; at least 1 day + attribution window + rollup interval + 1 h. Default 48 h.</summary>
+    /// <summary>How long raw search and interaction rows are kept; at least 1 day + 3 × attribution window + flush interval + 5 min + rollup interval + 1 h. Default 48 h.</summary>
     public TimeSpan RawRetention { get; set; } = TimeSpan.FromHours(48);
 
     /// <summary>How long daily KPI rows are kept. Default 25 months (762 days).</summary>
     public TimeSpan DailyRetention { get; set; } = TimeSpan.FromDays(762);
 
-    /// <summary>Daily rows of a query still below the surfacing threshold are pruned this long after it was last seen. Default 30 days.</summary>
+    /// <summary>Daily rows of a query still below the surfacing threshold are folded into the day's "(other)" row this long after it was last seen. Default 30 days.</summary>
     public TimeSpan SubThresholdPruneAfter { get; set; } = TimeSpan.FromDays(30);
+
+    /// <summary>Raw rows older than this are deleted even when the rollup is stuck, so query text is never kept indefinitely; at least <see cref="RawRetention"/>. Default 7 days.</summary>
+    public TimeSpan RawHardLimit { get; set; } = TimeSpan.FromDays(7);
 }
 
 /// <summary>Surfacing threshold (<c>LuceneSuite:Analytics:Surfacing</c>): a query surfaces only with at least both values.</summary>
@@ -98,4 +101,7 @@ public sealed class SuiteJobOptions
 {
     /// <summary>How often the rollup job runs. Default 15 min.</summary>
     public TimeSpan RollupInterval { get; set; } = TimeSpan.FromMinutes(15);
+
+    /// <summary>Most UTC days one run rolls up, so a catch-up after downtime spreads over several runs. Default 7.</summary>
+    public int MaxDaysPerRun { get; set; } = 7;
 }

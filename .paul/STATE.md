@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-09)
 
 Milestone: v0.1 Tune & Capture
 Phase: 2 of 6 (Event Capture) — In progress
-Plan: 02-03 complete (3 of 4; 02-01, 02-02, 02-03 complete)
-Status: Loop closed, ready for next PLAN (02-04)
-Last activity: 2026-10-09 — UNIFY of 02-03 (02-03-SUMMARY.md)
+Plan: 02-04 applied (02-01..02-03 complete)
+Status: APPLY complete, ready for UNIFY
+Last activity: 2026-10-09 — APPLY of 02-04 (rollup job, store, retention + fold): all ACs verified on a disposable DB copy; 254 tests (233 + 19 DB-gated + 2 opt-in volume)
 
 Progress:
 - Milestone: [██░░░░░░░░] 17% (1 of 6 phases)
@@ -25,7 +25,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ✓        ○     [Applied, ready for UNIFY]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: Sub-threshold prune folds into per-day (other) bucket (QueryText NULL) to preserve totals; xbk DB subject to retention when it next runs this code | Phase 2 | 02-04 |
 | 2026-10-09: 02-03 options bound via Configure<IServiceProvider> + optional IConfiguration (not BindConfiguration; no live reload); SearchDaily = installer v3; engine input contract + duration cap + tie-break implemented; 02-02 mint conflicts resolved as settings (vectors prove both flips) | Phase 2 | 02-04 maps Info rows to the documented engine input contract |
 | 2026-10-09: 02-02 interaction logger: validation throws synchronously, storage never throws; real Kentico cookie-level provider writes no CMSCookieLevel on a started response (SearchSessionCookie kept) | Phase 2 | Closes 02-01 HasStarted concern |
 | 2026-10-09: Enterprise audit on 02-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 2 | Destructive tests only on a disposable DB copy; cross-page conversion attribution via URL ids |
@@ -90,10 +91,10 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Plan 02-03 unified (loop closed)
-Next action: /paul:plan 02-04 Job & retention
-Resume file: .paul/phases/02-event-capture/02-03-SUMMARY.md
-Environment: an xbk.exe (PID 13160) started outside the loop listens on port 55709, running pre-02-03 code against DB `xperience` at installer version 2 — left untouched; its next start on current code runs the additive v2 → v3 step
+Stopped at: Plan 02-04 applied (code committed on main, not pushed)
+Next action: /paul:unify .paul/phases/02-event-capture/02-04-PLAN.md
+Resume file: .paul/phases/02-event-capture/02-04-PLAN.md
+Environment: 2026-10-09 (02-04 APPLY): no xbk process running; DB `xperience` already at LuceneSuiteInstalledVersion = 3 (SELECT only). When xbk next runs this code, the installer adds the watermark key and the rollup job applies retention to its raw rows (by design)
 
 ---
 *STATE.md — Updated after every significant action*

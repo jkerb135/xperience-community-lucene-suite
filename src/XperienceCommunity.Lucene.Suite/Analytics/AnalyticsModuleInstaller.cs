@@ -22,6 +22,9 @@ internal sealed class AnalyticsModuleInstaller(
     /// <summary>Settings key holding the installed schema version.</summary>
     internal const string VersionKeyName = "LuceneSuiteInstalledVersion";
 
+    /// <summary>Hidden settings key holding the last fully rolled UTC day (yyyy-MM-dd), empty before the first rollup.</summary>
+    internal const string WatermarkKeyName = "LuceneSuiteRollupWatermark";
+
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
     internal const int Version = 3;
 
@@ -72,6 +75,7 @@ internal sealed class AnalyticsModuleInstaller(
             nameof(SearchDailyInfo.Day),
             nameof(SearchDailyInfo.IndexName),
             nameof(SearchDailyInfo.QueryText));
+        EnsureWatermarkKey();
 
         if (installed < Version)
         {
@@ -147,23 +151,29 @@ internal sealed class AnalyticsModuleInstaller(
 
     private static void AcquireLock(SqlConnection connection, SqlTransaction transaction)
     {
+        int result = GetAppLock(connection, transaction, LockResource, "Transaction", LockTimeoutMs);
+        if (result < 0)
+        {
+            throw new TimeoutException($"sp_getapplock '{LockResource}' returned {result}.");
+        }
+    }
+
+    /// <summary>Runs an exclusive sp_getapplock and returns its result; negative means the lock was not granted.</summary>
+    internal static int GetAppLock(SqlConnection connection, SqlTransaction? transaction, string resource, string owner, int timeoutMs)
+    {
         using var command = new SqlCommand("sp_getapplock", connection, transaction)
         {
             CommandType = CommandType.StoredProcedure,
-            CommandTimeout = (LockTimeoutMs / 1000) + 30,
+            CommandTimeout = (timeoutMs / 1000) + 30,
         };
-        command.Parameters.AddWithValue("@Resource", LockResource);
+        command.Parameters.AddWithValue("@Resource", resource);
         command.Parameters.AddWithValue("@LockMode", "Exclusive");
-        command.Parameters.AddWithValue("@LockOwner", "Transaction");
-        command.Parameters.AddWithValue("@LockTimeout", LockTimeoutMs);
+        command.Parameters.AddWithValue("@LockOwner", owner);
+        command.Parameters.AddWithValue("@LockTimeout", timeoutMs);
         var result = command.Parameters.Add("@Result", SqlDbType.Int);
         result.Direction = ParameterDirection.ReturnValue;
         command.ExecuteNonQuery();
-
-        if ((int)result.Value < 0)
-        {
-            throw new TimeoutException($"sp_getapplock '{LockResource}' returned {result.Value}.");
-        }
+        return (int)result.Value;
     }
 
     private ResourceInfo EnsureResource()
@@ -217,6 +227,22 @@ internal sealed class AnalyticsModuleInstaller(
             KeyIsCustom = true,
             KeyIsHidden = true,
         };
+
+    private void EnsureWatermarkKey()
+    {
+        if (!settingsKeys.Get().WhereEquals(nameof(SettingsKeyInfo.KeyName), WatermarkKeyName).Any())
+        {
+            settingsKeys.Set(new SettingsKeyInfo
+            {
+                KeyName = WatermarkKeyName,
+                KeyDisplayName = "Lucene Suite rollup watermark (last rolled UTC day)",
+                KeyType = "string",
+                KeyValue = string.Empty,
+                KeyIsCustom = true,
+                KeyIsHidden = true,
+            });
+        }
+    }
 
     private static int ParseVersion(SettingsKeyInfo key) =>
         int.TryParse(key.KeyValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) ? value : 0;

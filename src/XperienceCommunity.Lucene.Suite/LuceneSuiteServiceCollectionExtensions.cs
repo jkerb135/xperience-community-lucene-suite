@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
+using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 using XperienceCommunity.Lucene.Suite.Search;
 
 namespace XperienceCommunity.Lucene.Suite;
@@ -15,7 +16,7 @@ namespace XperienceCommunity.Lucene.Suite;
 /// <summary>Registers the Lucene Suite services.</summary>
 public static class LuceneSuiteServiceCollectionExtensions
 {
-    /// <summary>Adds suite search, search event capture and <see cref="ISearchInteractionLogger"/>; options bind from configuration section "LuceneSuite", then <paramref name="configure"/>, and are validated on start. Call after AddKenticoLucene.</summary>
+    /// <summary>Adds suite search, search event capture, <see cref="ISearchInteractionLogger"/> and the daily rollup and retention job; options bind from configuration section "LuceneSuite", then <paramref name="configure"/>, and are validated on start. Call after AddKenticoLucene.</summary>
     public static IServiceCollection AddLuceneSuite(this IServiceCollection services, Action<SuiteSearchOptions>? configure = null)
     {
         services.TryAddSingleton<ISearchQueryFactory, DefaultSearchQueryFactory>();
@@ -30,6 +31,9 @@ public static class LuceneSuiteServiceCollectionExtensions
         services.TryAddSingleton<ISuiteSearchService>(provider => ActivatorUtilities.CreateInstance<SearchCaptureService>(
             provider, provider.GetRequiredService<SuiteSearchService>()));
         services.AddHostedService<SearchEventWriter>();
+        services.TryAddSingleton<DailyRollupStore>();
+        services.TryAddSingleton<AnalyticsRetention>();
+        services.AddHostedService<AnalyticsRollupJob>();
         services.Configure<CookieLevelOptions>(cookies =>
             cookies.CookieConfigurations[SearchSessionCookie.Name] = new CookieLevel(CookieLevelConstants.VISITOR));
         // Bound by hand rather than BindConfiguration so a container without IConfiguration still works.

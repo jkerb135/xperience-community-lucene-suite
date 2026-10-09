@@ -23,10 +23,10 @@ public sealed class AnalyticsOptionsTests
             (a.Merge.TextChangeWindow, a.Merge.TypoOneEditMinLength, a.Merge.TypoTwoEditMinLength, a.Merge.DeepBackspaceRatio));
         Assert.Equal(TimeSpan.FromHours(1), a.Attribution.AttributionWindow);
         Assert.Equal(
-            (TimeSpan.FromHours(48), TimeSpan.FromDays(762), TimeSpan.FromDays(30)),
-            (a.Retention.RawRetention, a.Retention.DailyRetention, a.Retention.SubThresholdPruneAfter));
+            (TimeSpan.FromHours(48), TimeSpan.FromDays(762), TimeSpan.FromDays(30), TimeSpan.FromDays(7)),
+            (a.Retention.RawRetention, a.Retention.DailyRetention, a.Retention.SubThresholdPruneAfter, a.Retention.RawHardLimit));
         Assert.Equal((5, 2), (a.Surfacing.MinSearches, a.Surfacing.MinDistinctDays));
-        Assert.Equal(TimeSpan.FromMinutes(15), a.Job.RollupInterval);
+        Assert.Equal((TimeSpan.FromMinutes(15), 7), (a.Job.RollupInterval, a.Job.MaxDaysPerRun));
     }
 
     [Fact]
@@ -48,9 +48,11 @@ public sealed class AnalyticsOptionsTests
             ["LuceneSuite:Analytics:Retention:RawRetention"] = "3.00:00:00",
             ["LuceneSuite:Analytics:Retention:DailyRetention"] = "400.00:00:00",
             ["LuceneSuite:Analytics:Retention:SubThresholdPruneAfter"] = "10.00:00:00",
+            ["LuceneSuite:Analytics:Retention:RawHardLimit"] = "9.00:00:00",
             ["LuceneSuite:Analytics:Surfacing:MinSearches"] = "6",
             ["LuceneSuite:Analytics:Surfacing:MinDistinctDays"] = "3",
             ["LuceneSuite:Analytics:Job:RollupInterval"] = "00:05:00",
+            ["LuceneSuite:Analytics:Job:MaxDaysPerRun"] = "3",
         });
         var a = options.Analytics;
 
@@ -64,10 +66,10 @@ public sealed class AnalyticsOptionsTests
             (a.Merge.TextChangeWindow, a.Merge.TypoOneEditMinLength, a.Merge.TypoTwoEditMinLength, a.Merge.DeepBackspaceRatio));
         Assert.Equal(TimeSpan.FromHours(2), a.Attribution.AttributionWindow);
         Assert.Equal(
-            (TimeSpan.FromDays(3), TimeSpan.FromDays(400), TimeSpan.FromDays(10)),
-            (a.Retention.RawRetention, a.Retention.DailyRetention, a.Retention.SubThresholdPruneAfter));
+            (TimeSpan.FromDays(3), TimeSpan.FromDays(400), TimeSpan.FromDays(10), TimeSpan.FromDays(9)),
+            (a.Retention.RawRetention, a.Retention.DailyRetention, a.Retention.SubThresholdPruneAfter, a.Retention.RawHardLimit));
         Assert.Equal((6, 3), (a.Surfacing.MinSearches, a.Surfacing.MinDistinctDays));
-        Assert.Equal(TimeSpan.FromMinutes(5), a.Job.RollupInterval);
+        Assert.Equal((TimeSpan.FromMinutes(5), 3), (a.Job.RollupInterval, a.Job.MaxDaysPerRun));
     }
 
     [Fact]
@@ -97,6 +99,8 @@ public sealed class AnalyticsOptionsTests
     [InlineData("Surfacing:MinSearches", "0")]
     [InlineData("Surfacing:MinDistinctDays", "0")]
     [InlineData("Job:RollupInterval", "00:00:00")]
+    [InlineData("Job:MaxDaysPerRun", "0")]
+    [InlineData("Retention:RawHardLimit", "1.23:59:59")]
     public void InvalidSetting_FailsNamingTheSetting(string key, string value)
     {
         var error = Assert.Throws<OptionsValidationException>(() => Resolve(new() { ["LuceneSuite:Analytics:" + key] = value }));
@@ -105,18 +109,18 @@ public sealed class AnalyticsOptionsTests
     }
 
     [Fact]
-    public void RawRetention_MustCoverADayPlusAttributionPlusRollupIntervalPlusOneHour()
+    public void RawRetention_MustKeepEveryDayRollableForOneIntervalPlusOneHour()
     {
-        // 1 day + 2 h + 30 min + 1 h = 1.03:30:00.
+        // 1 day + 3 × 2 h + 2 s flush + 5 min margin + 30 min + 1 h = 1.07:35:02.
         Dictionary<string, string?> settings = new()
         {
             ["LuceneSuite:Analytics:Attribution:AttributionWindow"] = "02:00:00",
             ["LuceneSuite:Analytics:Job:RollupInterval"] = "00:30:00",
-            ["LuceneSuite:Analytics:Retention:RawRetention"] = "1.03:30:00",
+            ["LuceneSuite:Analytics:Retention:RawRetention"] = "1.07:35:02",
         };
-        Assert.Equal(TimeSpan.Parse("1.03:30:00"), Resolve(settings).Analytics.Retention.RawRetention);
+        Assert.Equal(TimeSpan.Parse("1.07:35:02"), Resolve(settings).Analytics.Retention.RawRetention);
 
-        settings["LuceneSuite:Analytics:Retention:RawRetention"] = "1.03:29:59";
+        settings["LuceneSuite:Analytics:Retention:RawRetention"] = "1.07:35:01";
         Assert.Throws<OptionsValidationException>(() => Resolve(settings));
     }
 
