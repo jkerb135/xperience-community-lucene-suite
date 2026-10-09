@@ -13,7 +13,7 @@ namespace XperienceCommunity.Lucene.Suite;
 /// <summary>Registers the Lucene Suite services.</summary>
 public static class LuceneSuiteServiceCollectionExtensions
 {
-    /// <summary>Adds suite search and search event capture; call after AddKenticoLucene.</summary>
+    /// <summary>Adds suite search, search event capture and <see cref="ISearchInteractionLogger"/>; call after AddKenticoLucene.</summary>
     public static IServiceCollection AddLuceneSuite(this IServiceCollection services, Action<SuiteSearchOptions>? configure = null)
     {
         services.TryAddSingleton<ISearchQueryFactory, DefaultSearchQueryFactory>();
@@ -22,6 +22,8 @@ public static class LuceneSuiteServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.TryAddSingleton<SearchSessionCookie>();
         services.TryAddSingleton<SearchEventQueue>();
+        services.TryAddSingleton<AnalyticsRequestFilter>();
+        services.TryAddSingleton<ISearchInteractionLogger, SearchInteractionLogger>();
         services.TryAddSingleton<AnalyticsModuleInstaller>();
         services.TryAddSingleton<ISuiteSearchService>(provider => ActivatorUtilities.CreateInstance<SearchCaptureService>(
             provider, provider.GetRequiredService<SuiteSearchService>()));

@@ -17,6 +17,7 @@ internal sealed class SearchSessionCookie(IHttpContextAccessor httpContextAccess
     /// <summary>Reads or creates the session id for the current request; null outside a request or below Visitor.</summary>
     public Guid? GetSessionId()
     {
+        // Kentico's provider returns normally after the response has started (observed in xbk, plan 02-02), so it is called first.
         if (httpContextAccessor.HttpContext is not { } context
             || context.RequestServices?.GetService<ICurrentCookieLevelProvider>() is not { } cookieLevel
             || cookieLevel.GetCurrentCookieLevel() < CookieLevelConstants.VISITOR)

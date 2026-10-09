@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.1 Tune & Capture** (v0.1.0)
 Status: In progress
-Phases: 1 of 5 complete (20%)
+Phases: 1 of 6 complete (17%)
 
 ## Phases
 
@@ -17,6 +17,7 @@ Phases: 1 of 5 complete (20%)
 | 3 | Rules Engine | TBD | Not started | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
+| 6 | Widgets Package | TBD | Not started | - |
 
 ## Phase Details
 
@@ -43,7 +44,7 @@ Phases: 1 of 5 complete (20%)
 
 **Plans:**
 - [x] 02-01: Capture — module class + installer, request/response searchId contract, scrubber, session cookie, decorator + bulk writer (complete 2026-10-09)
-- [ ] 02-02: Interaction endpoint — click/conversion beacon, rate/bot filter, client contract
+- [ ] 02-02: Interactions — ISearchInteractionLogger (LogClick/LogConversion) through the capture pipeline, installer v2, client contract doc + test vectors (planned)
 - [ ] 02-03: Rollups & retention — hosted job, merge rule, histograms, purge/prune, xbk checkpoint
 
 ### Phase 3: Rules Engine
@@ -58,6 +59,10 @@ Phases: 1 of 5 complete (20%)
 ### Phase 5: Preview Sandbox
 **Goal:** Side-by-side results with and without rules under a simulated contact-group/visitor context.
 **Depends on:** Phases 3, 4
+
+### Phase 6: Widgets Package
+**Goal:** Optional `XperienceCommunity.Lucene.Suite.Widgets` package: HTTP events endpoint (MapLuceneSuiteEvents, rate-limited) over ISearchInteractionLogger, JS client implementing the client contract (tested against the shared vectors), tag helpers and Page Builder search widgets — gives xbk real Suite traffic.
+**Depends on:** Phases 2–5
 
 ## Later Milestones
 

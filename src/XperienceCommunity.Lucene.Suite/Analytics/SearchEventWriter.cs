@@ -9,7 +9,7 @@ using XperienceCommunity.Lucene.Suite.Search;
 
 namespace XperienceCommunity.Lucene.Suite.Analytics;
 
-/// <summary>Drains <see cref="SearchEventQueue"/> into bulk inserts of <see cref="SearchEventInfo"/>; failed batches are logged and discarded.</summary>
+/// <summary>Drains <see cref="SearchEventQueue"/> into bulk inserts of <see cref="SearchEventInfo"/> and <see cref="SearchInteractionInfo"/>; failed batches are logged and discarded.</summary>
 internal sealed class SearchEventWriter(
     SearchEventQueue queue,
     IServiceProvider serviceProvider,
@@ -21,14 +21,16 @@ internal sealed class SearchEventWriter(
     private const int ShutdownBulkCopyTimeoutSeconds = 5;
 
     private readonly LogThrottle failureThrottle = new(timeProvider, TimeSpan.FromMinutes(1));
+    private readonly LogThrottle interactionFailureThrottle = new(timeProvider, TimeSpan.FromMinutes(1));
     private readonly LogThrottle dropThrottle = new(timeProvider, TimeSpan.FromMinutes(1));
     private long reportedDropped;
+    private long reportedDroppedInteractions;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var analytics = options.Value.Analytics;
         int batchSize = Math.Max(1, analytics.BatchSize);
-        var batch = new List<SearchEvent>(batchSize);
+        var batch = new List<AnalyticsEvent>(batchSize);
 
         try
         {
@@ -71,24 +73,22 @@ internal sealed class SearchEventWriter(
         }
     }
 
-    private void Write(List<SearchEvent> batch, int timeoutSeconds)
+    private void Write(List<AnalyticsEvent> batch, int timeoutSeconds)
     {
         ReportDrops();
-        if (batch.Count == 0)
-        {
-            return;
-        }
-
         try
         {
-            serviceProvider.GetRequiredService<IInfoProvider<SearchEventInfo>>()
-                .BulkInsert(batch.Select(ToInfo), new BulkInsertSettings { BulkCopyTimeout = timeoutSeconds });
-        }
-        catch (Exception exception)
-        {
-            if (failureThrottle.ShouldLog())
+            var settings = new BulkInsertSettings { BulkCopyTimeout = timeoutSeconds };
+            var searches = batch.OfType<SearchEvent>().Select(ToInfo).ToList();
+            if (searches.Count > 0)
             {
-                logger.LogError(exception, "Lucene Suite could not write {Count} search events; the batch was discarded (further failures suppressed for a minute).", batch.Count);
+                Insert(searches, settings, failureThrottle, "search events");
+            }
+
+            var interactions = batch.OfType<SearchInteractionEvent>().Select(ToInfo).ToList();
+            if (interactions.Count > 0)
+            {
+                Insert(interactions, settings, interactionFailureThrottle, "search interactions");
             }
         }
         finally
@@ -97,14 +97,37 @@ internal sealed class SearchEventWriter(
         }
     }
 
+    private void Insert<TInfo>(List<TInfo> infos, BulkInsertSettings settings, LogThrottle throttle, string kind)
+        where TInfo : AbstractInfoBase<TInfo>, new()
+    {
+        try
+        {
+            serviceProvider.GetRequiredService<IInfoProvider<TInfo>>().BulkInsert(infos, settings);
+        }
+        catch (Exception exception)
+        {
+            if (throttle.ShouldLog())
+            {
+                logger.LogError(exception, "Lucene Suite could not write {Count} {Kind}; the batch was discarded (further failures suppressed for a minute).", infos.Count, kind);
+            }
+        }
+    }
+
     private void ReportDrops()
     {
         long dropped = queue.Dropped;
+        long droppedInteractions = queue.DroppedInteractions;
         long newlyDropped = dropped - reportedDropped;
         if (newlyDropped > 0 && dropThrottle.ShouldLog())
         {
+            long newlyDroppedInteractions = droppedInteractions - reportedDroppedInteractions;
             reportedDropped = dropped;
-            logger.LogWarning("Lucene Suite dropped {Count} search events because the capture queue was full.", newlyDropped);
+            reportedDroppedInteractions = droppedInteractions;
+            logger.LogWarning(
+                "Lucene Suite dropped {Count} analytics events ({Searches} search events, {Interactions} interactions) because the capture queue was full.",
+                newlyDropped,
+                newlyDropped - newlyDroppedInteractions,
+                newlyDroppedInteractions);
         }
     }
 
@@ -123,5 +146,17 @@ internal sealed class SearchEventWriter(
         LatencyMs = e.LatencyMs,
         IsSubmit = e.IsSubmit,
         Origin = e.Origin,
+    };
+
+    private static SearchInteractionInfo ToInfo(SearchInteractionEvent e) => new()
+    {
+        SearchId = e.SearchId,
+        Sequence = e.Sequence,
+        ItemGuid = e.ItemGuid,
+        Position = e.Position,
+        Type = e.Type,
+        EventId = e.EventId,
+        SessionId = e.SessionId,
+        ReceivedUtc = e.ReceivedUtc,
     };
 }

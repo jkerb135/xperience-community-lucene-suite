@@ -315,7 +315,7 @@ public sealed class SearchCaptureTests
             Queue = new SearchEventQueue(options);
             Cookie = new SearchSessionCookie(Accessor, time);
             service = new SearchCaptureService(
-                new FakeInner(indexDocumentCount, innerFailure), Queue, Cookie, Accessor, options, time, NullLogger<SearchCaptureService>.Instance);
+                new FakeInner(indexDocumentCount, innerFailure), Queue, Cookie, new AnalyticsRequestFilter(Accessor, options), time, NullLogger<SearchCaptureService>.Instance);
         }
 
         public SuiteSearchOptions Options { get; }
@@ -349,7 +349,7 @@ public sealed class SearchCaptureTests
             var events = new List<SearchEvent>();
             while (Queue.Reader.TryRead(out var e))
             {
-                events.Add(e);
+                events.Add((SearchEvent)e);
             }
 
             return events;

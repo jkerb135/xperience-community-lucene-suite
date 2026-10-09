@@ -6,11 +6,15 @@ using CMS.FormEngine;
 using CMS.Modules;
 
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 
 namespace XperienceCommunity.Lucene.Suite.Analytics;
 
 /// <summary>Creates or updates the Suite module and its analytics classes; safe to run on every instance at once.</summary>
-internal sealed class AnalyticsModuleInstaller(IInfoProvider<ResourceInfo> resources, IInfoProvider<SettingsKeyInfo> settingsKeys)
+internal sealed class AnalyticsModuleInstaller(
+    IInfoProvider<ResourceInfo> resources,
+    IInfoProvider<SettingsKeyInfo> settingsKeys,
+    ILogger<AnalyticsModuleInstaller> logger)
 {
     /// <summary>Code name of the Suite module (resource).</summary>
     internal const string ResourceName = "LuceneSuite";
@@ -19,9 +23,11 @@ internal sealed class AnalyticsModuleInstaller(IInfoProvider<ResourceInfo> resou
     internal const string VersionKeyName = "LuceneSuiteInstalledVersion";
 
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
-    internal const int Version = 1;
+    internal const int Version = 2;
 
     internal const string ReceivedIndexName = "IX_LuceneSuite_SearchEvent_ReceivedUtc_SearchId";
+
+    internal const string InteractionReceivedIndexName = "IX_LuceneSuite_SearchInteraction_ReceivedUtc_SearchId";
 
     private const string LockResource = "LuceneSuite.Install";
     private const int LockTimeoutMs = 120_000;
@@ -35,14 +41,31 @@ internal sealed class AnalyticsModuleInstaller(IInfoProvider<ResourceInfo> resou
         using var transaction = connection.BeginTransaction();
         AcquireLock(connection, transaction);
 
+        var versionKey = GetVersionKey();
+        int installed = ParseVersion(versionKey);
+        if (installed > Version)
+        {
+            logger.LogWarning(
+                "Lucene Suite analytics schema version {Installed} is newer than this build's version {Version}; nothing was changed.",
+                installed,
+                Version);
+            return;
+        }
+
+        // Every step is add-only and idempotent, so fresh and older databases take the same path.
         var resource = EnsureResource();
         EnsureClass(resource, SearchEventInfo.TYPEINFO, "Lucene Suite search event", SearchEventForm());
-        new TableManager(null).CreateIndex(
-            ReceivedIndexName,
-            SearchEventInfo.CLASS_NAME.Replace('.', '_'),
-            false,
-            [(nameof(SearchEventInfo.ReceivedUtc), true), (nameof(SearchEventInfo.SearchId), true)]);
-        RecordVersion();
+        EnsureReceivedIndex(ReceivedIndexName, SearchEventInfo.CLASS_NAME);
+
+        // Version 2: click and conversion events.
+        EnsureClass(resource, SearchInteractionInfo.TYPEINFO, "Lucene Suite search interaction", SearchInteractionForm());
+        EnsureReceivedIndex(InteractionReceivedIndexName, SearchInteractionInfo.CLASS_NAME);
+
+        if (installed < Version)
+        {
+            versionKey.KeyValue = Version.ToString(CultureInfo.InvariantCulture);
+            settingsKeys.Set(versionKey);
+        }
     }
 
     internal static FormInfo SearchEventForm()
@@ -64,6 +87,28 @@ internal sealed class AnalyticsModuleInstaller(IInfoProvider<ResourceInfo> resou
         Add(form, nameof(SearchEventInfo.Origin), FieldDataType.Integer);
         return form;
     }
+
+    internal static FormInfo SearchInteractionForm()
+    {
+        var form = FormHelper.GetBasicFormDefinition(nameof(SearchInteractionInfo.SearchInteractionID));
+        Add(form, nameof(SearchInteractionInfo.SearchId), FieldDataType.Guid);
+        Add(form, nameof(SearchInteractionInfo.Sequence), FieldDataType.Integer);
+        Add(form, nameof(SearchInteractionInfo.ItemGuid), FieldDataType.Guid);
+        Add(form, nameof(SearchInteractionInfo.Position), FieldDataType.Integer, allowEmpty: true);
+        Add(form, nameof(SearchInteractionInfo.Type), FieldDataType.Integer);
+        Add(form, nameof(SearchInteractionInfo.EventId), FieldDataType.Guid);
+        Add(form, nameof(SearchInteractionInfo.SessionId), FieldDataType.Guid, allowEmpty: true);
+        Add(form, nameof(SearchInteractionInfo.ReceivedUtc), FieldDataType.DateTime);
+        return form;
+    }
+
+    // The tuple bool is "ascending" (undocumented; false produced a DESC index in 02-01).
+    private static void EnsureReceivedIndex(string indexName, string className) =>
+        new TableManager(null).CreateIndex(
+            indexName,
+            className.Replace('.', '_'),
+            false,
+            [(nameof(SearchEventInfo.ReceivedUtc), true), (nameof(SearchEventInfo.SearchId), true)]);
 
     private static void AcquireLock(SqlConnection connection, SqlTransaction transaction)
     {
@@ -128,9 +173,8 @@ internal sealed class AnalyticsModuleInstaller(IInfoProvider<ResourceInfo> resou
         }
     }
 
-    private void RecordVersion()
-    {
-        var key = settingsKeys.Get().WhereEquals(nameof(SettingsKeyInfo.KeyName), VersionKeyName).FirstOrDefault() ?? new SettingsKeyInfo
+    private SettingsKeyInfo GetVersionKey() =>
+        settingsKeys.Get().WhereEquals(nameof(SettingsKeyInfo.KeyName), VersionKeyName).FirstOrDefault() ?? new SettingsKeyInfo
         {
             KeyName = VersionKeyName,
             KeyDisplayName = "Lucene Suite installed schema version",
@@ -139,17 +183,8 @@ internal sealed class AnalyticsModuleInstaller(IInfoProvider<ResourceInfo> resou
             KeyIsHidden = true,
         };
 
-        int installed = int.TryParse(key.KeyValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) ? value : 0;
-        if (installed < Version)
-        {
-            key.KeyValue = Version.ToString(CultureInfo.InvariantCulture);
-        }
-
-        if (key.HasChanged)
-        {
-            settingsKeys.Set(key);
-        }
-    }
+    private static int ParseVersion(SettingsKeyInfo key) =>
+        int.TryParse(key.KeyValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) ? value : 0;
 
     private static void Add(FormInfo form, string name, string dataType, int size = 0, bool allowEmpty = false) =>
         form.AddFormItem(new FormFieldInfo

@@ -11,12 +11,12 @@ See: .paul/PROJECT.md (updated 2026-10-09)
 
 Milestone: v0.1 Tune & Capture
 Phase: 2 of 5 (Event Capture) — In progress
-Plan: 02-01 complete (1 of 3)
-Status: Loop closed, ready for next PLAN (02-02)
-Last activity: 2026-10-09 — UNIFY 02-01 (02-01-SUMMARY.md)
+Plan: 02-02 created + audited, awaiting approval (02-01 complete)
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-09 — Enterprise audit of 02-02-PLAN.md (02-02-AUDIT.md)
 
 Progress:
-- Milestone: [██░░░░░░░░] 20% (1 of 5 phases)
+- Milestone: [██░░░░░░░░] 17% (1 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [███░░░░░░░] 33% (1/3 plans)
 
@@ -25,7 +25,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-09: Enterprise audit on 02-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 2 | Destructive tests only on a disposable DB copy; cross-page conversion attribution via URL ids |
+| 2026-10-09: Widgets/tag helpers/endpoint/JS client → optional package (Phase 6, end of v0.1); core exposes ISearchInteractionLogger | Phase 2 | Resolves the real-traffic question; 02-02 is API + contract only |
 | 2026-10-09: 02-01 cookie via Configure<CookieLevelOptions> + CookieLevelConstants (RegisterCookie/CookieLevel obsolete in 31.9.1); Suite core references Kentico.Xperience.WebApp | Phase 2 | Core package depends on the live-site WebApp package |
 | 2026-10-09: Enterprise audit on 02-01-PLAN.md. Applied 4 must-have, 5 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 2 | Capture can never break search; installer safe on web-farm startup |
 | 2026-10-09: Phase 2 design: module classes + Kentico bulk APIs; hosted single-runner rollup job; session cookie at Visitor/All (option a); merge at rollup per as-you-type-merge-analysis.md with the 5 recommended choices | Phase 2 | Split into 02-01 capture / 02-02 interactions / 02-03 rollups |
@@ -71,7 +73,6 @@ Plans 01-02, 01-03 and 02-01: all required skills invoked.
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
 | Phase 1: Tuning UI inherits Lucene Search app permissions (Development category). Marketers need Lucene app access; future rule/synonym editing would need UPDATE, which also allows editing/rebuilding/deleting indexes | Core value "marketers without a developer" vs. index-admin rights | Revisit before Phase 3 editing pages: custom permission on suite commands, or role guidance |
-| Open product question (unanswered): Suite search widget/page for real traffic in v0.1? xbk has no production path into ISuiteSearchService, only the dev-only demo controller | Capture/rollups only see demo traffic until a Suite front end exists | User decision; raise before 02-02 planning |
 
 ### Git State
 Last commit: see `git log -1` (docs(paul): unify plan 02-01)
@@ -81,9 +82,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-09
-Stopped at: Plan 02-01 unified (loop closed)
-Next action: /paul:plan 02-02 Interaction endpoint
-Resume file: .paul/phases/02-event-capture/02-01-SUMMARY.md
+Stopped at: Plan 02-02 created
+Next action: /paul:audit .paul/phases/02-event-capture/02-02-PLAN.md, then /paul:apply
+Resume file: .paul/phases/02-event-capture/02-02-PLAN.md
 
 ---
 *STATE.md — Updated after every significant action*

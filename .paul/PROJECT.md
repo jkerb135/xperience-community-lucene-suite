@@ -99,6 +99,7 @@ Marketers tune, test and measure site search without a developer.
 | Search API returns generic hits (ItemGuid, score, stored fields); default query from per-index field boosts via QueryBuilder, replaceable ISearchQueryFactory | No QueryParser dependency; admin + rules need a generic shape | 2026-10-08 | Active |
 | Admin UI is a per-index section inside the Lucene app, sibling of IndexEditPage (option A) | Per-index tuning (user); Edit-template pages only allow side-panel/dialog children | 2026-10-09 | Active |
 | Admin client Proxy in dev, embedded on Release via MSBuild npm step | User decision; matches Kentico's documented dev/deploy split | 2026-10-08 | Active |
+| Core exposes ISearchInteractionLogger (like ICustomActivityLogger); HTTP endpoint, JS client, tag helpers and widgets ship in optional package XperienceCommunity.Lucene.Suite.Widgets (Phase 6) | User decision: custom UIs/endpoints integrate via the C# API | 2026-10-09 | Active |
 | Buffered bulk writes for raw events, drop on overflow | Never slow search | 2026-10-08 | Active |
 | Consented visitors get a Suite session cookie (option a), not the contact GUID | Cross-page session merging without making analytics personal data; no collector/eraser | 2026-10-09 | Active |
 | Rollups/retention run as a hosted background job on every node, single-runner via sp_getapplock, idempotent per-day recompute | User decision; no admin setup, web-farm safe | 2026-10-09 | Active |

@@ -12,6 +12,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\docs\analytics-test-vectors.json" Link="analytics-test-vectors.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\XperienceCommunity.Lucene.Suite\XperienceCommunity.Lucene.Suite.csproj" />
     <ProjectReference Include="..\..\src\XperienceCommunity.Lucene.Suite.Admin\XperienceCommunity.Lucene.Suite.Admin.csproj" />
   </ItemGroup>

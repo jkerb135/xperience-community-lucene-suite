@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Search;
 
@@ -11,8 +9,7 @@ internal sealed class SearchCaptureService(
     ISuiteSearchService inner,
     SearchEventQueue queue,
     SearchSessionCookie sessionCookie,
-    IHttpContextAccessor httpContextAccessor,
-    IOptions<SuiteSearchOptions> options,
+    AnalyticsRequestFilter requestFilter,
     TimeProvider timeProvider,
     ILogger<SearchCaptureService> logger) : ISuiteSearchService
 {
@@ -38,13 +35,7 @@ internal sealed class SearchCaptureService(
 
     private void Capture(SuiteSearchRequest request, SuiteSearchResponse response)
     {
-        if (!options.Value.Analytics.Enabled || !request.TrackAnalytics || response.IndexDocumentCount == 0)
-        {
-            return;
-        }
-
-        if (httpContextAccessor.HttpContext?.Request is { } httpRequest
-            && (IsPrefetch(httpRequest.Headers) || BotUserAgents.IsBot(httpRequest.Headers.UserAgent)))
+        if (!request.TrackAnalytics || response.IndexDocumentCount == 0 || !requestFilter.ShouldCapture())
         {
             return;
         }
@@ -65,11 +56,6 @@ internal sealed class SearchCaptureService(
             minted || request.IsSubmit,
             minted ? SearchEventOrigin.Server : SearchEventOrigin.Client));
     }
-
-    private static bool IsPrefetch(IHeaderDictionary headers) =>
-        headers["Sec-Purpose"].ToString().Contains("prefetch", StringComparison.OrdinalIgnoreCase)
-        || headers["Sec-Purpose"].ToString().Contains("prerender", StringComparison.OrdinalIgnoreCase)
-        || headers["Purpose"].ToString().Contains("prefetch", StringComparison.OrdinalIgnoreCase);
 
     private static string Truncate(string value, int maxLength) => value.Length > maxLength ? value[..maxLength] : value;
 }

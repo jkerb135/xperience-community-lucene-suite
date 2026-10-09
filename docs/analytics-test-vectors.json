@@ -1,0 +1,166 @@
+{
+  "$comment": "Executable form of docs/analytics-client-contract.md. Each case starts with no searchId. A step with \"q\" is a debounced search about to be sent at time t (ms); expect.search is the 1-based ordinal of the searchId it must carry within the case, expect.seq its Sequence. A step with \"click\" is a click or conversion on the response of the given seq (default: the latest search step); expect.attributed is whether it falls inside the attribution window. Shared by the Suite tests, the 02-03 rollup and the Widgets JS client.",
+  "version": 1,
+  "textChangeTimeoutMs": 30000,
+  "attributionWindowMs": 3600000,
+  "cases": [
+    {
+      "name": "prefix typing is one search",
+      "steps": [
+        { "t": 0, "q": "i", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "ip", "expect": { "search": 1, "seq": 2 } },
+        { "t": 2000, "q": "ipa", "expect": { "search": 1, "seq": 3 } },
+        { "t": 3000, "q": "ipad", "expect": { "search": 1, "seq": 4 } }
+      ]
+    },
+    {
+      "name": "text change after more than 30 s starts a new search",
+      "steps": [
+        { "t": 0, "q": "i", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "ip", "expect": { "search": 1, "seq": 2 } },
+        { "t": 2000, "q": "ipa", "expect": { "search": 1, "seq": 3 } },
+        { "t": 33000, "q": "ipad", "expect": { "search": 2, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "timeout boundary: exactly 30 s continues, 30.001 s does not",
+      "steps": [
+        { "t": 0, "q": "cof", "expect": { "search": 1, "seq": 1 } },
+        { "t": 30000, "q": "coff", "expect": { "search": 1, "seq": 2 } },
+        { "t": 60001, "q": "coffe", "expect": { "search": 2, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "page and filter changes never time out; a later text change does",
+      "steps": [
+        { "t": 0, "q": "coffee", "expect": { "search": 1, "seq": 1 } },
+        { "t": 60000, "q": "coffee", "kind": "page", "expect": { "search": 1, "seq": 2 } },
+        { "t": 200000, "q": "coffee", "kind": "filter", "expect": { "search": 1, "seq": 3 } },
+        { "t": 235000, "q": "coffee beans", "expect": { "search": 2, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "empty query never continues and is never continued",
+      "steps": [
+        { "t": 0, "q": "laptop", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "", "kind": "clear", "expect": { "search": 2, "seq": 1 } },
+        { "t": 2000, "q": "phone", "expect": { "search": 3, "seq": 1 } },
+        { "t": 3000, "q": "", "kind": "clear", "expect": { "search": 4, "seq": 1 } },
+        { "t": 4000, "q": "", "kind": "page", "expect": { "search": 4, "seq": 2 } }
+      ]
+    },
+    {
+      "name": "deep backspace then divergent typing splits",
+      "steps": [
+        { "t": 0, "q": "laptop", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "lapto", "expect": { "search": 1, "seq": 2 } },
+        { "t": 1500, "q": "lapt", "expect": { "search": 1, "seq": 3 } },
+        { "t": 2000, "q": "lap", "expect": { "search": 1, "seq": 4 } },
+        { "t": 2500, "q": "la", "expect": { "search": 1, "seq": 5 } },
+        { "t": 3000, "q": "l", "expect": { "search": 1, "seq": 6 } },
+        { "t": 3500, "q": "la", "expect": { "search": 1, "seq": 7 } },
+        { "t": 4000, "q": "lam", "expect": { "search": 2, "seq": 1 } },
+        { "t": 4500, "q": "lamp", "expect": { "search": 2, "seq": 2 } }
+      ]
+    },
+    {
+      "name": "typo fix by backspacing and retyping stays one search",
+      "steps": [
+        { "t": 0, "q": "cofee", "expect": { "search": 1, "seq": 1 } },
+        { "t": 500, "q": "cofe", "expect": { "search": 1, "seq": 2 } },
+        { "t": 1000, "q": "cof", "expect": { "search": 1, "seq": 3 } },
+        { "t": 1500, "q": "coff", "expect": { "search": 1, "seq": 4 } },
+        { "t": 2000, "q": "coffe", "expect": { "search": 1, "seq": 5 } },
+        { "t": 2500, "q": "coffee", "expect": { "search": 1, "seq": 6 } }
+      ]
+    },
+    {
+      "name": "queries under 4 characters get no typo tolerance",
+      "steps": [
+        { "t": 0, "q": "tv", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "pc", "expect": { "search": 2, "seq": 1 } },
+        { "t": 2000, "q": "cat", "expect": { "search": 3, "seq": 1 } },
+        { "t": 3000, "q": "car", "expect": { "search": 4, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "4 characters: one edit continues",
+      "note": "The plan's thresholds (<=1 edit at >=4 chars) make ipad -> ipod one search; the research doc's prose example says 2.",
+      "steps": [
+        { "t": 0, "q": "ipad", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "ipod", "expect": { "search": 1, "seq": 2 } }
+      ]
+    },
+    {
+      "name": "4 characters: two edits split",
+      "steps": [
+        { "t": 0, "q": "ipad", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "imac", "expect": { "search": 2, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "7 characters: a transposition is one edit, two edits split",
+      "steps": [
+        { "t": 0, "q": "grinder", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "grindre", "expect": { "search": 1, "seq": 2 } },
+        { "t": 2000, "q": "gryndry", "expect": { "search": 2, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "8 characters: two edits continue, three split",
+      "steps": [
+        { "t": 0, "q": "espresso", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "expressa", "expect": { "search": 1, "seq": 2 } },
+        { "t": 2000, "q": "exprexxx", "expect": { "search": 2, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "after a submit, paging and filtering continue; re-submit or new text starts a new search",
+      "steps": [
+        { "t": 0, "q": "coff", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "coffee", "expect": { "search": 1, "seq": 2 } },
+        { "t": 2000, "q": "coffee", "submit": true, "expect": { "search": 1, "seq": 3 } },
+        { "t": 3000, "q": "coffee", "kind": "page", "expect": { "search": 1, "seq": 4 } },
+        { "t": 4000, "q": "coffee", "kind": "filter", "expect": { "search": 1, "seq": 5 } },
+        { "t": 5000, "q": "coffee", "submit": true, "expect": { "search": 2, "seq": 1 } },
+        { "t": 6000, "q": "coffee beans", "expect": { "search": 3, "seq": 1 } }
+      ]
+    },
+    {
+      "name": "case and whitespace are normalized before comparing",
+      "steps": [
+        { "t": 0, "q": "Coffee", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "  coffee  ", "expect": { "search": 1, "seq": 2 } },
+        { "t": 2000, "q": "COFFEE  BEANS", "expect": { "search": 1, "seq": 3 } }
+      ]
+    },
+    {
+      "name": "clicks are attributed for 1 h after the listed response",
+      "steps": [
+        { "t": 0, "q": "coffee", "expect": { "search": 1, "seq": 1 } },
+        { "t": 3540000, "click": {}, "expect": { "attributed": true } },
+        { "t": 3600000, "click": {}, "expect": { "attributed": true } },
+        { "t": 3600001, "click": {}, "expect": { "attributed": false } }
+      ]
+    },
+    {
+      "name": "a click on an earlier response is measured from that response",
+      "steps": [
+        { "t": 0, "q": "cof", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1800000, "q": "cof", "kind": "page", "expect": { "search": 1, "seq": 2 } },
+        { "t": 3600500, "click": { "seq": 2 }, "expect": { "attributed": true } },
+        { "t": 3600500, "click": { "seq": 1 }, "expect": { "attributed": false } }
+      ]
+    },
+    {
+      "name": "refining after a deep backspace past half the text splits",
+      "note": "Trailing spaces are trimmed, so 'coffee ' counts as 'coffee' (6 < half of 14). The research doc's prose expects one search here; the literal rule gives two (KNOWN-LIMITATIONS).",
+      "steps": [
+        { "t": 0, "q": "coffee grinder", "expect": { "search": 1, "seq": 1 } },
+        { "t": 1000, "q": "coffee ", "expect": { "search": 1, "seq": 2 } },
+        { "t": 1500, "q": "coffee b", "expect": { "search": 2, "seq": 1 } },
+        { "t": 2000, "q": "coffee beans", "expect": { "search": 2, "seq": 2 } }
+      ]
+    }
+  ]
+}
