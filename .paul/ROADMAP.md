@@ -12,7 +12,7 @@ Phases: 0 of 5 complete
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 1 | Foundation | 1/3 | In progress | - |
+| 1 | Foundation | 2/3 | In progress | - |
 | 2 | Event Capture | TBD | Not started | - |
 | 3 | Rules Engine | TBD | Not started | - |
 | 4 | Synonyms | TBD | Not started | - |
@@ -26,13 +26,13 @@ Phases: 0 of 5 complete
 **Research:** Done (kentico-lucene-extension-points.md, local-conventions-and-design-kit.md)
 **Scope:**
 - Isolated build (own global.json/props/CPM), net10.0 only, Kentico Lucene ≥ 15.0.5 (coexists with XpSearch's exact pin), LUCENE_48 in xbk
-- Search API that sees query text, facets, hit count and timing, with a post-processing slot for rules
+- Search API that sees query text, facets, hit count and timing (rules hook added in Phase 3 with the first rule)
 - Admin application (own prefix, marketer category) on the design library + basic query tester
 - Database installer moved to Phase 2 (first tables)
 
 **Plans:**
 - [x] 01-01: Skeleton + xbk wiring (complete 2026-10-08)
-- [ ] 01-02: Search API + test project
+- [x] 01-02: Search API + test project (complete 2026-10-08)
 - [ ] 01-03: Admin application + client pipeline + query tester
 
 ### Phase 2: Event Capture

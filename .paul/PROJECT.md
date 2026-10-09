@@ -90,7 +90,8 @@ None yet.
 | Rule conflicts: explicit priority + ID tie-break; hide beats pin; pins respect filters | Industry common denominator; no content leaks | 2026-10-08 | Active |
 | Contact groups passed as rule contexts | Industry standard (only Coveo resolves in-engine) | 2026-10-08 | Active |
 | Algolia metric definitions (30 s as-you-type, 1 h attribution, 1-based positions) | Reference standard | 2026-10-08 | Active |
-| Reports: recompute on condition change + optional polling | Events stay open for seconds-minutes; no push infra | 2026-10-08 | Active |
+| Reports: recompute on condition change (no polling, no push) | "Live" = filter-driven; no push infra | 2026-10-08 | Active |
+| Search API returns generic hits (ItemGuid, score, stored fields); default query from per-index field boosts via QueryBuilder, replaceable ISearchQueryFactory | No QueryParser dependency; admin + rules need a generic shape | 2026-10-08 | Active |
 | Buffered bulk writes for raw events, drop on overflow | Never slow search | 2026-10-08 | Active |
 | Consent delegated entirely to Kentico cookie level / activity tracking | Platform-consistent; works for US and EU without suite-specific logic | 2026-10-08 | Active |
 | Analytics are identity-free KPI data; no suite collector/eraser needed | No personal data stored → nothing to access/erase; counts all visitors | 2026-10-08 | Active |
@@ -110,9 +111,9 @@ None yet.
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
-| Runtime | .NET 10 (`net10.0`) | Solution Directory.build.props |
-| Platform | Xperience by Kentico 31.9.1 | Central package management |
-| Search | Kentico.Xperience.Lucene 15.0.x | Root props pins stale 13.0.1 — must bump |
+| Runtime | .NET 10 (`net10.0`) only | Suite's own Directory.Build.props (isolated from solution root) |
+| Platform | Xperience by Kentico ≥ 31.9.1 | Declared floor; Suite's own central package management |
+| Search | Kentico.Xperience.Lucene.Core ≥ 15.0.5 | Floor matches XpSearch's exact pin so both load in xbk |
 | Engine | Lucene.NET 4.8.0-beta00017 | Suggest/Analysis.Common at exact same beta |
 | Admin UI | `@kentico/xperience-admin-components` + XbyK admin client module | Design kit repo: Personal/xperience-by-kentico-admin-design-components |
 | Storage | SQL Server via module classes; SqlBulkCopy for raw events | |
