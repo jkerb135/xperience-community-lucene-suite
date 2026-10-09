@@ -139,7 +139,7 @@ export const QueryTesterTemplate = ({ indexName, isFaceted, pageSize, maxResultW
       <Headline size={HeadlineSize.M}>Query tester: {indexName}</Headline>
       <form onSubmit={submit}>
         <Row spacingX={Spacing.M}>
-          <Column cols={Cols.Col10}>
+          <Column cols={Cols.Col12} colsMd={Cols.Col10}>
             <Input
               label="Query"
               placeholder="Leave empty to list all documents"
@@ -147,7 +147,7 @@ export const QueryTesterTemplate = ({ indexName, isFaceted, pageSize, maxResultW
               onChange={(e) => setQuery(e.target.value)}
             />
           </Column>
-          <Column cols={Cols.Col2}>
+          <Column>
             <Button type={ButtonType.Submit} color={ButtonColor.Primary} label="Search" inProgress={inProgress} />
           </Column>
         </Row>
