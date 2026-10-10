@@ -79,7 +79,7 @@ Marketers tune, test and measure site search without a developer.
 
 ### Business Constraints
 - Public community package (MIT, matching upstream)
-- XpSearch (Personal/xperience-community-lucene-instant-search) is loose reference only — never a basis for decisions
+- XpSearch (F:\Personal\CommunityProjects\libraries\xperience-search) is loose reference only — never a basis for decisions
 
 ### Compliance Constraints
 - Analytics/reporting store KPI/metric data only — never contact IDs, IPs or hashes. Identity-free is bounded by Kentico cookie level/consent: below Visitor, searches correlate only by a random per-search ID held in page memory; at Visitor/All, a Suite session cookie (random, registered with Kentico at Visitor level, 30-min sliding, no contact link) additionally groups searches across page loads
@@ -139,17 +139,17 @@ Marketers tune, test and measure site search without a developer.
 | Platform | Xperience by Kentico ≥ 31.9.1 | Declared floor; Suite's own central package management |
 | Search | Kentico.Xperience.Lucene.Core ≥ 15.0.5 | Floor matches XpSearch's exact pin so both load in xbk |
 | Engine | Lucene.NET 4.8.0-beta00017 | Suggest/Analysis.Common at exact same beta |
-| Admin UI | `@kentico/xperience-admin-components` + XbyK admin client module | Design kit repo: Personal/xperience-by-kentico-admin-design-components |
+| Admin UI | `@kentico/xperience-admin-components` + XbyK admin client module | Design kit repo: F:\Personal\xperience-by-kentico-admin-design-components |
 | Storage | SQL Server via module classes; SqlBulkCopy for raw events | |
 | Live-site deps | Kentico.Xperience.WebApp 31.9.1 + Microsoft.AspNetCore.App framework reference in Suite core | Added 02-01 for cookie levels; acceptable because the core package is the live-site package |
-| Host for testing | xbk (Dancing Goat) | |
+| Host for testing | CommunityProjects (Dancing Goat), F:\Personal\CommunityProjects\CommProjects.sln | Untracked; replaced xbk 2026-10-10; XpSearch unwired |
 
 ## Links
 
 | Resource | URL |
 |----------|-----|
 | Upstream | https://github.com/Kentico/xperience-by-kentico-lucene |
-| Research | ../project-sidecar/docs/research/ |
+| Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
 *Created: 2026-10-08 · Last updated: 2026-10-09 after 03-01*

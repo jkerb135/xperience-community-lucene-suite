@@ -5,15 +5,15 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-02 complete; ready to plan 03-03
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-03 planned (awaiting audit/approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 3 of 6 (Rules Engine) — In progress
-Plan: 03-02 complete (unified); next 03-03 Rule model + pure engine
-Status: Loop closed, ready for next PLAN
-Last activity: 2026-10-10 — Unified 03-02 (58c3126 APPLY, f014963 checkpoint fixes; checkpoint approved)
+Phase: 3 of 6 (Rules Engine) — Planning
+Plan: 03-03 created, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-10 — Created .paul/phases/03-rules-engine/03-03-PLAN.md
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
@@ -26,7 +26,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -37,6 +37,7 @@ See PROJECT.md Key Decisions.
 | Decision | Phase | Impact |
 |----------|-------|--------|
 | 2026-10-10: /xbyk-admin-ui:design-screen required for every custom admin page (PLAN records screen classification + template/component map; APPLY re-invokes before markup); kit asset path fixed to KENTICO_ADMIN_DS (F:/Personal/xperience-by-kentico-admin-design-components) | Pre-03-03 | 03-05, Phase 4/5 admin pages and the admin settings page; UNIFY logs a gap if not invoked |
+| 2026-10-10: 03-03 rules stored as structured JSON (conditions array + actions object on one LuceneSuite.Rule class), evaluated by a pure engine — not Kentico ConditionBuilder macros (user decision) | Phase 3 | 03-05 builds its own condition editor from kit components; ROADMAP 03-05 'ConditionBuilder editor' wording superseded |
 | 2026-10-10: Test host switched xbk → CommunityProjects (F:\Personal\CommunityProjects\CommProjects.sln, untracked). XpSearch unwired (lib kept in libraries/xperience-search as reference only, not source of truth); host Kentico 31.8.0 → 31.9.1 + DB update (backup comm_projects_pre-31.9.1_2026-10-10.bak); plain DefaultLuceneIndexingStrategy (Title ×3 / Body / ContentType facet) + AddLuceneSuite + LUCENE_48; Development proxy 3011; file backups in project-sidecar/backups/host-swap-2026-10-10 | Pre-03-03 | All later plans verify against CommunityProjects; leftover XpSearch DB objects pending user decision |
 | 2026-10-10: 03-02 query tester: state logic as node-tested pure helpers (latest-request-wins + abort, selected merge); user-requested content-hub Filters SidePanel (draft; Clear all / Cancel / Apply) + applied-filters bar composed from exported npm components (kit FilterPanel/FilterStatusIndicator not exported in 31.9.1); admin shell root `.app` sets `color: red` → never leave text unstyled; npm Table rows (display:contents buttons) can't take focus → focus returns to the table wrapper; app identifier/slug/permission names pinned as literals in tests; admin UI design validation now required | Phase 3 | 03-05 reuses the filter/side-panel/state patterns and must solve keyboard access to rows |
 | 2026-10-09: 03-01 Site Search app (site-search, Digital marketing) with View + LuceneSuite.ManageRules/ManageSynonyms/ManageExperiments; cogwheel hidden via Kentico-internal IApplicationPermissionEvaluator (user option a; IUITreeNodeUIPermissionEvaluator internal in 31.9.1); permissions enforced by [UIEvaluatePermission], ValidatePage = index-exists on every routed node (user change b362fa0) | Phase 3 | 03-05 adds pages under SearchTuningSectionPage and enforces the custom permissions on its commands |
@@ -111,9 +112,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-10
-Stopped at: Plan 03-02 unified (Phase 3: 2/5)
-Next action: /paul:plan for 03-03 Rule model + pure engine
-Resume file: .paul/phases/03-rules-engine/03-02-SUMMARY.md
+Stopped at: Plan 03-03 created
+Next action: /paul:audit .paul/phases/03-rules-engine/03-03-PLAN.md (audit enabled), then /paul:apply
+Resume file: .paul/phases/03-rules-engine/03-03-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite installer ran). Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
