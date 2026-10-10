@@ -2,7 +2,7 @@
 
 **Project:** XperienceCommunity.Lucene.Suite
 **Created:** 2026-10-08
-**Last Updated:** 2026-10-09
+**Last Updated:** 2026-10-10
 
 ---
 
@@ -14,7 +14,8 @@
 | C# implementation and refactoring | /dotnet:csharp-refactoring | required | Any non-trivial C# change | |
 | MSBuild / central package management | /dotnet:msbuild | optional | Editing props/targets/csproj | Lucene.Net.* must match host beta exactly |
 | Page Builder widgets (search box, results) | /kentico-web-development:page-builder-widgets | optional | Live-site widgets | |
-| Admin UI design validation | Admin design kit (asset below) + browser pane | required | Any admin UI change (client templates, C# page configuration, listings, callouts, icons) | Before markup: check the component story in the kit and its export + props in `@kentico/xperience-admin-components` `dist/entry.d.ts`; copy kit source only as a recorded last resort. Tokens only (`--color-*` at runtime; no hard-coded colour, font or spacing). Kit loading / empty / error states. Accessibility: labels, programmatic headings, focus moves and returns. Visual check in the browser pane at ~790 px and 1440 px content width against `previews/*.webp`. The design-validation skill script does not apply (authenticated admin pages) |
+| Custom admin page design | /xbyk-admin-ui:design-screen | required | Any new or reworked custom admin page, side panel or dialog (client template or C# page layout) | Invoke during PLAN (screen classification, template + component map recorded in the plan) and again at the start of APPLY before markup. Uses `KENTICO_ADMIN_DS` (kit clone below) |
+| Admin UI design validation | Admin design kit (asset below) + browser pane | required | Any admin UI change (client templates, C# page configuration, listings, callouts, icons) | Before markup: follow the /xbyk-admin-ui:design-screen output, then confirm the export + props in `@kentico/xperience-admin-components` `dist/entry.d.ts` (the npm package can lag the kit); copy kit source only as a recorded last resort. Tokens only (`--color-*` at runtime; no hard-coded colour, font or spacing). Kit loading / empty / error states. Accessibility: labels, programmatic headings, focus moves and returns. Visual check in the browser pane at ~790 px and 1440 px content width against `previews/*.webp`. The design-validation skill script does not apply (authenticated admin pages) |
 
 **Priority Legend:**
 - `required` - Gap documented if not invoked during UNIFY
@@ -26,7 +27,7 @@
 
 | Phase | Additional Skills | Notes |
 |-------|-------------------|-------|
-| 1, 3, 4, 5 | Admin design kit (asset below) | All admin UI work |
+| 1, 3, 4, 5 | /xbyk-admin-ui:design-screen + admin design kit (asset below) | All admin UI work (03-05 rules admin UI, Phase 4 synonyms admin, Phase 5 preview sandbox, admin settings page) |
 
 ---
 
@@ -34,9 +35,9 @@
 
 | Asset Type | Location | When Used |
 |------------|----------|-----------|
-| Admin design kit (Storybook reference for `@kentico/xperience-admin-components`) | C:\Users\jkerb\RiderProjects\Personal\xperience-by-kentico-admin-design-components | Any admin UI: import from npm first, copy tokens, copy components only as last resort |
-| Research | ../project-sidecar/docs/research/ | Planning any phase |
-| Loose reference only (never a decision basis) | C:\Users\jkerb\RiderProjects\Personal\xperience-community-lucene-instant-search | Pitfalls only |
+| Admin design kit (Storybook reference for `@kentico/xperience-admin-components`) | F:\Personal\xperience-by-kentico-admin-design-components (`KENTICO_ADMIN_DS`) | Any admin UI: import from npm first, copy tokens, copy components only as last resort |
+| Research | project-sidecar/docs/research/ (git-ignored) | Planning any phase |
+| Loose reference only (never a decision basis) | F:\Personal\CommunityProjects\libraries\xperience-search | Pitfalls only |
 
 ---
 
@@ -55,6 +56,7 @@ During UNIFY, confirm:
 |------|--------|--------|
 | 2026-10-08 | Initial creation | Project setup |
 | 2026-10-09 | Admin UI design validation made required | Plan 03-02: design review found state bugs and kit drift in the query tester |
+| 2026-10-10 | /xbyk-admin-ui:design-screen required for custom admin pages; kit path fixed to `KENTICO_ADMIN_DS` | User request; old RiderProjects kit path no longer exists |
 
 ---
 

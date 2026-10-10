@@ -59,14 +59,16 @@ Phases: 2 of 6 complete (33%)
 - [x] 03-02: Query tester design & state fixes — stuck facets, request handling, kit layout/states/side panel, content-hub Filters panel, a11y, C# polish; design validation made required (complete 2026-10-10)
 - [ ] 03-03: Rule model + pure engine — module classes, conditions, actions, priority/conflicts, validity
 - [ ] 03-04: Search integration — rules hook, boost/bury rewrite, pin/hide post-processing, contexts, cache invalidation, overhead
-- [ ] 03-05: Rules admin UI — listing, ConditionBuilder editor, content picker pins, query tester shows fired rules
+- [ ] 03-05: Rules admin UI — listing, ConditionBuilder editor, content picker pins, query tester shows fired rules (design via /xbyk-admin-ui:design-screen)
 
 ### Phase 4: Synonyms
 **Goal:** Query-time synonym rewrite managed in admin.
+**Admin UI:** design via /xbyk-admin-ui:design-screen (SPECIAL-FLOWS)
 **Depends on:** Phase 1
 
 ### Phase 5: Preview Sandbox
 **Goal:** Side-by-side results with and without rules under a simulated contact-group/visitor context.
+**Admin UI:** design via /xbyk-admin-ui:design-screen (SPECIAL-FLOWS)
 **Depends on:** Phases 3, 4
 
 ### Phase 6: Widgets Package
