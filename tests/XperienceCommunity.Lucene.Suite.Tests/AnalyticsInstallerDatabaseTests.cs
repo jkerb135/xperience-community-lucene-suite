@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
+using XperienceCommunity.Lucene.Suite.Rules;
 
 using static XperienceCommunity.Lucene.Suite.Tests.DatabaseTestHost;
 
@@ -160,6 +161,80 @@ public sealed class AnalyticsInstallerDatabaseTests
     }
 
     [DatabaseFact]
+    public void Version3Database_UpgradesToVersion4_LeavingVersion3ObjectsUntouched()
+    {
+        var services = KenticoServices.Value;
+        CreateInstaller(services).Install();
+        string[] kept = [SearchEventInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME];
+        RemoveSuiteObjects(keep: kept);
+        SetInstalledVersion(3);
+        string[] definitions = kept.Select(ClassDefinition).ToArray();
+
+        CreateInstaller(services).Install();
+
+        AssertInstalledOnce();
+        Assert.Equal(definitions, kept.Select(ClassDefinition).ToArray());
+        Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{RuleInfo.CLASS_NAME}' AND ClassDisplayName = 'Lucene Suite search rule'"));
+    }
+
+    [DatabaseFact]
+    public void RuleInfo_RoundTripsThroughToDefinition()
+    {
+        var services = KenticoServices.Value;
+        CreateInstaller(services).Install();
+        var rules = services.GetRequiredService<IInfoProvider<RuleInfo>>();
+        Execute("DELETE FROM LuceneSuite_Rule WHERE IndexName = 'rule-test'");
+        var pinned = Guid.NewGuid();
+        var rule = new RuleInfo
+        {
+            IndexName = "rule-test",
+            DisplayName = "Pin the grinder guide",
+            Enabled = true,
+            Priority = 2,
+            ValidFromUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            Conditions = """[{"anchoring":"contains","pattern":"Coffee Grinder"}]""",
+            Actions = $$"""{"pins":[{"itemGuid":"{{pinned}}","position":1}]}""",
+        };
+
+        rules.Set(rule);
+        var stored = rules.Get().WhereEquals(nameof(RuleInfo.RuleID), rule.RuleID).First();
+        var result = stored.ToDefinition();
+
+        Assert.NotEqual(Guid.Empty, stored.RuleGuid);
+        Assert.Null(stored.Description);
+        Assert.Null(stored.ValidUntilUtc);
+        Assert.Empty(result.Errors);
+        var definition = Assert.IsType<RuleDefinition>(result.Definition);
+        Assert.Equal((rule.RuleID, "rule-test", 2, true), (definition.Id, definition.IndexName, definition.Priority, definition.Enabled));
+        Assert.Equal(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), definition.ValidFromUtc);
+        Assert.Equal(DateTimeKind.Utc, definition.ValidFromUtc!.Value.Kind);
+        Assert.Equal("coffee grinder", Assert.Single(definition.Conditions).Pattern);
+        Assert.Equal(new RulePin(pinned, 1), Assert.Single(definition.Actions.Pins));
+        Execute("DELETE FROM LuceneSuite_Rule WHERE IndexName = 'rule-test'");
+    }
+
+    [DatabaseFact]
+    public void StoredRuleWithInvalidJson_YieldsErrors_NotAnException()
+    {
+        var services = KenticoServices.Value;
+        CreateInstaller(services).Install();
+        var rules = services.GetRequiredService<IInfoProvider<RuleInfo>>();
+        Execute("DELETE FROM LuceneSuite_Rule WHERE IndexName = 'rule-test'");
+        Execute(
+            """
+            INSERT INTO LuceneSuite_Rule (RuleGuid, IndexName, DisplayName, Enabled, Priority, Conditions, Actions, LastModified)
+            VALUES (NEWID(), 'rule-test', 'Hand-edited', 1, 1, '[]', '{"pins":[{"itemGuid":', SYSUTCDATETIME())
+            """);
+
+        var stored = rules.Get().WhereEquals(nameof(RuleInfo.IndexName), "rule-test").First();
+        var result = stored.ToDefinition();
+
+        Assert.Null(result.Definition);
+        Assert.Equal("actions", Assert.Single(result.Errors).Path);
+        Execute("DELETE FROM LuceneSuite_Rule WHERE IndexName = 'rule-test'");
+    }
+
+    [DatabaseFact]
     public void SearchDaily_RejectsADuplicateDayIndexAndQuery()
     {
         CreateInstaller(KenticoServices.Value).Install();
@@ -188,7 +263,7 @@ public sealed class AnalyticsInstallerDatabaseTests
         CreateInstaller(services, logger).Install();
 
         Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Warning);
-        Assert.Equal(0, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName IN ('{SearchInteractionInfo.CLASS_NAME}', '{SearchDailyInfo.CLASS_NAME}')"));
+        Assert.Equal(0, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName IN ('{SearchInteractionInfo.CLASS_NAME}', '{SearchDailyInfo.CLASS_NAME}', '{RuleInfo.CLASS_NAME}')"));
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}' AND KeyValue = '{AnalyticsModuleInstaller.Version + 1}'"));
 
         // Leave the database fully installed for the other tests.
@@ -205,7 +280,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     // Raw SQL because Kentico refuses to delete a class whose Info type is compiled in; the caches are cleared afterwards.
     private static void RemoveSuiteObjects(string[] keep)
     {
-        string[] all = [SearchDailyInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
+        string[] all = [RuleInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
         foreach (string className in all.Except(keep))
         {
             Execute($"DROP TABLE IF EXISTS [{className.Replace('.', '_')}]; DELETE FROM CMS_Class WHERE ClassName = '{className}';");
@@ -254,6 +329,7 @@ public sealed class AnalyticsInstallerDatabaseTests
             (SearchEventInfo.CLASS_NAME, AnalyticsModuleInstaller.ReceivedIndexName, 2, 0),
             (SearchInteractionInfo.CLASS_NAME, AnalyticsModuleInstaller.InteractionReceivedIndexName, 2, 0),
             (SearchDailyInfo.CLASS_NAME, AnalyticsModuleInstaller.DailyKeyIndexName, 3, 1),
+            (RuleInfo.CLASS_NAME, AnalyticsModuleInstaller.RuleIndexName, 1, 0),
         })
         {
             Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{className}'"));

@@ -8,6 +8,8 @@ using CMS.Modules;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
+using XperienceCommunity.Lucene.Suite.Rules;
+
 namespace XperienceCommunity.Lucene.Suite.Analytics;
 
 /// <summary>Creates or updates the Suite module and its analytics classes; safe to run on every instance at once.</summary>
@@ -26,13 +28,15 @@ internal sealed class AnalyticsModuleInstaller(
     internal const string WatermarkKeyName = "LuceneSuiteRollupWatermark";
 
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
-    internal const int Version = 3;
+    internal const int Version = 4;
 
     internal const string ReceivedIndexName = "IX_LuceneSuite_SearchEvent_ReceivedUtc_SearchId";
 
     internal const string InteractionReceivedIndexName = "IX_LuceneSuite_SearchInteraction_ReceivedUtc_SearchId";
 
     internal const string DailyKeyIndexName = "IX_LuceneSuite_SearchDaily_Day_IndexName_QueryText";
+
+    internal const string RuleIndexName = "IX_LuceneSuite_Rule_IndexName";
 
     private const string LockResource = "LuceneSuite.Install";
     private const int LockTimeoutMs = 120_000;
@@ -76,6 +80,10 @@ internal sealed class AnalyticsModuleInstaller(
             nameof(SearchDailyInfo.IndexName),
             nameof(SearchDailyInfo.QueryText));
         EnsureWatermarkKey();
+
+        // Version 4: search rules.
+        EnsureClass(resource, RuleInfo.TYPEINFO, "Lucene Suite search rule", RuleForm());
+        CreateAscendingIndex(RuleIndexName, RuleInfo.CLASS_NAME, false, nameof(RuleInfo.IndexName));
 
         if (installed < Version)
         {
@@ -142,6 +150,23 @@ internal sealed class AnalyticsModuleInstaller(
         return form;
     }
 
+    internal static FormInfo RuleForm()
+    {
+        var form = FormHelper.GetBasicFormDefinition(nameof(RuleInfo.RuleID));
+        Add(form, nameof(RuleInfo.RuleGuid), FieldDataType.Guid);
+        Add(form, nameof(RuleInfo.IndexName), FieldDataType.Text, RuleLimits.IndexNameLength);
+        Add(form, nameof(RuleInfo.DisplayName), FieldDataType.Text, RuleInfo.DisplayNameMaxLength);
+        Add(form, nameof(RuleInfo.Description), FieldDataType.LongText, allowEmpty: true);
+        Add(form, nameof(RuleInfo.Enabled), FieldDataType.Boolean);
+        Add(form, nameof(RuleInfo.Priority), FieldDataType.Integer);
+        Add(form, nameof(RuleInfo.ValidFromUtc), FieldDataType.DateTime, allowEmpty: true);
+        Add(form, nameof(RuleInfo.ValidUntilUtc), FieldDataType.DateTime, allowEmpty: true);
+        Add(form, nameof(RuleInfo.Conditions), FieldDataType.LongText);
+        Add(form, nameof(RuleInfo.Actions), FieldDataType.LongText);
+        Add(form, nameof(RuleInfo.LastModified), FieldDataType.DateTime);
+        return form;
+    }
+
     private static void EnsureReceivedIndex(string indexName, string className) =>
         CreateAscendingIndex(indexName, className, false, nameof(SearchEventInfo.ReceivedUtc), nameof(SearchEventInfo.SearchId));
 
@@ -181,7 +206,7 @@ internal sealed class AnalyticsModuleInstaller(
         var resource = resources.Get().WhereEquals(nameof(ResourceInfo.ResourceName), ResourceName).FirstOrDefault() ?? new ResourceInfo();
         resource.ResourceName = ResourceName;
         resource.ResourceDisplayName = "Lucene Suite";
-        resource.ResourceDescription = "Storage of XperienceCommunity.Lucene.Suite (search analytics).";
+        resource.ResourceDescription = "Storage of XperienceCommunity.Lucene.Suite (search analytics and rules).";
         resource.ResourceIsInDevelopment = false;
         if (resource.HasChanged)
         {
