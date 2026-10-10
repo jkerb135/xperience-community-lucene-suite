@@ -5,28 +5,28 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-03 planned (awaiting audit/approval)
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-03 complete; ready to plan 03-04
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 3 of 6 (Rules Engine) — Planning
-Plan: 03-03 created, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-10 — Created .paul/phases/03-rules-engine/03-03-PLAN.md
+Phase: 3 of 6 (Rules Engine) — In progress
+Plan: 03-03 complete (unified); next 03-04 Search integration
+Status: Loop closed, ready for next PLAN
+Last activity: 2026-10-10 — Unified 03-03 (3/3 tasks PASS; 349 tests incl. DB tests; host installed v4 on comm_projects)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [████░░░░░░] 40% (2/5 plans)
+- Phase 3: [██████░░░░] 60% (3/5 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -36,6 +36,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-10: 03-03 rule model + engine: malformed JSON → root-path error, member errors keep their path; null/blank JSON = empty; engine whole-word matching via boundary substring (no allocations, ≈0.5 ms / 500 rules); RuleEngine types internal; disposable comm_projects_test DB set up | Phase 3 | 03-04 loads RuleInfo → ToDefinition → skip+log invalid → Evaluate; decides public surface |
+| 2026-10-10: Enterprise audit on 03-03-PLAN.md. Applied 4 must-have, 5 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 3 | Engine normalizes input without PII placeholders; invalid stored rules fail safe (03-04 must log skipped ids); pins past 300 dropped; Hides sorted |
 | 2026-10-10: /xbyk-admin-ui:design-screen required for every custom admin page (PLAN records screen classification + template/component map; APPLY re-invokes before markup); kit asset path fixed to KENTICO_ADMIN_DS (F:/Personal/xperience-by-kentico-admin-design-components) | Pre-03-03 | 03-05, Phase 4/5 admin pages and the admin settings page; UNIFY logs a gap if not invoked |
 | 2026-10-10: 03-03 rules stored as structured JSON (conditions array + actions object on one LuceneSuite.Rule class), evaluated by a pure engine — not Kentico ConditionBuilder macros (user decision) | Phase 3 | 03-05 builds its own condition editor from kit components; ROADMAP 03-05 'ConditionBuilder editor' wording superseded |
 | 2026-10-10: Test host switched xbk → CommunityProjects (F:\Personal\CommunityProjects\CommProjects.sln, untracked). XpSearch unwired (lib kept in libraries/xperience-search as reference only, not source of truth); host Kentico 31.8.0 → 31.9.1 + DB update (backup comm_projects_pre-31.9.1_2026-10-10.bak); plain DefaultLuceneIndexingStrategy (Title ×3 / Body / ContentType facet) + AddLuceneSuite + LUCENE_48; Development proxy 3011; file backups in project-sidecar/backups/host-swap-2026-10-10 | Pre-03-03 | All later plans verify against CommunityProjects; leftover XpSearch DB objects pending user decision |
@@ -105,17 +107,17 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 03-02; 03-02 code in 58c3126, f014963)
+Last commit: see `git log -1` (docs(paul): unify plan 03-03; 03-03 code in d9d352f)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-10
-Stopped at: Plan 03-03 created
-Next action: /paul:audit .paul/phases/03-rules-engine/03-03-PLAN.md (audit enabled), then /paul:apply
-Resume file: .paul/phases/03-rules-engine/03-03-PLAN.md
-Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite installer ran). Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
+Stopped at: Plan 03-03 unified (Phase 3: 3/5)
+Next action: /paul:plan for 03-04 Search integration
+Resume file: .paul/phases/03-rules-engine/03-03-SUMMARY.md
+Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v4). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v4) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
 *STATE.md — Updated after every significant action*
