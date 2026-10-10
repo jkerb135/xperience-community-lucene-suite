@@ -9,7 +9,6 @@ import {
   CalloutType,
   CellType,
   Checkbox,
-  Cols,
   Column,
   ColumnContentType,
   Headline,
@@ -79,6 +78,12 @@ const cell = (value: string, columnName: string): StringCell => ({ type: CellTyp
 
 const fieldText = (hit: Hit, field: string) => (hit.fields[field] ?? []).join(", ");
 
+// Deferred so it runs after the SidePanel has finished moving focus itself.
+const focusLater = (target: () => HTMLElement | null | undefined) => requestAnimationFrame(() => target()?.focus());
+
+// Module-level so the callback ref is stable: it focuses a panel's content once, when it mounts.
+const focusOnMount = (element: HTMLElement | null) => element?.focus();
+
 export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyFields }: QueryTesterProps) => {
   const { executeCommand } = usePageCommandProvider();
   const [request] = useState(latestRequest);
@@ -91,7 +96,9 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
   const [inProgress, setInProgress] = useState(false);
   const [expandedFacets, setExpandedFacets] = useState<Record<string, boolean>>({});
   const [detail, setDetail] = useState<number>();
-  const detailTrigger = useRef<HTMLElement | null>(null);
+  const [draft, setDraft] = useState<FacetSelection>();
+  const tableArea = useRef<HTMLDivElement>(null);
+  const filterButton = useRef<HTMLButtonElement>(null);
 
   const search = useCallback(
     async (searchQuery: string, searchPage: number, facets: FacetSelection) => {
@@ -133,19 +140,23 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
     void search(submittedQuery, 1, next);
   };
 
-  const openDetail = (index: number) => {
-    detailTrigger.current = document.activeElement as HTMLElement | null;
-    setDetail(index);
-  };
-
   const closeDetail = () => {
     setDetail(undefined);
-    detailTrigger.current?.focus();
+    // The npm Table's row button is display: contents and cannot take focus, so focus returns to the table itself.
+    focusLater(() => tableArea.current);
+  };
+
+  const closeFilters = (commit: boolean) => {
+    if (commit && draft) {
+      applySelection(draft);
+    }
+    setDraft(undefined);
+    focusLater(() => filterButton.current);
   };
 
   const hits = result?.hits ?? [];
   const firstField = keyFields[0];
-  const columns = [...keyFields.map((f) => column(f, f)), column("score", "Score"), column("itemGuid", "Item GUID")];
+  const columns = [...keyFields.map((f) => column(f, humanizeFieldName(f))), column("score", "Score"), column("itemGuid", "Item GUID")];
   const rows: TableRow[] = hits.map((hit, i) => ({
     identifier: i,
     disabled: false,
@@ -185,33 +196,111 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
           onChange={(e) => setQuery(e.target.value)}
         />
       </form>
-      {applied.length > 0 && (
+      {isFaceted && (
         <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
-          <span>Applied filters:</span>
           <Button
-            label="Clear all"
-            icon="xp-times-circle"
+            label="Filter"
+            icon="xp-filter-1"
             size={ButtonSize.S}
-            color={ButtonColor.Tertiary}
-            disabled={inProgress}
-            onClick={() => applySelection({})}
+            color={ButtonColor.Secondary}
+            badge={applied.length > 0}
+            buttonRef={filterButton}
+            onClick={() => setDraft(selection)}
           />
-          {applied.map(({ dimension, label }) => (
-            <Tag
-              key={`${dimension}\u0000${label}`}
-              label={`${humanizeFieldName(dimension)}: ${label}`}
+          {applied.length > 0 && [
+            <div
+              key="label"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                height: "100%",
+                marginLeft: Spacing.M,
+                color: "var(--color-text-low-emphasis)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Applied filters:
+            </div>,
+            <Button
+              key="clear"
+              label="Clear all"
+              icon="xp-times-circle"
+              size={ButtonSize.S}
+              color={ButtonColor.Tertiary}
               disabled={inProgress}
-              onRemoveClick={() => applySelection(toggleSelection(selection, dimension, label, false))}
-            />
-          ))}
+              onClick={() => applySelection({})}
+            />,
+            ...applied.map(({ dimension, label }) => (
+              <Tag
+                key={`${dimension}\u0000${label}`}
+                label={`${humanizeFieldName(dimension)}: ${label}`}
+                disabled={inProgress}
+                onClick={() => setDraft(selection)}
+                onRemoveClick={() => applySelection(toggleSelection(selection, dimension, label, false))}
+              />
+            )),
+          ]}
         </Inline>
       )}
-      <Row spacingX={Spacing.XL} spacingY={Spacing.XL}>
-        {facets.length > 0 && (
-          <Column cols={Cols.Col3}>
-            <Stack spacing={Spacing.L}>
+      {result && !result.error && (
+        // Row sets its own inline margin-top, which would cancel the Stack spacing; the wrapper takes the spacing instead.
+        <div>
+          <Row spacingX={Spacing.XL}>
+            <Column>
+              <TextWithLabel label="Total hits" value={result.totalHits.toLocaleString()} />
+            </Column>
+            <Column>
+              <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
+            </Column>
+          </Row>
+        </div>
+      )}
+      {noHits ? (
+        <Callout
+          type={CalloutType.QuickTip}
+          placement={CalloutPlacementType.OnDesk}
+          headline="No documents match"
+          actionButton={
+            applied.length > 0 ? (
+              <Button label="Clear filters" color={ButtonColor.Secondary} onClick={() => applySelection({})} />
+            ) : undefined
+          }
+        >
+          {applied.length > 0 ? "Try removing a filter or changing the query." : "Try a different query."}
+        </Callout>
+      ) : (
+        <div ref={tableArea} tabIndex={-1} style={{ outline: "none" }}>
+          <Table
+            columns={columns}
+            rows={inProgress || (result === undefined && !failed) ? undefined : rows}
+            onRowClick={(id) => setDetail(id as number)}
+          />
+        </div>
+      )}
+      {totalPages > 1 && !noHits && (
+        <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(submittedQuery, p, selection)} />
+      )}
+      <SidePanel
+        headline="Filters"
+        size={SidePanelSize.Stackable}
+        isVisible={draft !== undefined}
+        tooltips={{ close: "Close" }}
+        onClose={() => closeFilters(false)}
+        footer={
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+            <Button label="Clear all" icon="xp-times-circle" destructive color={ButtonColor.Secondary} onClick={() => setDraft({})} />
+            <Inline spacingX={Spacing.S}>
+              <Button label="Cancel" color={ButtonColor.Secondary} onClick={() => closeFilters(false)} />
+              <Button label="Apply" color={ButtonColor.Primary} onClick={() => closeFilters(true)} />
+            </Inline>
+          </div>
+        }
+      >
+        {draft && (
+          <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
+            <Stack spacing={Spacing.XL}>
               {facets.map((facet) => {
-                const selected = selection[facet.dimension] ?? [];
+                const selected = draft[facet.dimension] ?? [];
                 const expanded = expandedFacets[facet.dimension] ?? false;
                 const shown = visibleValues(facet.values, selected, expanded, collapsedFacetValues);
                 const heading = humanizeFieldName(facet.dimension);
@@ -226,8 +315,7 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
                           key={value.label}
                           label={`${value.label} (${value.count.toLocaleString()})`}
                           checked={selected.includes(value.label)}
-                          disabled={inProgress}
-                          onChange={(_, checked) => applySelection(toggleSelection(selection, facet.dimension, value.label, checked))}
+                          onChange={(_, checked) => setDraft(toggleSelection(draft, facet.dimension, value.label, checked))}
                         />
                       ))}
                       {facet.values.length > collapsedFacetValues && (
@@ -246,62 +334,26 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
                 );
               })}
             </Stack>
-          </Column>
+          </div>
         )}
-        <Column cols={facets.length > 0 ? Cols.Col9 : Cols.Col12}>
-          <Stack spacing={Spacing.L}>
-            {result && !result.error && (
-              <Row spacingX={Spacing.XL}>
-                <Column>
-                  <TextWithLabel label="Total hits" value={result.totalHits.toLocaleString()} />
-                </Column>
-                <Column>
-                  <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
-                </Column>
-              </Row>
-            )}
-            {noHits ? (
-              <Callout
-                type={CalloutType.QuickTip}
-                placement={CalloutPlacementType.OnDesk}
-                headline="No documents match"
-                actionButton={
-                  applied.length > 0 ? (
-                    <Button label="Clear filters" color={ButtonColor.Secondary} onClick={() => applySelection({})} />
-                  ) : undefined
-                }
-              >
-                {applied.length > 0 ? "Try removing a filter or changing the query." : "Try a different query."}
-              </Callout>
-            ) : (
-              <Table
-                columns={columns}
-                rows={inProgress || (result === undefined && !failed) ? undefined : rows}
-                onRowClick={(id) => openDetail(id as number)}
-              />
-            )}
-            {totalPages > 1 && !noHits && (
-              <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(submittedQuery, p, selection)} />
-            )}
-          </Stack>
-        </Column>
-      </Row>
+      </SidePanel>
       <SidePanel
         headline={(detailHit && firstField && fieldText(detailHit, firstField)) || detailHit?.itemGuid || "Document"}
         size={SidePanelSize.Stackable}
         isVisible={detailHit !== undefined}
-        autofocusCancelButton
         tooltips={{ close: "Close" }}
         onClose={closeDetail}
       >
         {detailHit && (
-          <Stack spacing={Spacing.M}>
-            <TextWithLabel label="Item GUID" value={detailHit.itemGuid ?? "(none)"} />
-            <TextWithLabel label="Score" value={detailHit.score.toFixed(4)} />
-            {Object.keys(detailHit.fields).map((field) => (
-              <TextWithLabel key={field} label={field} value={fieldText(detailHit, field)} />
-            ))}
-          </Stack>
+          <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
+            <Stack spacing={Spacing.M}>
+              <TextWithLabel label="Item GUID" value={detailHit.itemGuid ?? "(none)"} />
+              <TextWithLabel label="Score" value={detailHit.score.toFixed(4)} />
+              {Object.keys(detailHit.fields).map((field) => (
+                <TextWithLabel key={field} label={field} value={fieldText(detailHit, field)} />
+              ))}
+            </Stack>
+          </div>
         )}
       </SidePanel>
     </Stack>
