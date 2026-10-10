@@ -5,28 +5,28 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-01 complete; ready to plan 03-02
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-02 complete; ready to plan 03-03
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
 Phase: 3 of 6 (Rules Engine) — In progress
-Plan: 03-02 created + audited (1 must-have, 2 strongly-recommended applied; 1 deferred), awaiting approval (03-01 complete; Phase 3 now 5 plans)
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-09 — Created .paul/phases/03-rules-engine/03-02-PLAN.md (query tester design & state fixes from the design review)
+Plan: 03-02 complete (unified); next 03-03 Rule model + pure engine
+Status: Loop closed, ready for next PLAN
+Last activity: 2026-10-10 — Unified 03-02 (58c3126 APPLY, f014963 checkpoint fixes; checkpoint approved)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [██▌░░░░░░░] 25% (1/4 plans)
+- Phase 3: [████░░░░░░] 40% (2/5 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -36,6 +36,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-10: 03-02 query tester: state logic as node-tested pure helpers (latest-request-wins + abort, selected merge); user-requested content-hub Filters SidePanel (draft; Clear all / Cancel / Apply) + applied-filters bar composed from exported npm components (kit FilterPanel/FilterStatusIndicator not exported in 31.9.1); admin shell root `.app` sets `color: red` → never leave text unstyled; npm Table rows (display:contents buttons) can't take focus → focus returns to the table wrapper; app identifier/slug/permission names pinned as literals in tests; admin UI design validation now required | Phase 3 | 03-05 reuses the filter/side-panel/state patterns and must solve keyboard access to rows |
 | 2026-10-09: 03-01 Site Search app (site-search, Digital marketing) with View + LuceneSuite.ManageRules/ManageSynonyms/ManageExperiments; cogwheel hidden via Kentico-internal IApplicationPermissionEvaluator (user option a; IUITreeNodeUIPermissionEvaluator internal in 31.9.1); permissions enforced by [UIEvaluatePermission], ValidatePage = index-exists on every routed node (user change b362fa0) | Phase 3 | 03-04 adds pages under SearchTuningSectionPage and enforces the custom permissions on its commands |
 | 2026-10-09: 02-04 rollup job: session applock on unpooled connection; watermark = hidden settings key read uncached in the lock, written in the day's CMSTransactionScope (Kentico bulk ops enlist); RawRetention minimum tightened to 1 day + 3W + flush + 5 min + RollupInterval + 1 h; collation-equal texts merged; volume within budget (no streaming); SessionId/Position getter null bug fixed | Phase 2 | v0.2 reports read SearchDaily incl. (other) (QueryText NULL) |
 | 2026-10-09: Sub-threshold prune folds into per-day (other) bucket (QueryText NULL) to preserve totals; xbk DB subject to retention when it next runs this code | Phase 2 | 02-04 |
@@ -70,6 +71,9 @@ See PROJECT.md Key Decisions.
 | No config change tracking / live reload: merge-setting changes only affect days rolled afterwards | 02-03 UNIFY | S | v0.2 reports |
 | Admin settings page | 02-03 audit | M | After 03-04 (Site Search app + custom permissions now exist) |
 | 03-01 audit deferrals: existing roles must be granted Site Search → View; old /admin/lucene/indexes/search-tuning/… URLs no longer resolve | 03-01 audit | S | README at packaging |
+| npm Table rows not keyboard-reachable (display:contents row buttons); hit-detail focus returns to the table wrapper (KNOWN-LIMITATIONS) | 03-02 checkpoint | S–M | 03-05 rules listing (per-row action or focusable row) |
+| 03-02 verification gaps: 1440 px visual check and rapid-click re-test on the Filters panel / Apply / bar controls not run (pane ~800 px) | 03-02 UNIFY | S | Next admin UI checkpoint (03-05) |
+| 03-02 limitations: filter-panel counts from the last executed search; server runs aborted searches (audit deferral); Show more capped by FacetValuesPerDimension; @types/node only transitive | 03-02 audit / checkpoint | S | KNOWN-LIMITATIONS |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -86,22 +90,28 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /dotnet:csharp-refactoring | ✓ | Both APPLY runs |
 | /kentico-web-development:content-retrieval | ○ | Not evidenced; listing reads LuceneIndexItemInfo via Kentico ListingPage ObjectType, no hand-written query |
 
+#### Skill Audit (Phase 3, plan 03-02)
+| Expected | Invoked | Notes |
+|----------|---------|-------|
+| Admin UI design validation | ✓ | Kit stories/source/exports, tokens, kit states, a11y, browser check at ~800 px; 1440 px not checked (pane width) |
+| /dotnet:csharp-refactoring | ○ | C# changed in 58c3126 (QueryTesterPage, SiteSearchApplication, SiteSearchIndexListingPage, AdminRegistrationTests); invocation not evidenced in plan or commit record |
+
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
-| Admin UI has not been formally validated against the admin design components repo (C:\Users\jkerb\RiderProjects\Personal\xperience-by-kentico-admin-design-components); 01-03 only consulted registry/stories and imported npm components — design validation pass pending (user question 2026-10-09) | Query tester / Site Search pages may diverge from the design kit | Review done 2026-10-09 (project-sidecar/docs/design-review-2026-10-09.md: 2 high, 11 medium, 10 low + visual pass); fixes in 03-02; design validation becomes required in SPECIAL-FLOWS |
+| None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 03-01; 03-01 code in 0aa45f2, b362fa0)
+Last commit: see `git log -1` (docs(paul): unify plan 03-02; 03-02 code in 58c3126, f014963)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
-Last session: 2026-10-09
-Stopped at: Plan 03-01 unified (Phase 3: 1/4)
-Next action: /paul:audit .paul/phases/03-rules-engine/03-02-PLAN.md, then /paul:apply
-Resume file: .paul/phases/03-rules-engine/03-01-SUMMARY.md
+Last session: 2026-10-10
+Stopped at: Plan 03-02 unified (Phase 3: 2/5)
+Next action: /paul:plan for 03-03 Rule model + pure engine
+Resume file: .paul/phases/03-rules-engine/03-02-SUMMARY.md
 Environment: 2026-10-09 (02-04 APPLY): no xbk process running; DB `xperience` already at LuceneSuiteInstalledVersion = 3 (SELECT only). When xbk next runs this code, the installer adds the watermark key and the rollup job applies retention to its raw rows (by design)
 
 ---
