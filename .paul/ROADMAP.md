@@ -14,7 +14,7 @@ Phases: 2 of 6 complete (33%)
 |-------|------|-------|--------|-----------|
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
 | 2 | Event Capture | 4/4 | ✅ Complete | 2026-10-09 |
-| 3 | Rules Engine | 5/7 | In progress | - |
+| 3 | Rules Engine | 6/7 | In progress | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
 | 6 | Widgets Package | TBD | Not started | - |
@@ -48,7 +48,7 @@ Phases: 2 of 6 complete (33%)
 - [x] 02-03: Merge engine — configurable options + validation, SearchDaily class (installer v3), pure rollup engine, parameterized vectors (complete 2026-10-09)
 - [x] 02-04: Job & retention — hosted single-runner job, watermark, idempotent persistence, raw/daily purge, sub-threshold fold into (other), E2E + volume on a disposable DB (complete 2026-10-09)
 
-### Phase 3: Rules Engine (in progress, 5/7)
+### Phase 3: Rules Engine (in progress, 6/7)
 **Goal:** Marketers pin/boost/bury/hide/attach data by query, facets and context.
 **Depends on:** Phase 1
 **Research:** Done (search-merchandising-standards.md)
@@ -60,7 +60,7 @@ Phases: 2 of 6 complete (33%)
 - [x] 03-03: Rule model + pure engine — JSON model + strict validator, pure engine, LuceneSuite.Rule (installer v4) (complete 2026-10-10)
 - [x] 03-04: Search integration (complete 2026-10-10) — request contexts + ApplyRules, cached RuleProvider (web-farm invalidation, invalid rules logged), hide via query exclusion, multiplicative boost/bury, fired rules + userData in response, overhead
 - [x] 03-05: Pins (complete 2026-10-11) — placement across pages, respect-filters check, totals, pinned flag on hits (split from 03-04, 2026-10-10)
-- [ ] 03-06: Rules admin UI — native listing + edit pages, conditions/boosts custom form components (server-validated), custom data; Manage rules permission (design via /xbyk-admin-ui:design-screen)
+- [x] 03-06: Rules admin UI (complete 2026-10-11) — native listing + edit pages, conditions/boosts custom form components (server-validated), custom data; Manage rules permission (design via /xbyk-admin-ui:design-screen)
 - [ ] 03-07: Pins/hides editor (index-search item picker, respect-filters toggle) + query tester shows fired rules, pinned marker, rules-not-applied warning (split from 03-06, 2026-10-11)
 
 ### Phase 4: Synonyms
