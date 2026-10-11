@@ -5,28 +5,28 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-03 complete; ready to plan 03-04
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-05 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 3 of 6 (Rules Engine) — In progress
-Plan: 03-03 complete (unified); next 03-04 Search integration
-Status: Loop closed, ready for next PLAN
-Last activity: 2026-10-10 — Unified 03-03 (3/3 tasks PASS; 349 tests incl. DB tests; host installed v4 on comm_projects)
+Phase: 3 of 6 (Rules Engine) — Planning
+Plan: 03-05 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-10 — Audited .paul/phases/03-rules-engine/03-05-PLAN.md (03-05-AUDIT.md)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [██████░░░░] 60% (3/5 plans)
+- Phase 3: [███████░░░] 67% (4/6 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -36,6 +36,11 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-10: Enterprise audit on 03-05-PLAN.md. Applied 2 must-have, 2 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 3 | One hit per pinned ItemGuid in multilingual indexes; TotalHits = run-1 total − passing pinned docs + available pins (equals pageable length) |
+| 2026-10-10: 03-05 planning (user choices): pinned items count in TotalHits and facets via a zero-weight, coord-disabled pinned clause in the match set; filter-ignoring pins add to the total only; pins show regardless of query text (Algolia); standard track | Phase 3 | Unpinned scores must stay identical (proven by test) |
+| 2026-10-10: 03-04 applied: boosts nest one BoostingQuery per boost, capped at the 200 strongest (supersedes the audit's group-by-strength bound, which broke same-strength stacking); fail-open reruns unruled for any non-ArgumentException; RuleProvider.GetRules virtual as test seam; host boosts use Kentico's ContentTypeName StringField (ContentType is facet-only) | Phase 3 | 03-05 pins plug into SearchWithRules / SearchExecutor; 03-06 shows FiredRuleIds/UserData/RulesFailed |
+| 2026-10-10: Enterprise audit on 03-04-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 3 | Bounded query (one TermsFilter MUST_NOT for hides; boosts grouped by strength ≤ 199 levels); fail-open covers rule application; RulesFailed flag on the response |
+| 2026-10-10: 03-04 planning (user choices): split pins into new 03-05 (admin UI → 03-06); boost/bury = score × MaxBoostFactor^(strength/100), MaxBoostFactor default 10 (LuceneSuite:Rules), via Lucene.Net.Queries BoostingQuery; hides = MUST_NOT ItemGuid in the query (excluded from totals and facets); rules fail open on load errors | Phase 3 | 03-05 pins post-process on top of 03-04; PROJECT "duplicate pins take best position" research note already superseded by priority (KNOWN-LIMITATIONS) |
 | 2026-10-10: 03-03 rule model + engine: malformed JSON → root-path error, member errors keep their path; null/blank JSON = empty; engine whole-word matching via boundary substring (no allocations, ≈0.5 ms / 500 rules); RuleEngine types internal; disposable comm_projects_test DB set up | Phase 3 | 03-04 loads RuleInfo → ToDefinition → skip+log invalid → Evaluate; decides public surface |
 | 2026-10-10: Enterprise audit on 03-03-PLAN.md. Applied 4 must-have, 5 strongly-recommended. Deferred 4. Verdict: conditionally acceptable → acceptable | Phase 3 | Engine normalizes input without PII placeholders; invalid stored rules fail safe (03-04 must log skipped ids); pins past 300 dropped; Hides sorted |
 | 2026-10-10: /xbyk-admin-ui:design-screen required for every custom admin page (PLAN records screen classification + template/component map; APPLY re-invokes before markup); kit asset path fixed to KENTICO_ADMIN_DS (F:/Personal/xperience-by-kentico-admin-design-components) | Pre-03-03 | 03-05, Phase 4/5 admin pages and the admin settings page; UNIFY logs a gap if not invoked |
@@ -107,16 +112,16 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 03-03; 03-03 code in d9d352f)
+Last commit: see `git log -1` (docs(paul): plan 03-05; 03-04 code in d882f98, unify in 7b3c2cd)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-10
-Stopped at: Plan 03-03 unified (Phase 3: 3/5)
-Next action: /paul:plan for 03-04 Search integration
-Resume file: .paul/phases/03-rules-engine/03-03-SUMMARY.md
+Stopped at: Plan 03-05 audited
+Next action: /paul:apply .paul/phases/03-rules-engine/03-05-PLAN.md
+Resume file: .paul/phases/03-rules-engine/03-05-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v4). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v4) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
