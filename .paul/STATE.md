@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-09)
 
 Milestone: v0.1 Tune & Capture
 Phase: 6 of 6 (Widgets Package) — Complete
-Plan: 06-03 complete (Phase 6: 3/3)
-Status: Milestone v0.1 reviewed — one follow-up (host readable facet values), then complete milestone
-Last activity: 2026-10-11 — Unified 06-03; Phase 6 and v0.1 complete
+Plan: 06-04 (quick fix, review follow-up) created, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-12 — Created .paul/phases/06-widgets-package/06-04-PLAN.md (quick fix)
 
 Progress:
 - Milestone: [██████████] 100% (6 of 6 phases)
@@ -29,7 +29,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — milestone review next]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -160,16 +160,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03: all 
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 4162202 feat(06-widgets-package): Phase 6 complete
+Last commit: 2460c40 docs(paul): v0.1 milestone review
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: v0.1 milestone review done (approved)
-Next action: host follow-up (readable facet values in DancingGoatSearchIndexingStrategy + rebuild), then /paul:complete-milestone
-Resume file: .paul/APPROVAL-CHECKS.md
+Stopped at: Plan 06-04 created (quick fix)
+Next action: /paul:apply .paul/phases/06-widgets-package/06-04-PLAN.md, then /paul:complete-milestone
+Resume file: .paul/phases/06-widgets-package/06-04-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

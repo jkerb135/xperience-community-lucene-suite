@@ -12,7 +12,9 @@
     "status": "complete"
   },
   "loop": {
-    "position": "IDLE"
+    "plan": "06-04",
+    "position": "PLAN",
+    "plan_path": "phases/06-widgets-package/06-04-PLAN.md"
   },
   "timestamps": {
     "created_at": "2026-10-08T00:00:00Z",

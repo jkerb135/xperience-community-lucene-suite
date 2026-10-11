@@ -91,6 +91,7 @@ Phases: 6 of 6 complete (100%)
 - [x] 06-01 (complete 2026-10-11): Package skeleton — rate-limited events endpoint, client-settings endpoint, sr= result reference, full contract JS client (shared vectors)
 - [x] 06-02 (complete 2026-10-11): Server-rendered search box, results and facets view components (one shared search per request, sid/seq continuation links, sr= result links, click beacons, toggle-link facets, contact-group contexts)
 - [x] 06-03 (complete 2026-10-11): Page Builder widgets (page-selector search box, results, filters with dimension labels), preview/edit-mode never tracked, contact-group DB test, CommunityProjects wiring + permanent Search page, end-to-end with real traffic
+- [ ] 06-04 (planned, quick fix — v0.1 review follow-up): host index stores readable content-type facet values
 
 ## Later Milestones
 
