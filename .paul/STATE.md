@@ -5,29 +5,29 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 4 Synonyms, 04-01 planned + audited (awaiting approval)
+**Current focus:** v0.1 Tune & Capture — Phase 4 Synonyms, 04-01 complete; next 04-02 (admin + query tester)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 4 of 6 (Synonyms) — Planning
-Plan: 04-01 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-11 — Audited .paul/phases/04-synonyms/04-01-PLAN.md (04-01-AUDIT.md)
+Phase: 4 of 6 (Synonyms) — In progress
+Plan: 04-01 complete
+Status: Ready for next PLAN (04-02)
+Last activity: 2026-10-11 — 04-01 unified (.paul/phases/04-synonyms/04-01-SUMMARY.md)
 
 Progress:
 - Milestone: [█████░░░░░] 50% (3 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
 - Phase 3: [██████████] 100% (7/7 plans)
-- Phase 4: [░░░░░░░░░░] 0% (0/2 plans)
+- Phase 4: [█████░░░░░] 50% (1/2 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -37,6 +37,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: 04-01 applied: synonyms expand through ISearchQueryFactory as DisjunctionMaxQuery(0) variants (boost × 0.8); one MatchKey for terms and queries; shared fail-open rerun now sets RulesFailed only when rules fired; host "mill" example shows weight is a preference (user kept 0.8); installer v5 on comm_projects | Phase 4 | 04-02 admin edits SynonymInfo via SynonymSerializer paths; query tester adds AppliedSynonyms |
 | 2026-10-11: Enterprise audit on 04-01-PLAN.md. Applied 2 must-have, 5 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 4 | Fail-open covers variant query building (rerun without rules+synonyms); variant boost multiplied not overwritten; one MatchKey for entries and queries; weight documented as preference |
 | 2026-10-11: Phase 4 planning (user choices): two-way + one-way synonyms (no replace type); synonym matches slightly below exact (weight 0.8, configurable); per index under Search tuning (Manage synonyms); two plans — 04-01 model + installer v5 + query expansion, 04-02 admin + query tester. Expansion = DisjunctionMaxQuery of factory(original) and single-substitution variants (works with any ISearchQueryFactory); rules and analytics see the original text | Phase 4 | 04-02 builds admin on the 03-06/03-07 patterns |
 | 2026-10-11: 03-07 applied: component commands get the page's index via a RuleEditPageBase.GetFormItems override (31.9.1 ComponentCommand calls it); cross-field picker exclusion via FormComponentProps.fieldValues; ActionsJson built from the form only (serializer disallows unknown members); SidePanel content focused by mount ref; GetPath is admin-root-relative → client prefixes admin base | Phase 3 | Patterns for Phase 4 admin |
@@ -97,6 +98,8 @@ See PROJECT.md Key Decisions.
 | "Featured content" rule action: content item references (Content hub selector, ContentItemGUIDs) returned in the response for the site to load via IContentRetriever; custom JSON kept as a developer field. Suite must not resolve content itself (no language/channel on requests, latency budget) | 03-06 discussion (user: not now) | M | When wanted |
 | 03-07 audit deferrals: picker 20 results without paging; multilingual title by doc id; stored fields visible to View users (01-03) | 03-07 audit | S | KNOWN-LIMITATIONS |
 | Leftover XpSearch contact-group macro `Contact.XpSearchSearchedFor("grinders")` fails on every evaluation in the CommunityProjects host log | 03-05 checkpoint | S | Part of the pending XpSearch DB-objects decision |
+| 04-01 audit deferrals: accent folding of synonym inputs; orphan synonyms after index rename/deletion; query-parser custom factories reading synonym syntax characters | 04-01 audit | S | KNOWN-LIMITATIONS |
+| Leftover XpSearch scheduled tasks (XpSearch.QueryLogRetention, XpSearch.PopularitySignal) fail on every CommunityProjects host start | 04-01 checkpoint | S | Part of the pending XpSearch DB-objects decision |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -119,7 +122,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01: all required skills invoked.
 
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
@@ -140,10 +143,10 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Plan 04-01 audited
-Next action: /paul:apply .paul/phases/04-synonyms/04-01-PLAN.md
-Resume file: .paul/phases/04-synonyms/04-01-PLAN.md
-Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v4). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v4) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
+Stopped at: 04-01 unified
+Next action: commit 04-01 (on request), then /paul:plan for 04-02 (synonyms admin + query tester; design-screen required)
+Resume file: .paul/phases/04-synonyms/04-01-SUMMARY.md
+Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
 *STATE.md — Updated after every significant action*

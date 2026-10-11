@@ -25,9 +25,21 @@ public sealed record SuiteSearchResponse(
     /// <summary>True when rules could not be loaded or applied, so these results are unruled.</summary>
     public bool RulesFailed { get; init; }
 
+    /// <summary>Synonym substitutions the search used, one per query variant.</summary>
+    public IReadOnlyList<SuiteAppliedSynonym> AppliedSynonyms { get; init; } = [];
+
+    /// <summary>True when synonyms could not be loaded or applied, so the original query text was searched alone.</summary>
+    public bool SynonymsFailed { get; init; }
+
     // Null when unknown (a replaced inner service); 0 means the index is empty or rebuilding.
     internal int? IndexDocumentCount { get; init; }
 }
+
+/// <summary>A synonym substitution used by a search.</summary>
+/// <param name="SynonymId">Synonym that supplied it.</param>
+/// <param name="Term">The query words it matched, as typed.</param>
+/// <param name="Replacement">What they were replaced with in the variant.</param>
+public sealed record SuiteAppliedSynonym(int SynonymId, string Term, string Replacement);
 
 /// <summary>Custom data returned by a fired rule.</summary>
 /// <param name="RuleId">Rule that returned it.</param>

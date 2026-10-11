@@ -444,7 +444,7 @@ public sealed class RuleSearchTests(ITestOutputHelper output)
         var options = new SuiteSearchOptions();
         options.SearchFields[Index] = new() { ["Title"] = 3f, ["Content"] = 1f };
         var timeProvider = new FixedTime(Now);
-        return new SuiteSearchService(null!, null!, null!, new DefaultSearchQueryFactory(Options.Create(options)), Options.Create(options), rules, timeProvider, logger);
+        return new SuiteSearchService(null!, null!, null!, new DefaultSearchQueryFactory(Options.Create(options)), Options.Create(options), rules, FixedSynonyms.None, timeProvider, logger);
     }
 
     private static SuiteSearchResponse SearchPlain(IndexSearcher searcher, SuiteSearchRequest request, RuleDefinition[] rules) =>

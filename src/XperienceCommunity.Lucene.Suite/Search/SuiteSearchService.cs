@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Rules;
+using XperienceCommunity.Lucene.Suite.Synonyms;
 
 namespace XperienceCommunity.Lucene.Suite.Search;
 
@@ -19,10 +20,12 @@ internal sealed class SuiteSearchService(
     ISearchQueryFactory queryFactory,
     IOptions<SuiteSearchOptions> options,
     RuleProvider ruleProvider,
+    SynonymProvider synonymProvider,
     TimeProvider timeProvider,
     ILogger<SuiteSearchService> logger) : ISuiteSearchService
 {
     private readonly LogThrottle logThrottle = new(timeProvider, TimeSpan.FromMinutes(1));
+    private readonly LogThrottle synonymLogThrottle = new(timeProvider, TimeSpan.FromMinutes(1));
 
     public SuiteSearchResponse Search(SuiteSearchRequest request)
     {
@@ -43,10 +46,25 @@ internal sealed class SuiteSearchService(
         return response with { Elapsed = stopwatch.Elapsed };
     }
 
-    /// <summary>Evaluates rules and runs <paramref name="run"/> with them; any rule failure falls back to an unruled run.</summary>
-    /// <remarks>Request errors (<see cref="ArgumentException"/>) are not rule failures and still reach the caller.</remarks>
+    /// <summary>Expands synonyms, evaluates rules and runs <paramref name="run"/> with both; a failure of either falls back to a plain run.</summary>
+    /// <remarks>Request errors (<see cref="ArgumentException"/>) are not rule or synonym failures and still reach the caller.</remarks>
     internal SuiteSearchResponse SearchWithRules(SuiteSearchRequest request, Func<SearchExecutor, SuiteSearchResponse> run)
     {
+        bool synonymsFailed = false;
+        var expansion = SynonymExpansion.None;
+        if (!string.IsNullOrWhiteSpace(request.Query))
+        {
+            try
+            {
+                expansion = SynonymEngine.Expand(synonymProvider.GetSynonyms(request.IndexName), request.Query, options.Value.Synonyms.MaxExpansions);
+            }
+            catch (Exception exception)
+            {
+                WarnSynonyms(exception, "Lucene Suite could not load or expand synonyms for index {Index}; searching the original text only (further failures suppressed for a minute).", request.IndexName);
+                synonymsFailed = true;
+            }
+        }
+
         bool rulesFailed = false;
         RuleOutcome? outcome = null;
         if (request.ApplyRules)
@@ -68,17 +86,19 @@ internal sealed class SuiteSearchService(
             }
         }
 
-        var executor = new SearchExecutor(queryFactory, options.Value, outcome);
+        var executor = new SearchExecutor(queryFactory, options.Value, outcome, expansion);
         SuiteSearchResponse response;
         try
         {
             response = run(executor);
         }
-        catch (Exception exception) when (outcome is not null && exception is not ArgumentException)
+        catch (Exception exception) when ((outcome is not null || expansion.Variants.Count > 0) && exception is not ArgumentException)
         {
-            Warn(exception, "Lucene Suite could not apply rules on index {Index}; searching without rules (further failures suppressed for a minute).", request.IndexName);
-            rulesFailed = true;
+            Warn(exception, "Lucene Suite could not apply rules or synonyms on index {Index}; searching without them (further failures suppressed for a minute).", request.IndexName);
+            rulesFailed |= outcome is { FiredRuleIds.Count: > 0 };
+            synonymsFailed |= expansion.Variants.Count > 0;
             outcome = null;
+            expansion = SynonymExpansion.None;
             executor = new SearchExecutor(queryFactory, options.Value);
             response = run(executor);
         }
@@ -93,7 +113,17 @@ internal sealed class SuiteSearchService(
             FiredRuleIds = outcome?.FiredRuleIds ?? [],
             UserData = outcome?.UserData.Select(data => new SuiteRuleUserData(data.RuleId, data.Data)).ToArray() ?? [],
             RulesFailed = rulesFailed,
+            AppliedSynonyms = [.. expansion.Applied.Select(applied => new SuiteAppliedSynonym(applied.SynonymId, applied.Term, applied.Replacement))],
+            SynonymsFailed = synonymsFailed,
         };
+    }
+
+    private void WarnSynonyms(Exception exception, string message, string index)
+    {
+        if (synonymLogThrottle.ShouldLog())
+        {
+            logger.LogWarning(exception, message, index);
+        }
     }
 
     private void Warn(Exception? exception, string message, string index)

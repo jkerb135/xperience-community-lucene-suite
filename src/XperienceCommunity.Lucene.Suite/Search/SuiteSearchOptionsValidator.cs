@@ -83,6 +83,22 @@ internal sealed class SuiteSearchOptionsValidator : IValidateOptions<SuiteSearch
             failures.Add($"{rules}{nameof(options.Rules.CacheMinutes)} must be between 0 and 1440 (was {options.Rules.CacheMinutes}).");
         }
 
+        const string synonyms = SuiteSearchOptions.SectionName + ":Synonyms:";
+        if (!(options.Synonyms.Weight > 0 && options.Synonyms.Weight <= 1))
+        {
+            failures.Add($"{synonyms}{nameof(options.Synonyms.Weight)} must be greater than 0 and at most 1 (was {options.Synonyms.Weight}).");
+        }
+
+        if (options.Synonyms.MaxExpansions is < 1 or > 50)
+        {
+            failures.Add($"{synonyms}{nameof(options.Synonyms.MaxExpansions)} must be between 1 and 50 (was {options.Synonyms.MaxExpansions}).");
+        }
+
+        if (options.Synonyms.CacheMinutes is < 0 or > 1440)
+        {
+            failures.Add($"{synonyms}{nameof(options.Synonyms.CacheMinutes)} must be between 0 and 1440 (was {options.Synonyms.CacheMinutes}).");
+        }
+
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
     }
 }

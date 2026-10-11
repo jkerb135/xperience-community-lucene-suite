@@ -11,11 +11,12 @@ using Lucene.Net.Search;
 using Lucene.Net.Util;
 
 using XperienceCommunity.Lucene.Suite.Rules;
+using XperienceCommunity.Lucene.Suite.Synonyms;
 
 namespace XperienceCommunity.Lucene.Suite.Search;
 
-/// <summary>Runs one search; <paramref name="outcome"/> (fired rules) adds hides and boosts to the query.</summary>
-internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSearchOptions options, RuleOutcome? outcome = null)
+/// <summary>Runs one search; <paramref name="outcome"/> (fired rules) adds hides and boosts to the query, <paramref name="synonyms"/> adds weighted query variants.</summary>
+internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSearchOptions options, RuleOutcome? outcome = null, SynonymExpansion? synonyms = null)
 {
     internal const int MaxPageSize = 100;
     internal const int MaxResultWindow = 1000;
@@ -175,7 +176,7 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
     {
         var query = string.IsNullOrWhiteSpace(request.Query)
             ? new MatchAllDocsQuery()
-            : queryFactory.Create(request.IndexName, request.Query, analyzer);
+            : TextQuery(request.IndexName, request.Query, analyzer);
         if (outcome is null)
         {
             return query;
@@ -210,6 +211,26 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
             { query, Occur.MUST },
             { new ConstantScoreQuery(hidden), Occur.MUST_NOT },
         };
+    }
+
+    // Each document scores by its best variant, so one matching both the original and a synonym is not counted twice.
+    private Query TextQuery(string indexName, string queryText, Analyzer analyzer)
+    {
+        var original = queryFactory.Create(indexName, queryText, analyzer);
+        if (synonyms is not { Variants.Count: > 0 })
+        {
+            return original;
+        }
+
+        var query = new DisjunctionMaxQuery(0f) { original };
+        foreach (string variant in synonyms.Variants)
+        {
+            var variantQuery = queryFactory.Create(indexName, variant, analyzer);
+            variantQuery.Boost *= (float)options.Synonyms.Weight;
+            query.Add(variantQuery);
+        }
+
+        return query;
     }
 
     // A document matches a boost when the field holds the exact value or the analyzed value as a phrase.

@@ -17,6 +17,22 @@ public sealed class SuiteSearchOptions
 
     /// <summary>Search rule settings (<c>LuceneSuite:Rules</c>).</summary>
     public SuiteRulesOptions Rules { get; } = new();
+
+    /// <summary>Synonym settings (<c>LuceneSuite:Synonyms</c>).</summary>
+    public SuiteSynonymsOptions Synonyms { get; } = new();
+}
+
+/// <summary>Synonym settings (<c>LuceneSuite:Synonyms</c>).</summary>
+public sealed class SuiteSynonymsOptions
+{
+    /// <summary>Score weight of a synonym variant relative to the original query (a preference, not a guarantee). Default 0.8, range (0, 1].</summary>
+    public double Weight { get; set; } = 0.8;
+
+    /// <summary>Most query variants built from synonyms per search. Default 20, range 1–50.</summary>
+    public int MaxExpansions { get; set; } = 20;
+
+    /// <summary>How long loaded synonyms are cached per index; any synonym change clears the cache. 0 disables caching. Default 60, range 0–1440.</summary>
+    public int CacheMinutes { get; set; } = 60;
 }
 
 /// <summary>Search rule settings (<c>LuceneSuite:Rules</c>).</summary>

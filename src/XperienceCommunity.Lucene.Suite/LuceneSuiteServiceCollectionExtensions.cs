@@ -11,6 +11,7 @@ using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Search;
+using XperienceCommunity.Lucene.Suite.Synonyms;
 
 namespace XperienceCommunity.Lucene.Suite;
 
@@ -23,6 +24,7 @@ public static class LuceneSuiteServiceCollectionExtensions
         services.TryAddSingleton<ISearchQueryFactory, DefaultSearchQueryFactory>();
         services.TryAddSingleton<SuiteSearchService>();
         services.TryAddSingleton<RuleProvider>();
+        services.TryAddSingleton<SynonymProvider>();
         services.TryAddSingleton<SuiteItemLookup>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddHttpContextAccessor();

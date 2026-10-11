@@ -9,6 +9,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using XperienceCommunity.Lucene.Suite.Rules;
+using XperienceCommunity.Lucene.Suite.Synonyms;
 
 namespace XperienceCommunity.Lucene.Suite.Analytics;
 
@@ -28,7 +29,7 @@ internal sealed class AnalyticsModuleInstaller(
     internal const string WatermarkKeyName = "LuceneSuiteRollupWatermark";
 
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
-    internal const int Version = 4;
+    internal const int Version = 5;
 
     internal const string ReceivedIndexName = "IX_LuceneSuite_SearchEvent_ReceivedUtc_SearchId";
 
@@ -37,6 +38,7 @@ internal sealed class AnalyticsModuleInstaller(
     internal const string DailyKeyIndexName = "IX_LuceneSuite_SearchDaily_Day_IndexName_QueryText";
 
     internal const string RuleIndexName = "IX_LuceneSuite_Rule_IndexName";
+    internal const string SynonymIndexName = "IX_LuceneSuite_Synonym_IndexName";
 
     private const string LockResource = "LuceneSuite.Install";
     private const int LockTimeoutMs = 120_000;
@@ -84,6 +86,10 @@ internal sealed class AnalyticsModuleInstaller(
         // Version 4: search rules.
         EnsureClass(resource, RuleInfo.TYPEINFO, "Lucene Suite search rule", RuleForm());
         CreateAscendingIndex(RuleIndexName, RuleInfo.CLASS_NAME, false, nameof(RuleInfo.IndexName));
+
+        // Version 5: synonyms.
+        EnsureClass(resource, SynonymInfo.TYPEINFO, "Lucene Suite synonym", SynonymForm());
+        CreateAscendingIndex(SynonymIndexName, SynonymInfo.CLASS_NAME, false, nameof(SynonymInfo.IndexName));
 
         if (installed < Version)
         {
@@ -147,6 +153,19 @@ internal sealed class AnalyticsModuleInstaller(
             Add(form, $"LatencyBucket{i}", FieldDataType.Integer);
         }
 
+        return form;
+    }
+
+    internal static FormInfo SynonymForm()
+    {
+        var form = FormHelper.GetBasicFormDefinition(nameof(SynonymInfo.SynonymID));
+        Add(form, nameof(SynonymInfo.SynonymGuid), FieldDataType.Guid);
+        Add(form, nameof(SynonymInfo.IndexName), FieldDataType.Text, RuleLimits.IndexNameLength);
+        Add(form, nameof(SynonymInfo.Kind), FieldDataType.Text, SynonymInfo.KindMaxLength);
+        Add(form, nameof(SynonymInfo.Input), FieldDataType.Text, SynonymLimits.TermLength, allowEmpty: true);
+        Add(form, nameof(SynonymInfo.Terms), FieldDataType.LongText);
+        Add(form, nameof(SynonymInfo.Enabled), FieldDataType.Boolean);
+        Add(form, nameof(SynonymInfo.LastModified), FieldDataType.DateTime);
         return form;
     }
 
