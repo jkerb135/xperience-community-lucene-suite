@@ -5,28 +5,28 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-05 complete; ready to plan 03-06 Rules admin UI
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-06 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 3 of 6 (Rules Engine) — In progress
-Plan: 03-05 complete (unified); next 03-06 Rules admin UI
-Status: Loop closed, ready for next PLAN
-Last activity: 2026-10-11 — Unified 03-05 (all AC pass, checkpoint approved; 394 tests; p95 ≈ 8 ms with 300 pins)
+Phase: 3 of 6 (Rules Engine) — Planning
+Plan: 03-06 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-11 — Audited .paul/phases/03-rules-engine/03-06-PLAN.md (03-06-AUDIT.md)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [████████░░] 83% (5/6 plans)
+- Phase 3: [███████░░░] 71% (5/7 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -36,6 +36,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: Enterprise audit on 03-06-PLAN.md. Applied 3 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 3 | Native submit/delete gated on Manage rules (app declares no system Create/Update/Delete); rule-belongs-to-index checks; pins/hides re-read at submit; optimistic concurrency; UTC round trip |
+| 2026-10-11: 03-06 planning (user choices): pins/hides chosen with an index-search picker (index stores WebPageItemGUID for pages, ContentItemGUID for reusable items — Kentico content selectors would not match pages); 03-06 split → 03-06 listing + editor (details, conditions, boosts, custom data), 03-07 pins/hides editor + query tester rule display. Design-screen run in PLAN: native ListingPage/ModelEditPage (npm 31.9.1 lacks the kit templates, ConfirmationDialog, ActionButtons, NumberInput); custom React only for conditions and boosts | Phase 3 | Phase 3 now 7 plans |
 | 2026-10-11: 03-05 applied: pinned window documents found by doc-id membership, ItemGuids via per-segment FieldCache (20.3 → ≈8 ms p95, 300 pins); DrillSideways counts of a filtered dimension include filter-ignoring pins; host index confirmed multilingual (es docs share ItemGuids) | Phase 3 | 03-06 can show PinnedByRuleId; dropped pins not reported yet |
 | 2026-10-10: Enterprise audit on 03-05-PLAN.md. Applied 2 must-have, 2 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 3 | One hit per pinned ItemGuid in multilingual indexes; TotalHits = run-1 total − passing pinned docs + available pins (equals pageable length) |
 | 2026-10-10: 03-05 planning (user choices): pinned items count in TotalHits and facets via a zero-weight, coord-disabled pinned clause in the match set; filter-ignoring pins add to the total only; pins show regardless of query text (Algolia); standard track | Phase 3 | Unpinned scores must stay identical (proven by test) |
@@ -114,16 +116,16 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): unify plan 03-05; 03-05 code in the preceding feat commit)
+Last commit: see `git log -1` (docs(paul): plan 03-06 rules admin UI)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Plan 03-05 unified (Phase 3: 5/6)
-Next action: /paul:plan for 03-06 Rules admin UI (design via /xbyk-admin-ui:design-screen)
-Resume file: .paul/phases/03-rules-engine/03-05-SUMMARY.md
+Stopped at: Plan 03-06 audited
+Next action: /paul:apply .paul/phases/03-rules-engine/03-06-PLAN.md
+Resume file: .paul/phases/03-rules-engine/03-06-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v4). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v4) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
