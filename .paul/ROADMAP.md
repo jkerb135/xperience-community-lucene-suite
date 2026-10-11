@@ -16,7 +16,7 @@ Phases: 4 of 6 complete (67%)
 | 2 | Event Capture | 4/4 | ✅ Complete | 2026-10-09 |
 | 3 | Rules Engine | 7/7 | ✅ Complete | 2026-10-11 |
 | 4 | Synonyms | 2/2 | ✅ Complete | 2026-10-11 |
-| 5 | Preview Sandbox | TBD | Not started | - |
+| 5 | Preview Sandbox | 0/1 | Planning | - |
 | 6 | Widgets Package | TBD | Not started | - |
 
 ## Phase Details
@@ -73,10 +73,14 @@ Phases: 4 of 6 complete (67%)
 - [x] 04-01 (complete 2026-10-11): Synonym model (LuceneSuite.Synonym, installer v5), strict serializer, cached provider, pure expansion engine, search integration (weighted DisMax variants, fail-open, AppliedSynonyms)
 - [x] 04-02 (complete 2026-10-11): Synonyms admin (listing + editor, Manage synonyms) + query tester shows applied synonyms
 
-### Phase 5: Preview Sandbox
+### Phase 5: Preview Sandbox (planning)
 **Goal:** Side-by-side results with and without rules under a simulated contact-group/visitor context.
 **Admin UI:** design via /xbyk-admin-ui:design-screen (SPECIAL-FLOWS)
 **Depends on:** Phases 3, 4
+**Decisions (2026-10-11):** compare mode inside the query tester; contexts = contact groups + free text; each column configurable; rank-change markers
+
+**Plans:**
+- [ ] 05-01: Query tester compare mode — contexts + page size on Search, ContactGroups command, two configurable columns, context picker, rank-change markers
 
 ### Phase 6: Widgets Package
 **Goal:** Optional `XperienceCommunity.Lucene.Suite.Widgets` package: HTTP events endpoint (MapLuceneSuiteEvents, rate-limited) over ISearchInteractionLogger, JS client implementing the client contract (tested against the shared vectors), tag helpers and Page Builder search widgets — gives xbk real Suite traffic.

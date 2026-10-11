@@ -5,15 +5,15 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 5 Preview Sandbox (ready to plan)
+**Current focus:** v0.1 Tune & Capture — Phase 5 Preview Sandbox, 05-01 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 5 of 6 (Preview Sandbox)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-11 — 04-02 unified; Phase 4 complete, transitioned to Phase 5
+Phase: 5 of 6 (Preview Sandbox) — Planning
+Plan: 05-01 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-11 — Audited .paul/phases/05-preview-sandbox/05-01-PLAN.md (05-01-AUDIT.md)
 
 Progress:
 - Milestone: [███████░░░] 67% (4 of 6 phases)
@@ -21,14 +21,14 @@ Progress:
 - Phase 2: [██████████] 100% (4/4 plans)
 - Phase 3: [██████████] 100% (7/7 plans)
 - Phase 4: [██████████] 100% (2/2 plans)
-- Phase 5: [░░░░░░░░░░] 0% (not planned)
+- Phase 5: [░░░░░░░░░░] 0% (0/1 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -38,6 +38,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: Enterprise audit on 05-01-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 5 | ContactGroups command also requires Kentico Contact groups View (no cross-app leak); rank by first occurrence per ItemGuid (multilingual); previews proven untracked; truncation flag at 500 |
+| 2026-10-11: Phase 5 planning (user choices): compare mode inside the query tester (no new page); contexts = contact groups (sent as code names) + free text; each column configurable (defaults Baseline = rules/synonyms off, Tuned = on); rank-change markers ↑/↓/New + missing items. Design-screen in PLAN: no npm MultiSelect → contact groups in a SidePanel Checkbox list; hit lists as focusable buttons (avoids Table row focus gap); one plan | Phase 5 | Closes the v0.1 tuning loop |
 | 2026-10-11: 04-02 applied: empty custom-field value + RequiredValidationRule so errors appear only at save (31.9.1 skips Required on load/change and never validates invisible fields); listing formatter reads sibling columns from the row; chip editor commits typed terms on blur; npm Input lacks maxLength/onKeyDown (DOM maxLength via inputRef, Enter via onKeyPress) | Phase 4 | Patterns for Phase 5 admin |
 | 2026-10-11: Enterprise audit on 04-02-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 4 | Typed-but-unadded term committed on blur (no silent loss); SerializeTerms keeps non-ASCII literal; shared MatchKey vectors C#/node; chip list semantics; synonym ownership DB test |
 | 2026-10-11: 04-02 planning (user choices): terms edited in a custom tag/chip component (not a native text area); query tester gets an "Apply synonyms" switch (SuiteSearchRequest.ApplySynonyms, default true); applied synonyms link to their edit pages. Design-screen in PLAN: native ListingPage/ModelEditPage with RadioGroup Kind + VisibleIfEqualTo Input; npm Tag remove buttons are focusable and labelled, no invalid state → per-term error lines | Phase 4 | Last Phase 4 plan |
@@ -141,16 +143,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: f319be0 feat(04-synonyms): query-time synonyms engine (plan 04-01)
+Last commit: e6852f0 feat(04-synonyms): Phase 4 complete
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Phase 4 complete (04-02 unified), ready to plan Phase 5
-Next action: commit Phase 4 (on request), then /paul:plan for Phase 5 Preview Sandbox
-Resume file: .paul/ROADMAP.md
+Stopped at: Plan 05-01 audited
+Next action: /paul:apply .paul/phases/05-preview-sandbox/05-01-PLAN.md
+Resume file: .paul/phases/05-preview-sandbox/05-01-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
