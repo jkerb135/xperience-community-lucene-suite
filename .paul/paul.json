@@ -7,18 +7,16 @@
     "status": "in_progress"
   },
   "phase": {
-    "number": 5,
-    "name": "Preview Sandbox",
-    "status": "in_progress"
+    "number": 6,
+    "name": "Widgets Package",
+    "status": "not_started"
   },
   "loop": {
-    "plan": "05-01",
-    "position": "PLAN",
-    "plan_path": "phases/05-preview-sandbox/05-01-PLAN.md"
+    "position": "IDLE"
   },
   "timestamps": {
     "created_at": "2026-10-08T00:00:00Z",
-    "updated_at": "2026-10-11T18:00:00Z"
+    "updated_at": "2026-10-11T21:00:00Z"
   },
   "satellite": {
     "groom": true

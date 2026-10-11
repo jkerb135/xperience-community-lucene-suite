@@ -5,30 +5,31 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 5 Preview Sandbox, 05-01 planned + audited (awaiting approval)
+**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package (ready to plan)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 5 of 6 (Preview Sandbox) — Planning
-Plan: 05-01 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-11 — Audited .paul/phases/05-preview-sandbox/05-01-PLAN.md (05-01-AUDIT.md)
+Phase: 6 of 6 (Widgets Package)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-11 — 05-01 unified; Phase 5 complete, transitioned to Phase 6
 
 Progress:
-- Milestone: [███████░░░] 67% (4 of 6 phases)
+- Milestone: [████████░░] 83% (5 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
 - Phase 3: [██████████] 100% (7/7 plans)
 - Phase 4: [██████████] 100% (2/2 plans)
-- Phase 5: [░░░░░░░░░░] 0% (0/1 plans)
+- Phase 5: [██████████] 100% (1/1 plans)
+- Phase 6: [░░░░░░░░░░] 0% (not planned)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -38,6 +39,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: 05-01 applied: kit breakpoints are md 1366–1919 / lg ≥ 1920 (use colsMd for desktop side-by-side; earlier colsLg-only tweaks apply from 1920 only); --color-text-high-emphasis = brand purple, body text = --color-text-default-on-light; contact groups gated with IApplicationPermissionEvaluator on ContactGroupsApplication.IDENTIFIER; rules-overhead perf test flaked once under parallel load (passes alone, 7.4–8.8 ms) | Phase 5 | Patterns for Phase 6 and later admin UI |
 | 2026-10-11: Enterprise audit on 05-01-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 5 | ContactGroups command also requires Kentico Contact groups View (no cross-app leak); rank by first occurrence per ItemGuid (multilingual); previews proven untracked; truncation flag at 500 |
 | 2026-10-11: Phase 5 planning (user choices): compare mode inside the query tester (no new page); contexts = contact groups (sent as code names) + free text; each column configurable (defaults Baseline = rules/synonyms off, Tuned = on); rank-change markers ↑/↓/New + missing items. Design-screen in PLAN: no npm MultiSelect → contact groups in a SidePanel Checkbox list; hit lists as focusable buttons (avoids Table row focus gap); one plan | Phase 5 | Closes the v0.1 tuning loop |
 | 2026-10-11: 04-02 applied: empty custom-field value + RequiredValidationRule so errors appear only at save (31.9.1 skips Required on load/change and never validates invisible fields); listing formatter reads sibling columns from the row; chip editor commits typed terms on blur; npm Input lacks maxLength/onKeyDown (DOM maxLength via inputRef, Enter via onKeyPress) | Phase 4 | Patterns for Phase 5 admin |
@@ -107,6 +109,8 @@ See PROJECT.md Key Decisions.
 | 04-01 audit deferrals: accent folding of synonym inputs; orphan synonyms after index rename/deletion; query-parser custom factories reading synonym syntax characters | 04-01 audit | S | KNOWN-LIMITATIONS |
 | Leftover XpSearch scheduled tasks (XpSearch.QueryLogRetention, XpSearch.PopularitySignal) fail on every CommunityProjects host start | 04-01 checkpoint | S | Part of the pending XpSearch DB-objects decision |
 | 04-02 audit deferrals: same term in several synonyms (no warning); Kind change without confirmation | 04-02 audit | S | KNOWN-LIMITATIONS |
+| Rules-overhead perf test (p95 < 10 ms) flaked once when the suite ran alongside the host and dev server; 7.4–8.8 ms alone | 05-01 APPLY | S | Watch; consider a CI-specific budget if it recurs |
+| 03-07 custom-data `<pre>` in the normal query tester uses the brand-purple token | 05-01 APPLY | S | KNOWN-LIMITATIONS; next change to the normal tester view |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -129,7 +133,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01: all required skills invoked.
 
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
@@ -150,9 +154,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Plan 05-01 audited
-Next action: /paul:apply .paul/phases/05-preview-sandbox/05-01-PLAN.md
-Resume file: .paul/phases/05-preview-sandbox/05-01-PLAN.md
+Stopped at: Phase 5 complete (05-01 unified), ready to plan Phase 6
+Next action: commit Phase 5 (on request), then /paul:plan for Phase 6 Widgets Package
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

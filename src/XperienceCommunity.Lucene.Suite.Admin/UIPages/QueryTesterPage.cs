@@ -1,9 +1,13 @@
 using System.Text.Json;
 
+using CMS.ContactManagement;
 using CMS.DataEngine;
 using CMS.Membership;
+using CMS.Membership.Internal;
 
 using Kentico.Xperience.Admin.Base;
+using Kentico.Xperience.Admin.Base.Authentication;
+using Kentico.Xperience.Admin.DigitalMarketing.UIPages;
 using Kentico.Xperience.Lucene.Core.Indexing;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -34,10 +38,16 @@ public sealed class QueryTesterPage(
     IOptions<SuiteSearchOptions> options,
     IInfoProvider<RuleInfo> rules,
     IInfoProvider<SynonymInfo> synonyms,
+    IInfoProvider<ContactGroupInfo> contactGroups,
+    IAuthenticatedUserAccessor userAccessor,
+    IApplicationPermissionEvaluator applicationPermissionEvaluator,
     IPageLinkGenerator pageLinkGenerator) : Page<QueryTesterClientProperties>
 {
     // Mirror SearchExecutor's limits so the pager never requests a rejected window.
     private const int PageSize = 10;
+    internal const int MaxPageSize = 50;
+    internal const int MaxContactGroups = 500;
+
     private const int MaxResultWindow = 1000;
 
     /// <summary>Identifier of the searched Lucene index, bound from the parent section.</summary>
@@ -58,6 +68,8 @@ public sealed class QueryTesterPage(
         properties.PageSize = PageSize;
         properties.MaxResultWindow = MaxResultWindow;
         properties.KeyFields = options.Value.SearchFields.TryGetValue(index.IndexName, out var fields) ? [.. fields.Keys] : [];
+        properties.MaxContexts = SearchExecutor.MaxContexts;
+        properties.MaxContextLength = SearchExecutor.MaxContextLength;
         return Task.FromResult(properties);
     }
 
@@ -68,17 +80,7 @@ public sealed class QueryTesterPage(
         try
         {
             string indexName = GetIndex().IndexName;
-            var response = searchService.Search(new SuiteSearchRequest
-            {
-                IndexName = indexName,
-                Query = arguments.Query,
-                Facets = (arguments.Facets ?? []).ToDictionary(f => f.Key, f => (IReadOnlyList<string>)(f.Value ?? [])),
-                Page = arguments.Page,
-                PageSize = PageSize,
-                TrackAnalytics = false,
-                ApplyRules = arguments.ApplyRules,
-                ApplySynonyms = arguments.ApplySynonyms,
-            });
+            var response = searchService.Search(Request(arguments, indexName));
 
             return Task.FromResult(ResponseFrom(new QueryTesterResult
             {
@@ -96,6 +98,66 @@ public sealed class QueryTesterPage(
         {
             return Task.FromResult(ResponseFrom(new QueryTesterResult { Error = ValidationMessage(exception) }));
         }
+    }
+
+    /// <summary>Contact groups the compare mode can simulate; empty unless the user may view Kentico's Contact groups application.</summary>
+    [PageCommand(Permission = SystemPermissions.VIEW)]
+    public async Task<ICommandResponse<QueryTesterContactGroups>> ContactGroups()
+    {
+        if (!await CanViewContactGroups())
+        {
+            return ResponseFrom(ContactGroupsResult(allowed: false, []));
+        }
+
+        return ResponseFrom(ContactGroupsResult(allowed: true, LoadContactGroups(contactGroups)));
+    }
+
+    /// <summary>Contact groups that are not recipient lists, by display name, one more than shown so truncation is detectable.</summary>
+    internal static List<QueryTesterContactGroup> LoadContactGroups(IInfoProvider<ContactGroupInfo> contactGroups) =>
+        contactGroups.Get()
+            .WhereFalse(nameof(ContactGroupInfo.ContactGroupIsRecipientList))
+            .Columns(nameof(ContactGroupInfo.ContactGroupName), nameof(ContactGroupInfo.ContactGroupDisplayName))
+            .OrderBy(nameof(ContactGroupInfo.ContactGroupDisplayName))
+            .TopN(MaxContactGroups + 1)
+            .Select(group => new QueryTesterContactGroup(group.ContactGroupName, group.ContactGroupDisplayName))
+            .ToList();
+
+    /// <summary>Builds the suite request; the tester never records analytics.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">PageSize is outside 1–<see cref="MaxPageSize"/>.</exception>
+    internal static SuiteSearchRequest Request(QueryTesterArguments arguments, string indexName)
+    {
+        if (arguments.PageSize is < 1 or > MaxPageSize)
+        {
+            throw new ArgumentOutOfRangeException(nameof(arguments), arguments.PageSize, $"PageSize must be between 1 and {MaxPageSize}.");
+        }
+
+        return new SuiteSearchRequest
+        {
+            IndexName = indexName,
+            Query = arguments.Query,
+            Facets = (arguments.Facets ?? []).ToDictionary(f => f.Key, f => (IReadOnlyList<string>)(f.Value ?? [])),
+            Page = arguments.Page,
+            PageSize = arguments.PageSize,
+            TrackAnalytics = false,
+            ApplyRules = arguments.ApplyRules,
+            ApplySynonyms = arguments.ApplySynonyms,
+            Contexts = arguments.Contexts ?? [],
+        };
+    }
+
+    /// <summary>At most <see cref="MaxContactGroups"/> groups; <paramref name="fetched"/> holds one more when there are more.</summary>
+    internal static QueryTesterContactGroups ContactGroupsResult(bool allowed, IReadOnlyList<QueryTesterContactGroup> fetched) =>
+        new(allowed, fetched.Count > MaxContactGroups, [.. fetched.Take(MaxContactGroups)]);
+
+    private async Task<bool> CanViewContactGroups()
+    {
+        var user = await userAccessor.Get();
+        return user is not null && (user.IsAdministrator() || applicationPermissionEvaluator.Evaluate(new ApplicationPermissionEvaluationContext
+        {
+            ApplicationName = ContactGroupsApplication.IDENTIFIER,
+            PermissionName = SystemPermissions.VIEW,
+            User = user,
+        }));
     }
 
     /// <summary>The exception's own message, without the runtime-appended parameter name and actual value.</summary>
@@ -178,6 +240,12 @@ public sealed class QueryTesterClientProperties : TemplateClientProperties
 
     /// <summary>Configured searchable fields, shown as result columns.</summary>
     public IReadOnlyList<string> KeyFields { get; set; } = [];
+
+    /// <summary>Most contexts per search (server limit).</summary>
+    public int MaxContexts { get; set; }
+
+    /// <summary>Most characters per context (server limit).</summary>
+    public int MaxContextLength { get; set; }
 }
 
 /// <summary>Arguments of the query tester's Search command.</summary>
@@ -197,7 +265,24 @@ public sealed class QueryTesterArguments
 
     /// <summary>Whether synonyms expand the query.</summary>
     public bool ApplySynonyms { get; set; } = true;
+
+    /// <summary>Simulated contexts (contact group code names or free text), sent as the site would.</summary>
+    public List<string>? Contexts { get; set; }
+
+    /// <summary>Hits per page, 1–50.</summary>
+    public int PageSize { get; set; } = 10;
 }
+
+/// <summary>Contact groups for the compare mode's context picker.</summary>
+/// <param name="Allowed">False when the user may not view Kentico's Contact groups application.</param>
+/// <param name="Truncated">True when more groups exist than were returned.</param>
+/// <param name="Groups">Groups ordered by display name.</param>
+public sealed record QueryTesterContactGroups(bool Allowed, bool Truncated, IReadOnlyList<QueryTesterContactGroup> Groups);
+
+/// <summary>A contact group as the picker shows it.</summary>
+/// <param name="Name">Code name, sent as the context.</param>
+/// <param name="DisplayName">Name shown to marketers.</param>
+public sealed record QueryTesterContactGroup(string Name, string DisplayName);
 
 /// <summary>Result of the query tester's Search command.</summary>
 public sealed class QueryTesterResult

@@ -44,36 +44,26 @@ import {
   pinningRuleName,
   toggleSelection,
   visibleValues,
-  type Facet,
-  type AppliedSynonym,
   type FacetSelection,
   type FiredRule,
 } from "./state";
+import type { Hit, SearchResult } from "./compare";
+import { CompareView } from "./CompareView";
 
 interface QueryTesterProps {
   readonly isFaceted: boolean;
   readonly pageSize: number;
   readonly maxResultWindow: number;
   readonly keyFields: string[];
+  readonly maxContexts: number;
+  readonly maxContextLength: number;
 }
 
-interface Hit {
-  readonly itemGuid: string | null;
-  readonly score: number;
-  readonly fields: Record<string, string[]>;
-  readonly pinnedByRuleId?: number | null;
-}
-
-interface SearchResult {
-  readonly hits: Hit[];
-  readonly totalHits: number;
-  readonly facets: Facet[];
-  readonly elapsedMilliseconds: number;
-  readonly error: string | null;
-  readonly rulesFailed: boolean;
-  readonly firedRules: FiredRule[];
-  readonly synonymsFailed: boolean;
-  readonly appliedSynonyms: AppliedSynonym[];
+interface OpenDetail {
+  readonly hit: Hit;
+  readonly firedRules: readonly FiredRule[];
+  /** Where focus goes when the panel closes; null returns it to the table. */
+  readonly returnTo: HTMLElement | null;
 }
 
 const collapsedFacetValues = 5;
@@ -100,7 +90,14 @@ const focusLater = (target: () => HTMLElement | null | undefined) => requestAnim
 // Module-level so the callback ref is stable: it focuses a panel's content once, when it mounts.
 const focusOnMount = (element: HTMLElement | null) => element?.focus();
 
-export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyFields }: QueryTesterProps) => {
+export const QueryTesterTemplate = ({
+  isFaceted,
+  pageSize,
+  maxResultWindow,
+  keyFields,
+  maxContexts,
+  maxContextLength,
+}: QueryTesterProps) => {
   const { executeCommand } = usePageCommandProvider();
   const [request] = useState(latestRequest);
   const [query, setQuery] = useState("");
@@ -111,7 +108,8 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
   const [failed, setFailed] = useState(false);
   const [inProgress, setInProgress] = useState(false);
   const [expandedFacets, setExpandedFacets] = useState<Record<string, boolean>>({});
-  const [detail, setDetail] = useState<number>();
+  const [detail, setDetail] = useState<OpenDetail>();
+  const [compare, setCompare] = useState(false);
   const [draft, setDraft] = useState<FacetSelection>();
   const [applyRules, setApplyRules] = useState(true);
   const applyRulesRef = useRef(true);
@@ -173,9 +171,10 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
   };
 
   const closeDetail = () => {
+    const returnTo = detail?.returnTo;
     setDetail(undefined);
-    // The npm Table's row button is display: contents and cannot take focus, so focus returns to the table itself.
-    focusLater(() => tableArea.current);
+    // The npm Table's row button is display: contents and cannot take focus, so table rows return focus to the table itself.
+    focusLater(() => returnTo ?? tableArea.current);
   };
 
   const closeFilters = (commit: boolean) => {
@@ -207,7 +206,7 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
     ],
   }));
   const totalPages = Math.min(Math.ceil((result?.totalHits ?? 0) / pageSize), Math.floor(maxResultWindow / pageSize));
-  const detailHit = detail === undefined ? undefined : hits[detail];
+  const detailHit = detail?.hit;
   const facets = isFaceted ? mergeSelectedIntoFacets(result?.facets ?? [], selection) : [];
   const applied = Object.entries(selection).flatMap(([dimension, labels]) => labels.map((label) => ({ dimension, label })));
   const noHits = result !== undefined && !result.error && result.totalHits === 0 && !inProgress;
@@ -227,14 +226,14 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
           {result.error}
         </Callout>
       )}
-      {result?.rulesFailed && (
+      {!compare && result?.rulesFailed && (
         <NotificationBarWarning>Rules could not be applied — these results are unruled.</NotificationBarWarning>
       )}
-      {result?.synonymsFailed && (
+      {!compare && result?.synonymsFailed && (
         <NotificationBarWarning>Synonyms could not be applied — the original text was searched.</NotificationBarWarning>
       )}
       <Row spacingX={Spacing.XL}>
-        <Column cols={Cols.Col12} colsLg={Cols.Col9}>
+        <Column cols={Cols.Col12} colsMd={Cols.Col9} colsLg={Cols.Col9}>
           <form onSubmit={submit} role="search">
             <Input
               label="Query"
@@ -245,10 +244,11 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
             />
           </form>
         </Column>
-        <Column cols={Cols.Col12} colsLg={Cols.Col3}>
+        <Column cols={Cols.Col12} colsMd={Cols.Col3} colsLg={Cols.Col3}>
           <Stack spacing={Spacing.S}>
-            <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />
-            <Switch label="Apply synonyms" size={SwitchSize.M} value={applySynonyms} onChange={toggleSynonyms} />
+            <Switch label="Compare" size={SwitchSize.M} value={compare} onChange={setCompare} />
+            {!compare && <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />}
+            {!compare && <Switch label="Apply synonyms" size={SwitchSize.M} value={applySynonyms} onChange={toggleSynonyms} />}
           </Stack>
         </Column>
       </Row>
@@ -298,105 +298,118 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
           ]}
         </Inline>
       )}
-      {result && !result.error && (
-        // Row sets its own inline margin-top, which would cancel the Stack spacing; the wrapper takes the spacing instead.
-        <div>
-          <Row spacingX={Spacing.XL}>
-            <Column>
-              <TextWithLabel label="Total hits" value={result.totalHits.toLocaleString()} />
-            </Column>
-            <Column>
-              <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
-            </Column>
-          </Row>
-        </div>
-      )}
-      {result && !result.error && applyRules && !result.rulesFailed && (
-        <section aria-labelledby="fired-rules-heading">
-          <Stack spacing={Spacing.S}>
-            <div role="heading" aria-level={2} id="fired-rules-heading">
-              <Headline size={HeadlineSize.S}>{`Fired rules (${firedRules.length})`}</Headline>
-            </div>
-            {firedRules.length === 0 ? (
-              <span style={{ color: "var(--color-text-low-emphasis)" }}>No rules fired for this search.</span>
-            ) : (
-              firedRuleRows(firedRules, window.location.pathname).map((rule) => (
-                <Stack key={rule.ruleId} spacing={Spacing.XS}>
-                  {rule.href ? (
-                    <div>
-                      <LinkButton label={rule.label} href={rule.href} color={ButtonColor.Tertiary} />
-                    </div>
-                  ) : (
-                    <span>{`${rule.label} (deleted)`}</span>
-                  )}
-                  {rule.userData && (
-                    <pre
-                      aria-label={`Custom data of ${rule.label}`}
-                      style={{
-                        margin: 0,
-                        padding: Spacing.S,
-                        overflowX: "auto",
-                        fontFamily: "monospace",
-                        color: "var(--color-text-high-emphasis)",
-                        background: "var(--color-background-shelf-solid)",
-                        border: `${Spacing.Micro}px solid var(--color-border-default)`,
-                      }}
-                    >
-                      {rule.userData}
-                    </pre>
-                  )}
-                </Stack>
-              ))
-            )}
-          </Stack>
-        </section>
-      )}
-      {result && !result.error && applySynonyms && !result.synonymsFailed && submittedQuery.trim() !== "" && (
-        <section aria-labelledby="applied-synonyms-heading">
-          <Stack spacing={Spacing.S}>
-            <div role="heading" aria-level={2} id="applied-synonyms-heading">
-              <Headline size={HeadlineSize.S}>{`Synonyms applied (${result.appliedSynonyms.length})`}</Headline>
-            </div>
-            {result.appliedSynonyms.length === 0 ? (
-              <span style={{ color: "var(--color-text-low-emphasis)" }}>No synonyms applied to this search.</span>
-            ) : (
-              <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
-                {appliedSynonymRows(result.appliedSynonyms, window.location.pathname).map((row) =>
-                  row.href ? (
-                    <LinkButton key={row.key} label={row.label} href={row.href} color={ButtonColor.Tertiary} />
-                  ) : (
-                    <span key={row.key}>{`${row.label} (deleted)`}</span>
-                  ),
-                )}
-              </Inline>
-            )}
-          </Stack>
-        </section>
-      )}
-      {noHits ? (
-        <Callout
-          type={CalloutType.QuickTip}
-          placement={CalloutPlacementType.OnDesk}
-          headline="No documents match"
-          actionButton={
-            applied.length > 0 ? (
-              <Button label="Clear filters" color={ButtonColor.Secondary} onClick={() => applySelection({})} />
-            ) : undefined
-          }
-        >
-          {applied.length > 0 ? "Try removing a filter or changing the query." : "Try a different query."}
-        </Callout>
+      {compare ? (
+        <CompareView
+          query={submittedQuery}
+          selection={selection}
+          titleField={firstField}
+          maxContexts={maxContexts}
+          maxContextLength={maxContextLength}
+          onOpenHit={(hit, rules, returnTo) => setDetail({ hit, firedRules: rules, returnTo })}
+        />
       ) : (
-        <div ref={tableArea} tabIndex={-1} style={{ outline: "none" }}>
-          <Table
-            columns={columns}
-            rows={inProgress || (result === undefined && !failed) ? undefined : rows}
-            onRowClick={(id) => setDetail(id as number)}
-          />
-        </div>
-      )}
-      {totalPages > 1 && !noHits && (
-        <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(submittedQuery, p, selection)} />
+        <>
+          {result && !result.error && (
+            // Row sets its own inline margin-top, which would cancel the Stack spacing; the wrapper takes the spacing instead.
+            <div>
+              <Row spacingX={Spacing.XL}>
+                <Column>
+                  <TextWithLabel label="Total hits" value={result.totalHits.toLocaleString()} />
+                </Column>
+                <Column>
+                  <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
+                </Column>
+              </Row>
+            </div>
+          )}
+          {result && !result.error && applyRules && !result.rulesFailed && (
+            <section aria-labelledby="fired-rules-heading">
+              <Stack spacing={Spacing.S}>
+                <div role="heading" aria-level={2} id="fired-rules-heading">
+                  <Headline size={HeadlineSize.S}>{`Fired rules (${firedRules.length})`}</Headline>
+                </div>
+                {firedRules.length === 0 ? (
+                  <span style={{ color: "var(--color-text-low-emphasis)" }}>No rules fired for this search.</span>
+                ) : (
+                  firedRuleRows(firedRules, window.location.pathname).map((rule) => (
+                    <Stack key={rule.ruleId} spacing={Spacing.XS}>
+                      {rule.href ? (
+                        <div>
+                          <LinkButton label={rule.label} href={rule.href} color={ButtonColor.Tertiary} />
+                        </div>
+                      ) : (
+                        <span>{`${rule.label} (deleted)`}</span>
+                      )}
+                      {rule.userData && (
+                        <pre
+                          aria-label={`Custom data of ${rule.label}`}
+                          style={{
+                            margin: 0,
+                            padding: Spacing.S,
+                            overflowX: "auto",
+                            fontFamily: "monospace",
+                            color: "var(--color-text-high-emphasis)",
+                            background: "var(--color-background-shelf-solid)",
+                            border: `${Spacing.Micro}px solid var(--color-border-default)`,
+                          }}
+                        >
+                          {rule.userData}
+                        </pre>
+                      )}
+                    </Stack>
+                  ))
+                )}
+              </Stack>
+            </section>
+          )}
+          {result && !result.error && applySynonyms && !result.synonymsFailed && submittedQuery.trim() !== "" && (
+            <section aria-labelledby="applied-synonyms-heading">
+              <Stack spacing={Spacing.S}>
+                <div role="heading" aria-level={2} id="applied-synonyms-heading">
+                  <Headline size={HeadlineSize.S}>{`Synonyms applied (${result.appliedSynonyms.length})`}</Headline>
+                </div>
+                {result.appliedSynonyms.length === 0 ? (
+                  <span style={{ color: "var(--color-text-low-emphasis)" }}>No synonyms applied to this search.</span>
+                ) : (
+                  <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
+                    {appliedSynonymRows(result.appliedSynonyms, window.location.pathname).map((row) =>
+                      row.href ? (
+                        <LinkButton key={row.key} label={row.label} href={row.href} color={ButtonColor.Tertiary} />
+                      ) : (
+                        <span key={row.key}>{`${row.label} (deleted)`}</span>
+                      ),
+                    )}
+                  </Inline>
+                )}
+              </Stack>
+            </section>
+          )}
+          {noHits ? (
+            <Callout
+              type={CalloutType.QuickTip}
+              placement={CalloutPlacementType.OnDesk}
+              headline="No documents match"
+              actionButton={
+                applied.length > 0 ? (
+                  <Button label="Clear filters" color={ButtonColor.Secondary} onClick={() => applySelection({})} />
+                ) : undefined
+              }
+            >
+              {applied.length > 0 ? "Try removing a filter or changing the query." : "Try a different query."}
+            </Callout>
+          ) : (
+            <div ref={tableArea} tabIndex={-1} style={{ outline: "none" }}>
+              <Table
+                columns={columns}
+                rows={inProgress || (result === undefined && !failed) ? undefined : rows}
+                onRowClick={(id) => setDetail({ hit: hits[id as number], firedRules, returnTo: null })}
+              />
+            </div>
+          )}
+          {totalPages > 1 && !noHits && (
+            <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(submittedQuery, p, selection)} />
+          )}
+        </>
       )}
       <SidePanel
         headline="Filters"
@@ -466,8 +479,8 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
           <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
             <Stack spacing={Spacing.M}>
               <TextWithLabel label="Item GUID" value={detailHit.itemGuid ?? "(none)"} />
-              {pinningRuleName(detailHit, firedRules) !== null && (
-                <TextWithLabel label="Pinned by" value={pinningRuleName(detailHit, firedRules) ?? ""} />
+              {pinningRuleName(detailHit, detail.firedRules) !== null && (
+                <TextWithLabel label="Pinned by" value={pinningRuleName(detailHit, detail.firedRules) ?? ""} />
               )}
               <TextWithLabel label="Score" value={detailHit.score.toFixed(4)} />
               {Object.keys(detailHit.fields).map((field) => (

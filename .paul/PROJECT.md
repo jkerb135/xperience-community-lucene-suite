@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phases 1–4 complete (4 of 6); next Phase 5 Preview Sandbox |
+| Status | v0.1 in progress — Phases 1–5 complete (5 of 6); next Phase 6 Widgets Package |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -54,8 +54,10 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Query-time synonyms per index: two-way groups and one-way entries (LuceneSuite.Synonym, installer v5), expanded as weighted query variants (0.8, max 20) through the query factory, fail-open, AppliedSynonyms on the response; ApplySynonyms request flag — Phase 4 (04-01)
 - ✓ Synonyms admin: native listing + editor behind Manage synonyms with a tag/chip terms editor; query tester shows applied synonyms (linked) and can switch synonyms off — Phase 4 (04-02)
 
+- ✓ Preview sandbox: query tester Compare mode — Baseline vs Tuned columns with their own rules/synonyms switches and simulated contexts (Kentico contact groups by code name, gated on Contact groups → View, plus free text), rank-change markers and missing items — Phase 5 (05-01)
+
 ### Active (In Progress)
-- [ ] Phase 5 Preview Sandbox: side-by-side results with and without rules/synonyms under a simulated context (not yet planned)
+- [ ] Phase 6 Widgets Package: optional events endpoint, JS client, tag helpers and Page Builder search widgets (not yet planned)
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -135,12 +137,13 @@ Marketers tune, test and measure site search without a developer.
 | Pins/hides pick items by searching the index (store WebPageItemGUID / ContentItemGUID as indexed), not Kentico content selectors | Content selectors return ContentItemGUIDs, which don't match indexed pages | 2026-10-11 | Active |
 | Rule admin uses native Kentico listing/edit pages; custom React only for structured fields; page context reaches component commands via GetFormItems, never the client | Native look and permissions; trust boundary | 2026-10-11 | Active |
 | Synonyms: two-way + one-way, query-time variants weighted 0.8 below exact (a preference, not a guarantee), per index; rules and analytics see the original text | User decisions; no rebuild per edit; any ISearchQueryFactory keeps working | 2026-10-11 | Active |
+| Preview = compare mode inside the query tester; simulated contexts are the strings the site would send (membership not evaluated); contact groups need Kentico Contact groups → View | User decisions; no duplicate page; no cross-app data leak | 2026-10-11 | Active |
 
 ## Success Metrics
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Marketer creates a rule and sees it in preview without a deploy | Yes | Yes in the query tester (Apply rules on/off); side-by-side preview in Phase 5 | In progress |
+| Marketer creates a rule and sees it in preview without a deploy | Yes | Yes — query tester Compare mode with simulated contexts (05-01) | Met |
 | Search count dedup correct across web-farm nodes | Matches searchId count | - | Not started |
 | Search latency overhead of suite (rules + capture) | p95 < 10 ms | ≈ 8 ms p95 with 300 pins + 500 rules (Debug, 5 000 docs, 03-05) | On track |
 | Works on SaaS and multi-instance self-hosted | Yes | - | Not started |
@@ -166,4 +169,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 4*
+*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 5*

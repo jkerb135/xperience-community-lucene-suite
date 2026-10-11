@@ -1,5 +1,8 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+
+using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Lucene.Core.Indexing;
@@ -54,7 +57,7 @@ public class SiteSearchAccessTests
         Func<Task<PageValidationResult>>[] validations =
         [
             new SearchTuningSectionPage(indexes) { IndexIdentifier = 404 }.ValidatePage,
-            new QueryTesterPage(indexes, null!, null!, null!, null!, null!, null!) { IndexIdentifier = 404 }.ValidatePage,
+            new QueryTesterPage(indexes, null!, null!, null!, null!, null!, null!, null!, null!, null!) { IndexIdentifier = 404 }.ValidatePage,
         ];
 
         foreach (var validate in validations)
@@ -93,6 +96,38 @@ public class SiteSearchAccessTests
         Assert.Equal(
             [new QueryTesterAppliedSynonym(4, "mill", "grinder", "/synonyms/4"), new QueryTesterAppliedSynonym(9, "tee", "t-shirt", null)],
             applied);
+    }
+
+    [Fact]
+    public void QueryTester_RequestCarriesContextsAndPageSize_AndNeverTracksAnalytics()
+    {
+        var request = QueryTesterPage.Request(new QueryTesterArguments { Query = "coffee", Contexts = ["vip", "mobile"], PageSize = 20, ApplyRules = false }, "dg");
+
+        Assert.Equal(("dg", "coffee", 20, false, false), (request.IndexName, request.Query, request.PageSize, request.TrackAnalytics, request.ApplyRules));
+        Assert.Equal(["vip", "mobile"], request.Contexts);
+        Assert.Empty(QueryTesterPage.Request(new QueryTesterArguments(), "dg").Contexts);
+        Assert.Equal(10, QueryTesterPage.Request(new QueryTesterArguments(), "dg").PageSize);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(51)]
+    public void QueryTester_RejectsPageSizesOutsideTheCompareRange(int pageSize) =>
+        Assert.Throws<ArgumentOutOfRangeException>(() => QueryTesterPage.Request(new QueryTesterArguments { PageSize = pageSize }, "dg"));
+
+    [Fact]
+    public void QueryTester_ContactGroups_RequireView_ReportTruncation_AndReturnNothingWhenNotAllowed()
+    {
+        Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.ContactGroups))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
+
+        var many = Enumerable.Range(0, QueryTesterPage.MaxContactGroups + 1).Select(i => new QueryTesterContactGroup($"g{i}", $"Group {i}")).ToList();
+        var truncated = QueryTesterPage.ContactGroupsResult(allowed: true, many);
+        Assert.True(truncated.Truncated);
+        Assert.Equal(QueryTesterPage.MaxContactGroups, truncated.Groups.Count);
+        Assert.False(QueryTesterPage.ContactGroupsResult(allowed: true, [.. many.Take(3)]).Truncated);
+        var none = QueryTesterPage.ContactGroupsResult(allowed: false, []);
+        Assert.False(none.Allowed);
+        Assert.Empty(none.Groups);
     }
 
     private sealed class FakeIndexManager : ILuceneIndexManager
