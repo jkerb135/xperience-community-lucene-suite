@@ -5,21 +5,21 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-06 planned + audited (awaiting approval)
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-07 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
 Phase: 3 of 6 (Rules Engine) — Planning
-Plan: 03-06 created + audited, awaiting approval
+Plan: 03-07 created + audited, awaiting approval
 Status: PLAN created, ready for APPLY
-Last activity: 2026-10-11 — Audited .paul/phases/03-rules-engine/03-06-PLAN.md (03-06-AUDIT.md)
+Last activity: 2026-10-11 — Audited .paul/phases/03-rules-engine/03-07-PLAN.md (03-07-AUDIT.md)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [███████░░░] 71% (5/7 plans)
+- Phase 3: [████████░░] 86% (6/7 plans)
 
 ## Loop Position
 
@@ -36,6 +36,9 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: Enterprise audit on 03-07-PLAN.md. Applied 2 must-have, 2 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 3 | Picker de-duplicates by ItemGuid (multilingual); commands fail closed (unresolved index, Describe cap 350); pinned+hidden refused on the Hides field via a cross-field rule; fired-rule names in one query |
+| 2026-10-11: 03-07 planning (user choices): one standard plan (pins/hides editor + query tester); query tester gets an "Apply rules" switch. Design-screen in PLAN: picker = SidePanel with labelled Input + Checkbox list (npm lacks SearchInput; Table rows not focusable); core SuiteItemLookup internal with InternalsVisibleTo Admin; index name for component commands from the page, never the client | Phase 3 | Last Phase 3 plan; checkpoint closes 03-02/03-06 verification gaps |
+| 2026-10-11: 03-06 applied: EditPageBase.Submit/Change require system Update and native CreatePage requires Create in 31.9.1 → both overridden/replaced with Manage rules gates (ModelEditPage for create); child-page links need ancestor PageParameterValues; server-only validation rules via always-pass client rule; concurrency token in a hidden custom component; per-control errors after blur/failed save; mapper on StoredRule (RuleInfo needs Kentico) | Phase 3 | Patterns reused by 03-07 and Phase 4 admin |
 | 2026-10-11: Enterprise audit on 03-06-PLAN.md. Applied 3 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 3 | Native submit/delete gated on Manage rules (app declares no system Create/Update/Delete); rule-belongs-to-index checks; pins/hides re-read at submit; optimistic concurrency; UTC round trip |
 | 2026-10-11: 03-06 planning (user choices): pins/hides chosen with an index-search picker (index stores WebPageItemGUID for pages, ContentItemGUID for reusable items — Kentico content selectors would not match pages); 03-06 split → 03-06 listing + editor (details, conditions, boosts, custom data), 03-07 pins/hides editor + query tester rule display. Design-screen run in PLAN: native ListingPage/ModelEditPage (npm 31.9.1 lacks the kit templates, ConfirmationDialog, ActionButtons, NumberInput); custom React only for conditions and boosts | Phase 3 | Phase 3 now 7 plans |
 | 2026-10-11: 03-05 applied: pinned window documents found by doc-id membership, ItemGuids via per-segment FieldCache (20.3 → ≈8 ms p95, 300 pins); DrillSideways counts of a filtered dimension include filter-ignoring pins; host index confirmed multilingual (es docs share ItemGuids) | Phase 3 | 03-06 can show PinnedByRuleId; dropped pins not reported yet |
@@ -84,9 +87,11 @@ See PROJECT.md Key Decisions.
 | No config change tracking / live reload: merge-setting changes only affect days rolled afterwards | 02-03 UNIFY | S | v0.2 reports |
 | Admin settings page | 02-03 audit | M | After 03-04 (Site Search app + custom permissions now exist) |
 | 03-01 audit deferrals: existing roles must be granted Site Search → View; old /admin/lucene/indexes/search-tuning/… URLs no longer resolve | 03-01 audit | S | README at packaging |
-| npm Table rows not keyboard-reachable (display:contents row buttons); hit-detail focus returns to the table wrapper (KNOWN-LIMITATIONS) | 03-02 checkpoint | S–M | 03-05 rules listing (per-row action or focusable row) |
-| 03-02 verification gaps: 1440 px visual check and rapid-click re-test on the Filters panel / Apply / bar controls not run (pane ~800 px) | 03-02 UNIFY | S | Next admin UI checkpoint (03-05) |
+| npm Table rows not keyboard-reachable (display:contents row buttons); hit-detail focus returns to the table wrapper (KNOWN-LIMITATIONS). Rules listing avoided it (native Kentico listing, 03-06); query tester still affected | 03-02 checkpoint | S–M | 03-07 query tester changes |
+| 03-02 verification gaps: rapid-click re-test on the Filters panel / Apply / bar controls not run; 1440 px now checked for the rules editor (03-06) but not the query tester | 03-02 UNIFY | S | 03-07 query tester checkpoint |
 | 03-02 limitations: filter-panel counts from the last executed search; server runs aborted searches (audit deferral); Show more capped by FacetValuesPerDimension; @types/node only transitive | 03-02 audit / checkpoint | S | KNOWN-LIMITATIONS |
+| 03-06 verification gaps: live role checks (View-only read-only; View + Manage rules create/save/delete), native date input time-zone round trip on the host, listing keyboard pass with rows | 03-06 checkpoint | S | 03-07 checkpoint |
+| "Featured content" rule action: content item references (Content hub selector, ContentItemGUIDs) returned in the response for the site to load via IContentRetriever; custom JSON kept as a developer field. Suite must not resolve content itself (no language/channel on requests, latency budget) | 03-06 discussion (user: not now) | M | 03-07 or later, when wanted |
 | Leftover XpSearch contact-group macro `Contact.XpSearchSearchedFor("grinders")` fails on every evaluation in the CommunityProjects host log | 03-05 checkpoint | S | Part of the pending XpSearch DB-objects decision |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
@@ -104,6 +109,14 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /dotnet:csharp-refactoring | ✓ | Both APPLY runs |
 | /kentico-web-development:content-retrieval | ○ | Not evidenced; listing reads LuceneIndexItemInfo via Kentico ListingPage ObjectType, no hand-written query |
 
+#### Skill Audit (Phase 3, plan 03-06)
+| Expected | Invoked | Notes |
+|----------|---------|-------|
+| /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
+| Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
+
+Plans 03-03, 03-04, 03-05: all required skills invoked.
+
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
 |----------|---------|-------|
@@ -116,16 +129,16 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): plan 03-06 rules admin UI)
+Last commit: see `git log -1` (docs(paul): plan 03-07; 03-06 code and unify in the two preceding commits)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Plan 03-06 audited
-Next action: /paul:apply .paul/phases/03-rules-engine/03-06-PLAN.md
-Resume file: .paul/phases/03-rules-engine/03-06-PLAN.md
+Stopped at: Plan 03-07 audited
+Next action: /paul:apply .paul/phases/03-rules-engine/03-07-PLAN.md
+Resume file: .paul/phases/03-rules-engine/03-07-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v4). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v4) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
