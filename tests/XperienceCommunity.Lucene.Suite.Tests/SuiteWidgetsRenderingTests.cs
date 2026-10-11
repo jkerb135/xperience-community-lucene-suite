@@ -1,5 +1,8 @@
 using System.Net;
 
+using Kentico.Content.Web.Mvc;
+using Kentico.PageBuilder.Web.Mvc;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
@@ -10,6 +13,7 @@ using XperienceCommunity.Lucene.Suite.Search;
 using XperienceCommunity.Lucene.Suite.Widgets;
 using XperienceCommunity.Lucene.Suite.Widgets.Components;
 using XperienceCommunity.Lucene.Suite.Widgets.Events;
+using XperienceCommunity.Lucene.Suite.Widgets.PageBuilder;
 using XperienceCommunity.Lucene.Suite.Widgets.Search;
 
 namespace XperienceCommunity.Lucene.Suite.Tests;
@@ -112,6 +116,66 @@ public sealed class SuiteWidgetsRenderingTests
     }
 
     [Fact]
+    public async Task Preview_ResultsCarryNoTracking()
+    {
+        string html = await Render("/test/results?q=grinder", preview: "preview");
+
+        Assert.Contains("href=\"/coffee/grinder?x=1#frag\">", html);
+        Assert.DoesNotContain("sr=", html);
+        Assert.DoesNotContain("data-lucene-suite-item", html);
+        Assert.DoesNotContain("<script", html);
+        Assert.Contains("data-lucene-suite-events=\"\"", html);
+    }
+
+    [Fact]
+    public async Task EditMode_ShowsPlaceholdersAndAnInertSearchBox()
+    {
+        Assert.Contains("Search results appear here when a visitor searches.", await Render("/test/results", preview: "edit"));
+        Assert.Contains("Filters appear here when a visitor searches.", await Render("/test/facets", preview: "edit"));
+        Assert.Contains("<fieldset class=\"lucene-suite-search-box__fields\" disabled=\"disabled\">", await Render("/test/box", preview: "edit"));
+        Assert.Contains("<fieldset class=\"lucene-suite-search-box__fields\" disabled=\"disabled\">", await Render("/test/box", preview: "preview"));
+        Assert.Contains("<fieldset class=\"lucene-suite-search-box__fields\">", await Render("/test/box"));
+        Assert.Equal(string.Empty, (await Render("/test/results")).Trim());
+    }
+
+    [Fact]
+    public async Task Facets_UseDimensionLabels_LinksKeepTheDimension()
+    {
+        string html = await Render("/test/facets?q=grinder&labels=" + Uri.EscapeDataString("ContentType = Content type\nBrand=Make"));
+
+        Assert.Contains("<h2 class=\"lucene-suite-facets__title\">Content type</h2>", html);
+        Assert.Contains("f.ContentType=Article", html);
+    }
+
+    [Fact]
+    public async Task Widgets_RenderTheSharedViews()
+    {
+        string results = await Render("/test/widget/results?q=grinder");
+        string filters = await Render("/test/widget/filters?q=grinder");
+        string box = await Render("/test/widget/box?q=grinder");
+
+        Assert.Contains("35 results for “grinder”", results);
+        Assert.Contains("<p class=\"lucene-suite-results__summary\">Burr &amp; blade</p>", results);
+        Assert.Contains("<h2 class=\"lucene-suite-facets__title\">Content type</h2>", filters);
+        Assert.Contains("action=\"/search-results\"", box);
+    }
+
+    [Fact]
+    public async Task Widgets_WithoutAUsableIndex_TellEditorsAndShowVisitorsNothing()
+    {
+        Assert.Equal(string.Empty, await Render("/test/widget/results?index=missing"));
+        Assert.Equal(string.Empty, await Render("/test/widget/filters?index="));
+        Assert.Contains("choose an existing index", await Render("/test/widget/results?index=missing", preview: "edit"));
+    }
+
+    [Fact]
+    public async Task SearchBoxWidget_WithAnUnresolvablePage_SubmitsToTheCurrentPage()
+    {
+        Assert.Contains("action=\"/test/widget/box\"", await Render("/test/widget/box?page=broken"));
+        Assert.Contains("action=\"/test/widget/box\"", await Render("/test/widget/box?page=none"));
+    }
+
+    [Fact]
     public async Task ResultsAndFacets_OnOnePage_ShareOneSearch()
     {
         var service = new CannedSearch();
@@ -122,7 +186,7 @@ public sealed class SuiteWidgetsRenderingTests
         Assert.Equal(1, service.Calls);
     }
 
-    private static async Task<string> Render(string url, bool mapEvents = true, CannedSearch? service = null)
+    private static async Task<string> Render(string url, bool mapEvents = true, CannedSearch? service = null, string? preview = null)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseTestServer();
@@ -130,6 +194,8 @@ public sealed class SuiteWidgetsRenderingTests
         builder.Services.AddSingleton<ISearchInteractionLogger>(new NoLogger());
         builder.Services.AddSingleton<Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager>(new SuiteSearchUrlTests.OneIndex());
         builder.Services.AddSingleton<SuiteContactGroupContexts>(new SuiteSearchUrlTests.StubGroups(null, []));
+        builder.Services.AddSingleton<ISuitePreviewState>(new HeaderPreview());
+        builder.Services.AddSingleton<CMS.Websites.IWebPageUrlRetriever>(new OnePageUrl());
         builder.Services.AddLuceneSuiteWidgets();
         builder.Services.AddControllersWithViews()
             .AddApplicationPart(typeof(LuceneSuiteResultsViewComponent).Assembly)
@@ -142,7 +208,13 @@ public sealed class SuiteWidgetsRenderingTests
         }
 
         await app.StartAsync();
-        var response = await app.GetTestClient().GetAsync(url);
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        if (preview is not null)
+        {
+            request.Headers.Add(HeaderPreview.Header, preview);
+        }
+
+        var response = await app.GetTestClient().SendAsync(request);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         return await response.Content.ReadAsStringAsync();
     }
@@ -192,6 +264,40 @@ public sealed class SuiteWidgetsRenderingTests
         }
     }
 
+    /// <summary>Preview state from a test header: "preview", "edit", or none.</summary>
+    private sealed class HeaderPreview : ISuitePreviewState
+    {
+        public const string Header = "X-Test-Preview";
+
+        public SuitePreview Get(Microsoft.AspNetCore.Http.HttpContext context) => context.Request.Headers[Header].ToString() switch
+        {
+            "edit" => new SuitePreview(true, true),
+            "preview" => new SuitePreview(true, false),
+            _ => default,
+        };
+    }
+
+    /// <summary>Resolves the one known results page; any other page throws like a deleted page.</summary>
+    private sealed class OnePageUrl : CMS.Websites.IWebPageUrlRetriever
+    {
+        public static readonly Guid Page = Guid.Parse("5a5a5a5a-1111-4222-8333-944444444444");
+
+        public Task<CMS.Websites.WebPageUrl> Retrieve(Guid webPageItemGuid, string languageName, bool forPreview = false, CancellationToken cancellationToken = default) =>
+            webPageItemGuid == Page ? Task.FromResult(new CMS.Websites.WebPageUrl("~/search-results", "http://localhost/search-results")) : throw new InvalidOperationException("page not found");
+
+        public Task<CMS.Websites.WebPageUrl> Retrieve(CMS.Websites.IWebPageFieldsSource webPageFieldsSource, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<CMS.Websites.WebPageUrl> Retrieve(CMS.Websites.IWebPageFieldsSource webPageFieldsSource, string languageName, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<CMS.Websites.WebPageUrl> Retrieve(string webPageUrlPath, string webPageTreePath, int websiteChannelId, string languageName, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<CMS.Websites.WebPageUrl> Retrieve(int webPageItemId, string languageName, bool forPreview = false, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<IDictionary<Guid, CMS.Websites.WebPageUrl>> Retrieve(IReadOnlyCollection<Guid> webPageItemGuids, string websiteChannelName, string languageName, bool forPreview = false, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<CMS.Websites.WebPageUrl> Retrieve(string webPageTreePath, string websiteChannelName, string languageName, bool forPreview = false, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    }
+
     private sealed class NoLogger : ISearchInteractionLogger
     {
         public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null)
@@ -214,7 +320,33 @@ public sealed class WidgetsTestController : Controller
     public IActionResult Results() => ViewComponent(typeof(LuceneSuiteResultsViewComponent), new { indexName = SuiteSearchUrlTests.Index, summaryField = "Summary" });
 
     [HttpGet("/test/facets")]
-    public IActionResult Facets() => ViewComponent(typeof(LuceneSuiteFacetsViewComponent), new { indexName = SuiteSearchUrlTests.Index });
+    public IActionResult Facets(string? labels) => ViewComponent(typeof(LuceneSuiteFacetsViewComponent), new { indexName = SuiteSearchUrlTests.Index, dimensionLabels = labels });
+
+    [HttpGet("/test/widget/results")]
+    public IActionResult ResultsWidget(string? index = SuiteSearchUrlTests.Index) => ViewComponent(typeof(LuceneSuiteResultsWidget), new
+    {
+        widget = ComponentViewModel<LuceneSuiteResultsWidgetProperties>.Create(new RoutedWebPage { LanguageName = "en" }, new LuceneSuiteResultsWidgetProperties { IndexName = index ?? string.Empty, SummaryField = "Summary" }),
+    });
+
+    [HttpGet("/test/widget/filters")]
+    public IActionResult FiltersWidget(string? index = SuiteSearchUrlTests.Index) => ViewComponent(typeof(LuceneSuiteFiltersWidget), new
+    {
+        widget = ComponentViewModel<LuceneSuiteFiltersWidgetProperties>.Create(new RoutedWebPage { LanguageName = "en" }, new LuceneSuiteFiltersWidgetProperties { IndexName = index ?? string.Empty, DimensionLabels = "ContentType = Content type" }),
+    });
+
+    [HttpGet("/test/widget/box")]
+    public IActionResult BoxWidget(string? page) => ViewComponent(typeof(LuceneSuiteSearchBoxWidget), new
+    {
+        widget = ComponentViewModel<LuceneSuiteSearchBoxWidgetProperties>.Create(new RoutedWebPage { LanguageName = "en" }, new LuceneSuiteSearchBoxWidgetProperties
+        {
+            ResultsPage = page switch
+            {
+                "none" => [],
+                "broken" => [new CMS.Websites.WebPageRelatedItem { WebPageGuid = Guid.NewGuid() }],
+                _ => [new CMS.Websites.WebPageRelatedItem { WebPageGuid = Guid.Parse("5a5a5a5a-1111-4222-8333-944444444444") }],
+            },
+        }),
+    });
 
     [HttpGet("/test/both")]
     public IActionResult Both([FromServices] SuitePageSearch search)

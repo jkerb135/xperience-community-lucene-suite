@@ -3,6 +3,10 @@
     var search = Model.Search;
     var response = search.Response;
 }
+@if (search.Status == SuitePageSearchStatus.NotSearched && search.IsEditMode)
+{
+    <p class="lucene-suite-results__placeholder">Search results appear here when a visitor searches.</p>
+}
 @if (search.Status != SuitePageSearchStatus.NotSearched)
 {
     <section class="lucene-suite-results" aria-label="Search results">

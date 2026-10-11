@@ -45,6 +45,21 @@ Two things are deliberately **not** configurable, because changing them would ma
 - Site-wide options (`AddLuceneSuiteWidgets(o => …)`): `PageSize` (10), `SearchOnEmptyQuery` (false), `ContactGroupContexts` (true: the current contact's contact groups, never creating a contact, are sent as rule contexts; cached 5 minutes per contact).
 - Override the markup by adding `Views/Shared/Components/LuceneSuiteSearchBox|LuceneSuiteResults|LuceneSuiteFacets/Default.cshtml` to the site; the models are `LuceneSuite*Model`.
 
+### Page Builder widgets
+
+The package registers three widgets (its assembly is `AssemblyDiscoverable`), all with `AllowCache = false`:
+
+| Identifier | Properties |
+|---|---|
+| `XperienceCommunity.LuceneSuite.SearchBox` | Results page (page selector; empty = this page), Label, Placeholder |
+| `XperienceCommunity.LuceneSuite.SearchResults` | Index (drop-down of Lucene indexes), Title field, URL field, Summary field |
+| `XperienceCommunity.LuceneSuite.SearchFilters` | Index, Dimension labels (`Dimension = Label` per line) |
+
+They render the same views as the view components. If a page template restricts widgets per editable area or zone, allow the `XperienceCommunity.LuceneSuite.` identifiers there.
+
+- **Preview and Page Builder edit mode are never tracked.** Searches there send `TrackAnalytics = false` and no contact-group contexts, and result links carry no `sr=` or beacon data. If the preview state cannot be read, the request is treated as preview. In preview the search box is disabled, because Kentico signs preview URLs and a submitted query would fail. In edit mode the results and filters widgets show a placeholder. A widget whose index is empty or missing shows editors a message and renders nothing for visitors.
+- **Do not cache pages that contain these widgets.** That means no `<cache>` tag helper around them, no Kentico page output caching and no CDN caching of search URLs. Cached HTML replays one visitor's `sid`/`seq` links and context-specific results to everyone, and skips analytics.
+
 ## 1. Search requests
 
 Send these on every `SuiteSearchRequest`:

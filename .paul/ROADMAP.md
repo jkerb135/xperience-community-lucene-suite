@@ -5,8 +5,8 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.1 Tune & Capture** (v0.1.0)
-Status: In progress
-Phases: 5 of 6 complete (83%)
+Status: Complete in code — milestone review pending (.paul/APPROVAL-CHECKS.md)
+Phases: 6 of 6 complete (100%)
 
 ## Phases
 
@@ -17,7 +17,7 @@ Phases: 5 of 6 complete (83%)
 | 3 | Rules Engine | 7/7 | ✅ Complete | 2026-10-11 |
 | 4 | Synonyms | 2/2 | ✅ Complete | 2026-10-11 |
 | 5 | Preview Sandbox | 1/1 | ✅ Complete | 2026-10-11 |
-| 6 | Widgets Package | 2/3 | In progress | - |
+| 6 | Widgets Package | 3/3 | ✅ Complete | 2026-10-11 |
 
 ## Phase Details
 
@@ -82,7 +82,7 @@ Phases: 5 of 6 complete (83%)
 **Plans:**
 - [x] 05-01 (complete 2026-10-11): Query tester compare mode — contexts + page size on Search, ContactGroups command, two configurable columns, context picker, rank-change markers
 
-### Phase 6: Widgets Package
+### Phase 6: Widgets Package ✅ (complete 2026-10-11)
 **Goal:** Optional `XperienceCommunity.Lucene.Suite.Widgets` package: HTTP events endpoint (MapLuceneSuiteEvents, rate-limited) over ISearchInteractionLogger, JS client implementing the client contract (tested against the shared vectors), tag helpers and Page Builder search widgets — gives xbk real Suite traffic.
 **Depends on:** Phases 2–5
 **Decisions (2026-10-11):** server-rendered widgets (no public search API); Search box + Results + Facets widgets; visitor contact groups as contexts (configurable); full contract JS client for custom UIs
@@ -90,7 +90,7 @@ Phases: 5 of 6 complete (83%)
 **Plans:**
 - [x] 06-01 (complete 2026-10-11): Package skeleton — rate-limited events endpoint, client-settings endpoint, sr= result reference, full contract JS client (shared vectors)
 - [x] 06-02 (complete 2026-10-11): Server-rendered search box, results and facets view components (one shared search per request, sid/seq continuation links, sr= result links, click beacons, toggle-link facets, contact-group contexts)
-- [ ] 06-03 (planned): Page Builder widgets (page-selector search box, results, filters with dimension labels), preview/edit-mode never tracked, contact-group DB test, CommunityProjects wiring + permanent Search page, end-to-end with real traffic
+- [x] 06-03 (complete 2026-10-11): Page Builder widgets (page-selector search box, results, filters with dimension labels), preview/edit-mode never tracked, contact-group DB test, CommunityProjects wiring + permanent Search page, end-to-end with real traffic
 
 ## Later Milestones
 
@@ -100,4 +100,4 @@ Phases: 5 of 6 complete (83%)
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-11 (Phase 5 complete)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-11 (Phase 6 complete — v0.1 complete in code)*

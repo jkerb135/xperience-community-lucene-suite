@@ -53,11 +53,13 @@ public static class LuceneSuiteWidgetsServiceCollectionExtensions
         services.TryAddSingleton<SuiteEventsRateLimiter>();
         services.TryAddSingleton<SuiteEventsPath>();
         services.TryAddSingleton<SuiteContactGroupContexts>();
+        services.TryAddSingleton<ISuitePreviewState, KenticoPreviewState>();
         services.TryAddSingleton(provider => new SuitePageSearch(
             provider.GetRequiredService<ISuiteSearchService>(),
             provider.GetRequiredService<ILuceneIndexManager>(),
             provider.GetRequiredService<SuiteContactGroupContexts>(),
             provider.GetRequiredService<SuiteEventsPath>(),
+            provider.GetRequiredService<ISuitePreviewState>(),
             provider.GetRequiredService<IOptions<SuiteWidgetsOptions>>(),
             provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<ILogger<SuitePageSearch>>()));

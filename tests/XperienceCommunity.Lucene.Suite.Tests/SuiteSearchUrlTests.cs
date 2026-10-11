@@ -208,6 +208,64 @@ public sealed class SuiteSearchUrlTests
     }
 
     [Fact]
+    public void PageSearch_InPreview_IsUntrackedWithoutContexts()
+    {
+        var (search, service) = PageSearch(preview: new SuitePreview(true, false));
+
+        var result = search.For(Context("?q=tea"), Index);
+
+        var request = Assert.Single(service.Requests);
+        Assert.Equal((false, 0), (request.TrackAnalytics, request.Contexts.Count));
+        Assert.Equal((true, false), (result.IsPreview, result.IsEditMode));
+    }
+
+    [Fact]
+    public void PageSearch_UnreadablePreviewState_FailsClosed()
+    {
+        var options = new SuiteWidgetsOptions();
+        var service = new RecordingSearch(null);
+        var search = new SuitePageSearch(service, new OneIndex(), new StubGroups(1, ["vip"]), new SuiteEventsPath(), new FixedPreview(null), Options.Create(options), TimeProvider.System, NullLogger<SuitePageSearch>.Instance);
+
+        var result = search.For(Context("?q=tea"), Index);
+
+        Assert.False(Assert.Single(service.Requests).TrackAnalytics);
+        Assert.True(result.IsPreview);
+    }
+
+    [Theory]
+    [InlineData(null, "")]
+    [InlineData("", "")]
+    [InlineData("ContentType = Content type", "ContentType=Content type")]
+    [InlineData("  A=1 \r\nno equals\n=orphan\nB=\nC = x = y\nA = 2", "A=2|C=x = y")]
+    public void ParseLabels_SkipsIncompleteLines_LastWins(string? text, string expected) =>
+        Assert.Equal(expected, string.Join("|", Widgets.Components.LuceneSuiteFacetsViewComponent.ParseLabels(text).Select(l => $"{l.Key}={l.Value}")));
+
+    [Fact]
+    public void WidgetsAssembly_IsDiscoverable_AndRegistersThreeUncachedWidgets()
+    {
+        var assembly = typeof(SuitePageSearch).Assembly;
+        // The attribute keeps the types internally, so read the constructor arguments as written.
+        var widgets = assembly.GetCustomAttributesData()
+            .Where(a => a.AttributeType == typeof(Kentico.PageBuilder.Web.Mvc.RegisterWidgetAttribute))
+            .Select(a => (
+                (string)a.ConstructorArguments[0].Value!,
+                ((Type)a.ConstructorArguments[1].Value!).Name,
+                ((Type)a.ConstructorArguments[3].Value!).Name,
+                (bool)a.NamedArguments.Single(n => n.MemberName == "AllowCache").TypedValue.Value!))
+            .OrderBy(w => w.Item1, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.NotNull(assembly.GetCustomAttributes(typeof(CMS.AssemblyDiscoverableAttribute), false).SingleOrDefault());
+        Assert.Equal(
+            [
+                ("XperienceCommunity.LuceneSuite.SearchBox", "LuceneSuiteSearchBoxWidget", "LuceneSuiteSearchBoxWidgetProperties", false),
+                ("XperienceCommunity.LuceneSuite.SearchFilters", "LuceneSuiteFiltersWidget", "LuceneSuiteFiltersWidgetProperties", false),
+                ("XperienceCommunity.LuceneSuite.SearchResults", "LuceneSuiteResultsWidget", "LuceneSuiteResultsWidgetProperties", false),
+            ],
+            widgets);
+    }
+
+    [Fact]
     public void ContactGroups_FilterLimitAndFailSafe()
     {
         string[] loaded = ["", "  ", new string('g', 101), .. Enumerable.Range(0, 60).Select(i => $"group{i:00}")];
@@ -230,13 +288,19 @@ public sealed class SuiteSearchUrlTests
         return context;
     }
 
-    private static (SuitePageSearch Search, RecordingSearch Service) PageSearch(Action<SuiteWidgetsOptions>? configure = null, Exception? fail = null)
+    private static (SuitePageSearch Search, RecordingSearch Service) PageSearch(Action<SuiteWidgetsOptions>? configure = null, Exception? fail = null, SuitePreview preview = default)
     {
         var options = new SuiteWidgetsOptions();
         configure?.Invoke(options);
         var service = new RecordingSearch(fail);
-        var search = new SuitePageSearch(service, new OneIndex(), new StubGroups(1, ["vip"]), new SuiteEventsPath(), Options.Create(options), TimeProvider.System, NullLogger<SuitePageSearch>.Instance);
+        var search = new SuitePageSearch(service, new OneIndex(), new StubGroups(1, ["vip"]), new SuiteEventsPath(), new FixedPreview(preview), Options.Create(options), TimeProvider.System, NullLogger<SuitePageSearch>.Instance);
         return (search, service);
+    }
+
+    /// <summary>A fixed preview state; null throws (unreadable state).</summary>
+    internal sealed class FixedPreview(SuitePreview? preview) : ISuitePreviewState
+    {
+        public SuitePreview Get(HttpContext context) => preview ?? throw new InvalidOperationException("no Kentico context");
     }
 
     private sealed class OutputCacheFeature(HttpContext httpContext) : IOutputCacheFeature

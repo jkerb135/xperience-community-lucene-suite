@@ -47,18 +47,22 @@ public sealed record LuceneSuitePageLink(int Page, string Href, bool Current);
 /// <summary>Hits, result count and pagination of the page's search, with tracked result links. Use as <c>&lt;vc:lucene-suite-results index-name="…" /&gt;</c>.</summary>
 public sealed class LuceneSuiteResultsViewComponent(SuitePageSearch search) : ViewComponent
 {
+    internal const string ViewPath = "~/Views/Shared/Components/LuceneSuiteResults/Default.cshtml";
     private const int PageWindow = 2;
 
     /// <param name="indexName">Kentico Lucene index to search.</param>
     /// <param name="titleField">Stored field holding the hit title.</param>
     /// <param name="urlField">Stored field holding the hit URL (Kentico stores "~/…" paths).</param>
     /// <param name="summaryField">Stored field holding a summary; none by default.</param>
-    public IViewComponentResult Invoke(string indexName, string titleField = "Title", string urlField = BaseDocumentProperties.URL, string? summaryField = null)
+    public IViewComponentResult Invoke(string indexName, string titleField = "Title", string urlField = BaseDocumentProperties.URL, string? summaryField = null) =>
+        View(ViewPath, Build(search, HttpContext, Url, indexName, titleField, urlField, summaryField));
+
+    internal static LuceneSuiteResultsModel Build(SuitePageSearch search, HttpContext context, IUrlHelper url, string indexName, string titleField, string urlField, string? summaryField)
     {
-        var result = search.For(HttpContext, indexName);
+        var result = search.For(context, indexName);
         var response = result.Response;
         int first = ((result.Url.Page - 1) * result.PageSize) + 1;
-        var hits = (response?.Hits ?? []).Select((hit, i) => ToHit(hit, first + i, result, titleField, urlField, summaryField)).ToList();
+        var hits = (response?.Hits ?? []).Select((hit, i) => ToHit(hit, first + i, result, url, context.Request, titleField, urlField, summaryField)).ToList();
 
         int totalPages = response is null ? 0 : (int)Math.Ceiling(Math.Min(response.TotalHits, SearchExecutor.MaxResultWindow) / (double)result.PageSize);
         int page = result.Url.Page;
@@ -67,7 +71,7 @@ public sealed class LuceneSuiteResultsViewComponent(SuitePageSearch search) : Vi
             .Select(p => new LuceneSuitePageLink(p, result.Url.PageLink(p, searchId, result.NextSequence), p == page))
             .ToList();
 
-        return View(new LuceneSuiteResultsModel(
+        return new LuceneSuiteResultsModel(
             result,
             hits,
             first,
@@ -75,14 +79,14 @@ public sealed class LuceneSuiteResultsViewComponent(SuitePageSearch search) : Vi
             pages,
             page > 1 && page <= totalPages ? result.Url.PageLink(page - 1, searchId, result.NextSequence) : null,
             page < totalPages ? result.Url.PageLink(page + 1, searchId, result.NextSequence) : null,
-            search.EventsUrl(HttpContext)));
+            result.IsPreview ? null : search.EventsUrl(context));
     }
 
-    private LuceneSuiteResultHit ToHit(SuiteSearchHit hit, int position, SuitePageSearchResult result, string titleField, string urlField, string? summaryField)
+    private static LuceneSuiteResultHit ToHit(SuiteSearchHit hit, int position, SuitePageSearchResult result, IUrlHelper url, HttpRequest request, string titleField, string urlField, string? summaryField)
     {
         string? raw = First(hit, urlField);
-        var (href, sameSite) = SafeLink(raw is not null && raw.StartsWith("~/", StringComparison.Ordinal) ? Url.Content(raw) : raw, Request);
-        bool tracked = href is not null && sameSite && hit.ItemGuid is not null && result.Response is not null;
+        var (href, sameSite) = SafeLink(raw is not null && raw.StartsWith("~/", StringComparison.Ordinal) ? url.Content(raw) : raw, request);
+        bool tracked = href is not null && sameSite && hit.ItemGuid is not null && result.Response is not null && !result.IsPreview;
         if (tracked)
         {
             href = QueryHelpers.AddQueryString(href!, SuiteResultReference.QueryParameter, SuiteResultReference.Format(result.Response!.SearchId, result.Sequence, position));

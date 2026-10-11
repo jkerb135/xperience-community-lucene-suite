@@ -14,8 +14,8 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phases 1–5 complete (5 of 6); next Phase 6 Widgets Package |
-| Last Updated | 2026-10-09 |
+| Status | v0.1 complete in code — Phases 1–6 complete (6 of 6); milestone review pending (.paul/APPROVAL-CHECKS.md #2, #3) |
+| Last Updated | 2026-10-11 |
 
 ## Requirements
 
@@ -56,8 +56,12 @@ Marketers tune, test and measure site search without a developer.
 
 - ✓ Preview sandbox: query tester Compare mode — Baseline vs Tuned columns with their own rules/synonyms switches and simulated contexts (Kentico contact groups by code name, gated on Contact groups → View, plus free text), rank-change markers and missing items — Phase 5 (05-01)
 
+- ✓ Optional Widgets package: rate-limited click/conversion endpoint (package-owned limiter) + client-settings endpoint, `sr=` result reference, dependency-free contract JS client proven against the shared vectors — Phase 6 (06-01)
+- ✓ Server-rendered search box, results and facets view components sharing one URL-driven search per request (sid/seq continuation, Sec-Fetch-Site gating, safe tracked result links, toggle-link facets, no-store, contact-group contexts) — Phase 6 (06-02)
+- ✓ Page Builder widgets (search box with results-page selector, results, filters with dimension labels); preview/edit mode never tracked; contact-group query DB-proven; CommunityProjects Site search page producing real Suite traffic — Phase 6 (06-03)
+
 ### Active (In Progress)
-- [ ] Phase 6 Widgets Package: optional events endpoint, JS client, tag helpers and Page Builder search widgets (not yet planned)
+- [ ] Milestone v0.1 review: .paul/APPROVAL-CHECKS.md #2 (06-02 markup/URL names) and #3 (06-03 widgets, host edits, facet value labels)
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -138,12 +142,16 @@ Marketers tune, test and measure site search without a developer.
 | Rule admin uses native Kentico listing/edit pages; custom React only for structured fields; page context reaches component commands via GetFormItems, never the client | Native look and permissions; trust boundary | 2026-10-11 | Active |
 | Synonyms: two-way + one-way, query-time variants weighted 0.8 below exact (a preference, not a guarantee), per index; rules and analytics see the original text | User decisions; no rebuild per edit; any ISearchQueryFactory keeps working | 2026-10-11 | Active |
 | Preview = compare mode inside the query tester; simulated contexts are the strings the site would send (membership not evaluated); contact groups need Kentico Contact groups → View | User decisions; no duplicate page; no cross-app data leak | 2026-10-11 | Active |
+| Widgets package: server-rendered view components + Page Builder widgets over one URL-driven search per request; page size and contact-group contexts are site-wide options; sr= always on same-site result links; preview/edit never tracked | User decisions (Phase 6); shared search makes per-widget settings conflict | 2026-10-11 | Active |
+| Package endpoints never reconfigure the host (own rate limiter; no AddRateLimiter/UseRateLimiter) | A library must not change host-wide middleware behaviour | 2026-10-11 | Active |
+| Human-verify checkpoints are deferred to .paul/APPROVAL-CHECKS.md and reviewed at milestone end | User decision | 2026-10-11 | Active |
 
 ## Success Metrics
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
 | Marketer creates a rule and sees it in preview without a deploy | Yes | Yes — query tester Compare mode with simulated contexts (05-01) | Met |
+| Real Suite traffic from the live site | Yes | Yes — CommunityProjects /site-search widgets record searches, continuations and clicks (06-03) | Met |
 | Search count dedup correct across web-farm nodes | Matches searchId count | - | Not started |
 | Search latency overhead of suite (rules + capture) | p95 < 10 ms | ≈ 8 ms p95 with 300 pins + 500 rules (Debug, 5 000 docs, 03-05) | On track |
 | Works on SaaS and multi-instance self-hosted | Yes | - | Not started |
@@ -169,4 +177,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 5*
+*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 6 (v0.1 complete in code)*
