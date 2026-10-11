@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XperienceCommunity.Lucene.Suite\XperienceCommunity.Lucene.Suite.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="js\**" />
+    <None Remove="js\**" />
+  </ItemGroup>
+</Project>

@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/XperienceCommunity.Lucene.Suite.Admin/XperienceCommunity.Lucene.Suite.Admin.csproj" />
     <Project Path="src/XperienceCommunity.Lucene.Suite/XperienceCommunity.Lucene.Suite.csproj" />
+    <Project Path="src/XperienceCommunity.Lucene.Suite.Widgets/XperienceCommunity.Lucene.Suite.Widgets.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/XperienceCommunity.Lucene.Suite.Tests/XperienceCommunity.Lucene.Suite.Tests.csproj" />

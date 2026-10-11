@@ -11,5 +11,6 @@
   <ItemGroup>
     <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Tests" />
     <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Admin" />
+    <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Widgets" />
   </ItemGroup>
 </Project>

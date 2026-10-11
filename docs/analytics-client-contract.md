@@ -6,7 +6,7 @@ The executable form of these rules is [`analytics-test-vectors.json`](analytics-
 
 ## Settings
 
-Every number below is a server setting, bound from the `LuceneSuite` configuration section (for example `appsettings.json`) and validated at startup. **A client must use the values the server is configured with, not these defaults.** The optional Widgets package will expose them to its JS client; a custom client must be kept in step by hand. The numbers in the rest of this page are the defaults.
+Every number below is a server setting, bound from the `LuceneSuite` configuration section (for example `appsettings.json`) and validated at startup. **A client must use the values the server is configured with, not these defaults.** The optional Widgets package serves them as JSON from `GET /lucenesuite/events/settings` (same names as the vectors' `settings`, plus `eventsUrl`); its JS client reads them with `loadSettings`. A client that does not use the package must be kept in step by hand. The numbers in the rest of this page are the defaults.
 
 | Setting | Default | Configuration key | Used by |
 |---|---|---|---|
@@ -19,6 +19,13 @@ Every number below is a server setting, bound from the `LuceneSuite` configurati
 Server-only settings (no client impact): `Enabled`, `QueueCapacity`, `FlushInterval`, `BatchSize` under `LuceneSuite:Analytics`; `Retention:RawRetention` (48 h; at least 1 day + 3 Ã— attribution window + flush interval + 5 min + rollup interval + 1 h), `Retention:RawHardLimit` (7 days; at least RawRetention), `Retention:DailyRetention` (25 months), `Retention:SubThresholdPruneAfter` (30 days), `Surfacing:MinSearches` (5), `Surfacing:MinDistinctDays` (2), `Job:RollupInterval` (15 min), `Job:MaxDaysPerRun` (7). Time spans use the .NET format, e.g. `"00:00:30"` or `"2.00:00:00"`.
 
 Two things are deliberately **not** configurable, because changing them would make stored daily history incomparable: days are UTC days (a logical search belongs to the UTC day of its first request; reports may convert for display), and the latency histogram buckets are fixed at 10, 25, 50, 100, 250, 500, 1000, 2500 and 5000 ms (inclusive upper bounds) plus an overflow bucket.
+
+## Widgets package
+
+`XperienceCommunity.Lucene.Suite.Widgets` implements the browser side of this page:
+
+- `services.AddLuceneSuiteWidgets()` and `app.MapLuceneSuiteEvents()` map `POST /lucenesuite/events` (body `{ "type": "click" | "conversion", searchId, sequence, itemGuid, position?, eventId? }`, JSON or `text/plain`, at most 1 KB; 202, or 400/413/429) and `GET /lucenesuite/events/settings`.
+- `_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite.js` is a dependency-free ES module: `createSearchTracker(settings).beforeSend(input, isSubmit, now)` implements §2, `sendClick`/`sendConversion` implement §3, and `formatResultReference`/`parseResultReference` handle the `sr` parameter (`SuiteResultReference` on the server). It is tested against the vectors.
 
 ## 1. Search requests
 
@@ -85,7 +92,7 @@ logger.LogConversion(searchId, sequence, itemGuid, position, eventId);  // a goa
 - Invalid arguments (empty GUIDs, `sequence < 1`, position out of range) throw `ArgumentException` synchronously. Return HTTP 400 for them. Storage problems are never thrown.
 - The logger skips bots, prefetch/prerender requests and disabled analytics on its own. It does **not** check whether the search or position really existed. The rollup checks that, and it only counts an interaction that arrives within the **attribution window** (1 hour) of the response it refers to, and a click only when its position was on the page that response returned.
 - Send clicks with `navigator.sendBeacon`, with a `fetch(..., { keepalive: true })` fallback, so that navigating away does not cancel them.
-- **Rate limiting is yours.** A custom endpoint must apply its own rate limit (for example ASP.NET Core's rate limiter, keyed in memory by IP, which is never stored). The optional Widgets package adds one to its endpoint.
+- **Rate limiting is yours.** A custom endpoint must apply its own rate limit (for example ASP.NET Core's rate limiter, keyed in memory by IP, which is never stored). The optional Widgets package adds one to its endpoint (`EventsPerMinute`, default 60 per IP; 0 turns it off when a proxy or CDN limits requests).
 
 ### Conversions on a later page
 

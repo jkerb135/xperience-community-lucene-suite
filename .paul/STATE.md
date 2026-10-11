@@ -5,15 +5,15 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package (ready to plan)
+**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package, 06-01 complete; next 06-02
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 6 of 6 (Widgets Package)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-11 — 05-01 unified; Phase 5 complete, transitioned to Phase 6
+Phase: 6 of 6 (Widgets Package) — In progress
+Plan: 06-01 complete
+Status: Ready for next PLAN (06-02)
+Last activity: 2026-10-11 — Unified 06-01 (06-01-SUMMARY.md)
 
 Progress:
 - Milestone: [████████░░] 83% (5 of 6 phases)
@@ -22,7 +22,7 @@ Progress:
 - Phase 3: [██████████] 100% (7/7 plans)
 - Phase 4: [██████████] 100% (2/2 plans)
 - Phase 5: [██████████] 100% (1/1 plans)
-- Phase 6: [░░░░░░░░░░] 0% (not planned)
+- Phase 6: [███░░░░░░░] 33% (1/3 plans)
 
 ## Loop Position
 
@@ -39,6 +39,9 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: 06-01 applied: Widgets package (Razor RCL) with package-owned per-IP limiter acquired in the handler (host RateLimiterOptions untouched, no UseRateLimiter); InternalsVisibleTo Widgets on core (reuses LogThrottle, MaxResultWindow); public API approved (/lucenesuite/events, /settings, sr=, JS exports incl. norm/osa/typo); C# pitfall: `cond ? null : Memory<byte>` yields empty Memory via byte[] conversion; node 24 `t.mock.property(globalThis, "navigator")` hangs → defineProperty | Phase 6 | 06-02 tag helpers use SuiteResultReference, SuiteClientSettings.EventsUrl and the _content asset |
+| 2026-10-11: Enterprise audit on 06-01-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 6 | Events endpoint owns its PartitionedRateLimiter (never touches host RateLimiterOptions, no UseRateLimiter dependency); EventsPerMinute 0 disables + throttled warning for proxy/CDN; bounded body read incl. chunked; eventId optional |
+| 2026-10-11: Phase 6 planning (user choices): server-rendered widgets (no public search API); Search box + Results + Facets as separate widgets; visitor contact groups passed as contexts (widget property, default on, only with a current contact); three plans (06-01 package + events endpoint + JS client, 06-02 tag helpers + server rendering, 06-03 Page Builder widgets + host wiring); full contract JS client built now despite server-rendered widgets continuing searches via server-rendered sid/seq links (user overrode the click-beacon-only recommendation) | Phase 6 | Last v0.1 phase |
 | 2026-10-11: 05-01 applied: kit breakpoints are md 1366–1919 / lg ≥ 1920 (use colsMd for desktop side-by-side; earlier colsLg-only tweaks apply from 1920 only); --color-text-high-emphasis = brand purple, body text = --color-text-default-on-light; contact groups gated with IApplicationPermissionEvaluator on ContactGroupsApplication.IDENTIFIER; rules-overhead perf test flaked once under parallel load (passes alone, 7.4–8.8 ms) | Phase 5 | Patterns for Phase 6 and later admin UI |
 | 2026-10-11: Enterprise audit on 05-01-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 5 | ContactGroups command also requires Kentico Contact groups View (no cross-app leak); rank by first occurrence per ItemGuid (multilingual); previews proven untracked; truncation flag at 500 |
 | 2026-10-11: Phase 5 planning (user choices): compare mode inside the query tester (no new page); contexts = contact groups (sent as code names) + free text; each column configurable (defaults Baseline = rules/synonyms off, Tuned = on); rank-change markers ↑/↓/New + missing items. Design-screen in PLAN: no npm MultiSelect → contact groups in a SidePanel Checkbox list; hit lists as focusable buttons (avoids Table row focus gap); one plan | Phase 5 | Closes the v0.1 tuning loop |
@@ -111,6 +114,7 @@ See PROJECT.md Key Decisions.
 | 04-02 audit deferrals: same term in several synonyms (no warning); Kind change without confirmation | 04-02 audit | S | KNOWN-LIMITATIONS |
 | Rules-overhead perf test (p95 < 10 ms) flaked once when the suite ran alongside the host and dev server; 7.4–8.8 ms alone | 05-01 APPLY | S | Watch; consider a CI-specific budget if it recurs |
 | 03-07 custom-data `<pre>` in the normal query tester uses the brand-purple token | 05-01 APPLY | S | KNOWN-LIMITATIONS; next change to the normal tester view |
+| Widgets: per-process rate limit, forgeable events, unfingerprinted JS asset; no NuGet metadata on either package | 06-01 audit / APPLY | S–M | KNOWN-LIMITATIONS; 06-02 asset versioning; release phase |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -133,7 +137,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01: all required skills invoked.
 
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
@@ -147,16 +151,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01: all required skills invok
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: e6852f0 feat(04-synonyms): Phase 4 complete
+Last commit: e16f909 feat(05-preview-sandbox): Phase 5 complete
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Phase 5 complete (05-01 unified), ready to plan Phase 6
-Next action: commit Phase 5 (on request), then /paul:plan for Phase 6 Widgets Package
-Resume file: .paul/ROADMAP.md
+Stopped at: 06-01 loop closed
+Next action: commit, then /paul:plan (06-02 tag helpers + server-rendered search box, results, facets)
+Resume file: .paul/phases/06-widgets-package/06-01-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

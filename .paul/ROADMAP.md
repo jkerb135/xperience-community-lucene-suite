@@ -17,7 +17,7 @@ Phases: 5 of 6 complete (83%)
 | 3 | Rules Engine | 7/7 | ✅ Complete | 2026-10-11 |
 | 4 | Synonyms | 2/2 | ✅ Complete | 2026-10-11 |
 | 5 | Preview Sandbox | 1/1 | ✅ Complete | 2026-10-11 |
-| 6 | Widgets Package | TBD | Not started | - |
+| 6 | Widgets Package | 1/3 | In progress | - |
 
 ## Phase Details
 
@@ -85,6 +85,12 @@ Phases: 5 of 6 complete (83%)
 ### Phase 6: Widgets Package
 **Goal:** Optional `XperienceCommunity.Lucene.Suite.Widgets` package: HTTP events endpoint (MapLuceneSuiteEvents, rate-limited) over ISearchInteractionLogger, JS client implementing the client contract (tested against the shared vectors), tag helpers and Page Builder search widgets — gives xbk real Suite traffic.
 **Depends on:** Phases 2–5
+**Decisions (2026-10-11):** server-rendered widgets (no public search API); Search box + Results + Facets widgets; visitor contact groups as contexts (configurable); full contract JS client for custom UIs
+
+**Plans:**
+- [x] 06-01 (complete 2026-10-11): Package skeleton — rate-limited events endpoint, client-settings endpoint, sr= result reference, full contract JS client (shared vectors)
+- [ ] 06-02: Tag helpers + server-rendered search box, results and facets (sid/seq continuation links, sr= result links, click beacons, contact-group contexts)
+- [ ] 06-03: Page Builder widgets + host wiring + end-to-end check with real traffic
 
 ## Later Milestones
 
