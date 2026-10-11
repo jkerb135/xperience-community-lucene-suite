@@ -5,29 +5,29 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 4 Synonyms (ready to plan)
+**Current focus:** v0.1 Tune & Capture — Phase 4 Synonyms, 04-01 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 4 of 6 (Synonyms)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-11 — 03-07 unified; Phase 3 complete, transitioned to Phase 4
+Phase: 4 of 6 (Synonyms) — Planning
+Plan: 04-01 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-11 — Audited .paul/phases/04-synonyms/04-01-PLAN.md (04-01-AUDIT.md)
 
 Progress:
 - Milestone: [█████░░░░░] 50% (3 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
 - Phase 3: [██████████] 100% (7/7 plans)
-- Phase 4: [░░░░░░░░░░] 0% (not planned)
+- Phase 4: [░░░░░░░░░░] 0% (0/2 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -37,6 +37,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: Enterprise audit on 04-01-PLAN.md. Applied 2 must-have, 5 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 4 | Fail-open covers variant query building (rerun without rules+synonyms); variant boost multiplied not overwritten; one MatchKey for entries and queries; weight documented as preference |
+| 2026-10-11: Phase 4 planning (user choices): two-way + one-way synonyms (no replace type); synonym matches slightly below exact (weight 0.8, configurable); per index under Search tuning (Manage synonyms); two plans — 04-01 model + installer v5 + query expansion, 04-02 admin + query tester. Expansion = DisjunctionMaxQuery of factory(original) and single-substitution variants (works with any ISearchQueryFactory); rules and analytics see the original text | Phase 4 | 04-02 builds admin on the 03-06/03-07 patterns |
 | 2026-10-11: 03-07 applied: component commands get the page's index via a RuleEditPageBase.GetFormItems override (31.9.1 ComponentCommand calls it); cross-field picker exclusion via FormComponentProps.fieldValues; ActionsJson built from the form only (serializer disallows unknown members); SidePanel content focused by mount ref; GetPath is admin-root-relative → client prefixes admin base | Phase 3 | Patterns for Phase 4 admin |
 | 2026-10-11: Enterprise audit on 03-07-PLAN.md. Applied 2 must-have, 2 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 3 | Picker de-duplicates by ItemGuid (multilingual); commands fail closed (unresolved index, Describe cap 350); pinned+hidden refused on the Hides field via a cross-field rule; fired-rule names in one query |
 | 2026-10-11: 03-07 planning (user choices): one standard plan (pins/hides editor + query tester); query tester gets an "Apply rules" switch. Design-screen in PLAN: picker = SidePanel with labelled Input + Checkbox list (npm lacks SearchInput; Table rows not focusable); core SuiteItemLookup internal with InternalsVisibleTo Admin; index name for component commands from the page, never the client | Phase 3 | Last Phase 3 plan; checkpoint closes 03-02/03-06 verification gaps |
@@ -131,16 +133,16 @@ Plans 03-03, 03-04, 03-05, 03-07: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log -1` (Phase 3 transition commit pending user request)
+Last commit: 33839fb feat(03-rules-engine): Phase 3 complete
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Phase 3 complete (03-07 unified), ready to plan Phase 4
-Next action: commit Phase 3 (on request), then /paul:plan for Phase 4 Synonyms
-Resume file: .paul/ROADMAP.md
+Stopped at: Plan 04-01 audited
+Next action: /paul:apply .paul/phases/04-synonyms/04-01-PLAN.md
+Resume file: .paul/phases/04-synonyms/04-01-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v4). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v4) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

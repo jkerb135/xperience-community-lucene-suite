@@ -15,7 +15,7 @@ Phases: 3 of 6 complete (50%)
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
 | 2 | Event Capture | 4/4 | ✅ Complete | 2026-10-09 |
 | 3 | Rules Engine | 7/7 | ✅ Complete | 2026-10-11 |
-| 4 | Synonyms | TBD | Not started | - |
+| 4 | Synonyms | 0/2 | Planning | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
 | 6 | Widgets Package | TBD | Not started | - |
 
@@ -63,10 +63,15 @@ Phases: 3 of 6 complete (50%)
 - [x] 03-06: Rules admin UI (complete 2026-10-11) — native listing + edit pages, conditions/boosts custom form components (server-validated), custom data; Manage rules permission (design via /xbyk-admin-ui:design-screen)
 - [x] 03-07 (complete 2026-10-11): Pins/hides editor (index-search item picker, respect-filters toggle) + query tester shows fired rules, pinned marker, rules-not-applied warning (split from 03-06, 2026-10-11)
 
-### Phase 4: Synonyms
+### Phase 4: Synonyms (planning)
 **Goal:** Query-time synonym rewrite managed in admin.
 **Admin UI:** design via /xbyk-admin-ui:design-screen (SPECIAL-FLOWS)
 **Depends on:** Phase 1
+**Decisions (2026-10-11):** two-way + one-way; synonym matches weighted below exact (0.8); per index; two plans
+
+**Plans:**
+- [ ] 04-01: Synonym model (LuceneSuite.Synonym, installer v5), strict serializer, cached provider, pure expansion engine, search integration (weighted DisMax variants, fail-open, AppliedSynonyms)
+- [ ] 04-02: Synonyms admin (listing + editor, Manage synonyms) + query tester shows applied synonyms
 
 ### Phase 5: Preview Sandbox
 **Goal:** Side-by-side results with and without rules under a simulated contact-group/visitor context.
