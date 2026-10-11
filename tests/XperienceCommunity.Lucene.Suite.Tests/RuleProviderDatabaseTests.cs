@@ -72,6 +72,33 @@ public sealed class RuleProviderDatabaseTests
         }
     }
 
+    [DatabaseFact]
+    public void Ownership_FindsARuleOnlyInItsOwnIndex()
+    {
+        var services = KenticoServices.Value;
+        new AnalyticsModuleInstaller(
+            services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
+            services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            NullLogger<AnalyticsModuleInstaller>.Instance).Install();
+        var infos = services.GetRequiredService<IInfoProvider<RuleInfo>>();
+        Cleanup();
+        try
+        {
+            var rule = Rule(Index, priority: 1);
+            infos.Set(rule);
+
+            Assert.NotNull(Admin.UIPages.RuleOwnership.Find(infos, rule.RuleID, Index));
+            Assert.NotNull(Admin.UIPages.RuleOwnership.Find(infos, rule.RuleID, Index.ToUpperInvariant()));
+            Assert.Null(Admin.UIPages.RuleOwnership.Find(infos, rule.RuleID, OtherIndex));
+            Assert.Null(Admin.UIPages.RuleOwnership.Find(infos, rule.RuleID, string.Empty));
+            Assert.Null(Admin.UIPages.RuleOwnership.Find(infos, int.MaxValue, Index));
+        }
+        finally
+        {
+            Cleanup();
+        }
+    }
+
     private static RuleInfo Rule(string index, int priority) => new()
     {
         IndexName = index,

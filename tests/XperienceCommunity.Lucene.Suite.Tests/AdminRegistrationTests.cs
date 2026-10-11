@@ -54,7 +54,10 @@ public class AdminRegistrationTests
         Assert.Equal(typeof(SiteSearchApplication), parents[typeof(SiteSearchIndexListingPage)]);
         Assert.Equal(typeof(SiteSearchIndexListingPage), parents[typeof(SearchTuningSectionPage)]);
         Assert.Equal(typeof(SearchTuningSectionPage), parents[typeof(QueryTesterPage)]);
-        Assert.Equal(3, parents.Count);
+        Assert.Equal(typeof(SearchTuningSectionPage), parents[typeof(RuleListingPage)]);
+        Assert.Equal(typeof(RuleListingPage), parents[typeof(RuleCreatePage)]);
+        Assert.Equal(typeof(RuleListingPage), parents[typeof(RuleEditPage)]);
+        Assert.Equal(6, parents.Count);
     }
 
     [Fact]
@@ -68,8 +71,40 @@ public class AdminRegistrationTests
     [Fact]
     public void Pages_EvaluateViewAndTheSearchCommandRequiresView()
     {
-        Assert.All(Pages, p => Assert.Equal(SystemPermissions.VIEW, p.Type.GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission));
+        Assert.All(Pages.Where(p => p.Type != typeof(RuleCreatePage)), p => Assert.Equal(SystemPermissions.VIEW, p.Type.GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission));
         Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.Search))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
+    }
+
+    [Fact]
+    public void RulePages_AreRegisteredWithNativeTemplates()
+    {
+        var listing = Assert.Single(Pages, p => p.Type == typeof(RuleListingPage));
+        Assert.Equal(("rules", TemplateNames.LISTING, Icons.ListBullets), (listing.Slug, listing.TemplateName, listing.Icon));
+        Assert.True(listing.Order > Assert.Single(Pages, p => p.Type == typeof(QueryTesterPage)).Order);
+
+        var create = Assert.Single(Pages, p => p.Type == typeof(RuleCreatePage));
+        Assert.Equal(("create", TemplateNames.EDIT), (create.Slug, create.TemplateName));
+
+        var edit = Assert.Single(Pages, p => p.Type == typeof(RuleEditPage));
+        Assert.Equal((PageParameterConstants.PARAMETERIZED_SLUG, TemplateNames.EDIT), (edit.Slug, edit.TemplateName));
+    }
+
+    [Fact]
+    public void RuleChanges_RequireManageRules_NotSystemPermissionsTheAppLacks()
+    {
+        // Literal, not the constant: role grants are stored under this name.
+        const string manageRules = "LuceneSuite.ManageRules";
+
+        Assert.Equal(manageRules, typeof(RuleCreatePage).GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission);
+        Assert.Equal(manageRules, Command(typeof(RuleListingPage), nameof(RuleListingPage.Delete)));
+        foreach (var page in new[] { typeof(RuleCreatePage), typeof(RuleEditPage) })
+        {
+            Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.Submit)));
+            Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.Change)));
+        }
+
+        static string? Command(Type page, string method) =>
+            page.GetMethods().Single(m => m.Name == method && m.GetCustomAttribute<PageCommandAttribute>() is not null).GetCustomAttribute<PageCommandAttribute>()!.Permission;
     }
 
     [Fact]
