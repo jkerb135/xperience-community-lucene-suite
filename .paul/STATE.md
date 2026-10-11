@@ -5,15 +5,15 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 4 Synonyms, 04-01 complete; next 04-02 (admin + query tester)
+**Current focus:** v0.1 Tune & Capture — Phase 4 Synonyms, 04-02 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 4 of 6 (Synonyms) — In progress
-Plan: 04-01 complete
-Status: Ready for next PLAN (04-02)
-Last activity: 2026-10-11 — 04-01 unified (.paul/phases/04-synonyms/04-01-SUMMARY.md)
+Phase: 4 of 6 (Synonyms) — Planning
+Plan: 04-02 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-11 — Audited .paul/phases/04-synonyms/04-02-PLAN.md (04-02-AUDIT.md)
 
 Progress:
 - Milestone: [█████░░░░░] 50% (3 of 6 phases)
@@ -27,7 +27,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -37,6 +37,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: Enterprise audit on 04-02-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 4 | Typed-but-unadded term committed on blur (no silent loss); SerializeTerms keeps non-ASCII literal; shared MatchKey vectors C#/node; chip list semantics; synonym ownership DB test |
+| 2026-10-11: 04-02 planning (user choices): terms edited in a custom tag/chip component (not a native text area); query tester gets an "Apply synonyms" switch (SuiteSearchRequest.ApplySynonyms, default true); applied synonyms link to their edit pages. Design-screen in PLAN: native ListingPage/ModelEditPage with RadioGroup Kind + VisibleIfEqualTo Input; npm Tag remove buttons are focusable and labelled, no invalid state → per-term error lines | Phase 4 | Last Phase 4 plan |
 | 2026-10-11: 04-01 applied: synonyms expand through ISearchQueryFactory as DisjunctionMaxQuery(0) variants (boost × 0.8); one MatchKey for terms and queries; shared fail-open rerun now sets RulesFailed only when rules fired; host "mill" example shows weight is a preference (user kept 0.8); installer v5 on comm_projects | Phase 4 | 04-02 admin edits SynonymInfo via SynonymSerializer paths; query tester adds AppliedSynonyms |
 | 2026-10-11: Enterprise audit on 04-01-PLAN.md. Applied 2 must-have, 5 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 4 | Fail-open covers variant query building (rerun without rules+synonyms); variant boost multiplied not overwritten; one MatchKey for entries and queries; weight documented as preference |
 | 2026-10-11: Phase 4 planning (user choices): two-way + one-way synonyms (no replace type); synonym matches slightly below exact (weight 0.8, configurable); per index under Search tuning (Manage synonyms); two plans — 04-01 model + installer v5 + query expansion, 04-02 admin + query tester. Expansion = DisjunctionMaxQuery of factory(original) and single-substitution variants (works with any ISearchQueryFactory); rules and analytics see the original text | Phase 4 | 04-02 builds admin on the 03-06/03-07 patterns |
@@ -136,16 +138,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 33839fb feat(03-rules-engine): Phase 3 complete
+Last commit: f319be0 feat(04-synonyms): query-time synonyms engine (plan 04-01)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: 04-01 unified
-Next action: commit 04-01 (on request), then /paul:plan for 04-02 (synonyms admin + query tester; design-screen required)
-Resume file: .paul/phases/04-synonyms/04-01-SUMMARY.md
+Stopped at: Plan 04-02 audited
+Next action: /paul:apply .paul/phases/04-synonyms/04-02-PLAN.md
+Resume file: .paul/phases/04-synonyms/04-02-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
