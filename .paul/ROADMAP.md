@@ -14,7 +14,7 @@ Phases: 2 of 6 complete (33%)
 |-------|------|-------|--------|-----------|
 | 1 | Foundation | 3/3 | ✅ Complete | 2026-10-09 |
 | 2 | Event Capture | 4/4 | ✅ Complete | 2026-10-09 |
-| 3 | Rules Engine | 3/5 | In progress | - |
+| 3 | Rules Engine | 4/6 | In progress | - |
 | 4 | Synonyms | TBD | Not started | - |
 | 5 | Preview Sandbox | TBD | Not started | - |
 | 6 | Widgets Package | TBD | Not started | - |
@@ -48,7 +48,7 @@ Phases: 2 of 6 complete (33%)
 - [x] 02-03: Merge engine — configurable options + validation, SearchDaily class (installer v3), pure rollup engine, parameterized vectors (complete 2026-10-09)
 - [x] 02-04: Job & retention — hosted single-runner job, watermark, idempotent persistence, raw/daily purge, sub-threshold fold into (other), E2E + volume on a disposable DB (complete 2026-10-09)
 
-### Phase 3: Rules Engine (in progress, 3/5)
+### Phase 3: Rules Engine (in progress, 4/6)
 **Goal:** Marketers pin/boost/bury/hide/attach data by query, facets and context.
 **Depends on:** Phase 1
 **Research:** Done (search-merchandising-standards.md)
@@ -58,8 +58,9 @@ Phases: 2 of 6 complete (33%)
 - [x] 03-01: Placement & permissions — Site Search app, custom permissions, move section/query tester, role checkpoint (complete 2026-10-09)
 - [x] 03-02: Query tester design & state fixes — stuck facets, request handling, kit layout/states/side panel, content-hub Filters panel, a11y, C# polish; design validation made required (complete 2026-10-10)
 - [x] 03-03: Rule model + pure engine — JSON model + strict validator, pure engine, LuceneSuite.Rule (installer v4) (complete 2026-10-10)
-- [ ] 03-04: Search integration — rules hook, boost/bury rewrite, pin/hide post-processing, contexts, cache invalidation, overhead
-- [ ] 03-05: Rules admin UI — listing, structured condition editor (JSON-backed, not ConditionBuilder), content picker pins, query tester shows fired rules (design via /xbyk-admin-ui:design-screen)
+- [x] 03-04: Search integration (complete 2026-10-10) — request contexts + ApplyRules, cached RuleProvider (web-farm invalidation, invalid rules logged), hide via query exclusion, multiplicative boost/bury, fired rules + userData in response, overhead
+- [ ] 03-05: Pins — placement across pages, respect-filters check, totals, pinned flag on hits (split from 03-04, 2026-10-10)
+- [ ] 03-06: Rules admin UI — listing, structured condition editor (JSON-backed, not ConditionBuilder), content picker pins, query tester shows fired rules (design via /xbyk-admin-ui:design-screen)
 
 ### Phase 4: Synonyms
 **Goal:** Query-time synonym rewrite managed in admin.
@@ -83,4 +84,4 @@ Phases: 2 of 6 complete (33%)
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-10 after 03-02*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-10 (03-04 split; pins = 03-05, admin UI = 03-06)*
