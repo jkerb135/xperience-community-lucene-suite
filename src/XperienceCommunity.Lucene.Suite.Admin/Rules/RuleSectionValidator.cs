@@ -16,6 +16,12 @@ public enum RuleJsonSection
 
     /// <summary>The userData object inside actions.</summary>
     UserData,
+
+    /// <summary>The pins array inside actions.</summary>
+    Pins,
+
+    /// <summary>The hides array inside actions.</summary>
+    Hides,
 }
 
 /// <summary>Validates one field's JSON with <see cref="RuleSerializer"/>, so the editor and the engine share one set of rules.</summary>
@@ -33,13 +39,13 @@ internal static class RuleSectionValidator
                 return Only(RuleSerializer.Parse(Placeholder, json, """{"userData":{}}"""), "conditions");
 
             case RuleJsonSection.Boosts:
-                if (!TryParse(string.IsNullOrWhiteSpace(json) ? "[]" : json, out var boosts))
-                {
-                    return [new RuleError("actions.boosts", "Boosts are not valid JSON.")];
-                }
+                return ActionArray(json, "boosts", "Boosts");
 
-                var withBoosts = new JsonObject { ["boosts"] = boosts, ["userData"] = new JsonObject() };
-                return Only(RuleSerializer.Parse(Placeholder, "[]", withBoosts.ToJsonString()), "actions.boosts");
+            case RuleJsonSection.Pins:
+                return ActionArray(json, "pins", "Pins");
+
+            case RuleJsonSection.Hides:
+                return ActionArray(json, "hides", "Hidden items");
 
             case RuleJsonSection.UserData:
                 if (string.IsNullOrWhiteSpace(json))
@@ -58,6 +64,18 @@ internal static class RuleSectionValidator
             default:
                 throw new ArgumentOutOfRangeException(nameof(section), section, null);
         }
+    }
+
+    private static IReadOnlyList<RuleError> ActionArray(string? json, string name, string label)
+    {
+        if (!TryParse(string.IsNullOrWhiteSpace(json) ? "[]" : json, out var array))
+        {
+            return [new RuleError("actions." + name, $"{label} are not valid JSON.")];
+        }
+
+        // Placeholder custom data keeps the "no actions" rule from firing for an empty list.
+        var actions = new JsonObject { [name] = array, ["userData"] = new JsonObject() };
+        return Only(RuleSerializer.Parse(Placeholder, "[]", actions.ToJsonString()), "actions." + name);
     }
 
     private static IReadOnlyList<RuleError> Only(RuleParseResult result, string root) =>

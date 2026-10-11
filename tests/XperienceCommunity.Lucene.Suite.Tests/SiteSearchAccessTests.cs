@@ -1,9 +1,11 @@
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Lucene.Core.Indexing;
 
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
+using XperienceCommunity.Lucene.Suite.Search;
 
 namespace XperienceCommunity.Lucene.Suite.Tests;
 
@@ -52,7 +54,7 @@ public class SiteSearchAccessTests
         Func<Task<PageValidationResult>>[] validations =
         [
             new SearchTuningSectionPage(indexes) { IndexIdentifier = 404 }.ValidatePage,
-            new QueryTesterPage(indexes, null!, null!, null!) { IndexIdentifier = 404 }.ValidatePage,
+            new QueryTesterPage(indexes, null!, null!, null!, null!, null!) { IndexIdentifier = 404 }.ValidatePage,
         ];
 
         foreach (var validate in validations)
@@ -61,6 +63,21 @@ public class SiteSearchAccessTests
             Assert.False(result.IsValid);
             Assert.Equal(SearchTuningSectionPage.IndexMissingMessageKey, result.ErrorMessageKey);
         }
+    }
+
+    [Fact]
+    public void QueryTester_ListsFiredRulesInRunOrder_WithoutALinkForDeletedRules()
+    {
+        var response = new SuiteSearchResponse([], 0, [], TimeSpan.Zero)
+        {
+            FiredRuleIds = [9, 3],
+            UserData = [new SuiteRuleUserData(3, JsonDocument.Parse("""{"banner":"x"}""").RootElement)],
+        };
+
+        var rules = QueryTesterPage.FiredRules(response, new Dictionary<int, string> { [3] = "Coffee" }, id => $"/rules/{id}");
+
+        Assert.Equal([new QueryTesterFiredRule(9, null, null, null)], rules.Take(1));
+        Assert.Equal((3, "Coffee", "/rules/3", "x"), (rules[1].RuleId, rules[1].Name, rules[1].EditUrl, rules[1].UserData!.Value.GetProperty("banner").GetString()));
     }
 
     private sealed class FakeIndexManager : ILuceneIndexManager

@@ -1,3 +1,6 @@
+using System.Text.Json;
+
+using CMS.DataEngine;
 using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
@@ -7,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
+using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Search;
 
 [assembly: UIPage(
@@ -26,7 +30,9 @@ public sealed class QueryTesterPage(
     ILuceneIndexManager indexManager,
     IServiceProvider serviceProvider,
     ISuiteSearchService searchService,
-    IOptions<SuiteSearchOptions> options) : Page<QueryTesterClientProperties>
+    IOptions<SuiteSearchOptions> options,
+    IInfoProvider<RuleInfo> rules,
+    IPageLinkGenerator pageLinkGenerator) : Page<QueryTesterClientProperties>
 {
     // Mirror SearchExecutor's limits so the pager never requests a rejected window.
     private const int PageSize = 10;
@@ -59,14 +65,16 @@ public sealed class QueryTesterPage(
     {
         try
         {
+            string indexName = GetIndex().IndexName;
             var response = searchService.Search(new SuiteSearchRequest
             {
-                IndexName = GetIndex().IndexName,
+                IndexName = indexName,
                 Query = arguments.Query,
                 Facets = (arguments.Facets ?? []).ToDictionary(f => f.Key, f => (IReadOnlyList<string>)(f.Value ?? [])),
                 Page = arguments.Page,
                 PageSize = PageSize,
                 TrackAnalytics = false,
+                ApplyRules = arguments.ApplyRules,
             });
 
             return Task.FromResult(ResponseFrom(new QueryTesterResult
@@ -75,6 +83,8 @@ public sealed class QueryTesterPage(
                 TotalHits = response.TotalHits,
                 Facets = response.Facets,
                 ElapsedMilliseconds = response.Elapsed.TotalMilliseconds,
+                RulesFailed = response.RulesFailed,
+                FiredRules = FiredRules(response, RuleNames(response.FiredRuleIds, indexName), EditUrl),
             }));
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
@@ -98,6 +108,29 @@ public sealed class QueryTesterPage(
             ? exception.Message[..^suffix.Length]
             : exception.Message;
     }
+
+    /// <summary>Fired rules in run order, with their custom data; a rule missing from <paramref name="names"/> was deleted since and gets no name or link.</summary>
+    internal static IReadOnlyList<QueryTesterFiredRule> FiredRules(SuiteSearchResponse response, IReadOnlyDictionary<int, string> names, Func<int, string> editUrl) =>
+        [.. response.FiredRuleIds.Select(id => new QueryTesterFiredRule(
+            id,
+            names.GetValueOrDefault(id),
+            names.ContainsKey(id) ? editUrl(id) : null,
+            response.UserData.FirstOrDefault(data => data.RuleId == id)?.Data))];
+
+    private Dictionary<int, string> RuleNames(IReadOnlyList<int> ids, string indexName) =>
+        ids.Count == 0
+            ? []
+            : rules.Get()
+                .WhereIn(nameof(RuleInfo.RuleID), [.. ids])
+                .WhereEquals(nameof(RuleInfo.IndexName), indexName)
+                .Columns(nameof(RuleInfo.RuleID), nameof(RuleInfo.DisplayName))
+                .ToDictionary(rule => rule.RuleID, rule => rule.DisplayName);
+
+    private string EditUrl(int ruleId) => pageLinkGenerator.GetPath<RuleEditPage>(new PageParameterValues
+    {
+        { typeof(SearchTuningSectionPage), IndexIdentifier },
+        { typeof(RuleEditPage), ruleId },
+    });
 
     private LuceneIndex GetIndex() =>
         indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.");
@@ -130,6 +163,9 @@ public sealed class QueryTesterArguments
 
     /// <summary>Selected facet values per dimension.</summary>
     public Dictionary<string, List<string>>? Facets { get; set; }
+
+    /// <summary>Whether rules apply to the search.</summary>
+    public bool ApplyRules { get; set; } = true;
 }
 
 /// <summary>Result of the query tester's Search command.</summary>
@@ -149,4 +185,17 @@ public sealed class QueryTesterResult
 
     /// <summary>Validation message when the request was rejected; otherwise null.</summary>
     public string? Error { get; init; }
+
+    /// <summary>True when rules could not be applied, so these results are unruled.</summary>
+    public bool RulesFailed { get; init; }
+
+    /// <summary>Rules that fired, in run order.</summary>
+    public IReadOnlyList<QueryTesterFiredRule> FiredRules { get; init; } = [];
 }
+
+/// <summary>A rule that fired for a query tester search.</summary>
+/// <param name="RuleId">Rule identifier.</param>
+/// <param name="Name">Display name; null when the rule was deleted since.</param>
+/// <param name="EditUrl">Path of the rule's edit page; null when the rule was deleted since.</param>
+/// <param name="UserData">Custom data the rule returned, or null.</param>
+public sealed record QueryTesterFiredRule(int RuleId, string? Name, string? EditUrl, JsonElement? UserData);

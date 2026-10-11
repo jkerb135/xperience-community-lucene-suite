@@ -67,3 +67,47 @@ export const latestRequest = () => {
     return { latest: mine === current, value };
   };
 };
+
+export interface FiredRule {
+  readonly ruleId: number;
+  readonly name: string | null;
+  readonly editUrl: string | null;
+  readonly userData: unknown;
+}
+
+export interface PinnableHit {
+  readonly pinnedByRuleId?: number | null;
+}
+
+const ruleName = (rule: Pick<FiredRule, "ruleId" | "name"> | undefined, ruleId: number) => rule?.name ?? `Rule ${ruleId}`;
+
+/**
+ * The rule's edit link inside the admin: the server's path is relative to the admin root, so the root is taken
+ * from the current page's path (everything before the link's first segment).
+ */
+export const adminHref = (editUrl: string, currentPath: string) => {
+  const firstSegment = editUrl.split("/").slice(0, 2).join("/") + "/";
+  const at = currentPath.indexOf(firstSegment);
+  return (at > 0 ? currentPath.slice(0, at) : "") + editUrl;
+};
+
+/** Fired rules as the query tester lists them; a rule deleted since has no name or link. */
+export const firedRuleRows = (rules: readonly FiredRule[], currentPath: string) =>
+  rules.map((rule) => ({
+    ruleId: rule.ruleId,
+    label: ruleName(rule, rule.ruleId),
+    href: rule.name !== null && rule.editUrl ? adminHref(rule.editUrl, currentPath) : null,
+    userData: rule.userData === null || rule.userData === undefined ? null : JSON.stringify(rule.userData, null, 2),
+  }));
+
+/** Name of the rule that pinned the hit, or null for an organic hit. */
+export const pinningRuleName = (hit: PinnableHit, rules: readonly FiredRule[]) =>
+  hit.pinnedByRuleId === null || hit.pinnedByRuleId === undefined
+    ? null
+    : ruleName(rules.find((rule) => rule.ruleId === hit.pinnedByRuleId), hit.pinnedByRuleId);
+
+/** "Pinned · <rule name>" for a pinned hit, else an empty string. */
+export const pinnedLabel = (hit: PinnableHit, rules: readonly FiredRule[]) => {
+  const name = pinningRuleName(hit, rules);
+  return name === null ? "" : `Pinned · ${name}`;
+};

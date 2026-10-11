@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { humanizeFieldName, latestRequest, mergeSelectedIntoFacets, toggleSelection, visibleValues } from "./state.ts";
+import {
+  adminHref,
+  firedRuleRows,
+  humanizeFieldName,
+  latestRequest,
+  mergeSelectedIntoFacets,
+  pinnedLabel,
+  toggleSelection,
+  visibleValues,
+} from "./state.ts";
 
 test("selected values missing from the response stay listed with count 0", () => {
   const merged = mergeSelectedIntoFacets(
@@ -60,4 +69,23 @@ test("only the latest request is applied, and older ones are aborted", async () 
 test("a failed request resolves as undefined instead of throwing", async () => {
   const result = await latestRequest()(() => Promise.reject(new Error("network")));
   assert.deepEqual(result, { latest: true, value: undefined });
+});
+
+test("fired rules link inside the admin root; a deleted rule shows its id without a link", () => {
+  const rules = [
+    { ruleId: 3, name: "Coffee", editUrl: "/site-search/indexes/4/rules/3", userData: { banner: "x" } },
+    { ruleId: 9, name: null, editUrl: null, userData: null },
+  ];
+  assert.deepEqual(firedRuleRows(rules, "/admin/site-search/indexes/4/query-tester"), [
+    { ruleId: 3, label: "Coffee", href: "/admin/site-search/indexes/4/rules/3", userData: JSON.stringify({ banner: "x" }, null, 2) },
+    { ruleId: 9, label: "Rule 9", href: null, userData: null },
+  ]);
+  assert.equal(adminHref("/site-search/indexes/4/rules/3", "/site-search/indexes/4/query-tester"), "/site-search/indexes/4/rules/3");
+});
+
+test("pinned label names the pinning rule", () => {
+  const rules = [{ ruleId: 3, name: "Coffee", editUrl: null, userData: null }];
+  assert.equal(pinnedLabel({ pinnedByRuleId: 3 }, rules), "Pinned · Coffee");
+  assert.equal(pinnedLabel({ pinnedByRuleId: 7 }, rules), "Pinned · Rule 7");
+  assert.equal(pinnedLabel({ pinnedByRuleId: null }, rules), "");
 });

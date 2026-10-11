@@ -9,6 +9,7 @@ import {
   CalloutType,
   CellType,
   Checkbox,
+  Cols,
   Column,
   ColumnContentType,
   Headline,
@@ -16,12 +17,16 @@ import {
   Icon,
   Inline,
   Input,
+  LinkButton,
+  NotificationBarWarning,
   Pagination,
   Row,
   SidePanel,
   SidePanelSize,
   Spacing,
   Stack,
+  Switch,
+  SwitchSize,
   Table,
   Tag,
   TextWithLabel,
@@ -30,13 +35,17 @@ import {
   type TableRow,
 } from "@kentico/xperience-admin-components";
 import {
+  firedRuleRows,
   humanizeFieldName,
   latestRequest,
   mergeSelectedIntoFacets,
+  pinnedLabel,
+  pinningRuleName,
   toggleSelection,
   visibleValues,
   type Facet,
   type FacetSelection,
+  type FiredRule,
 } from "./state";
 
 interface QueryTesterProps {
@@ -50,6 +59,7 @@ interface Hit {
   readonly itemGuid: string | null;
   readonly score: number;
   readonly fields: Record<string, string[]>;
+  readonly pinnedByRuleId?: number | null;
 }
 
 interface SearchResult {
@@ -58,6 +68,8 @@ interface SearchResult {
   readonly facets: Facet[];
   readonly elapsedMilliseconds: number;
   readonly error: string | null;
+  readonly rulesFailed: boolean;
+  readonly firedRules: FiredRule[];
 }
 
 const collapsedFacetValues = 5;
@@ -97,6 +109,8 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
   const [expandedFacets, setExpandedFacets] = useState<Record<string, boolean>>({});
   const [detail, setDetail] = useState<number>();
   const [draft, setDraft] = useState<FacetSelection>();
+  const [applyRules, setApplyRules] = useState(true);
+  const applyRulesRef = useRef(true);
   const tableArea = useRef<HTMLDivElement>(null);
   const filterButton = useRef<HTMLButtonElement>(null);
 
@@ -104,9 +118,9 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
     async (searchQuery: string, searchPage: number, facets: FacetSelection) => {
       setInProgress(true);
       const { latest, value } = await request((abort) =>
-        executeCommand<SearchResult, { query: string; page: number; facets: FacetSelection }>(
+        executeCommand<SearchResult, { query: string; page: number; facets: FacetSelection; applyRules: boolean }>(
           "Search",
-          { query: searchQuery, page: searchPage, facets },
+          { query: searchQuery, page: searchPage, facets, applyRules: applyRulesRef.current },
           undefined,
           abort,
         ),
@@ -140,6 +154,12 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
     void search(submittedQuery, 1, next);
   };
 
+  const toggleRules = (value: boolean) => {
+    applyRulesRef.current = value;
+    setApplyRules(value);
+    void search(submittedQuery, page, selection);
+  };
+
   const closeDetail = () => {
     setDetail(undefined);
     // The npm Table's row button is display: contents and cannot take focus, so focus returns to the table itself.
@@ -156,11 +176,19 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
 
   const hits = result?.hits ?? [];
   const firstField = keyFields[0];
-  const columns = [...keyFields.map((f) => column(f, humanizeFieldName(f))), column("score", "Score"), column("itemGuid", "Item GUID")];
+  const firedRules = result?.firedRules ?? [];
+  const showPinned = hits.some((hit) => hit.pinnedByRuleId != null);
+  const columns = [
+    ...(showPinned ? [column("pinned", "Pinned")] : []),
+    ...keyFields.map((f) => column(f, humanizeFieldName(f))),
+    column("score", "Score"),
+    column("itemGuid", "Item GUID"),
+  ];
   const rows: TableRow[] = hits.map((hit, i) => ({
     identifier: i,
     disabled: false,
     cells: [
+      ...(showPinned ? [cell(pinnedLabel(hit, firedRules), "pinned")] : []),
       ...keyFields.map((f) => cell(fieldText(hit, f), f)),
       cell(hit.score.toFixed(4), "score"),
       cell(hit.itemGuid ?? "(none)", "itemGuid"),
@@ -187,15 +215,25 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
           {result.error}
         </Callout>
       )}
-      <form onSubmit={submit} role="search">
-        <Input
-          label="Query"
-          explanationText="Leave empty to list all documents. Press Enter to search."
-          actionElement={<Icon name="xp-magnifier" />}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </form>
+      {result?.rulesFailed && (
+        <NotificationBarWarning>Rules could not be applied — these results are unruled.</NotificationBarWarning>
+      )}
+      <Row spacingX={Spacing.XL}>
+        <Column cols={Cols.Col12} colsLg={Cols.Col9}>
+          <form onSubmit={submit} role="search">
+            <Input
+              label="Query"
+              explanationText="Leave empty to list all documents. Press Enter to search."
+              actionElement={<Icon name="xp-magnifier" />}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </form>
+        </Column>
+        <Column cols={Cols.Col12} colsLg={Cols.Col3}>
+          <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />
+        </Column>
+      </Row>
       {isFaceted && (
         <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
           <Button
@@ -254,6 +292,46 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
             </Column>
           </Row>
         </div>
+      )}
+      {result && !result.error && applyRules && !result.rulesFailed && (
+        <section aria-labelledby="fired-rules-heading">
+          <Stack spacing={Spacing.S}>
+            <div role="heading" aria-level={2} id="fired-rules-heading">
+              <Headline size={HeadlineSize.S}>{`Fired rules (${firedRules.length})`}</Headline>
+            </div>
+            {firedRules.length === 0 ? (
+              <span style={{ color: "var(--color-text-low-emphasis)" }}>No rules fired for this search.</span>
+            ) : (
+              firedRuleRows(firedRules, window.location.pathname).map((rule) => (
+                <Stack key={rule.ruleId} spacing={Spacing.XS}>
+                  {rule.href ? (
+                    <div>
+                      <LinkButton label={rule.label} href={rule.href} color={ButtonColor.Tertiary} />
+                    </div>
+                  ) : (
+                    <span>{`${rule.label} (deleted)`}</span>
+                  )}
+                  {rule.userData && (
+                    <pre
+                      aria-label={`Custom data of ${rule.label}`}
+                      style={{
+                        margin: 0,
+                        padding: Spacing.S,
+                        overflowX: "auto",
+                        fontFamily: "monospace",
+                        color: "var(--color-text-high-emphasis)",
+                        background: "var(--color-background-shelf-solid)",
+                        border: `${Spacing.Micro}px solid var(--color-border-default)`,
+                      }}
+                    >
+                      {rule.userData}
+                    </pre>
+                  )}
+                </Stack>
+              ))
+            )}
+          </Stack>
+        </section>
       )}
       {noHits ? (
         <Callout
@@ -348,6 +426,9 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
           <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
             <Stack spacing={Spacing.M}>
               <TextWithLabel label="Item GUID" value={detailHit.itemGuid ?? "(none)"} />
+              {pinningRuleName(detailHit, firedRules) !== null && (
+                <TextWithLabel label="Pinned by" value={pinningRuleName(detailHit, firedRules) ?? ""} />
+              )}
               <TextWithLabel label="Score" value={detailHit.score.toFixed(4)} />
               {Object.keys(detailHit.fields).map((field) => (
                 <TextWithLabel key={field} label={field} value={fieldText(detailHit, field)} />

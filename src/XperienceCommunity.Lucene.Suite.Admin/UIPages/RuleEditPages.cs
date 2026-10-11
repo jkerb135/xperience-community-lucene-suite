@@ -113,6 +113,18 @@ public abstract class RuleEditPageBase(
         await base.ConfigurePage();
     }
 
+    /// <summary>Gives the pins and hides components this page's index; Kentico also builds the items this way for component commands.</summary>
+    protected override async Task<ICollection<IFormItem>> GetFormItems()
+    {
+        var items = await base.GetFormItems();
+        foreach (var component in items.OfType<RuleItemsFormComponent>())
+        {
+            component.IndexIdentifier = IndexIdentifier;
+        }
+
+        return items;
+    }
+
     /// <summary>Saving needs Manage rules; the base command would require the system Update permission, which Site search does not declare.</summary>
     [PageCommand(Permission = SiteSearchPermissions.MANAGE_RULES)]
     public override Task<ICommandResponse> Submit(FormSubmissionCommandArguments args) => base.Submit(args);
@@ -126,7 +138,7 @@ public abstract class RuleEditPageBase(
     {
         string indexName = indexManager.GetIndex(IndexIdentifier)?.IndexName ?? string.Empty;
 
-        // Re-read the row: pins and hides come from the database, not from the form's load state.
+        // Re-read the row for the ownership and concurrency checks.
         var rule = EditedRuleId is { } id ? FindRule(id) : new RuleInfo { IndexName = indexName };
         if (rule is null)
         {

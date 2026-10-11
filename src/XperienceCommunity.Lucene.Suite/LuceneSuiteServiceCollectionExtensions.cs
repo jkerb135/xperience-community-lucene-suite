@@ -23,6 +23,7 @@ public static class LuceneSuiteServiceCollectionExtensions
         services.TryAddSingleton<ISearchQueryFactory, DefaultSearchQueryFactory>();
         services.TryAddSingleton<SuiteSearchService>();
         services.TryAddSingleton<RuleProvider>();
+        services.TryAddSingleton<SuiteItemLookup>();
         services.TryAddSingleton(TimeProvider.System);
         services.AddHttpContextAccessor();
         services.TryAddSingleton<SearchSessionCookie>();

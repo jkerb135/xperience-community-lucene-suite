@@ -8,7 +8,7 @@ using XperienceCommunity.Lucene.Suite.Rules;
 
 namespace XperienceCommunity.Lucene.Suite.Admin.Rules;
 
-/// <summary>The rule editor form: native fields for the metadata, custom components for conditions and boosts.</summary>
+/// <summary>The rule editor form: native fields for the metadata, custom components for conditions and actions.</summary>
 public sealed class RuleEditModel
 {
     /// <summary>Name shown to marketers.</summary>
@@ -50,13 +50,28 @@ public sealed class RuleEditModel
     [RuleBoostsComponent(Label = "Boosts and buries", Order = 8)]
     public string Boosts { get; set; } = "[]";
 
+    /// <summary>Pins JSON (array of itemGuid and position).</summary>
+    [RuleJsonValidationRule(RuleJsonSection.Pins)]
+    [RulePinsComponent(Label = "Pinned items", Order = 9)]
+    public string Pins { get; set; } = "[]";
+
+    /// <summary>Whether pinned items must still match the applied facets.</summary>
+    [CheckBoxComponent(Label = "Pinned items must match the applied filters", Order = 10)]
+    public bool PinsRespectFilters { get; set; } = true;
+
+    /// <summary>Hides JSON (array of item GUIDs).</summary>
+    [RuleJsonValidationRule(RuleJsonSection.Hides)]
+    [RuleHidesConflictValidationRule]
+    [RuleHidesComponent(Label = "Hidden items", Order = 11)]
+    public string Hides { get; set; } = "[]";
+
     /// <summary>Custom data returned with fired results (JSON object).</summary>
     [RuleJsonValidationRule(RuleJsonSection.UserData)]
-    [CodeEditorComponent(Label = "Custom data", Language = "json", ExplanationText = "Optional JSON object (at most 1 KB) returned to the site with the results when the rule fires.", Order = 9)]
+    [CodeEditorComponent(Label = "Custom data", Language = "json", ExplanationText = "Optional JSON object (at most 1 KB) returned to the site with the results when the rule fires.", Order = 12)]
     public string? UserData { get; set; }
 
     /// <summary>The stored row's LastModified when the form was loaded; a mismatch at save means someone else changed the rule.</summary>
-    [RuleHiddenComponent(Order = 10)]
+    [RuleHiddenComponent(Order = 13)]
     public string? LoadedVersion { get; set; }
 }
 
@@ -117,32 +132,28 @@ internal static class RuleEditMapping
             ValidUntilUtc = rule.ValidUntilUtc,
             Conditions = string.IsNullOrWhiteSpace(rule.Conditions) ? "[]" : rule.Conditions,
             Boosts = actions?["boosts"]?.ToJsonString() ?? "[]",
+            Pins = actions?["pins"]?.ToJsonString() ?? "[]",
+            PinsRespectFilters = actions?["pinsRespectFilters"]?.GetValue<bool>() ?? true,
+            Hides = actions?["hides"]?.ToJsonString() ?? "[]",
             UserData = actions?["userData"]?.ToJsonString(Indented),
             LoadedVersion = VersionOf(rule),
         };
     }
 
-    /// <summary>
-    /// Builds the actions JSON from the edited boosts and custom data, keeping every other part of
-    /// <paramref name="storedActionsJson"/> (pins, hides, pinsRespectFilters), which this form cannot edit.
-    /// </summary>
-    /// <exception cref="JsonException">The boosts or custom data are not valid JSON (the field validation rules reject this first).</exception>
-    public static string ActionsJson(string? boostsJson, string? userDataJson, string? storedActionsJson)
+    /// <summary>Builds the actions JSON from the form; empty lists are omitted.</summary>
+    /// <exception cref="JsonException">A field is not valid JSON (the field validation rules reject this first).</exception>
+    public static string ActionsJson(RuleEditModel model)
     {
-        var actions = ParseObject(storedActionsJson) ?? [];
-        actions.Remove("boosts");
-        actions.Remove("userData");
-
-        if (JsonNode.Parse(string.IsNullOrWhiteSpace(boostsJson) ? "[]" : boostsJson) is JsonArray { Count: > 0 } boosts)
+        var actions = new JsonObject();
+        AddArray(actions, "pins", model.Pins);
+        AddArray(actions, "hides", model.Hides);
+        AddArray(actions, "boosts", model.Boosts);
+        if (!string.IsNullOrWhiteSpace(model.UserData))
         {
-            actions["boosts"] = boosts;
+            actions["userData"] = JsonNode.Parse(model.UserData);
         }
 
-        if (!string.IsNullOrWhiteSpace(userDataJson))
-        {
-            actions["userData"] = JsonNode.Parse(userDataJson);
-        }
-
+        actions["pinsRespectFilters"] = model.PinsRespectFilters;
         return actions.ToJsonString();
     }
 
@@ -152,7 +163,7 @@ internal static class RuleEditMapping
         string actions;
         try
         {
-            actions = ActionsJson(model.Boosts, model.UserData, stored.Actions);
+            actions = ActionsJson(model);
         }
         catch (JsonException exception)
         {
@@ -179,6 +190,14 @@ internal static class RuleEditMapping
     /// <summary>Treats Unspecified as UTC, so the stored value is the instant the marketer entered.</summary>
     public static DateTime? AsUtc(DateTime? value) =>
         value is { } date ? DateTime.SpecifyKind(date, DateTimeKind.Utc) : null;
+
+    private static void AddArray(JsonObject actions, string name, string? json)
+    {
+        if (!string.IsNullOrWhiteSpace(json) && JsonNode.Parse(json) is var node && node is not JsonArray { Count: 0 })
+        {
+            actions[name] = node;
+        }
+    }
 
     private static JsonObject? ParseObject(string? json)
     {

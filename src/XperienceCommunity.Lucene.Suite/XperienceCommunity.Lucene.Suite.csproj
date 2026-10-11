@@ -10,5 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Tests" />
+    <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Admin" />
   </ItemGroup>
 </Project>

@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phases 1–2 complete (2 of 6); Phase 3 Rules Engine 1/4 (03-01 complete) |
+| Status | v0.1 in progress — Phases 1–3 complete (3 of 6); next Phase 4 Synonyms |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -44,8 +44,15 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Sub-threshold fold of SearchDaily rows into per-day "(other)" rows (QueryText NULL) with every per-day total preserved; browse ('') never folded — Phase 2 (02-04)
 - ✓ Suite-owned "Site Search" admin application (Digital marketing) with its own permissions — View + Manage rules / Manage synonyms / Manage experiments; per-index section + query tester moved into it; role with only Site Search → View can tune search, Lucene-only role is refused; Lucene listing cogwheel is a permission-aware shortcut — Phase 3 (03-01)
 
+- ✓ Query tester design/state fixes: latest-request-wins, content-hub Filters side panel, applied-filters bar, kit states — Phase 3 (03-02)
+- ✓ Rules as structured JSON (LuceneSuite.Rule, installer v4) with strict validator (errors by JSON path) and a pure, allocation-light engine: conditions on query text (any/is/starts/ends/contains), facets and contexts; priority + UTC validity window — Phase 3 (03-03)
+- ✓ Rules applied in search: cached RuleProvider (web-farm invalidation, invalid rules logged and skipped), hides excluded in the query, multiplicative boost/bury, fired rule ids + custom data + RulesFailed on the response, fail-open; ApplyRules/Contexts on requests — Phase 3 (03-04)
+- ✓ Pins placed across pages (respect-filters option), counted in totals/facets, PinnedByRuleId on hits, p95 ≈ 8 ms with 300 pins — Phase 3 (03-05)
+- ✓ Rules admin: native listing + editor gated on Manage rules (View is read-only), structured conditions/boosts editors with server validation, custom data, optimistic concurrency — Phase 3 (03-06)
+- ✓ Pins/hides edited through an index-search item picker; query tester shows fired rules (linked, with custom data), pinned hits, rule failures, and an Apply rules switch — Phase 3 (03-07)
+
 ### Active (In Progress)
-- [ ] Phase 3 Rules Engine: pin/boost/bury/hide/attach data by query, facets and context — 03-01 placement & permissions done; next 03-02 rule model + pure engine
+- [ ] Phase 4 Synonyms: query-time synonym rewrite managed in admin (not yet planned)
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -121,14 +128,17 @@ Marketers tune, test and measure site search without a developer.
 | Analytics are identity-free KPI data; no suite collector/eraser needed | No personal data stored → nothing to access/erase; counts all visitors | 2026-10-08 | Active |
 | Surfacing threshold = count + distinct days, not distinct people | Identity-free data can't count people; one visitor can't satisfy multi-day | 2026-10-08 | Active |
 | A/B stickiness via variant cookie gated by Kentico cookie level (K13-style), not contact hash | Needs no contact/identity; outlier-user exclusion dropped | 2026-10-08 | Active |
+| Rules stored as structured JSON on one module class, evaluated by a pure engine (not Kentico ConditionBuilder macros) | User decision; testable, fast, no macro surface | 2026-10-10 | Active |
+| Pins/hides pick items by searching the index (store WebPageItemGUID / ContentItemGUID as indexed), not Kentico content selectors | Content selectors return ContentItemGUIDs, which don't match indexed pages | 2026-10-11 | Active |
+| Rule admin uses native Kentico listing/edit pages; custom React only for structured fields; page context reaches component commands via GetFormItems, never the client | Native look and permissions; trust boundary | 2026-10-11 | Active |
 
 ## Success Metrics
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Marketer creates a rule and sees it in preview without a deploy | Yes | - | Not started |
+| Marketer creates a rule and sees it in preview without a deploy | Yes | Yes in the query tester (Apply rules on/off); side-by-side preview in Phase 5 | In progress |
 | Search count dedup correct across web-farm nodes | Matches searchId count | - | Not started |
-| Search latency overhead of suite (rules + capture) | p95 < 10 ms | - | Not started |
+| Search latency overhead of suite (rules + capture) | p95 < 10 ms | ≈ 8 ms p95 with 300 pins + 500 rules (Debug, 5 000 docs, 03-05) | On track |
 | Works on SaaS and multi-instance self-hosted | Yes | - | Not started |
 
 ## Tech Stack / Tools
@@ -152,4 +162,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-09 after 03-01*
+*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 3*

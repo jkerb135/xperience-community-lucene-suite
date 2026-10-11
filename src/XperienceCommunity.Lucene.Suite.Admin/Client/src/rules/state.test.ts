@@ -13,6 +13,19 @@ import {
   replaceAt,
   serializeBoosts,
   serializeConditions,
+  addHides,
+  addPins,
+  fieldValue,
+  hideControlPaths,
+  nextFreePositions,
+  parseHides,
+  parsePins,
+  pickerRow,
+  pinAlias,
+  pinControlPaths,
+  serializeHides,
+  serializePins,
+  toggleItem,
 } from "./state.ts";
 
 test("conditions round-trip, with Any query omitting anchoring and pattern", () => {
@@ -84,4 +97,59 @@ test("debounce runs only the last call", async () => {
   await new Promise((resolve) => setTimeout(resolve, 30));
 
   assert.deepEqual(calls, [2]);
+});
+
+test("next free positions fill gaps first", () => {
+  assert.deepEqual(nextFreePositions([1, 3], 2), [2, 4]);
+  assert.deepEqual(nextFreePositions([], 3), [1, 2, 3]);
+  assert.deepEqual(nextFreePositions([2], 0), []);
+});
+
+test("addPins appends new items at free positions and skips pinned or repeated ones", () => {
+  const rows = parsePins(JSON.stringify([{ itemGuid: "AAA", position: 1 }, { itemGuid: "bbb", position: 3 }]));
+  const next = addPins(rows, ["aaa", "ccc", "ddd", "CCC"]);
+  assert.deepEqual(next.slice(2), [
+    { itemGuid: "ccc", position: "2" },
+    { itemGuid: "ddd", position: "4" },
+  ]);
+  assert.equal(serializePins(next), '[{"itemGuid":"AAA","position":1},{"itemGuid":"bbb","position":3},{"itemGuid":"ccc","position":2},{"itemGuid":"ddd","position":4}]');
+});
+
+test("pins keep a non-integer position as typed; hides round-trip", () => {
+  assert.equal(serializePins([{ itemGuid: "a", position: "x" }]), '[{"itemGuid":"a","position":"x"}]');
+  assert.deepEqual(addHides(parseHides('["a"]'), ["A", "b", "b"]), ["a", "b"]);
+  assert.equal(serializeHides(["a", "b"]), '["a","b"]');
+});
+
+test("picker rows: added items are checked and disabled, the other list's items are disabled", () => {
+  const added = new Set(["a"]);
+  const excluded = new Set(["b"]);
+  const selected = toggleItem(new Set(), "C", true);
+  assert.deepEqual(pickerRow("A", selected, added, excluded, "Pinned"), { checked: true, disabled: true, note: "Already added" });
+  assert.deepEqual(pickerRow("b", selected, added, excluded, "Pinned"), { checked: false, disabled: true, note: "Pinned" });
+  assert.deepEqual(pickerRow("c", selected, added, excluded, "Pinned"), { checked: true, disabled: false, note: undefined });
+  assert.equal(toggleItem(selected, "c", false).size, 0);
+});
+
+test("pin and hide error paths map to their controls", () => {
+  const rows = parsePins('[{"itemGuid":"a","position":1}]');
+  const { byPath, unmatched } = partitionErrors(
+    [
+      { path: "actions.pins[0]", message: "Must be an object." },
+      { path: "actions.pins[0].position", message: "Must be 1–300." },
+      { path: "actions.pins", message: "At most 300 pins." },
+    ],
+    pinControlPaths(rows),
+    pinAlias,
+  );
+  assert.equal(byPath.get("actions.pins[0].itemGuid"), "Must be an object.");
+  assert.equal(byPath.get("actions.pins[0].position"), "Must be 1–300.");
+  assert.equal(unmatched.length, 1);
+  assert.deepEqual(hideControlPaths(["a", "b"]), ["actions.hides[0]", "actions.hides[1]"]);
+});
+
+test("fieldValue reads another field regardless of key casing", () => {
+  assert.equal(fieldValue({ pins: "[]" }, "Pins"), "[]");
+  assert.equal(fieldValue({ Pins: 1 }, "Pins"), undefined);
+  assert.equal(fieldValue(undefined, "Pins"), undefined);
 });

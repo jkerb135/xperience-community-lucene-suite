@@ -27,26 +27,47 @@ public sealed class RuleEditModelTests
     }
 
     [Fact]
-    public void ActionsJson_KeepsPinsHidesAndFilterSetting_FromTheStoredRow()
+    public void PinsHidesAndFilterSetting_RoundTripThroughTheForm()
     {
-        string stored = $$$"""{"pins":[{{{Pin}}}],"hides":["{{{Hide}}}"],"pinsRespectFilters":false,"boosts":[{"field":"Old","value":"x","strength":5}],"userData":{"old":1}}""";
+        string stored = $$$"""{"pins":[{{{Pin}}}],"hides":["{{{Hide}}}"],"pinsRespectFilters":false,"boosts":[{"field":"Old","value":"x","strength":5}]}""";
 
-        var actions = JsonNode.Parse(RuleEditMapping.ActionsJson("""[{"field":"Type","value":"Article","strength":-30}]""", null, stored))!.AsObject();
+        var model = RuleEditMapping.FromRule(Stored(stored));
+        var actions = JsonNode.Parse(RuleEditMapping.ActionsJson(model))!;
 
-        Assert.Equal(JsonNode.Parse($"[{Pin}]")!.ToJsonString(), actions["pins"]!.ToJsonString());
-        Assert.Equal(Hide, actions["hides"]![0]!.GetValue<string>());
-        Assert.False(actions["pinsRespectFilters"]!.GetValue<bool>());
-        Assert.Equal(-30, actions["boosts"]![0]!["strength"]!.GetValue<int>());
-        Assert.False(actions.ContainsKey("userData"));
+        Assert.False(model.PinsRespectFilters);
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse(stored), actions));
     }
 
     [Fact]
-    public void ActionsJson_DropsEmptyBoosts_AndAddsCustomData()
+    public void ActionsJson_DropsEmptyLists_AndAddsCustomData()
     {
-        var actions = JsonNode.Parse(RuleEditMapping.ActionsJson("[]", """{"a":1}""", null))!.AsObject();
+        var model = new RuleEditModel { Boosts = "[]", Pins = "[]", Hides = " ", UserData = """{"a":1}""" };
 
-        Assert.False(actions.ContainsKey("boosts"));
+        var actions = JsonNode.Parse(RuleEditMapping.ActionsJson(model))!.AsObject();
+
+        Assert.Equal(["userData", "pinsRespectFilters"], actions.Select(property => property.Key));
         Assert.Equal(1, actions["userData"]!["a"]!.GetValue<int>());
+        Assert.True(actions["pinsRespectFilters"]!.GetValue<bool>());
+    }
+
+    [Fact]
+    public void Validate_RefusesAnItemBothPinnedAndHidden_OnTheHide()
+    {
+        var model = RuleEditMapping.FromRule(Stored($$"""{"pins":[{{Pin}}]}"""));
+        model.Hides = """["11111111-1111-1111-1111-111111111111"]""";
+
+        Assert.Equal(["actions.hides[0]"], RuleEditMapping.Validate(model, Stored("{}"), "articles").Errors.Select(error => error.Path));
+    }
+
+    [Fact]
+    public void HidesConflictRule_NamesOverlappingItems_AndIgnoresMalformedJson()
+    {
+        string pins = $"[{Pin}]";
+
+        Assert.Contains("11111111-1111-1111-1111-111111111111", RuleHidesConflictValidationRule.Conflict("""["11111111-1111-1111-1111-111111111111"]""", pins));
+        Assert.Null(RuleHidesConflictValidationRule.Conflict($"""["{Hide}"]""", pins));
+        Assert.Null(RuleHidesConflictValidationRule.Conflict("[{", pins));
+        Assert.Null(RuleHidesConflictValidationRule.Conflict("""["11111111-1111-1111-1111-111111111111"]""", "[1]"));
     }
 
     [Fact]
@@ -110,6 +131,13 @@ public sealed class RuleEditModelTests
     [InlineData(RuleJsonSection.Boosts, """[{"field":"Type","value":"a","strength":0}]""", "actions.boosts[0].strength")]
     [InlineData(RuleJsonSection.Boosts, "[{", "actions.boosts")]
     [InlineData(RuleJsonSection.Boosts, "[]", "")]
+    [InlineData(RuleJsonSection.Pins, $$$"""[{{{Pin}}},{"itemGuid":"33333333-3333-3333-3333-333333333333","position":2}]""", "actions.pins[1].position")]
+    [InlineData(RuleJsonSection.Pins, """[{"itemGuid":"33333333-3333-3333-3333-333333333333","position":301}]""", "actions.pins[0].position")]
+    [InlineData(RuleJsonSection.Pins, "[{", "actions.pins")]
+    [InlineData(RuleJsonSection.Pins, "[]", "")]
+    [InlineData(RuleJsonSection.Hides, $"""["{Hide}","{Hide}"]""", "actions.hides[1]")]
+    [InlineData(RuleJsonSection.Hides, "[{", "actions.hides")]
+    [InlineData(RuleJsonSection.Hides, "[]", "")]
     [InlineData(RuleJsonSection.UserData, "[1]", "actions.userData")]
     [InlineData(RuleJsonSection.UserData, "{", "actions.userData")]
     [InlineData(RuleJsonSection.UserData, "  ", "")]

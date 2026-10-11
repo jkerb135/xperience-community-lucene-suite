@@ -7,18 +7,16 @@
     "status": "in_progress"
   },
   "phase": {
-    "number": 3,
-    "name": "Rules Engine",
-    "status": "in_progress"
+    "number": 4,
+    "name": "Synonyms",
+    "status": "not_started"
   },
   "loop": {
-    "plan": "03-07",
-    "position": "PLAN",
-    "plan_path": "phases/03-rules-engine/03-07-PLAN.md"
+    "position": "IDLE"
   },
   "timestamps": {
     "created_at": "2026-10-08T00:00:00Z",
-    "updated_at": "2026-10-11T05:00:00Z"
+    "updated_at": "2026-10-11T12:00:00Z"
   },
   "satellite": {
     "groom": true

@@ -130,3 +130,104 @@ export const debounce = <A extends unknown[]>(run: (...args: A) => void, delayMs
     timer = setTimeout(() => run(...args), delayMs);
   };
 };
+
+export interface PinRow {
+  readonly itemGuid: string;
+  readonly position: string;
+}
+
+/** An indexed item as the Search and Describe commands return it. */
+export interface RuleItem {
+  readonly itemGuid: string;
+  readonly title: string;
+  readonly contentType: string | null;
+}
+
+export const sameGuid = (guid: string) => guid.toLowerCase();
+
+export const parsePins = (json: string | undefined): PinRow[] =>
+  parseArray(json).map((item) => {
+    const pin = record(item);
+    return { itemGuid: text(pin.itemGuid), position: pin.position === undefined ? "" : String(pin.position) };
+  });
+
+// Like boosts, a non-integer position is sent as typed so the server reports it on the position control.
+export const serializePins = (rows: readonly PinRow[]): string =>
+  JSON.stringify(
+    rows.map((row) => ({
+      itemGuid: row.itemGuid,
+      position: /^\d+$/.test(row.position.trim()) ? Number(row.position.trim()) : row.position,
+    })),
+  );
+
+export const parseHides = (json: string | undefined): string[] => parseArray(json).map(text);
+export const serializeHides = (guids: readonly string[]): string => JSON.stringify(guids);
+
+/** The `count` lowest positions from 1 that are not taken. */
+export const nextFreePositions = (taken: readonly number[], count: number): number[] => {
+  const used = new Set(taken);
+  const free: number[] = [];
+  for (let position = 1; free.length < count; position++) {
+    if (!used.has(position)) {
+      free.push(position);
+    }
+  }
+  return free;
+};
+
+/** Appends pins for items not pinned yet, at the next free positions, in the order chosen. */
+export const addPins = (rows: readonly PinRow[], guids: readonly string[]): PinRow[] => {
+  const pinned = new Set(rows.map((row) => sameGuid(row.itemGuid)));
+  const fresh = guids.filter((guid, i) => !pinned.has(sameGuid(guid)) && guids.findIndex((g) => sameGuid(g) === sameGuid(guid)) === i);
+  const taken = rows.map((row) => Number(row.position.trim())).filter((position) => Number.isInteger(position));
+  const positions = nextFreePositions(taken, fresh.length);
+  return [...rows, ...fresh.map((itemGuid, i) => ({ itemGuid, position: String(positions[i]) }))];
+};
+
+/** Appends hides for items not hidden yet, in the order chosen. */
+export const addHides = (hides: readonly string[], guids: readonly string[]): string[] => {
+  const result = [...hides];
+  for (const guid of guids) {
+    if (!result.some((existing) => sameGuid(existing) === sameGuid(guid))) {
+      result.push(guid);
+    }
+  }
+  return result;
+};
+
+/** How the picker shows a result: already in this list (checked), in the other list, or free to choose. */
+export const pickerRow = (guid: string, selected: ReadonlySet<string>, added: ReadonlySet<string>, excluded: ReadonlySet<string>, excludedNote: string) => {
+  const key = sameGuid(guid);
+  if (added.has(key)) {
+    return { checked: true, disabled: true, note: "Already added" };
+  }
+  if (excluded.has(key)) {
+    return { checked: false, disabled: true, note: excludedNote };
+  }
+  return { checked: selected.has(key), disabled: false, note: undefined };
+};
+
+export const toggleItem = (selected: ReadonlySet<string>, guid: string, checked: boolean): Set<string> => {
+  const next = new Set(selected);
+  if (checked) {
+    next.add(sameGuid(guid));
+  } else {
+    next.delete(sameGuid(guid));
+  }
+  return next;
+};
+
+/** Every path a pins control shows errors for; a row-level error shows on the item. */
+export const pinControlPaths = (rows: readonly PinRow[]): string[] =>
+  rows.flatMap((_, i) => [`actions.pins[${i}].position`, `actions.pins[${i}].itemGuid`]);
+
+export const pinAlias = (path: string) => (/^actions\.pins\[\d+\]$/.test(path) ? `${path}.itemGuid` : path);
+
+export const hideControlPaths = (hides: readonly string[]): string[] => hides.map((_, i) => `actions.hides[${i}]`);
+
+/** A form field's value by name, ignoring case (the form runtime's key casing is the server's property name). */
+export const fieldValue = (values: Readonly<Record<string, unknown>> | undefined, name: string): string | undefined => {
+  const key = Object.keys(values ?? {}).find((k) => k.toLowerCase() === name.toLowerCase());
+  const value = key === undefined ? undefined : values?.[key];
+  return typeof value === "string" ? value : undefined;
+};
