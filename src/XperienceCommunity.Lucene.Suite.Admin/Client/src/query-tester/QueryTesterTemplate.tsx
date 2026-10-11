@@ -35,6 +35,7 @@ import {
   type TableRow,
 } from "@kentico/xperience-admin-components";
 import {
+  appliedSynonymRows,
   firedRuleRows,
   humanizeFieldName,
   latestRequest,
@@ -44,6 +45,7 @@ import {
   toggleSelection,
   visibleValues,
   type Facet,
+  type AppliedSynonym,
   type FacetSelection,
   type FiredRule,
 } from "./state";
@@ -70,6 +72,8 @@ interface SearchResult {
   readonly error: string | null;
   readonly rulesFailed: boolean;
   readonly firedRules: FiredRule[];
+  readonly synonymsFailed: boolean;
+  readonly appliedSynonyms: AppliedSynonym[];
 }
 
 const collapsedFacetValues = 5;
@@ -111,6 +115,8 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
   const [draft, setDraft] = useState<FacetSelection>();
   const [applyRules, setApplyRules] = useState(true);
   const applyRulesRef = useRef(true);
+  const [applySynonyms, setApplySynonyms] = useState(true);
+  const applySynonymsRef = useRef(true);
   const tableArea = useRef<HTMLDivElement>(null);
   const filterButton = useRef<HTMLButtonElement>(null);
 
@@ -118,9 +124,9 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
     async (searchQuery: string, searchPage: number, facets: FacetSelection) => {
       setInProgress(true);
       const { latest, value } = await request((abort) =>
-        executeCommand<SearchResult, { query: string; page: number; facets: FacetSelection; applyRules: boolean }>(
+        executeCommand<SearchResult, { query: string; page: number; facets: FacetSelection; applyRules: boolean; applySynonyms: boolean }>(
           "Search",
-          { query: searchQuery, page: searchPage, facets, applyRules: applyRulesRef.current },
+          { query: searchQuery, page: searchPage, facets, applyRules: applyRulesRef.current, applySynonyms: applySynonymsRef.current },
           undefined,
           abort,
         ),
@@ -157,6 +163,12 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
   const toggleRules = (value: boolean) => {
     applyRulesRef.current = value;
     setApplyRules(value);
+    void search(submittedQuery, page, selection);
+  };
+
+  const toggleSynonyms = (value: boolean) => {
+    applySynonymsRef.current = value;
+    setApplySynonyms(value);
     void search(submittedQuery, page, selection);
   };
 
@@ -218,6 +230,9 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
       {result?.rulesFailed && (
         <NotificationBarWarning>Rules could not be applied — these results are unruled.</NotificationBarWarning>
       )}
+      {result?.synonymsFailed && (
+        <NotificationBarWarning>Synonyms could not be applied — the original text was searched.</NotificationBarWarning>
+      )}
       <Row spacingX={Spacing.XL}>
         <Column cols={Cols.Col12} colsLg={Cols.Col9}>
           <form onSubmit={submit} role="search">
@@ -231,7 +246,10 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
           </form>
         </Column>
         <Column cols={Cols.Col12} colsLg={Cols.Col3}>
-          <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />
+          <Stack spacing={Spacing.S}>
+            <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />
+            <Switch label="Apply synonyms" size={SwitchSize.M} value={applySynonyms} onChange={toggleSynonyms} />
+          </Stack>
         </Column>
       </Row>
       {isFaceted && (
@@ -329,6 +347,28 @@ export const QueryTesterTemplate = ({ isFaceted, pageSize, maxResultWindow, keyF
                   )}
                 </Stack>
               ))
+            )}
+          </Stack>
+        </section>
+      )}
+      {result && !result.error && applySynonyms && !result.synonymsFailed && submittedQuery.trim() !== "" && (
+        <section aria-labelledby="applied-synonyms-heading">
+          <Stack spacing={Spacing.S}>
+            <div role="heading" aria-level={2} id="applied-synonyms-heading">
+              <Headline size={HeadlineSize.S}>{`Synonyms applied (${result.appliedSynonyms.length})`}</Headline>
+            </div>
+            {result.appliedSynonyms.length === 0 ? (
+              <span style={{ color: "var(--color-text-low-emphasis)" }}>No synonyms applied to this search.</span>
+            ) : (
+              <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
+                {appliedSynonymRows(result.appliedSynonyms, window.location.pathname).map((row) =>
+                  row.href ? (
+                    <LinkButton key={row.key} label={row.label} href={row.href} color={ButtonColor.Tertiary} />
+                  ) : (
+                    <span key={row.key}>{`${row.label} (deleted)`}</span>
+                  ),
+                )}
+              </Inline>
             )}
           </Stack>
         </section>

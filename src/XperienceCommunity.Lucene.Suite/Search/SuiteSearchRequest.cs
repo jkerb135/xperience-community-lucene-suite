@@ -35,4 +35,7 @@ public sealed record SuiteSearchRequest
 
     /// <summary>Whether search rules apply; false shows the unruled results (for example in a preview).</summary>
     public bool ApplyRules { get; init; } = true;
+
+    /// <summary>Whether the index's synonyms expand the query text. Default true.</summary>
+    public bool ApplySynonyms { get; init; } = true;
 }

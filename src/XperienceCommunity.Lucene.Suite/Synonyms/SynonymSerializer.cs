@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 using XperienceCommunity.Lucene.Suite.Rules;
@@ -82,8 +83,11 @@ public static class SynonymSerializer
             : new SynonymParseResult(new SynonymDefinition(id, indexName!, validKind, normalizedInput, normalizedTerms), []);
     }
 
-    /// <summary>Serializes normalized terms to the stored JSON shape.</summary>
-    public static string SerializeTerms(IReadOnlyList<string> terms) => JsonSerializer.Serialize(terms);
+    // Stored text, never written into HTML: keeping non-ASCII literal lets the admin listing's text search find "café".
+    private static readonly JsonSerializerOptions StoredText = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+    /// <summary>Serializes normalized terms to the stored JSON shape; non-ASCII text stays literal.</summary>
+    public static string SerializeTerms(IReadOnlyList<string> terms) => JsonSerializer.Serialize(terms, StoredText);
 
     private static List<string?>? ParseTerms(string? json, List<RuleError> errors)
     {

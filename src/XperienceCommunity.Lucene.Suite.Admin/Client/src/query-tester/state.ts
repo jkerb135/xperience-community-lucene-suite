@@ -100,6 +100,21 @@ export const firedRuleRows = (rules: readonly FiredRule[], currentPath: string) 
     userData: rule.userData === null || rule.userData === undefined ? null : JSON.stringify(rule.userData, null, 2),
   }));
 
+export interface AppliedSynonym {
+  readonly synonymId: number;
+  readonly term: string;
+  readonly replacement: string;
+  readonly editUrl: string | null;
+}
+
+/** Applied synonyms as the query tester lists them; a synonym deleted since has no link. */
+export const appliedSynonymRows = (synonyms: readonly AppliedSynonym[], currentPath: string) =>
+  synonyms.map((synonym, index) => ({
+    key: `${synonym.synonymId}-${index}`,
+    label: `${synonym.term} → ${synonym.replacement}`,
+    href: synonym.editUrl ? adminHref(synonym.editUrl, currentPath) : null,
+  }));
+
 /** Name of the rule that pinned the hit, or null for an organic hit. */
 export const pinningRuleName = (hit: PinnableHit, rules: readonly FiredRule[]) =>
   hit.pinnedByRuleId === null || hit.pinnedByRuleId === undefined

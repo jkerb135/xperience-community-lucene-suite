@@ -47,6 +47,10 @@ public sealed class SynonymSerializerTests
         Assert.Equal(expected, Paths(Parse(kind, input, terms)));
 
     [Fact]
+    public void SerializeTerms_KeepsNonAsciiTextLiteral() =>
+        Assert.Equal("""["café","crème brûlée"]""", SynonymSerializer.SerializeTerms(["café", "crème brûlée"]));
+
+    [Fact]
     public void Limits_AreEnforced()
     {
         string twentyOne = "[" + string.Join(",", Enumerable.Range(0, 21).Select(i => $"\"t{i}\"")) + "]";

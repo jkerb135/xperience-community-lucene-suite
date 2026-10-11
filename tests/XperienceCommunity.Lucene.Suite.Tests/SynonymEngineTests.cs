@@ -79,4 +79,14 @@ public sealed class SynonymEngineTests
     [Fact]
     public void MatchKey_NormalizesCaseWhitespaceAndEdgePunctuation() =>
         Assert.Equal("t-shirt black", SynonymEngine.MatchKey("  \"T-Shirt,\"   BLACK. "));
+
+    // Shared with Client/src/synonyms/state.test.ts: the chip editor's duplicate check must agree with the server.
+    [Theory]
+    [InlineData("  Coffee   GRINDER ", "coffee grinder")]
+    [InlineData("\"T-Shirt,\"", "t-shirt")]
+    [InlineData("...!!!", "")]
+    [InlineData("V60-01 filters.", "v60-01 filters")]
+    [InlineData("Café CRÈME", "café crème")]
+    [InlineData("a - b", "a b")]
+    public void MatchKey_SharedVectors(string text, string expected) => Assert.Equal(expected, SynonymEngine.MatchKey(text));
 }

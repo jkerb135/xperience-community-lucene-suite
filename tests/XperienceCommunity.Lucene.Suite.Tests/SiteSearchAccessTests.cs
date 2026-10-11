@@ -54,7 +54,7 @@ public class SiteSearchAccessTests
         Func<Task<PageValidationResult>>[] validations =
         [
             new SearchTuningSectionPage(indexes) { IndexIdentifier = 404 }.ValidatePage,
-            new QueryTesterPage(indexes, null!, null!, null!, null!, null!) { IndexIdentifier = 404 }.ValidatePage,
+            new QueryTesterPage(indexes, null!, null!, null!, null!, null!, null!) { IndexIdentifier = 404 }.ValidatePage,
         ];
 
         foreach (var validate in validations)
@@ -78,6 +78,21 @@ public class SiteSearchAccessTests
 
         Assert.Equal([new QueryTesterFiredRule(9, null, null, null)], rules.Take(1));
         Assert.Equal((3, "Coffee", "/rules/3", "x"), (rules[1].RuleId, rules[1].Name, rules[1].EditUrl, rules[1].UserData!.Value.GetProperty("banner").GetString()));
+    }
+
+    [Fact]
+    public void QueryTester_ListsAppliedSynonymsInOrder_WithoutALinkForDeletedSynonyms()
+    {
+        var response = new SuiteSearchResponse([], 0, [], TimeSpan.Zero)
+        {
+            AppliedSynonyms = [new SuiteAppliedSynonym(4, "mill", "grinder"), new SuiteAppliedSynonym(9, "tee", "t-shirt")],
+        };
+
+        var applied = QueryTesterPage.AppliedSynonyms(response, new HashSet<int> { 4 }, id => $"/synonyms/{id}");
+
+        Assert.Equal(
+            [new QueryTesterAppliedSynonym(4, "mill", "grinder", "/synonyms/4"), new QueryTesterAppliedSynonym(9, "tee", "t-shirt", null)],
+            applied);
     }
 
     private sealed class FakeIndexManager : ILuceneIndexManager

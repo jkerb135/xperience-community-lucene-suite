@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 in progress — Phases 1–3 complete (3 of 6); next Phase 4 Synonyms |
+| Status | v0.1 in progress — Phases 1–4 complete (4 of 6); next Phase 5 Preview Sandbox |
 | Last Updated | 2026-10-09 |
 
 ## Requirements
@@ -51,8 +51,11 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Rules admin: native listing + editor gated on Manage rules (View is read-only), structured conditions/boosts editors with server validation, custom data, optimistic concurrency — Phase 3 (03-06)
 - ✓ Pins/hides edited through an index-search item picker; query tester shows fired rules (linked, with custom data), pinned hits, rule failures, and an Apply rules switch — Phase 3 (03-07)
 
+- ✓ Query-time synonyms per index: two-way groups and one-way entries (LuceneSuite.Synonym, installer v5), expanded as weighted query variants (0.8, max 20) through the query factory, fail-open, AppliedSynonyms on the response; ApplySynonyms request flag — Phase 4 (04-01)
+- ✓ Synonyms admin: native listing + editor behind Manage synonyms with a tag/chip terms editor; query tester shows applied synonyms (linked) and can switch synonyms off — Phase 4 (04-02)
+
 ### Active (In Progress)
-- [ ] Phase 4 Synonyms: query-time synonym rewrite managed in admin (not yet planned)
+- [ ] Phase 5 Preview Sandbox: side-by-side results with and without rules/synonyms under a simulated context (not yet planned)
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
@@ -131,6 +134,7 @@ Marketers tune, test and measure site search without a developer.
 | Rules stored as structured JSON on one module class, evaluated by a pure engine (not Kentico ConditionBuilder macros) | User decision; testable, fast, no macro surface | 2026-10-10 | Active |
 | Pins/hides pick items by searching the index (store WebPageItemGUID / ContentItemGUID as indexed), not Kentico content selectors | Content selectors return ContentItemGUIDs, which don't match indexed pages | 2026-10-11 | Active |
 | Rule admin uses native Kentico listing/edit pages; custom React only for structured fields; page context reaches component commands via GetFormItems, never the client | Native look and permissions; trust boundary | 2026-10-11 | Active |
+| Synonyms: two-way + one-way, query-time variants weighted 0.8 below exact (a preference, not a guarantee), per index; rules and analytics see the original text | User decisions; no rebuild per edit; any ISearchQueryFactory keeps working | 2026-10-11 | Active |
 
 ## Success Metrics
 
@@ -162,4 +166,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 3*
+*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 4*

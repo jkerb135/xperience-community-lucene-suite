@@ -114,6 +114,19 @@ public sealed class SynonymSearchTests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void ApplySynonymsOff_SkipsExpansionEntirely_EvenWhenTheProviderWouldFail()
+    {
+        var request = Request("grinder") with { ApplySynonyms = false };
+
+        var response = Service(new FailingSynonyms(), new FixedRules([]), new DefaultSearchQueryFactory(Options.Create(SearchOptions())))
+            .SearchWithRules(request, executor => executor.Search(request, Analyzer, BuildIndex()));
+
+        Assert.Equal([Grinder], response.Hits.Select(hit => hit.ItemGuid!.Value));
+        Assert.Empty(response.AppliedSynonyms);
+        Assert.False(response.SynonymsFailed);
+    }
+
+    [Fact]
     public void EmptyQuery_IsNeverExpanded()
     {
         var response = Search(string.Empty, [GrinderMill]);

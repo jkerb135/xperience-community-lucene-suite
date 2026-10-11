@@ -57,7 +57,10 @@ public class AdminRegistrationTests
         Assert.Equal(typeof(SearchTuningSectionPage), parents[typeof(RuleListingPage)]);
         Assert.Equal(typeof(RuleListingPage), parents[typeof(RuleCreatePage)]);
         Assert.Equal(typeof(RuleListingPage), parents[typeof(RuleEditPage)]);
-        Assert.Equal(6, parents.Count);
+        Assert.Equal(typeof(SearchTuningSectionPage), parents[typeof(SynonymListingPage)]);
+        Assert.Equal(typeof(SynonymListingPage), parents[typeof(SynonymCreatePage)]);
+        Assert.Equal(typeof(SynonymListingPage), parents[typeof(SynonymEditPage)]);
+        Assert.Equal(9, parents.Count);
     }
 
     [Fact]
@@ -71,7 +74,7 @@ public class AdminRegistrationTests
     [Fact]
     public void Pages_EvaluateViewAndTheSearchCommandRequiresView()
     {
-        Assert.All(Pages.Where(p => p.Type != typeof(RuleCreatePage)), p => Assert.Equal(SystemPermissions.VIEW, p.Type.GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission));
+        Assert.All(Pages.Where(p => p.Type != typeof(RuleCreatePage) && p.Type != typeof(SynonymCreatePage)), p => Assert.Equal(SystemPermissions.VIEW, p.Type.GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission));
         Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.Search))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
     }
 
@@ -101,6 +104,36 @@ public class AdminRegistrationTests
         {
             Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.Submit)));
             Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.Change)));
+        }
+
+        static string? Command(Type page, string method) =>
+            page.GetMethods().Single(m => m.Name == method && m.GetCustomAttribute<PageCommandAttribute>() is not null).GetCustomAttribute<PageCommandAttribute>()!.Permission;
+    }
+
+    [Fact]
+    public void SynonymPages_AreRegisteredWithNativeTemplates()
+    {
+        var listing = Assert.Single(Pages, p => p.Type == typeof(SynonymListingPage));
+        Assert.Equal(("synonyms", TemplateNames.LISTING, Icons.ArrowsH), (listing.Slug, listing.TemplateName, listing.Icon));
+        Assert.True(listing.Order > Assert.Single(Pages, p => p.Type == typeof(RuleListingPage)).Order);
+        Assert.Equal(("create", TemplateNames.EDIT), Shape(typeof(SynonymCreatePage)));
+        Assert.Equal((PageParameterConstants.PARAMETERIZED_SLUG, TemplateNames.EDIT), Shape(typeof(SynonymEditPage)));
+
+        static (string, string) Shape(Type page) => Assert.Single(Pages, p => p.Type == page) is var registered ? (registered.Slug, registered.TemplateName) : default;
+    }
+
+    [Fact]
+    public void SynonymChanges_RequireManageSynonyms_NotSystemPermissionsTheAppLacks()
+    {
+        // Literal, not the constant: role grants are stored under this name.
+        const string manageSynonyms = "LuceneSuite.ManageSynonyms";
+
+        Assert.Equal(manageSynonyms, typeof(SynonymCreatePage).GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission);
+        Assert.Equal(manageSynonyms, Command(typeof(SynonymListingPage), nameof(SynonymListingPage.Delete)));
+        foreach (var page in new[] { typeof(SynonymCreatePage), typeof(SynonymEditPage) })
+        {
+            Assert.Equal(manageSynonyms, Command(page, nameof(SynonymEditPageBase.Submit)));
+            Assert.Equal(manageSynonyms, Command(page, nameof(SynonymEditPageBase.Change)));
         }
 
         static string? Command(Type page, string method) =>

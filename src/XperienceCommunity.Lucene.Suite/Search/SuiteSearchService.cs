@@ -52,7 +52,7 @@ internal sealed class SuiteSearchService(
     {
         bool synonymsFailed = false;
         var expansion = SynonymExpansion.None;
-        if (!string.IsNullOrWhiteSpace(request.Query))
+        if (request.ApplySynonyms && !string.IsNullOrWhiteSpace(request.Query))
         {
             try
             {

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Search;
+using XperienceCommunity.Lucene.Suite.Synonyms;
 
 [assembly: UIPage(
     parentType: typeof(SearchTuningSectionPage),
@@ -32,6 +33,7 @@ public sealed class QueryTesterPage(
     ISuiteSearchService searchService,
     IOptions<SuiteSearchOptions> options,
     IInfoProvider<RuleInfo> rules,
+    IInfoProvider<SynonymInfo> synonyms,
     IPageLinkGenerator pageLinkGenerator) : Page<QueryTesterClientProperties>
 {
     // Mirror SearchExecutor's limits so the pager never requests a rejected window.
@@ -75,6 +77,7 @@ public sealed class QueryTesterPage(
                 PageSize = PageSize,
                 TrackAnalytics = false,
                 ApplyRules = arguments.ApplyRules,
+                ApplySynonyms = arguments.ApplySynonyms,
             });
 
             return Task.FromResult(ResponseFrom(new QueryTesterResult
@@ -85,6 +88,8 @@ public sealed class QueryTesterPage(
                 ElapsedMilliseconds = response.Elapsed.TotalMilliseconds,
                 RulesFailed = response.RulesFailed,
                 FiredRules = FiredRules(response, RuleNames(response.FiredRuleIds, indexName), EditUrl),
+                SynonymsFailed = response.SynonymsFailed,
+                AppliedSynonyms = AppliedSynonyms(response, ExistingSynonyms(response.AppliedSynonyms, indexName), SynonymEditUrl),
             }));
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
@@ -116,6 +121,29 @@ public sealed class QueryTesterPage(
             names.GetValueOrDefault(id),
             names.ContainsKey(id) ? editUrl(id) : null,
             response.UserData.FirstOrDefault(data => data.RuleId == id)?.Data))];
+
+    /// <summary>Applied synonyms in order; one missing from <paramref name="existing"/> was deleted since and gets no link.</summary>
+    internal static IReadOnlyList<QueryTesterAppliedSynonym> AppliedSynonyms(SuiteSearchResponse response, IReadOnlySet<int> existing, Func<int, string> editUrl) =>
+        [.. response.AppliedSynonyms.Select(applied => new QueryTesterAppliedSynonym(
+            applied.SynonymId,
+            applied.Term,
+            applied.Replacement,
+            existing.Contains(applied.SynonymId) ? editUrl(applied.SynonymId) : null))];
+
+    private HashSet<int> ExistingSynonyms(IReadOnlyList<SuiteAppliedSynonym> applied, string indexName) =>
+        applied.Count == 0
+            ? []
+            : [.. synonyms.Get()
+                .WhereIn(nameof(SynonymInfo.SynonymID), [.. applied.Select(synonym => synonym.SynonymId).Distinct()])
+                .WhereEquals(nameof(SynonymInfo.IndexName), indexName)
+                .Columns(nameof(SynonymInfo.SynonymID))
+                .Select(synonym => synonym.SynonymID)];
+
+    private string SynonymEditUrl(int synonymId) => pageLinkGenerator.GetPath<SynonymEditPage>(new PageParameterValues
+    {
+        { typeof(SearchTuningSectionPage), IndexIdentifier },
+        { typeof(SynonymEditPage), synonymId },
+    });
 
     private Dictionary<int, string> RuleNames(IReadOnlyList<int> ids, string indexName) =>
         ids.Count == 0
@@ -166,6 +194,9 @@ public sealed class QueryTesterArguments
 
     /// <summary>Whether rules apply to the search.</summary>
     public bool ApplyRules { get; set; } = true;
+
+    /// <summary>Whether synonyms expand the query.</summary>
+    public bool ApplySynonyms { get; set; } = true;
 }
 
 /// <summary>Result of the query tester's Search command.</summary>
@@ -191,7 +222,20 @@ public sealed class QueryTesterResult
 
     /// <summary>Rules that fired, in run order.</summary>
     public IReadOnlyList<QueryTesterFiredRule> FiredRules { get; init; } = [];
+
+    /// <summary>True when synonyms could not be applied, so the original text was searched alone.</summary>
+    public bool SynonymsFailed { get; init; }
+
+    /// <summary>Synonym substitutions used by the search, in order.</summary>
+    public IReadOnlyList<QueryTesterAppliedSynonym> AppliedSynonyms { get; init; } = [];
 }
+
+/// <summary>A synonym substitution used by a query tester search.</summary>
+/// <param name="SynonymId">Synonym identifier.</param>
+/// <param name="Term">Query words it matched.</param>
+/// <param name="Replacement">What replaced them in the variant.</param>
+/// <param name="EditUrl">Path of the synonym's edit page; null when it was deleted since.</param>
+public sealed record QueryTesterAppliedSynonym(int SynonymId, string Term, string Replacement, string? EditUrl);
 
 /// <summary>A rule that fired for a query tester search.</summary>
 /// <param name="RuleId">Rule identifier.</param>

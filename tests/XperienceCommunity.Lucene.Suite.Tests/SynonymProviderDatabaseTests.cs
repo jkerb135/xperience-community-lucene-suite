@@ -72,6 +72,33 @@ public sealed class SynonymProviderDatabaseTests
         }
     }
 
+    [DatabaseFact]
+    public void Ownership_FindsASynonymOnlyInItsOwnIndex()
+    {
+        var services = KenticoServices.Value;
+        new AnalyticsModuleInstaller(
+            services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
+            services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            NullLogger<AnalyticsModuleInstaller>.Instance).Install();
+        var infos = services.GetRequiredService<IInfoProvider<SynonymInfo>>();
+        Cleanup();
+        try
+        {
+            var synonym = Synonym(Index, SynonymSerializer.TwoWay, null, """["grinder","mill"]""");
+            infos.Set(synonym);
+
+            Assert.NotNull(Admin.UIPages.SynonymOwnership.Find(infos, synonym.SynonymID, Index));
+            Assert.NotNull(Admin.UIPages.SynonymOwnership.Find(infos, synonym.SynonymID, Index.ToUpperInvariant()));
+            Assert.Null(Admin.UIPages.SynonymOwnership.Find(infos, synonym.SynonymID, OtherIndex));
+            Assert.Null(Admin.UIPages.SynonymOwnership.Find(infos, synonym.SynonymID, string.Empty));
+            Assert.Null(Admin.UIPages.SynonymOwnership.Find(infos, int.MaxValue, Index));
+        }
+        finally
+        {
+            Cleanup();
+        }
+    }
+
     private static SynonymInfo Synonym(string index, string kind, string? input, string terms, bool enabled = true) => new()
     {
         IndexName = index,

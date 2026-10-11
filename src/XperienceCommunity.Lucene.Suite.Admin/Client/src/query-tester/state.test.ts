@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   adminHref,
+  appliedSynonymRows,
   firedRuleRows,
   humanizeFieldName,
   latestRequest,
@@ -88,4 +89,18 @@ test("pinned label names the pinning rule", () => {
   assert.equal(pinnedLabel({ pinnedByRuleId: 3 }, rules), "Pinned · Coffee");
   assert.equal(pinnedLabel({ pinnedByRuleId: 7 }, rules), "Pinned · Rule 7");
   assert.equal(pinnedLabel({ pinnedByRuleId: null }, rules), "");
+});
+
+test("applied synonyms link inside the admin root; a deleted synonym has no link", () => {
+  const rows = appliedSynonymRows(
+    [
+      { synonymId: 4, term: "mill", replacement: "grinder", editUrl: "/site-search/indexes/4/synonyms/4" },
+      { synonymId: 9, term: "tee", replacement: "t-shirt", editUrl: null },
+    ],
+    "/admin/site-search/indexes/4/query-tester",
+  );
+  assert.deepEqual(rows, [
+    { key: "4-0", label: "mill → grinder", href: "/admin/site-search/indexes/4/synonyms/4" },
+    { key: "9-1", label: "tee → t-shirt", href: null },
+  ]);
 });

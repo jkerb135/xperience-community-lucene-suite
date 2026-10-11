@@ -5,29 +5,30 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 4 Synonyms, 04-02 planned + audited (awaiting approval)
+**Current focus:** v0.1 Tune & Capture — Phase 5 Preview Sandbox (ready to plan)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 4 of 6 (Synonyms) — Planning
-Plan: 04-02 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-11 — Audited .paul/phases/04-synonyms/04-02-PLAN.md (04-02-AUDIT.md)
+Phase: 5 of 6 (Preview Sandbox)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-11 — 04-02 unified; Phase 4 complete, transitioned to Phase 5
 
 Progress:
-- Milestone: [█████░░░░░] 50% (3 of 6 phases)
+- Milestone: [███████░░░] 67% (4 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
 - Phase 3: [██████████] 100% (7/7 plans)
-- Phase 4: [█████░░░░░] 50% (1/2 plans)
+- Phase 4: [██████████] 100% (2/2 plans)
+- Phase 5: [░░░░░░░░░░] 0% (not planned)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -37,6 +38,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: 04-02 applied: empty custom-field value + RequiredValidationRule so errors appear only at save (31.9.1 skips Required on load/change and never validates invisible fields); listing formatter reads sibling columns from the row; chip editor commits typed terms on blur; npm Input lacks maxLength/onKeyDown (DOM maxLength via inputRef, Enter via onKeyPress) | Phase 4 | Patterns for Phase 5 admin |
 | 2026-10-11: Enterprise audit on 04-02-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 4 | Typed-but-unadded term committed on blur (no silent loss); SerializeTerms keeps non-ASCII literal; shared MatchKey vectors C#/node; chip list semantics; synonym ownership DB test |
 | 2026-10-11: 04-02 planning (user choices): terms edited in a custom tag/chip component (not a native text area); query tester gets an "Apply synonyms" switch (SuiteSearchRequest.ApplySynonyms, default true); applied synonyms link to their edit pages. Design-screen in PLAN: native ListingPage/ModelEditPage with RadioGroup Kind + VisibleIfEqualTo Input; npm Tag remove buttons are focusable and labelled, no invalid state → per-term error lines | Phase 4 | Last Phase 4 plan |
 | 2026-10-11: 04-01 applied: synonyms expand through ISearchQueryFactory as DisjunctionMaxQuery(0) variants (boost × 0.8); one MatchKey for terms and queries; shared fail-open rerun now sets RulesFailed only when rules fired; host "mill" example shows weight is a preference (user kept 0.8); installer v5 on comm_projects | Phase 4 | 04-02 admin edits SynonymInfo via SynonymSerializer paths; query tester adds AppliedSynonyms |
@@ -102,6 +104,7 @@ See PROJECT.md Key Decisions.
 | Leftover XpSearch contact-group macro `Contact.XpSearchSearchedFor("grinders")` fails on every evaluation in the CommunityProjects host log | 03-05 checkpoint | S | Part of the pending XpSearch DB-objects decision |
 | 04-01 audit deferrals: accent folding of synonym inputs; orphan synonyms after index rename/deletion; query-parser custom factories reading synonym syntax characters | 04-01 audit | S | KNOWN-LIMITATIONS |
 | Leftover XpSearch scheduled tasks (XpSearch.QueryLogRetention, XpSearch.PopularitySignal) fail on every CommunityProjects host start | 04-01 checkpoint | S | Part of the pending XpSearch DB-objects decision |
+| 04-02 audit deferrals: same term in several synonyms (no warning); Kind change without confirmation | 04-02 audit | S | KNOWN-LIMITATIONS |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -124,7 +127,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02: all required skills invoked.
 
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
@@ -145,9 +148,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Plan 04-02 audited
-Next action: /paul:apply .paul/phases/04-synonyms/04-02-PLAN.md
-Resume file: .paul/phases/04-synonyms/04-02-PLAN.md
+Stopped at: Phase 4 complete (04-02 unified), ready to plan Phase 5
+Next action: commit Phase 4 (on request), then /paul:plan for Phase 5 Preview Sandbox
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
