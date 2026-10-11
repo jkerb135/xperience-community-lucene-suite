@@ -2,34 +2,28 @@
 
 ## Project Reference
 
-See: .paul/PROJECT.md (updated 2026-10-09)
+See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — all 6 phases complete, reviewed, follow-up done; ready to complete the milestone
+**Current focus:** v0.1 complete — define v0.2 Measure next
 
 ## Current Position
 
-Milestone: v0.1 Tune & Capture
-Phase: 6 of 6 (Widgets Package) — Complete
-Plan: 06-04 complete (Phase 6: 4/4)
-Status: Ready for /paul:complete-milestone
-Last activity: 2026-10-12 — Unified 06-04 (host readable facet values)
+Milestone: Awaiting next milestone (v0.2 Measure — not yet defined)
+Phase: None active
+Plan: None
+Status: Milestone v0.1 Tune & Capture complete — ready for next
+Last activity: 2026-10-12 — Milestone v0.1 completed (tag v0.1.0)
 
 Progress:
-- Milestone: [██████████] 100% (6 of 6 phases)
-- Phase 1: [██████████] 100% (3/3 plans)
-- Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [██████████] 100% (7/7 plans)
-- Phase 4: [██████████] 100% (2/2 plans)
-- Phase 5: [██████████] 100% (1/1 plans)
-- Phase 6: [██████████] 100% (4/4 plans)
+- v0.1 Tune & Capture: [██████████] 100% ✓ (6 phases, 21 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready to complete milestone]
+  ○        ○        ○     [Milestone complete - ready for next]
 ```
 
 ## Accumulated Context
@@ -39,6 +33,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Milestone v0.1 Tune & Capture completed: MILESTONES.md entry, archive .paul/milestones/v0.1.0-ROADMAP.md, version aligned to 0.1.0 (PROJECT, config, paul.json), tag v0.1.0 | Milestone | Next: /paul:discuss-milestone for v0.2 Measure |
 | 2026-10-12: 06-04 applied: host ContentType facet = DataClassInfo display name (fallback code name); index rebuilt via Lucene admin rotate button; counts unchanged | Phase 6 | v0.1 follow-up closed |
 | 2026-10-12: v0.1 milestone review (user): APPROVAL-CHECKS #2 and #3 approved; facet values fixed in the host index strategy (not a widget value-label property); test traffic kept | Milestone | Follow-up host quick fix, then complete milestone |
 | 2026-10-11: 06-03 applied: widgets need [assembly: AssemblyDiscoverable] (asserted); RegisterWidgetAttribute types only readable via GetCustomAttributesData; Kentico preview URLs are hash-signed so the search box is disabled in all preview (not only edit); host landing-page template allow-list extended with the XperienceCommunity.LuceneSuite. prefix; new host page "Site search" /site-search (XpSearch "Search" page untouched, user); e2e search bdefc913… seq 1–3 + click seq 3 pos 2 verified; host edits must preserve BOM/CRLF (byte edits) | Phase 6 | v0.1 complete; real traffic flowing for v0.2 |
@@ -161,16 +156,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03: all 
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 2460c40 docs(paul): v0.1 milestone review
+Last commit: 808445b docs(paul): 06-04 closed (milestone commit + tag v0.1.0 follow)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
-Last session: 2026-10-11
-Stopped at: 06-04 loop closed — v0.1 ready to complete
-Next action: commit (on request), then /paul:complete-milestone
-Resume file: .paul/phases/06-widgets-package/06-04-SUMMARY.md
+Last session: 2026-10-12
+Stopped at: Milestone v0.1 Tune & Capture complete
+Next action: /paul:discuss-milestone (define v0.2 Measure) or /paul:milestone
+Resume file: .paul/MILESTONES.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

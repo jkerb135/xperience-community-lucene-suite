@@ -13,8 +13,8 @@ Marketers tune, test and measure site search without a developer.
 | Attribute | Value |
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
-| Version | 0.0.0 |
-| Status | v0.1 complete and reviewed (2026-10-12) — ready to close the milestone |
+| Version | 0.1.0 |
+| Status | v0.1 Tune & Capture complete (2026-10-12); next milestone v0.2 Measure (not yet defined) |
 | Last Updated | 2026-10-12 |
 
 ## Requirements
@@ -61,10 +61,9 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Page Builder widgets (search box with results-page selector, results, filters with dimension labels); preview/edit mode never tracked; contact-group query DB-proven; CommunityProjects Site search page producing real Suite traffic — Phase 6 (06-03)
 
 ### Active (In Progress)
-- (none — v0.1 complete and reviewed; next: v0.2 Measure)
+- (none — define v0.2 Measure with /paul:discuss-milestone)
 
 ### Planned (Next)
-- v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview
 - v0.2 Measure: reports, query suggestions, blocked suggestions, custom activities
 - v0.3 Test: A/B testing of rule sets + comparison reports
 
@@ -145,6 +144,7 @@ Marketers tune, test and measure site search without a developer.
 | Widgets package: server-rendered view components + Page Builder widgets over one URL-driven search per request; page size and contact-group contexts are site-wide options; sr= always on same-site result links; preview/edit never tracked | User decisions (Phase 6); shared search makes per-widget settings conflict | 2026-10-11 | Active |
 | Package endpoints never reconfigure the host (own rate limiter; no AddRateLimiter/UseRateLimiter) | A library must not change host-wide middleware behaviour | 2026-10-11 | Active |
 | Human-verify checkpoints are deferred to .paul/APPROVAL-CHECKS.md and reviewed at milestone end | User decision | 2026-10-11 | Active |
+| Test host content changes stay minimal and recorded: host files backed up before edits (byte-preserving), new pages rather than reusing existing ones, temporary data cleaned unless the user keeps it | User decisions across v0.1 | 2026-10-12 | Active |
 
 ## Success Metrics
 
@@ -153,7 +153,7 @@ Marketers tune, test and measure site search without a developer.
 | Marketer creates a rule and sees it in preview without a deploy | Yes | Yes — query tester Compare mode with simulated contexts (05-01) | Met |
 | Real Suite traffic from the live site | Yes | Yes — CommunityProjects /site-search widgets record searches, continuations and clicks (06-03) | Met |
 | Search count dedup correct across web-farm nodes | Matches searchId count | - | Not started |
-| Search latency overhead of suite (rules + capture) | p95 < 10 ms | ≈ 8 ms p95 with 300 pins + 500 rules (Debug, 5 000 docs, 03-05) | On track |
+| Search latency overhead of suite (rules + capture) | p95 < 10 ms | ≈ 8 ms p95 with 300 pins + 500 rules (Debug, 5 000 docs, 03-05); one flake under parallel load (05-01) | On track |
 | Works on SaaS and multi-instance self-hosted | Yes | - | Not started |
 
 ## Tech Stack / Tools
@@ -177,4 +177,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-11 after Phase 6 (v0.1 complete in code)*
+*Created: 2026-10-08 · Last updated: 2026-10-12 after v0.1 Tune & Capture*
