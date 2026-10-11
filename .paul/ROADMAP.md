@@ -5,7 +5,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.1 Tune & Capture** (v0.1.0)
-Status: Complete in code, reviewed 2026-10-12 — host follow-up (readable facet values) before closing
+Status: Complete and reviewed 2026-10-12 — ready to close
 Phases: 6 of 6 complete (100%)
 
 ## Phases
@@ -17,7 +17,7 @@ Phases: 6 of 6 complete (100%)
 | 3 | Rules Engine | 7/7 | ✅ Complete | 2026-10-11 |
 | 4 | Synonyms | 2/2 | ✅ Complete | 2026-10-11 |
 | 5 | Preview Sandbox | 1/1 | ✅ Complete | 2026-10-11 |
-| 6 | Widgets Package | 3/3 | ✅ Complete | 2026-10-11 |
+| 6 | Widgets Package | 4/4 | ✅ Complete | 2026-10-12 |
 
 ## Phase Details
 
@@ -91,7 +91,7 @@ Phases: 6 of 6 complete (100%)
 - [x] 06-01 (complete 2026-10-11): Package skeleton — rate-limited events endpoint, client-settings endpoint, sr= result reference, full contract JS client (shared vectors)
 - [x] 06-02 (complete 2026-10-11): Server-rendered search box, results and facets view components (one shared search per request, sid/seq continuation links, sr= result links, click beacons, toggle-link facets, contact-group contexts)
 - [x] 06-03 (complete 2026-10-11): Page Builder widgets (page-selector search box, results, filters with dimension labels), preview/edit-mode never tracked, contact-group DB test, CommunityProjects wiring + permanent Search page, end-to-end with real traffic
-- [ ] 06-04 (planned, quick fix — v0.1 review follow-up): host index stores readable content-type facet values
+- [x] 06-04 (complete 2026-10-12, quick fix — v0.1 review follow-up): host index stores readable content-type facet values
 
 ## Later Milestones
 
