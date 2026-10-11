@@ -129,15 +129,29 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
             throw new ArgumentException($"Index '{request.IndexName}' has no facets, so facet filters cannot be applied.", nameof(request));
         }
 
-        var topDocs = searcher.Search(CreateQuery(request, analyzer), request.Page * request.PageSize);
-        return ToResponse(request, searcher, topDocs, []);
+        var topDocs = searcher.Search(CreateQuery(request, analyzer), FetchCount(request));
+        return ToResponse(request, searcher, topDocs, [], facetFilter: null);
     }
 
     public SuiteSearchResponse Search(SuiteSearchRequest request, Analyzer analyzer, IndexSearcher searcher, DrillSideways drillSideways, FacetsConfig facetsConfig)
     {
         Validate(request);
 
-        var query = new DrillDownQuery(facetsConfig, CreateQuery(request, analyzer));
+        var result = drillSideways.Search(DrillDown(facetsConfig, CreateQuery(request, analyzer), request), FetchCount(request));
+        var facets = result.Facets.GetAllDims(options.FacetValuesPerDimension)
+            .Where(facet => facet is not null)
+            .Select(facet => new SuiteFacet(
+                facet.Dim,
+                facet.LabelValues.Select(lv => new SuiteFacetValue(lv.Label, (int)lv.Value)).ToArray()))
+            .ToArray();
+
+        Func<Query, Query>? facetFilter = request.Facets.Count > 0 ? pinned => DrillDown(facetsConfig, pinned, request) : null;
+        return ToResponse(request, searcher, result.Hits, facets, facetFilter);
+    }
+
+    private static DrillDownQuery DrillDown(FacetsConfig facetsConfig, Query baseQuery, SuiteSearchRequest request)
+    {
+        var query = new DrillDownQuery(facetsConfig, baseQuery);
         foreach (var (dimension, values) in request.Facets)
         {
             foreach (string value in values)
@@ -146,16 +160,16 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
             }
         }
 
-        var result = drillSideways.Search(query, request.Page * request.PageSize);
-        var facets = result.Facets.GetAllDims(options.FacetValuesPerDimension)
-            .Where(facet => facet is not null)
-            .Select(facet => new SuiteFacet(
-                facet.Dim,
-                facet.LabelValues.Select(lv => new SuiteFacetValue(lv.Label, (int)lv.Value)).ToArray()))
-            .ToArray();
-
-        return ToResponse(request, searcher, result.Hits, facets);
+        return query;
     }
+
+    private IReadOnlyList<ResolvedPin> Pins => outcome?.Pins ?? [];
+
+    // Pinned documents in the window are dropped from the organic list, so fetch enough to fill the page without them.
+    private int FetchCount(SuiteSearchRequest request) => (request.Page * request.PageSize) + Pins.Count;
+
+    private TermsFilter PinnedFilter() =>
+        new(Pins.Select(pin => new Term(BaseDocumentProperties.ITEM_GUID, pin.ItemGuid.ToString())).ToList());
 
     private Query CreateQuery(SuiteSearchRequest request, Analyzer analyzer)
     {
@@ -165,6 +179,16 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
         if (outcome is null)
         {
             return query;
+        }
+
+        // Pinned items join the match set (so they count in totals and facets) with zero weight and no coord, leaving other scores unchanged.
+        if (Pins.Count > 0)
+        {
+            query = new BooleanQuery(disableCoord: true)
+            {
+                { query, Occur.SHOULD },
+                { new ConstantScoreQuery(PinnedFilter()) { Boost = 0 }, Occur.SHOULD },
+            };
         }
 
         // Boosts arrive ordered by field and value; nesting multiplies, so every matching boost's factor applies.
@@ -200,15 +224,82 @@ internal sealed class SearchExecutor(ISearchQueryFactory queryFactory, SuiteSear
         return match;
     }
 
-    private static SuiteSearchResponse ToResponse(SuiteSearchRequest request, IndexSearcher searcher, TopDocs topDocs, IReadOnlyList<SuiteFacet> facets)
+    private SuiteSearchResponse ToResponse(SuiteSearchRequest request, IndexSearcher searcher, TopDocs topDocs, IReadOnlyList<SuiteFacet> facets, Func<Query, Query>? facetFilter)
     {
-        var hits = topDocs.ScoreDocs
-            .Skip((request.Page - 1) * request.PageSize)
-            .Select(scoreDoc => ToHit(searcher.Doc(scoreDoc.Doc), scoreDoc.Score))
+        if (Pins.Count == 0)
+        {
+            var hits = topDocs.ScoreDocs
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(scoreDoc => ToHit(searcher.Doc(scoreDoc.Doc), scoreDoc.Score))
+                .ToArray();
+
+            return new SuiteSearchResponse(hits, topDocs.TotalHits, facets, TimeSpan.Zero) { IndexDocumentCount = searcher.IndexReader.NumDocs };
+        }
+
+        // ItemGuid via the per-segment field cache: loaded once per segment, far cheaper than reading stored documents.
+        var leaves = searcher.IndexReader.Leaves;
+        string GuidOf(int doc)
+        {
+            var leaf = leaves[ReaderUtil.SubIndex(doc, leaves)];
+            var term = new BytesRef();
+            FieldCache.DEFAULT.GetTerms(leaf.AtomicReader, BaseDocumentProperties.ITEM_GUID, false).Get(doc - leaf.DocBase, term);
+            return term.Utf8ToString();
+        }
+
+        // Every document of every pinned item (several per item in multilingual indexes), and those passing the facet filters.
+        var pinnedQuery = new ConstantScoreQuery(PinnedFilter());
+        var existing = AllDocs(searcher, pinnedQuery, Pins.Count);
+        var passing = facetFilter is null ? existing : AllDocs(searcher, facetFilter(pinnedQuery), Pins.Count);
+        var existingByGuid = existing.ToLookup(GuidOf, StringComparer.OrdinalIgnoreCase);
+        var passingDocs = passing.ToHashSet();
+        var windowScores = topDocs.ScoreDocs.ToDictionary(scoreDoc => scoreDoc.Doc, scoreDoc => scoreDoc.Score);
+
+        var available = new List<(int Position, Slot Item)>();
+        foreach (var pin in Pins)
+        {
+            int[] docs = [.. existingByGuid[pin.ItemGuid.ToString()].Order()];
+            int[] passingForPin = [.. docs.Where(passingDocs.Contains)];
+            if (docs.Length == 0 || (pin.RespectFilters && passingForPin.Length == 0))
+            {
+                continue;
+            }
+
+            int chosen = docs.Where(windowScores.ContainsKey).Cast<int?>().FirstOrDefault()
+                ?? passingForPin.Cast<int?>().FirstOrDefault()
+                ?? docs[0];
+            available.Add((pin.Position, new Slot(chosen, windowScores.GetValueOrDefault(chosen), pin.RuleId)));
+        }
+
+        // Every document of a pinned item is in `existing`, so membership removes all its language variants.
+        var pinnedDocs = existing.ToHashSet();
+        var organic = topDocs.ScoreDocs
+            .Where(scoreDoc => !pinnedDocs.Contains(scoreDoc.Doc))
+            .Select(scoreDoc => new Slot(scoreDoc.Doc, scoreDoc.Score, null))
             .ToArray();
 
-        return new SuiteSearchResponse(hits, topDocs.TotalHits, facets, TimeSpan.Zero) { IndexDocumentCount = searcher.IndexReader.NumDocs };
+        var page = PinMerger.Merge(organic, available, request.Page, request.PageSize)
+            .Select(slot => ToHit(searcher.Doc(slot.Doc), slot.Score) with { PinnedByRuleId = slot.RuleId })
+            .ToArray();
+
+        // Documents of pinned items in the match set are replaced by one hit per available pin, so the total equals the pageable length.
+        int totalHits = topDocs.TotalHits - passing.Count + available.Count;
+        return new SuiteSearchResponse(page, totalHits, facets, TimeSpan.Zero) { IndexDocumentCount = searcher.IndexReader.NumDocs };
     }
+
+    // Sized for one document per item; repeated once when items have several (language) documents.
+    private static List<int> AllDocs(IndexSearcher searcher, Query query, int expected)
+    {
+        var top = searcher.Search(query, Math.Max(expected, 1));
+        if (top.TotalHits > top.ScoreDocs.Length)
+        {
+            top = searcher.Search(query, top.TotalHits);
+        }
+
+        return [.. top.ScoreDocs.Select(scoreDoc => scoreDoc.Doc)];
+    }
+
+    private sealed record Slot(int Doc, float Score, int? RuleId);
 
     private static SuiteSearchHit ToHit(Document document, float score)
     {

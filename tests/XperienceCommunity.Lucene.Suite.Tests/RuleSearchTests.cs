@@ -24,6 +24,8 @@ using XperienceCommunity.Lucene.Suite.Search;
 
 namespace XperienceCommunity.Lucene.Suite.Tests;
 
+using FacetIndexParts = (IndexSearcher Searcher, DrillSideways DrillSideways, FacetsConfig Config);
+
 public sealed class RuleSearchTests(ITestOutputHelper output)
 {
     private const string Index = "rules-test";
@@ -227,6 +229,7 @@ public sealed class RuleSearchTests(ITestOutputHelper output)
                 id,
                 conditions: [new RuleCondition(RuleAnchoring.Contains, id <= 50 ? "coffee" : $"term{id}", [], [])],
                 hides: [guids[id]],
+                pins: id <= 50 ? [.. Enumerable.Range(0, 6).Select(i => new RulePin(guids[1000 + (id * 6) + i], (id * 6) + i - 5))] : null,
                 boosts: [new RuleBoost("Type", id % 2 == 0 ? "Machine" : "Grinder", id % 2 == 0 ? 30 : -30)]))
             .ToArray();
         var ruled = Service(new FixedRules(rules), NullLogger<SuiteSearchService>.Instance);
@@ -260,6 +263,182 @@ public sealed class RuleSearchTests(ITestOutputHelper output)
         }
     }
 
+    [Fact]
+    public void PinnedNonMatch_LandsFirst_AndCountsInTotalsAndFacets()
+    {
+        var (index, coffee, biscuit) = PinIndex(coffeeCount: 3);
+
+        var response = Search(index, Request("coffee"), [Rule(7, pins: [new(biscuit, 1)])]);
+
+        Assert.Equal(biscuit, response.Hits[0].ItemGuid);
+        Assert.Equal(7, response.Hits[0].PinnedByRuleId);
+        Assert.Equal(0f, response.Hits[0].Score);
+        Assert.All(response.Hits.Skip(1), hit => Assert.Null(hit.PinnedByRuleId));
+        Assert.Equal(4, response.TotalHits);
+        Assert.Equal(1, FacetCount(response, "Food"));
+        AssertPageable(index, Request("coffee"), [Rule(7, pins: [new(biscuit, 1)])], response.TotalHits);
+    }
+
+    [Fact]
+    public void PinnedOrganicItem_IsMoved_NotDuplicated()
+    {
+        var (index, coffee, _) = PinIndex(coffeeCount: 3);
+        var top = Search(index, Request("coffee"), []).Hits[0].ItemGuid!.Value;
+
+        var response = Search(index, Request("coffee"), [Rule(1, pins: [new(top, 3)])]);
+
+        Assert.Equal(top, response.Hits[2].ItemGuid);
+        Assert.Single(response.Hits, hit => hit.ItemGuid == top);
+        Assert.True(response.Hits[2].Score > 0);
+        Assert.Equal(3, response.TotalHits);
+    }
+
+    [Fact]
+    public void PinBeyondTheFirstPage_LandsOnItsGlobalPosition()
+    {
+        var (index, _, biscuit) = PinIndex(coffeeCount: 15);
+        RuleDefinition[] rules = [Rule(1, pins: [new(biscuit, 12)])];
+
+        var first = Search(index, Request("coffee") with { PageSize = 10 }, rules);
+        var second = Search(index, Request("coffee") with { Page = 2, PageSize = 10 }, rules);
+
+        Assert.Equal(10, first.Hits.Count);
+        Assert.All(first.Hits, hit => Assert.Null(hit.PinnedByRuleId));
+        Assert.Equal(biscuit, second.Hits[1].ItemGuid);
+        Assert.Equal(16, second.TotalHits);
+        AssertPageable(index, Request("coffee"), rules, second.TotalHits);
+    }
+
+    [Fact]
+    public void PinRespectingFilters_IsDroppedWhenItFailsThem()
+    {
+        var (index, _, biscuit) = PinIndex(coffeeCount: 3);
+        var request = Request("coffee") with { Facets = new Dictionary<string, IReadOnlyList<string>> { [Category] = ["Coffee"] } };
+        RuleDefinition[] rules = [Rule(1, pins: [new(biscuit, 1)])];
+
+        var response = Search(index, request, rules);
+
+        Assert.DoesNotContain(biscuit, response.Hits.Select(hit => hit.ItemGuid));
+        Assert.Equal(3, response.TotalHits);
+        AssertPageable(index, request, rules, response.TotalHits);
+    }
+
+    [Fact]
+    public void PinIgnoringFilters_ShowsAndAddsToTheTotal()
+    {
+        var (index, _, biscuit) = PinIndex(coffeeCount: 3);
+        var request = Request("coffee") with { Facets = new Dictionary<string, IReadOnlyList<string>> { [Category] = ["Coffee"] } };
+        RuleDefinition[] rules = [Rule(1, pins: [new(biscuit, 1)], respectFilters: false)];
+
+        var response = Search(index, request, rules);
+
+        Assert.Equal(biscuit, response.Hits[0].ItemGuid);
+        Assert.Equal(4, response.TotalHits);
+        AssertPageable(index, request, rules, response.TotalHits);
+    }
+
+    [Fact]
+    public void MissingPinnedItem_IsIgnored()
+    {
+        var (index, _, _) = PinIndex(coffeeCount: 3);
+
+        var response = Search(index, Request("coffee"), [Rule(1, pins: [new(Guid.NewGuid(), 1)])]);
+
+        Assert.Equal(3, response.TotalHits);
+        Assert.All(response.Hits, hit => Assert.Null(hit.PinnedByRuleId));
+    }
+
+    [Fact]
+    public void Pins_LeaveUnpinnedScoresAndOrderUnchanged()
+    {
+        var (index, _, biscuit) = PinIndex(coffeeCount: 8);
+
+        var baseline = Search(index, Request("coffee"), []);
+        var pinned = Search(index, Request("coffee"), [Rule(1, pins: [new(biscuit, 2)])]);
+
+        Assert.Equal(
+            string.Join(",", baseline.Hits.Select(hit => $"{hit.ItemGuid}:{hit.Score:R}")),
+            string.Join(",", pinned.Hits.Where(hit => hit.PinnedByRuleId is null).Select(hit => $"{hit.ItemGuid}:{hit.Score:R}")));
+    }
+
+    [Fact]
+    public void PinnedItemWithSeveralLanguageDocuments_YieldsOneHit()
+    {
+        var shared = Guid.NewGuid();
+        var index = FacetIndex(
+            [
+                (Guid.NewGuid(), "coffee one", "Coffee", "en"),
+                (Guid.NewGuid(), "coffee two", "Coffee", "en"),
+                (shared, "coffee biscuit", "Food", "en"),
+                (shared, "coffee biskvit", "Food", "cs"),
+            ]);
+        RuleDefinition[] rules = [Rule(1, pins: [new(shared, 1)])];
+
+        var response = Search(index, Request("coffee"), rules);
+
+        Assert.Single(response.Hits, hit => hit.ItemGuid == shared);
+        Assert.Equal(shared, response.Hits[0].ItemGuid);
+        Assert.Equal(3, response.TotalHits);
+        AssertPageable(index, Request("coffee"), rules, response.TotalHits);
+    }
+
+    [Fact]
+    public void QueryWithNoOrganicMatches_ReturnsOnlyThePin()
+    {
+        var (index, _, biscuit) = PinIndex(coffeeCount: 3);
+
+        var response = Search(index, Request("zebra"), [Rule(1, pins: [new(biscuit, 4)])]);
+
+        Assert.Equal(1, response.TotalHits);
+        Assert.Equal(biscuit, Assert.Single(response.Hits).ItemGuid);
+    }
+
+    // Every page together holds exactly TotalHits hits, and no item appears twice.
+    private static void AssertPageable(FacetIndexParts index, SuiteSearchRequest request, RuleDefinition[] rules, int totalHits)
+    {
+        var all = new List<SuiteSearchHit>();
+        for (int page = 1; page <= (totalHits / 3) + 2; page++)
+        {
+            all.AddRange(Search(index, request with { Page = page, PageSize = 3 }, rules).Hits);
+        }
+
+        Assert.Equal(totalHits, all.Count);
+        Assert.Equal(all.Count, all.Select(hit => hit.ItemGuid).Distinct().Count());
+    }
+
+    private static (FacetIndexParts Index, Guid[] Coffee, Guid Biscuit) PinIndex(int coffeeCount)
+    {
+        var coffee = Enumerable.Range(0, coffeeCount).Select(_ => Guid.NewGuid()).ToArray();
+        var biscuit = Guid.NewGuid();
+        var index = FacetIndex(
+        [
+            .. coffee.Select((guid, i) => (guid, i % 2 == 0 ? $"coffee coffee {i}" : $"coffee {i}", "Coffee", "en")),
+            (biscuit, "biscuit", "Food", "en"),
+        ]);
+        return (index, coffee, biscuit);
+    }
+
+    private static FacetIndexParts FacetIndex((Guid Guid, string Title, string Category, string Language)[] documents)
+    {
+        var config = new FacetsConfig();
+        var directory = new RAMDirectory();
+        var taxonomyDirectory = new RAMDirectory();
+        using (var writer = new IndexWriter(directory, new IndexWriterConfig(LuceneVersion.LUCENE_48, Analyzer)))
+        using (var taxonomyWriter = new DirectoryTaxonomyWriter(taxonomyDirectory))
+        {
+            foreach (var (guid, title, category, language) in documents)
+            {
+                var document = Document(guid, title, "Drink");
+                document.Add(new StringField("LanguageName", language, Field.Store.YES));
+                document.Add(new FacetField(Category, category));
+                writer.AddDocument(config.Build(taxonomyWriter, document));
+            }
+        }
+
+        var searcher = new IndexSearcher(DirectoryReader.Open(directory));
+        return (searcher, new DrillSideways(searcher, config, new DirectoryTaxonomyReader(taxonomyDirectory)), config);
+    }
+
     private static SuiteSearchService Service(RuleProvider rules, ILogger<SuiteSearchService> logger)
     {
         var options = new SuiteSearchOptions();
@@ -272,7 +451,7 @@ public sealed class RuleSearchTests(ITestOutputHelper output)
         Service(new FixedRules(rules), NullLogger<SuiteSearchService>.Instance)
             .SearchWithRules(request, executor => executor.Search(request, Analyzer, searcher));
 
-    private static SuiteSearchResponse Search((IndexSearcher Searcher, DrillSideways DrillSideways, FacetsConfig Config) index, SuiteSearchRequest request, RuleDefinition[] rules) =>
+    private static SuiteSearchResponse Search(FacetIndexParts index, SuiteSearchRequest request, RuleDefinition[] rules) =>
         Service(new FixedRules(rules), NullLogger<SuiteSearchService>.Instance)
             .SearchWithRules(request, executor => executor.Search(request, Analyzer, index.Searcher, index.DrillSideways, index.Config));
 
@@ -284,9 +463,11 @@ public sealed class RuleSearchTests(ITestOutputHelper output)
         RuleCondition[]? conditions = null,
         Guid[]? hides = null,
         RuleBoost[]? boosts = null,
-        string? userData = null) =>
+        string? userData = null,
+        RulePin[]? pins = null,
+        bool respectFilters = true) =>
         new(id, Index, priority, true, null, null, conditions ?? [],
-            new RuleActions([], hides ?? [], boosts ?? [], userData is null ? null : JsonDocument.Parse(userData).RootElement.Clone()));
+            new RuleActions(pins ?? [], hides ?? [], boosts ?? [], userData is null ? null : JsonDocument.Parse(userData).RootElement.Clone(), respectFilters));
 
     private static (IndexSearcher Searcher, Guid Machine, Guid Grinder) PlainIndex()
     {
@@ -299,7 +480,7 @@ public sealed class RuleSearchTests(ITestOutputHelper output)
         return (searcher, machine, grinder);
     }
 
-    private static (IndexSearcher Searcher, DrillSideways DrillSideways, FacetsConfig Config) FacetedIndex(out Guid[] guids)
+    private static FacetIndexParts FacetedIndex(out Guid[] guids)
     {
         var config = new FacetsConfig();
         var directory = new RAMDirectory();

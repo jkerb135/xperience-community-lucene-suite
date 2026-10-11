@@ -36,12 +36,16 @@ public sealed record SuiteRuleUserData(int RuleId, JsonElement Data);
 
 /// <summary>One search hit.</summary>
 /// <param name="ItemGuid">The document's ItemGuid, or null when missing or unparsable.</param>
-/// <param name="Score">Relevance score.</param>
+/// <param name="Score">Relevance score; 0 for a pinned hit that did not rank organically within the fetched window.</param>
 /// <param name="Fields">Stored fields; multi-valued fields keep every value.</param>
 public sealed record SuiteSearchHit(
     Guid? ItemGuid,
     float Score,
-    IReadOnlyDictionary<string, IReadOnlyList<string>> Fields);
+    IReadOnlyDictionary<string, IReadOnlyList<string>> Fields)
+{
+    /// <summary>Id of the rule that pinned this hit to its position, or null for an organic hit.</summary>
+    public int? PinnedByRuleId { get; init; }
+}
 
 /// <summary>Counts for one facet dimension.</summary>
 /// <param name="Dimension">Facet dimension name.</param>
