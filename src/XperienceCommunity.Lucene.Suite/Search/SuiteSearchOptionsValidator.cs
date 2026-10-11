@@ -4,7 +4,7 @@ using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 
 namespace XperienceCommunity.Lucene.Suite.Search;
 
-/// <summary>Rejects analytics settings that would skew or lose data; each failure names its configuration key.</summary>
+/// <summary>Rejects analytics and rule settings that would skew or lose data; each failure names its configuration key.</summary>
 internal sealed class SuiteSearchOptionsValidator : IValidateOptions<SuiteSearchOptions>
 {
     private const string Prefix = SuiteSearchOptions.SectionName + ":Analytics:";
@@ -71,6 +71,17 @@ internal sealed class SuiteSearchOptionsValidator : IValidateOptions<SuiteSearch
         Positive(a.Retention.SubThresholdPruneAfter, "Retention:" + nameof(a.Retention.SubThresholdPruneAfter));
         AtLeastOne(a.Surfacing.MinSearches, "Surfacing:" + nameof(a.Surfacing.MinSearches));
         AtLeastOne(a.Surfacing.MinDistinctDays, "Surfacing:" + nameof(a.Surfacing.MinDistinctDays));
+
+        const string rules = SuiteSearchOptions.SectionName + ":Rules:";
+        if (!(options.Rules.MaxBoostFactor > 1 && options.Rules.MaxBoostFactor <= 1000))
+        {
+            failures.Add($"{rules}{nameof(options.Rules.MaxBoostFactor)} must be greater than 1 and at most 1000 (was {options.Rules.MaxBoostFactor}).");
+        }
+
+        if (options.Rules.CacheMinutes is < 0 or > 1440)
+        {
+            failures.Add($"{rules}{nameof(options.Rules.CacheMinutes)} must be between 0 and 1440 (was {options.Rules.CacheMinutes}).");
+        }
 
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
     }

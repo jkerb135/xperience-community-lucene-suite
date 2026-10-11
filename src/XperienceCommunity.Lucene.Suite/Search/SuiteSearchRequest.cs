@@ -29,4 +29,10 @@ public sealed record SuiteSearchRequest
 
     /// <summary>Whether to record this search in analytics; false for admin tools, previews and probes.</summary>
     public bool TrackAnalytics { get; init; } = true;
+
+    /// <summary>Visitor contexts rules can target, such as contact group code names; matched ordinally.</summary>
+    public IReadOnlyCollection<string> Contexts { get; init; } = [];
+
+    /// <summary>Whether search rules apply; false shows the unruled results (for example in a preview).</summary>
+    public bool ApplyRules { get; init; } = true;
 }

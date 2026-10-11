@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace XperienceCommunity.Lucene.Suite.Search;
 
 /// <summary>The result of a suite search.</summary>
@@ -14,9 +16,23 @@ public sealed record SuiteSearchResponse(
     /// <summary>Id of the logical search this request was recorded under (the request's, or a newly minted one).</summary>
     public Guid SearchId { get; init; }
 
+    /// <summary>Ids of the rules that fired, in the order they ran.</summary>
+    public IReadOnlyList<int> FiredRuleIds { get; init; } = [];
+
+    /// <summary>User data of the fired rules, in the order they ran.</summary>
+    public IReadOnlyList<SuiteRuleUserData> UserData { get; init; } = [];
+
+    /// <summary>True when rules could not be loaded or applied, so these results are unruled.</summary>
+    public bool RulesFailed { get; init; }
+
     // Null when unknown (a replaced inner service); 0 means the index is empty or rebuilding.
     internal int? IndexDocumentCount { get; init; }
 }
+
+/// <summary>Custom data returned by a fired rule.</summary>
+/// <param name="RuleId">Rule that returned it.</param>
+/// <param name="Data">A JSON object of at most 1 KB.</param>
+public sealed record SuiteRuleUserData(int RuleId, JsonElement Data);
 
 /// <summary>One search hit.</summary>
 /// <param name="ItemGuid">The document's ItemGuid, or null when missing or unparsable.</param>

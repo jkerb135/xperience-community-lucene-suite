@@ -65,6 +65,8 @@ public sealed class SearchExecutorTests
     [InlineData("dimensions21")]
     [InlineData("values51")]
     [InlineData("value257")]
+    [InlineData("contexts51")]
+    [InlineData("context101")]
     public void OutOfRangeRequests_AreRejected(string scenario)
     {
         var index = BuildFacetedIndex();
@@ -81,6 +83,9 @@ public sealed class SearchExecutorTests
     [InlineData("valuesEmpty")]
     [InlineData("valueNull")]
     [InlineData("valueEmpty")]
+    [InlineData("contextsNull")]
+    [InlineData("contextEmpty")]
+    [InlineData("contextWhitespace")]
     public void MalformedRequests_AreRejected(string scenario)
     {
         var index = BuildFacetedIndex();
@@ -238,6 +243,11 @@ public sealed class SearchExecutorTests
             "valuesEmpty" => request with { Facets = new Dictionary<string, IReadOnlyList<string>> { [Category] = [] } },
             "valueNull" => Request("drink", [null!]),
             "valueEmpty" => Request("drink", ""),
+            "contexts51" => request with { Contexts = Enumerable.Range(0, 51).Select(i => $"group{i}").ToArray() },
+            "context101" => request with { Contexts = [new string('g', 101)] },
+            "contextsNull" => request with { Contexts = null! },
+            "contextEmpty" => request with { Contexts = [""] },
+            "contextWhitespace" => request with { Contexts = ["  "] },
             _ => throw new ArgumentOutOfRangeException(nameof(scenario), scenario, null),
         };
     }

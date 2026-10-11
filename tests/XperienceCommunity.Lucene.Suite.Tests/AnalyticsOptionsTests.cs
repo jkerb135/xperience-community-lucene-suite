@@ -13,7 +13,8 @@ public sealed class AnalyticsOptionsTests
     [Fact]
     public void Defaults_AreValid_AndMatchTheDocumentedValues()
     {
-        var a = Resolve([]).Analytics;
+        var options = Resolve([]);
+        var a = options.Analytics;
 
         Assert.Equal(
             (true, 10_000, TimeSpan.FromSeconds(2), 500),
@@ -27,6 +28,7 @@ public sealed class AnalyticsOptionsTests
             (a.Retention.RawRetention, a.Retention.DailyRetention, a.Retention.SubThresholdPruneAfter, a.Retention.RawHardLimit));
         Assert.Equal((5, 2), (a.Surfacing.MinSearches, a.Surfacing.MinDistinctDays));
         Assert.Equal((TimeSpan.FromMinutes(15), 7), (a.Job.RollupInterval, a.Job.MaxDaysPerRun));
+        Assert.Equal((10d, 60), (options.Rules.MaxBoostFactor, options.Rules.CacheMinutes));
     }
 
     [Fact]
@@ -53,6 +55,8 @@ public sealed class AnalyticsOptionsTests
             ["LuceneSuite:Analytics:Surfacing:MinDistinctDays"] = "3",
             ["LuceneSuite:Analytics:Job:RollupInterval"] = "00:05:00",
             ["LuceneSuite:Analytics:Job:MaxDaysPerRun"] = "3",
+            ["LuceneSuite:Rules:MaxBoostFactor"] = "4.5",
+            ["LuceneSuite:Rules:CacheMinutes"] = "0",
         });
         var a = options.Analytics;
 
@@ -70,6 +74,7 @@ public sealed class AnalyticsOptionsTests
             (a.Retention.RawRetention, a.Retention.DailyRetention, a.Retention.SubThresholdPruneAfter, a.Retention.RawHardLimit));
         Assert.Equal((6, 3), (a.Surfacing.MinSearches, a.Surfacing.MinDistinctDays));
         Assert.Equal((TimeSpan.FromMinutes(5), 3), (a.Job.RollupInterval, a.Job.MaxDaysPerRun));
+        Assert.Equal((4.5, 0), (options.Rules.MaxBoostFactor, options.Rules.CacheMinutes));
     }
 
     [Fact]
@@ -106,6 +111,20 @@ public sealed class AnalyticsOptionsTests
         var error = Assert.Throws<OptionsValidationException>(() => Resolve(new() { ["LuceneSuite:Analytics:" + key] = value }));
 
         Assert.Contains(error.Failures, failure => failure.StartsWith("LuceneSuite:Analytics:" + key + " ", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("MaxBoostFactor", "1")]
+    [InlineData("MaxBoostFactor", "0.5")]
+    [InlineData("MaxBoostFactor", "1000.01")]
+    [InlineData("MaxBoostFactor", "NaN")]
+    [InlineData("CacheMinutes", "-1")]
+    [InlineData("CacheMinutes", "1441")]
+    public void InvalidRuleSetting_FailsNamingTheSetting(string key, string value)
+    {
+        var error = Assert.Throws<OptionsValidationException>(() => Resolve(new() { ["LuceneSuite:Rules:" + key] = value }));
+
+        Assert.Contains(error.Failures, failure => failure.StartsWith("LuceneSuite:Rules:" + key + " ", StringComparison.Ordinal));
     }
 
     [Fact]

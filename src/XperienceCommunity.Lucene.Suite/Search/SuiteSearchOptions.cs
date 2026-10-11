@@ -14,6 +14,19 @@ public sealed class SuiteSearchOptions
 
     /// <summary>Search analytics settings (<c>LuceneSuite:Analytics</c>).</summary>
     public SuiteAnalyticsOptions Analytics { get; } = new();
+
+    /// <summary>Search rule settings (<c>LuceneSuite:Rules</c>).</summary>
+    public SuiteRulesOptions Rules { get; } = new();
+}
+
+/// <summary>Search rule settings (<c>LuceneSuite:Rules</c>).</summary>
+public sealed class SuiteRulesOptions
+{
+    /// <summary>Score multiplier of a +100 boost; a strength s multiplies by MaxBoostFactor^(s/100), so −100 divides by it. Default 10, range (1, 1000].</summary>
+    public double MaxBoostFactor { get; set; } = 10;
+
+    /// <summary>How long loaded rules are cached per index; any rule change clears the cache. 0 disables caching. Default 60, range 0–1440.</summary>
+    public int CacheMinutes { get; set; } = 60;
 }
 
 /// <summary>Search analytics settings; the capture settings sit directly on this class, the rest in groups.</summary>
