@@ -25,7 +25,25 @@ Two things are deliberately **not** configurable, because changing them would ma
 `XperienceCommunity.Lucene.Suite.Widgets` implements the browser side of this page:
 
 - `services.AddLuceneSuiteWidgets()` and `app.MapLuceneSuiteEvents()` map `POST /lucenesuite/events` (body `{ "type": "click" | "conversion", searchId, sequence, itemGuid, position?, eventId? }`, JSON or `text/plain`, at most 1 KB; 202, or 400/413/429) and `GET /lucenesuite/events/settings`.
-- `_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite.js` is a dependency-free ES module: `createSearchTracker(settings).beforeSend(input, isSubmit, now)` implements �2, `sendClick`/`sendConversion` implement �3, and `formatResultReference`/`parseResultReference` handle the `sr` parameter (`SuiteResultReference` on the server). It is tested against the vectors.
+- `_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite.js` is a dependency-free ES module: `createSearchTracker(settings).beforeSend(input, isSubmit, now)` implements §2, `sendClick`/`sendConversion` implement §3, and `formatResultReference`/`parseResultReference` handle the `sr` parameter (`SuiteResultReference` on the server). It is tested against the vectors.
+
+### Server-rendered search components
+
+`<vc:lucene-suite-search-box />`, `<vc:lucene-suite-results index-name="…" />` and `<vc:lucene-suite-facets index-name="…" />` render a tracked search page without client code. All components for one index share **one** search per request (`SuitePageSearch`), driven by the URL:
+
+| Parameter | Meaning |
+|---|---|
+| `q` | Query text (≤ 256 characters; longer shows the invalid state) |
+| `page` | 1-based page within the 1000-result window |
+| `f.{dimension}` | Selected facet values, repeatable (at most 10 dimensions × 20 values) |
+| `sid`, `seq` | Continuation of a search: paging and facet links carry the response's `SearchId` and `seq + 1` |
+
+- The search box form carries no `sid`, so a submit starts a new server-minted search (`IsSubmit = true` when `q` is not empty).
+- `sid`/`seq` are honoured only on same-origin navigation (`Sec-Fetch-Site: same-origin`, or no header). A pasted, bookmarked or cross-site link starts a new search instead of colliding with the original visitor's rows.
+- Result links get `sr=` and click-beacon attributes only when they stay on the site; other URLs are linked plainly, and anything that is not a relative path or http/https URL is not linked.
+- A page that ran a search is sent with `Cache-Control: no-store` and is never stored by ASP.NET output caching. Do not cache search URLs in a CDN either: cached HTML replays one visitor's `sid`/`seq` and context-specific results to everyone. Add `X-Robots-Tag: noindex` yourself if results pages should not be indexed.
+- Site-wide options (`AddLuceneSuiteWidgets(o => …)`): `PageSize` (10), `SearchOnEmptyQuery` (false), `ContactGroupContexts` (true: the current contact's contact groups, never creating a contact, are sent as rule contexts; cached 5 minutes per contact).
+- Override the markup by adding `Views/Shared/Components/LuceneSuiteSearchBox|LuceneSuiteResults|LuceneSuiteFacets/Default.cshtml` to the site; the models are `LuceneSuite*Model`.
 
 ## 1. Search requests
 

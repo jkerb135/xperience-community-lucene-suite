@@ -17,7 +17,7 @@ Phases: 5 of 6 complete (83%)
 | 3 | Rules Engine | 7/7 | ✅ Complete | 2026-10-11 |
 | 4 | Synonyms | 2/2 | ✅ Complete | 2026-10-11 |
 | 5 | Preview Sandbox | 1/1 | ✅ Complete | 2026-10-11 |
-| 6 | Widgets Package | 1/3 | In progress | - |
+| 6 | Widgets Package | 2/3 | In progress | - |
 
 ## Phase Details
 
@@ -89,7 +89,7 @@ Phases: 5 of 6 complete (83%)
 
 **Plans:**
 - [x] 06-01 (complete 2026-10-11): Package skeleton — rate-limited events endpoint, client-settings endpoint, sr= result reference, full contract JS client (shared vectors)
-- [ ] 06-02 (planned): Server-rendered search box, results and facets view components (one shared search per request, sid/seq continuation links, sr= result links, click beacons, toggle-link facets, contact-group contexts)
+- [x] 06-02 (complete 2026-10-11): Server-rendered search box, results and facets view components (one shared search per request, sid/seq continuation links, sr= result links, click beacons, toggle-link facets, contact-group contexts)
 - [ ] 06-03: Page Builder widgets + host wiring + end-to-end check with real traffic
 
 ## Later Milestones

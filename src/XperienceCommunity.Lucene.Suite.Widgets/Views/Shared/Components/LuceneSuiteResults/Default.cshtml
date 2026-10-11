@@ -1,0 +1,80 @@
+@model LuceneSuiteResultsModel
+@{
+    var search = Model.Search;
+    var response = search.Response;
+}
+@if (search.Status != SuitePageSearchStatus.NotSearched)
+{
+    <section class="lucene-suite-results" aria-label="Search results">
+        @if (search.Status == SuitePageSearchStatus.Invalid)
+        {
+            <p class="lucene-suite-results__status">This search could not be run. Try different words or remove some filters.</p>
+        }
+        else if (search.Status == SuitePageSearchStatus.Unavailable)
+        {
+            <p class="lucene-suite-results__status">Search is unavailable right now. Please try again later.</p>
+        }
+        else if (response is not null)
+        {
+            <p class="lucene-suite-results__status">
+                @if (search.Url.Query.Length > 0)
+                {
+                    @(response.TotalHits == 1 ? "1 result" : $"{response.TotalHits} results")<text> for “</text>@search.Url.Query<text>”</text>
+                }
+                else
+                {
+                    @(response.TotalHits == 1 ? "1 result" : $"{response.TotalHits} results")
+                }
+            </p>
+            @if (Model.Hits.Count > 0)
+            {
+                <ol class="lucene-suite-results__list" start="@Model.FirstPosition" data-lucene-suite-results data-lucene-suite-events="@Model.EventsUrl" data-lucene-suite-search="@response.SearchId" data-lucene-suite-sequence="@search.Sequence">
+                    @foreach (var hit in Model.Hits)
+                    {
+                        <li class="lucene-suite-results__item">
+                            @if (hit.Href is null)
+                            {
+                                <span class="lucene-suite-results__title">@hit.Title</span>
+                            }
+                            else if (hit.Tracked)
+                            {
+                                <a class="lucene-suite-results__title" href="@hit.Href" data-lucene-suite-item="@hit.Hit.ItemGuid" data-lucene-suite-position="@hit.Position">@hit.Title</a>
+                            }
+                            else
+                            {
+                                <a class="lucene-suite-results__title" href="@hit.Href">@hit.Title</a>
+                            }
+                            @if (hit.Summary is not null)
+                            {
+                                <p class="lucene-suite-results__summary">@hit.Summary</p>
+                            }
+                        </li>
+                    }
+                </ol>
+            }
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="lucene-suite-pagination" aria-label="Search results pages">
+                    <ul class="lucene-suite-pagination__list">
+                        @if (Model.PreviousLink is not null)
+                        {
+                            <li><a class="lucene-suite-pagination__previous" href="@Model.PreviousLink" rel="prev nofollow">Previous</a></li>
+                        }
+                        @foreach (var link in Model.Pages)
+                        {
+                            <li><a class="lucene-suite-pagination__page" href="@link.Href" rel="nofollow" aria-current="@(link.Current ? "page" : null)">@link.Page</a></li>
+                        }
+                        @if (Model.NextLink is not null)
+                        {
+                            <li><a class="lucene-suite-pagination__next" href="@Model.NextLink" rel="next nofollow">Next</a></li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+    </section>
+    @if (Model.EventsUrl is not null && Model.Hits.Any(h => h.Tracked))
+    {
+        <script type="module" src="~/_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite-results.js" asp-append-version="true"></script>
+    }
+}

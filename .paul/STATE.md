@@ -5,15 +5,15 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package, 06-02 planned + audited (awaiting approval)
+**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package, 06-02 complete; next 06-03 (last v0.1 plan)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 6 of 6 (Widgets Package) — Planning
-Plan: 06-02 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-11 — Audited .paul/phases/06-widgets-package/06-02-PLAN.md (06-02-AUDIT.md)
+Phase: 6 of 6 (Widgets Package) — In progress
+Plan: 06-02 complete
+Status: Ready for next PLAN (06-03)
+Last activity: 2026-10-11 — Unified 06-02 (06-02-SUMMARY.md)
 
 Progress:
 - Milestone: [████████░░] 83% (5 of 6 phases)
@@ -22,14 +22,14 @@ Progress:
 - Phase 3: [██████████] 100% (7/7 plans)
 - Phase 4: [██████████] 100% (2/2 plans)
 - Phase 5: [██████████] 100% (1/1 plans)
-- Phase 6: [███░░░░░░░] 33% (1/3 plans)
+- Phase 6: [██████░░░░] 67% (2/3 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -39,6 +39,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: 06-02 applied: SuitePageSearch public (internal ctor, factory DI; view components need public ctor types); contacts via ICurrentContactProvider.GetExistingContact; Kentico Lucene Url = WebPageUrl.RelativePath (~/…) → Url.Content; Razor renders null data-* attributes (JS treats empty as absent); IProgressiveCache dependency only when settings.Cached; 06-01 doc had two cp1252 § bytes (repaired; always write with utf-8) | Phase 6 | 06-03 wraps the view components as widgets and verifies the contact-group query on the host |
+| 2026-10-11: User: human-verify checkpoints no longer block APPLY — each is recorded as a Pending entry in .paul/APPROVAL-CHECKS.md and reviewed together at the end of the milestone (v0.1, after 06-03); decisions and blockers still stop | All phases | 06-02 checkpoint is entry #2; future plans phrase checkpoints as entries |
 | 2026-10-11: Enterprise audit on 06-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 6 | Hit hrefs allow-listed (relative or http/https; sr= + beacons same-site only); search responses no-store + output cache storage off; unknown index loud, outages render "unavailable"; URL-selected facets always removable; rel=nofollow on paging/facets |
 | 2026-10-11: 06-02 planning (user choices): view components with overridable Razor views (06-03 widgets wrap them); facets as toggle links (no JS); sr= always on result links; hit title/URL/summary via field-name parameters (defaults Title / Kentico Url / none). Plan: one search per request per index shared by all components; URL q/page/f.{dim}/sid/seq; sid continues only on same-origin navigation (Sec-Fetch-Site); page size + contact-group contexts as site-wide options | Phase 6 | Departs from "contact groups as a widget property" (shared search) — user approved the plan with site-wide options 2026-10-11 |
 | 2026-10-11: 06-01 applied: Widgets package (Razor RCL) with package-owned per-IP limiter acquired in the handler (host RateLimiterOptions untouched, no UseRateLimiter); InternalsVisibleTo Widgets on core (reuses LogThrottle, MaxResultWindow); public API approved (/lucenesuite/events, /settings, sr=, JS exports incl. norm/osa/typo); C# pitfall: `cond ? null : Memory<byte>` yields empty Memory via byte[] conversion; node 24 `t.mock.property(globalThis, "navigator")` hangs → defineProperty | Phase 6 | 06-02 tag helpers use SuiteResultReference, SuiteClientSettings.EventsUrl and the _content asset |
@@ -117,6 +119,7 @@ See PROJECT.md Key Decisions.
 | Rules-overhead perf test (p95 < 10 ms) flaked once when the suite ran alongside the host and dev server; 7.4–8.8 ms alone | 05-01 APPLY | S | Watch; consider a CI-specific budget if it recurs |
 | 03-07 custom-data `<pre>` in the normal query tester uses the brand-purple token | 05-01 APPLY | S | KNOWN-LIMITATIONS; next change to the normal tester view |
 | Widgets: per-process rate limit, forgeable events, unfingerprinted JS asset; no NuGet metadata on either package | 06-01 audit / APPLY | S–M | KNOWN-LIMITATIONS; 06-02 asset versioning; release phase |
+| 06-02: contact-group membership query not DB-verified; real-browser pass; facet heading display names (APPROVAL-CHECKS #2) | 06-02 APPLY | S | 06-03 host checkpoint / milestone review |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -139,7 +142,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02: all required skills invoked.
 
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
@@ -153,16 +156,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01: all required skill
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 3a7bc95 feat(06-widgets-package): plan 06-01
+Last commit: 033d48f docs(paul): plan + audit 06-02
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: Plan 06-02 audited
-Next action: acknowledge site-wide page size/contact-group options, then /paul:apply .paul/phases/06-widgets-package/06-02-PLAN.md
-Resume file: .paul/phases/06-widgets-package/06-02-PLAN.md
+Stopped at: 06-02 loop closed
+Next action: commit, then /paul:plan (06-03 Page Builder widgets + host wiring + end-to-end)
+Resume file: .paul/phases/06-widgets-package/06-02-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

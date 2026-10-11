@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
@@ -26,6 +27,7 @@ public static class SuiteEventsEndpoints
     public static RouteGroupBuilder MapLuceneSuiteEvents(this IEndpointRouteBuilder endpoints, string pattern = "/lucenesuite/events")
     {
         string path = "/" + pattern.Trim('/');
+        endpoints.ServiceProvider.GetRequiredService<SuiteEventsPath>().Value = path;
         var group = endpoints.MapGroup(path);
         group.MapPost(string.Empty, Post).DisableAntiforgery();
         group.MapGet("settings", (HttpContext context, IOptions<SuiteSearchOptions> options) =>
@@ -95,4 +97,10 @@ public static class SuiteEventsEndpoints
     private static IResult Invalid() => Results.Text("Invalid event.", statusCode: StatusCodes.Status400BadRequest);
 
     private sealed record SuiteEvent(string? Type, Guid SearchId, int Sequence, Guid ItemGuid, int? Position, Guid? EventId);
+}
+
+/// <summary>The path <see cref="SuiteEventsEndpoints.MapLuceneSuiteEvents"/> mapped, without PathBase; null until it is called.</summary>
+internal sealed class SuiteEventsPath
+{
+    public string? Value { get; set; }
 }

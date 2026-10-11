@@ -1,0 +1,27 @@
+@model LuceneSuiteFacetsModel
+@if (Model.Groups.Count > 0)
+{
+    <nav class="lucene-suite-facets" aria-label="Filters">
+        @foreach (var group in Model.Groups)
+        {
+            <section class="lucene-suite-facets__group">
+                <h2 class="lucene-suite-facets__title">@group.Dimension</h2>
+                <ul class="lucene-suite-facets__list">
+                    @foreach (var option in group.Options)
+                    {
+                        <li class="lucene-suite-facets__item">
+                            <a class="lucene-suite-facets__link@(option.Selected ? " lucene-suite-facets__link--selected" : null)" href="@option.Href" rel="nofollow">
+                                <span class="lucene-suite-facets__label">@option.Label</span>
+                                <span class="lucene-suite-facets__count">(@option.Count)</span>
+                                @if (option.Selected)
+                                {
+                                    <span class="lucene-suite-facets__state">selected</span>
+                                }
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    </nav>
+}

@@ -1,0 +1,8 @@
+@model LuceneSuiteSearchBoxModel
+<form class="lucene-suite-search-box" role="search" method="get" action="@Model.ActionUrl">
+    <label class="lucene-suite-search-box__label">
+        <span class="lucene-suite-search-box__label-text">@Model.Label</span>
+        <input class="lucene-suite-search-box__input" type="search" name="@SuiteSearchUrl.QueryParameter" value="@Model.Query" placeholder="@Model.Placeholder" maxlength="256" autocomplete="off" />
+    </label>
+    <button class="lucene-suite-search-box__submit" type="submit">@Model.Label</button>
+</form>
