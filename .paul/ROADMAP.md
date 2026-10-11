@@ -89,7 +89,7 @@ Phases: 5 of 6 complete (83%)
 
 **Plans:**
 - [x] 06-01 (complete 2026-10-11): Package skeleton — rate-limited events endpoint, client-settings endpoint, sr= result reference, full contract JS client (shared vectors)
-- [ ] 06-02: Tag helpers + server-rendered search box, results and facets (sid/seq continuation links, sr= result links, click beacons, contact-group contexts)
+- [ ] 06-02 (planned): Server-rendered search box, results and facets view components (one shared search per request, sid/seq continuation links, sr= result links, click beacons, toggle-link facets, contact-group contexts)
 - [ ] 06-03: Page Builder widgets + host wiring + end-to-end check with real traffic
 
 ## Later Milestones

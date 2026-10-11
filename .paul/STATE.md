@@ -5,15 +5,15 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package, 06-01 complete; next 06-02
+**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package, 06-02 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 6 of 6 (Widgets Package) — In progress
-Plan: 06-01 complete
-Status: Ready for next PLAN (06-02)
-Last activity: 2026-10-11 — Unified 06-01 (06-01-SUMMARY.md)
+Phase: 6 of 6 (Widgets Package) — Planning
+Plan: 06-02 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-11 — Audited .paul/phases/06-widgets-package/06-02-PLAN.md (06-02-AUDIT.md)
 
 Progress:
 - Milestone: [████████░░] 83% (5 of 6 phases)
@@ -29,7 +29,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -39,6 +39,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: Enterprise audit on 06-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 6 | Hit hrefs allow-listed (relative or http/https; sr= + beacons same-site only); search responses no-store + output cache storage off; unknown index loud, outages render "unavailable"; URL-selected facets always removable; rel=nofollow on paging/facets |
+| 2026-10-11: 06-02 planning (user choices): view components with overridable Razor views (06-03 widgets wrap them); facets as toggle links (no JS); sr= always on result links; hit title/URL/summary via field-name parameters (defaults Title / Kentico Url / none). Plan: one search per request per index shared by all components; URL q/page/f.{dim}/sid/seq; sid continues only on same-origin navigation (Sec-Fetch-Site); page size + contact-group contexts as site-wide options | Phase 6 | Departs from "contact groups as a widget property" (shared search) — user approved the plan with site-wide options 2026-10-11 |
 | 2026-10-11: 06-01 applied: Widgets package (Razor RCL) with package-owned per-IP limiter acquired in the handler (host RateLimiterOptions untouched, no UseRateLimiter); InternalsVisibleTo Widgets on core (reuses LogThrottle, MaxResultWindow); public API approved (/lucenesuite/events, /settings, sr=, JS exports incl. norm/osa/typo); C# pitfall: `cond ? null : Memory<byte>` yields empty Memory via byte[] conversion; node 24 `t.mock.property(globalThis, "navigator")` hangs → defineProperty | Phase 6 | 06-02 tag helpers use SuiteResultReference, SuiteClientSettings.EventsUrl and the _content asset |
 | 2026-10-11: Enterprise audit on 06-01-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 6 | Events endpoint owns its PartitionedRateLimiter (never touches host RateLimiterOptions, no UseRateLimiter dependency); EventsPerMinute 0 disables + throttled warning for proxy/CDN; bounded body read incl. chunked; eventId optional |
 | 2026-10-11: Phase 6 planning (user choices): server-rendered widgets (no public search API); Search box + Results + Facets as separate widgets; visitor contact groups passed as contexts (widget property, default on, only with a current contact); three plans (06-01 package + events endpoint + JS client, 06-02 tag helpers + server rendering, 06-03 Page Builder widgets + host wiring); full contract JS client built now despite server-rendered widgets continuing searches via server-rendered sid/seq links (user overrode the click-beacon-only recommendation) | Phase 6 | Last v0.1 phase |
@@ -151,16 +153,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01: all required skill
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: e16f909 feat(05-preview-sandbox): Phase 5 complete
+Last commit: 3a7bc95 feat(06-widgets-package): plan 06-01
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: 06-01 loop closed
-Next action: commit, then /paul:plan (06-02 tag helpers + server-rendered search box, results, facets)
-Resume file: .paul/phases/06-widgets-package/06-01-SUMMARY.md
+Stopped at: Plan 06-02 audited
+Next action: acknowledge site-wide page size/contact-group options, then /paul:apply .paul/phases/06-widgets-package/06-02-PLAN.md
+Resume file: .paul/phases/06-widgets-package/06-02-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
