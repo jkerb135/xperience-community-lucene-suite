@@ -5,28 +5,28 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-05 planned + audited (awaiting approval)
+**Current focus:** v0.1 Tune & Capture — Phase 3 Rules Engine, 03-05 complete; ready to plan 03-06 Rules admin UI
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 3 of 6 (Rules Engine) — Planning
-Plan: 03-05 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-10 — Audited .paul/phases/03-rules-engine/03-05-PLAN.md (03-05-AUDIT.md)
+Phase: 3 of 6 (Rules Engine) — In progress
+Plan: 03-05 complete (unified); next 03-06 Rules admin UI
+Status: Loop closed, ready for next PLAN
+Last activity: 2026-10-11 — Unified 03-05 (all AC pass, checkpoint approved; 394 tests; p95 ≈ 8 ms with 300 pins)
 
 Progress:
 - Milestone: [███░░░░░░░] 33% (2 of 6 phases)
 - Phase 1: [██████████] 100% (3/3 plans)
 - Phase 2: [██████████] 100% (4/4 plans)
-- Phase 3: [███████░░░] 67% (4/6 plans)
+- Phase 3: [████████░░] 83% (5/6 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -36,6 +36,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: 03-05 applied: pinned window documents found by doc-id membership, ItemGuids via per-segment FieldCache (20.3 → ≈8 ms p95, 300 pins); DrillSideways counts of a filtered dimension include filter-ignoring pins; host index confirmed multilingual (es docs share ItemGuids) | Phase 3 | 03-06 can show PinnedByRuleId; dropped pins not reported yet |
 | 2026-10-10: Enterprise audit on 03-05-PLAN.md. Applied 2 must-have, 2 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 3 | One hit per pinned ItemGuid in multilingual indexes; TotalHits = run-1 total − passing pinned docs + available pins (equals pageable length) |
 | 2026-10-10: 03-05 planning (user choices): pinned items count in TotalHits and facets via a zero-weight, coord-disabled pinned clause in the match set; filter-ignoring pins add to the total only; pins show regardless of query text (Algolia); standard track | Phase 3 | Unpinned scores must stay identical (proven by test) |
 | 2026-10-10: 03-04 applied: boosts nest one BoostingQuery per boost, capped at the 200 strongest (supersedes the audit's group-by-strength bound, which broke same-strength stacking); fail-open reruns unruled for any non-ArgumentException; RuleProvider.GetRules virtual as test seam; host boosts use Kentico's ContentTypeName StringField (ContentType is facet-only) | Phase 3 | 03-05 pins plug into SearchWithRules / SearchExecutor; 03-06 shows FiredRuleIds/UserData/RulesFailed |
@@ -84,6 +85,7 @@ See PROJECT.md Key Decisions.
 | npm Table rows not keyboard-reachable (display:contents row buttons); hit-detail focus returns to the table wrapper (KNOWN-LIMITATIONS) | 03-02 checkpoint | S–M | 03-05 rules listing (per-row action or focusable row) |
 | 03-02 verification gaps: 1440 px visual check and rapid-click re-test on the Filters panel / Apply / bar controls not run (pane ~800 px) | 03-02 UNIFY | S | Next admin UI checkpoint (03-05) |
 | 03-02 limitations: filter-panel counts from the last executed search; server runs aborted searches (audit deferral); Show more capped by FacetValuesPerDimension; @types/node only transitive | 03-02 audit / checkpoint | S | KNOWN-LIMITATIONS |
+| Leftover XpSearch contact-group macro `Contact.XpSearchSearchedFor("grinders")` fails on every evaluation in the CommunityProjects host log | 03-05 checkpoint | S | Part of the pending XpSearch DB-objects decision |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -112,16 +114,16 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log -1` (docs(paul): plan 03-05; 03-04 code in d882f98, unify in 7b3c2cd)
+Last commit: see `git log -1` (docs(paul): unify plan 03-05; 03-05 code in the preceding feat commit)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
-Last session: 2026-10-10
-Stopped at: Plan 03-05 audited
-Next action: /paul:apply .paul/phases/03-rules-engine/03-05-PLAN.md
-Resume file: .paul/phases/03-rules-engine/03-05-PLAN.md
+Last session: 2026-10-11
+Stopped at: Plan 03-05 unified (Phase 3: 5/6)
+Next action: /paul:plan for 03-06 Rules admin UI (design via /xbyk-admin-ui:design-screen)
+Resume file: .paul/phases/03-rules-engine/03-05-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v4). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v4) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
