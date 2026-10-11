@@ -5,15 +5,15 @@
 See: .paul/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package, 06-02 complete; next 06-03 (last v0.1 plan)
+**Current focus:** v0.1 Tune & Capture — Phase 6 Widgets Package, 06-03 planned + audited (awaiting approval)
 
 ## Current Position
 
 Milestone: v0.1 Tune & Capture
-Phase: 6 of 6 (Widgets Package) — In progress
-Plan: 06-02 complete
-Status: Ready for next PLAN (06-03)
-Last activity: 2026-10-11 — Unified 06-02 (06-02-SUMMARY.md)
+Phase: 6 of 6 (Widgets Package) — Planning
+Plan: 06-03 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-11 — Audited .paul/phases/06-widgets-package/06-03-PLAN.md (06-03-AUDIT.md)
 
 Progress:
 - Milestone: [████████░░] 83% (5 of 6 phases)
@@ -29,7 +29,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -39,6 +39,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-11: Enterprise audit on 06-03-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 6 | Widgets assembly needs [assembly: AssemblyDiscoverable] or RegisterWidget is never scanned; preview detection fails closed; edit-mode search box inert; docs warn about <cache>/output cache/CDN |
+| 2026-10-11: 06-03 planning (user choices): search box widget targets the results page via a page selector (empty = current page); keep a permanent Search landing page on CommunityProjects (ongoing traffic; its analytics rows are kept); facet dimension labels as a widget property. Plan adds preview/edit-mode exclusion in SuitePageSearch (core capture excludes only bots/prefetch) | Phase 6 | Last v0.1 plan; checkpoint → APPROVAL-CHECKS #3 |
 | 2026-10-11: 06-02 applied: SuitePageSearch public (internal ctor, factory DI; view components need public ctor types); contacts via ICurrentContactProvider.GetExistingContact; Kentico Lucene Url = WebPageUrl.RelativePath (~/…) → Url.Content; Razor renders null data-* attributes (JS treats empty as absent); IProgressiveCache dependency only when settings.Cached; 06-01 doc had two cp1252 § bytes (repaired; always write with utf-8) | Phase 6 | 06-03 wraps the view components as widgets and verifies the contact-group query on the host |
 | 2026-10-11: User: human-verify checkpoints no longer block APPLY — each is recorded as a Pending entry in .paul/APPROVAL-CHECKS.md and reviewed together at the end of the milestone (v0.1, after 06-03); decisions and blockers still stop | All phases | 06-02 checkpoint is entry #2; future plans phrase checkpoints as entries |
 | 2026-10-11: Enterprise audit on 06-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 6 | Hit hrefs allow-listed (relative or http/https; sr= + beacons same-site only); search responses no-store + output cache storage off; unknown index loud, outages render "unavailable"; URL-selected facets always removable; rel=nofollow on paging/facets |
@@ -156,16 +158,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02: all require
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 033d48f docs(paul): plan + audit 06-02
+Last commit: d6dcc0b feat(06-widgets-package): plan 06-02
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-11
-Stopped at: 06-02 loop closed
-Next action: commit, then /paul:plan (06-03 Page Builder widgets + host wiring + end-to-end)
-Resume file: .paul/phases/06-widgets-package/06-02-SUMMARY.md
+Stopped at: Plan 06-03 audited
+Next action: /paul:apply .paul/phases/06-widgets-package/06-03-PLAN.md
+Resume file: .paul/phases/06-widgets-package/06-03-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
