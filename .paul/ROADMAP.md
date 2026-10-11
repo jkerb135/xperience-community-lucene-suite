@@ -5,7 +5,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.1 Tune & Capture** (v0.1.0)
-Status: Complete in code — milestone review pending (.paul/APPROVAL-CHECKS.md)
+Status: Complete in code, reviewed 2026-10-12 — host follow-up (readable facet values) before closing
 Phases: 6 of 6 complete (100%)
 
 ## Phases

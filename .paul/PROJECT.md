@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.0.0 |
-| Status | v0.1 complete in code — Phases 1–6 complete (6 of 6); milestone review pending (.paul/APPROVAL-CHECKS.md #2, #3) |
+| Status | v0.1 complete in code and reviewed — one host follow-up before the milestone is closed |
 | Last Updated | 2026-10-11 |
 
 ## Requirements
@@ -61,7 +61,7 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Page Builder widgets (search box with results-page selector, results, filters with dimension labels); preview/edit mode never tracked; contact-group query DB-proven; CommunityProjects Site search page producing real Suite traffic — Phase 6 (06-03)
 
 ### Active (In Progress)
-- [ ] Milestone v0.1 review: .paul/APPROVAL-CHECKS.md #2 (06-02 markup/URL names) and #3 (06-03 widgets, host edits, facet value labels)
+- [ ] v0.1 follow-up: CommunityProjects host stores readable content-type facet values (review 2026-10-12; #2 and #3 approved)
 
 ### Planned (Next)
 - v0.1 Tune & capture: foundation, event capture, rules engine, synonyms, preview

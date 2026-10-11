@@ -5,8 +5,8 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
 | 1 | 06-01 | Public API + endpoint shape | Approved 2026-10-11 (before this process) |
-| 2 | 06-02 | Search component markup, parameters and URL names | **Pending** |
-| 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | **Pending** |
+| 2 | 06-02 | Search component markup, parameters and URL names | Approved 2026-10-12 (heading labels resolved by 06-03) |
+| 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | Approved 2026-10-12 with one follow-up: host index stores readable facet values |
 
 ---
 
@@ -100,3 +100,14 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - The plan's page "Search" at `/search` became "Site search" at `/site-search`, so it doesn't clash with the XpSearch page.
    - The widget view components are named `LuceneSuite*Widget`, which also makes them usable as `<vc:lucene-suite-results-widget>`.
    - `LuceneSuiteFacetGroup` gained a positional `Label`. That is a breaking change to the 06-02 record, but it is unreleased.
+
+---
+
+## Milestone v0.1 review (2026-10-12)
+
+| Item | Decision |
+|---|---|
+| #2 public names (components, options, URL parameters q / page / f.{dimension} / sid / seq / sr, model types) | Approved as is |
+| #3 widgets, 4 host edits (incl. AreaRestrictionHelper allow-list), search box disabled in all Kentico preview, /site-search page (XpSearch page untouched) | Approved |
+| #3 facet values show raw code names | Follow-up: the CommunityProjects indexing strategy stores readable content-type facet values (host-only change + index rebuild; no Suite change; the host has no rules referencing facet values) |
+| Test traffic in comm_projects | Keep |
