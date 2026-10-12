@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 8 of 10 (Reports Admin) — Not started
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-12 — Phase 7 complete (07-02 unified), transitioned to Phase 8
+Phase: 8 of 10 (Reports Admin) — Planning
+Plan: 08-01 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-12 — Audited .paul/phases/08-reports-admin/08-01-PLAN.md (08-01-AUDIT.md)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Ready for first PLAN of Phase 8]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Enterprise audit on 08-01-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8 | UTC-day strings end to end (no toISOString / Date parsing; TZ-tested); rate deltas in percentage points; command failures shown with last result kept; host watermark checked first; URL persistence dropped if it conflicts with the admin router |
+| 2026-10-12: Phase 8 planning (user choices): trend = token-styled SVG chart + "Show as table" (npm 31.9.1 exports no ColumnChart; amCharts not externalized → own unlicensed ~1 MB bundle); range = presets (7/30/90 days, 12 months) + custom DateTimeRangeInput; row actions = open in query tester, create rule for query, add synonym; two plans (08-01 page/range/KPIs/trend/latency, 08-02 query tables + row actions). Design-screen in PLAN: composed Stack/Row/Card layout, InfoCard KPIs (strings only → delta in details), NameToggleButtons presets | Phase 8 | 08-01 created |
 | 2026-10-12: 07-02 applied: seed runner in tests/Seeding (generator → RollupEngine → SqlBulkCopy, RollupLock + serializable range re-read, DB-name confirm); texts normalized (lowercase/trim) because the SearchDaily unique index is case-insensitive and ignores trailing spaces; host comm_projects seeded DancingGoatSample 2026-08-12..2026-10-10 (3,477 rows, 7,725 searches; APPROVAL-CHECKS #4 with clear command) | Phase 7 | Phase 8 has 60 days of host history |
 | 2026-10-12: Enterprise audit on 07-02-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 7 | LUCENESUITE_SEED_CONFIRM = target DB name; seeder holds RollupLock and re-reads limits in the write transaction; clicks bounded by ResultCount; docs warn seeded history affects real queries' surfacing |
 | 2026-10-12: 07-02 planned: seeder writes via SqlBulkCopy without initializing Kentico against the target (no web-farm/cache side effects on the running host); range = N days before min(first daily day, watermark+1, earliest raw day, today); clear by explicit range; host range 2026-08-12..2026-10-10 (host: no daily rows, no watermark, raw from 2026-10-11) | Phase 7 | 07-02 |
@@ -166,16 +168,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: d3c2661 feat(07-02): dev-only search history seed runner; host seeded
+Last commit: aafcf69 feat(07-report-data): phase 7 complete
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Phase 7 complete, ready to plan Phase 8
-Next action: /paul:plan for Phase 8 (Reports Admin; /xbyk-admin-ui:design-screen required)
-Resume file: .paul/ROADMAP.md
+Stopped at: Plan 08-01 audited
+Next action: /paul:apply .paul/phases/08-reports-admin/08-01-PLAN.md
+Resume file: .paul/phases/08-reports-admin/08-01-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

@@ -10,15 +10,17 @@
   "phase": {
     "number": 8,
     "name": "Reports Admin",
-    "status": "not_started",
+    "status": "planning",
     "plans_completed": 0
   },
   "loop": {
-    "position": "IDLE"
+    "plan": "08-01",
+    "position": "PLAN",
+    "plan_path": "phases/08-reports-admin/08-01-PLAN.md"
   },
   "timestamps": {
     "created_at": "2026-10-08T00:00:00Z",
-    "updated_at": "2026-10-12T09:00:00Z"
+    "updated_at": "2026-10-12T10:00:00Z"
   },
   "satellite": {
     "groom": true
