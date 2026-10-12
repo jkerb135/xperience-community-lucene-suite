@@ -9,7 +9,7 @@ namespace XperienceCommunity.Lucene.Suite.Widgets.Events;
 /// <param name="DeepBackspaceRatio">Deep-backspace ratio.</param>
 /// <param name="AttributionWindowMs">Attribution window in milliseconds.</param>
 /// <param name="EventsUrl">Where to POST clicks and conversions.</param>
-public sealed record SuiteClientSettings(
+internal sealed record SuiteClientSettings(
     long TextChangeTimeoutMs,
     int TypoOneEditMinLength,
     int TypoTwoEditMinLength,

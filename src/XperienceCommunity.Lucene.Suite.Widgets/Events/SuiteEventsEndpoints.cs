@@ -8,8 +8,9 @@ using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Search;
+using XperienceCommunity.Lucene.Suite.Widgets.Events;
 
-namespace XperienceCommunity.Lucene.Suite.Widgets.Events;
+namespace XperienceCommunity.Lucene.Suite.Widgets;
 
 /// <summary>Maps the browser endpoints for search analytics.</summary>
 public static class SuiteEventsEndpoints
@@ -61,7 +62,7 @@ public static class SuiteEventsEndpoints
             switch (e?.Type)
             {
                 case "click" when e.Position is { } position:
-                    logger.LogClick(e.SearchId, e.Sequence, e.ItemGuid, position, e.EventId, ClickText(e.Query), ClickText(e.Title));
+                    logger.LogClick(new SearchClick(e.SearchId, e.Sequence, e.ItemGuid, position, e.EventId, ClickText(e.Query), ClickText(e.Title)));
                     break;
                 case "conversion":
                     logger.LogConversion(e.SearchId, e.Sequence, e.ItemGuid, e.Position, e.EventId);

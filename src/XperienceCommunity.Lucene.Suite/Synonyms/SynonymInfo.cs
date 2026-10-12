@@ -122,5 +122,5 @@ public class SynonymInfo : AbstractInfo<SynonymInfo, IInfoProvider<SynonymInfo>>
     }
 
     /// <summary>Parses this row; invalid stored values yield errors, never an exception.</summary>
-    public SynonymParseResult ToDefinition() => SynonymSerializer.Parse(SynonymID, IndexName, Kind, Input, Terms);
+    internal SynonymParseResult ToDefinition() => SynonymSerializer.Parse(SynonymID, IndexName, Kind, Input, Terms);
 }

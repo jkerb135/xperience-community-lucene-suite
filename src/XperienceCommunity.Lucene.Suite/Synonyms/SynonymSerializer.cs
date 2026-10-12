@@ -6,7 +6,7 @@ using XperienceCommunity.Lucene.Suite.Rules;
 namespace XperienceCommunity.Lucene.Suite.Synonyms;
 
 /// <summary>Validates and normalizes stored or edited synonyms.</summary>
-public static class SynonymSerializer
+internal static class SynonymSerializer
 {
     /// <summary>Stored value of <see cref="SynonymKind.TwoWay"/>.</summary>
     public const string TwoWay = "twoWay";

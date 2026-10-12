@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 15 | 12-01 | Public API: inventory + internalized types, SearchClick, one Widgets namespace, PublicApiAnalyzers baseline, docs/public-api.md | Pending |
 | 14 | 11-01/11-02 | Search insights: Fix these first card, All insights panel, actions per kind, ranking by searches affected | Pending |
 | 13 | 10-01 | Search activities (3 custom types, installed disabled) + click contract v2 (optional query/title) | Pending |
 | 12 | 09-03 | Blocked suggestions admin (listing/create/delete) + one-click report Block suggestion | Pending |
@@ -451,4 +452,40 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
      - focus return on panel close: animation frames don't run in the hidden browser pane, and the existing response-time panel behaves the same way there;
      - Create rule / Query tester / Block suggestion from a finding: they share the query-table handoff and command; no Relevance-miss finding existed for the Block button;
      - a View-only role.
+
+---
+
+## 15. 12-01: Public API audit (v0.2)
+
+1. **Where:**
+   - .paul/phases/12-public-api-audit/12-01-INVENTORY.md;
+   - src/*/PublicAPI.Unshipped.txt;
+   - docs/public-api.md.
+2. **What changed:**
+   - **Public types:** 163 → 147 (Core 50 → 35, Admin 86 unchanged, Widgets 27 → 26).
+   - **Made internal (17):**
+     - the rule model and serializer types (RuleDefinition, RuleCondition, RuleActions, RulePin, RuleBoost, RuleFacet, RuleAnchoring, RuleMetadata, RuleLimits, RuleParseResult, RuleSerializer);
+     - the synonym model and serializer types (SynonymDefinition, SynonymKind, SynonymLimits, SynonymParseResult, SynonymSerializer);
+     - Widgets SuiteClientSettings (only its JSON is the contract);
+     - plus RuleInfo/SynonymInfo.ToDefinition().
+   - **Classes:** 48 Supported; 98 Framework-required (public only for Kentico/ASP.NET: admin pages, page-command DTOs, form components, Info classes and so on).
+   - **`LogClick(SearchClick click)`** replaces the 7-parameter method. Validation and exceptions are unchanged; `LogClick(null)` now throws ArgumentNullException.
+   - **One namespace:** `MapLuceneSuiteEvents` and `MapLuceneSuiteSuggestions` moved to `XperienceCommunity.Lucene.Suite.Widgets`. The host now needs one using; its Program.cs was edited byte-preserving, with the backup in project-sidecar/backups/12-01.
+   - **Baseline:**
+     - Microsoft.CodeAnalysis.PublicApiAnalyzers 5.6.0 in the three packages. Shipped is empty (nothing released); Unshipped holds the whole surface.
+     - Proof: a throwaway public method failed the build with `error RS0016: Symbol 'static XperienceCommunity.Lucene.Suite.ApiProbe.Probe() -> void' is not part of the declared public API`; it was then removed.
+3. **Verified:**
+   - build 0 warnings with the analyzer active; .NET 797–798 passed (the RulesOverhead timing test flaked once in a full run and passed 3/3 alone; the implementer measured the same flake rate at HEAD); client 77/77; Widgets js 45/45; host builds.
+   - **Host smoke check after restart:**
+     - all Suite admin pages load: index listing, Search reports with insights, query tester, rules listing + rule edit (stored values shown) + create, synonyms + create, blocked suggestions;
+     - /site-search renders 10 tracked results;
+     - suggest 200, events/settings 200, events POST 202.
+   - **Smoke-test data removed:** the 1 fake click row and the 2 curl searches. The first rules-listing load after the restart was slow and looked empty; it showed the rule on reload.
+4. **Your decisions to confirm:**
+   - The 17 internalized types (the rule/synonym JSON models are no longer usable from host code).
+   - `SearchClick` shape.
+   - Which namespace the endpoints live in.
+   - `SiteSearchPermissions` classed Supported.
+   - SuiteResultReference stays in `Widgets.Events`.
+   - docs/public-api.md wording (incl. the "Other public surfaces" list).
 

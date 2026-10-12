@@ -424,7 +424,7 @@ public sealed class SuiteWidgetsRenderingTests
 
     private sealed class NoLogger : ISearchInteractionLogger
     {
-        public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null)
+        public void LogClick(SearchClick click)
         {
         }
 

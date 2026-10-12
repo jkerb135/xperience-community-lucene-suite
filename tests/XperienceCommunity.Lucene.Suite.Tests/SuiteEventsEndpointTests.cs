@@ -253,10 +253,10 @@ public sealed class SuiteEventsEndpointTests
 
         public List<(string? Query, string? Title)> ClickTexts { get; } = [];
 
-        public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null)
+        public void LogClick(SearchClick click)
         {
-            Record("click", searchId, sequence, itemGuid, position, eventId);
-            ClickTexts.Add((queryText, resultTitle));
+            Record("click", click.SearchId, click.Sequence, click.ItemGuid, click.Position, click.EventId);
+            ClickTexts.Add((click.QueryText, click.ResultTitle));
         }
 
         public void LogConversion(Guid searchId, int sequence, Guid itemGuid, int? position = null, Guid? eventId = null) =>

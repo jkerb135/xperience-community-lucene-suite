@@ -7,8 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Suggestions;
+using XperienceCommunity.Lucene.Suite.Widgets.Suggestions;
 
-namespace XperienceCommunity.Lucene.Suite.Widgets.Suggestions;
+namespace XperienceCommunity.Lucene.Suite.Widgets;
 
 /// <summary>Maps the browser endpoint for query suggestions, a thin adapter over <see cref="ISuiteSuggestions"/>.</summary>
 public static class SuiteSuggestEndpoints

@@ -29,9 +29,9 @@ public sealed class RuleEngineTests
     [InlineData(RuleAnchoring.Contains, "grinder", "coffee grinders", false)]
     [InlineData(RuleAnchoring.Contains, "1234567890", "SKU 1234567890", true)]
     [InlineData(null, null, "anything at all", true)]
-    public void Pattern_MatchesWholeWords(RuleAnchoring? anchoring, string? pattern, string? query, bool fires)
+    public void Pattern_MatchesWholeWords(object? anchoring, string? pattern, string? query, bool fires)
     {
-        var rule = Rule(1, conditions: [Condition(anchoring, pattern)]);
+        var rule = Rule(1, conditions: [Condition((RuleAnchoring?)anchoring, pattern)]);
 
         Assert.Equal(fires, Fired(Evaluate([rule], query)));
     }

@@ -76,7 +76,7 @@ public sealed class SearchActivityLoggerTests
         var harness = new Harness(totalHits: 0, enabled: []);
 
         harness.Search(Request());
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 1, queryText: "coffee", resultTitle: "Grinder");
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 1, QueryText: "coffee", ResultTitle: "Grinder"));
 
         Assert.Empty(harness.Activities.Logged);
         Assert.Equal(0, harness.Pages.Lookups);
@@ -89,7 +89,7 @@ public sealed class SearchActivityLoggerTests
         var harness = new Harness(activityFailure: true);
 
         var response = harness.Search(Request());
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 1);
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 1));
 
         Assert.Equal(42, response.TotalHits);
         Assert.Equal(2, harness.DrainAll().Count);
@@ -102,7 +102,7 @@ public sealed class SearchActivityLoggerTests
         harness.Accessor.HttpContext = null;
 
         harness.Search(Request());
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 1, queryText: "coffee");
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 1, QueryText: "coffee"));
 
         Assert.Empty(harness.Activities.Logged);
         Assert.Equal(2, harness.DrainAll().Count);
@@ -117,7 +117,7 @@ public sealed class SearchActivityLoggerTests
         harness.Context.Request.Headers.Referer = "https://user:pw@shop.example/search?q=jane@example.com#top";
 
         harness.Search(Request() with { Query = "jane@example.com" });
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 1, queryText: "jane@example.com");
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 1, QueryText: "jane@example.com"));
 
         Assert.Equal(2, harness.Activities.Logged.Count);
         var search = harness.Activities.Logged[0].Data;
@@ -140,7 +140,7 @@ public sealed class SearchActivityLoggerTests
         var harness = new Harness();
         harness.Context.Request.Path = "/lucenesuite/events";
 
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 1);
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 1));
 
         var data = Assert.Single(harness.Activities.Logged).Data;
         Assert.Equal("http://shop.local/lucenesuite/events", data.ActivityURL);
@@ -171,7 +171,7 @@ public sealed class SearchActivityLoggerTests
         var harness = new Harness();
 
         harness.Search(Request() with { Query = new string('a', 300) });
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 7, queryText: "cof\u0001fee", resultTitle: "Burr\u0007 \n grinder" + new string('x', 300));
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 7, QueryText: "cof\u0001fee", ResultTitle: "Burr\u0007 \n grinder" + new string('x', 300)));
 
         foreach (var (_, data) in harness.Activities.Logged)
         {
@@ -188,7 +188,7 @@ public sealed class SearchActivityLoggerTests
     {
         var harness = new Harness();
 
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 12, queryText: "  Coffee   0123456789 ", resultTitle: "  Burr \t grinder ");
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 12, QueryText: "  Coffee   0123456789 ", ResultTitle: "  Burr \t grinder "));
 
         var (code, data) = Assert.Single(harness.Activities.Logged);
         Assert.Equal(SuiteActivityTypes.ResultClick, code);
@@ -200,7 +200,7 @@ public sealed class SearchActivityLoggerTests
     {
         var harness = new Harness();
 
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Reusable, 3);
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Reusable, 3));
 
         var data = Assert.Single(harness.Activities.Logged).Data;
         Assert.Equal(($"Search result clicked: \"{Reusable}\" (position 3)", null, Guid.Empty), (data.ActivityTitle, data.ActivityValue, data.ActivityWebPageItemGUID));
@@ -212,7 +212,7 @@ public sealed class SearchActivityLoggerTests
     {
         var harness = new Harness();
 
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 1, queryText: "secret query", resultTitle: "secret title");
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 1, QueryText: "secret query", ResultTitle: "secret title"));
         harness.Interactions.LogConversion(Guid.NewGuid(), 1, Page, 1);
 
         var events = harness.DrainInteractions();
@@ -227,7 +227,7 @@ public sealed class SearchActivityLoggerTests
         var harness = new Harness();
         harness.Context.Request.Headers["Sec-Purpose"] = "prefetch";
 
-        harness.Interactions.LogClick(Guid.NewGuid(), 1, Page, 1, queryText: "coffee");
+        harness.Interactions.LogClick(new SearchClick(Guid.NewGuid(), 1, Page, 1, QueryText: "coffee"));
 
         Assert.Empty(harness.Activities.Logged);
     }

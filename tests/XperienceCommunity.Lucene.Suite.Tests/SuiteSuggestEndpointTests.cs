@@ -201,7 +201,7 @@ public sealed class SuiteSuggestEndpointTests
     {
         public List<string> Calls { get; } = [];
 
-        public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null) => Calls.Add("click");
+        public void LogClick(SearchClick click) => Calls.Add("click");
 
         public void LogConversion(Guid searchId, int sequence, Guid itemGuid, int? position = null, Guid? eventId = null) => Calls.Add("conversion");
     }

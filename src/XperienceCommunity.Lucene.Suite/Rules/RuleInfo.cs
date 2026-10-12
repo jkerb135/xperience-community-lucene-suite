@@ -154,6 +154,6 @@ public class RuleInfo : AbstractInfo<RuleInfo, IInfoProvider<RuleInfo>>
     }
 
     /// <summary>Parses this row; invalid stored JSON yields errors, never an exception.</summary>
-    public RuleParseResult ToDefinition() =>
+    internal RuleParseResult ToDefinition() =>
         RuleSerializer.Parse(new RuleMetadata(RuleID, IndexName, Priority, Enabled, ValidFromUtc, ValidUntilUtc), Conditions, Actions);
 }

@@ -1,0 +1,509 @@
+#nullable enable
+const XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes.ResultClick = "lucenesuite_resultclick" -> string!
+const XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes.Search = "lucenesuite_search" -> string!
+const XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes.SearchNoResults = "lucenesuite_search_noresults" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.CLASS_NAME = "LuceneSuite.SearchDaily" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucketCount = 10 -> int
+const XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.OBJECT_TYPE = "lucenesuite.searchdaily" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.CLASS_NAME = "LuceneSuite.SearchEvent" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.IndexNameMaxLength = 200 -> int
+const XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.OBJECT_TYPE = "lucenesuite.searchevent" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.QueryTextMaxLength = 256 -> int
+const XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.CLASS_NAME = "LuceneSuite.SearchInteraction" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.OBJECT_TYPE = "lucenesuite.searchinteraction" -> string!
+const XperienceCommunity.Lucene.Suite.Rules.RuleInfo.CLASS_NAME = "LuceneSuite.Rule" -> string!
+const XperienceCommunity.Lucene.Suite.Rules.RuleInfo.DisplayNameMaxLength = 200 -> int
+const XperienceCommunity.Lucene.Suite.Rules.RuleInfo.OBJECT_TYPE = "lucenesuite.rule" -> string!
+const XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.SectionName = "LuceneSuite" -> string!
+const XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.CLASS_NAME = "LuceneSuite.BlockedSuggestion" -> string!
+const XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.MatchModeExact = "exact" -> string!
+const XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.MatchModeMaxLength = 10 -> int
+const XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.MatchModeWord = "word" -> string!
+const XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.OBJECT_TYPE = "lucenesuite.blockedsuggestion" -> string!
+const XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.TextMaxLength = 100 -> int
+const XperienceCommunity.Lucene.Suite.Suggestions.ISuiteSuggestions.MaxInputLength = 100 -> int
+const XperienceCommunity.Lucene.Suite.Suggestions.ISuiteSuggestions.MaxResultsLimit = 20 -> int
+const XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.CLASS_NAME = "LuceneSuite.Synonym" -> string!
+const XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.KindMaxLength = 20 -> int
+const XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.OBJECT_TYPE = "lucenesuite.synonym" -> string!
+override XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Analytics.SearchClick.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Analytics.SearchClick.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Rules.RuleError.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Rules.RuleError.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Rules.RuleError.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Search.SuiteFacet.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Search.SuiteFacet.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Search.SuiteFacet.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.ToString() -> string!
+static readonly XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
+static readonly XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
+static readonly XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
+static readonly XperienceCommunity.Lucene.Suite.Rules.RuleInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
+static readonly XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
+static readonly XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
+static XperienceCommunity.Lucene.Suite.Analytics.SearchClick.operator !=(XperienceCommunity.Lucene.Suite.Analytics.SearchClick? left, XperienceCommunity.Lucene.Suite.Analytics.SearchClick? right) -> bool
+static XperienceCommunity.Lucene.Suite.Analytics.SearchClick.operator ==(XperienceCommunity.Lucene.Suite.Analytics.SearchClick? left, XperienceCommunity.Lucene.Suite.Analytics.SearchClick? right) -> bool
+static XperienceCommunity.Lucene.Suite.LuceneSuiteServiceCollectionExtensions.AddLuceneSuite(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static XperienceCommunity.Lucene.Suite.Rules.RuleError.operator !=(XperienceCommunity.Lucene.Suite.Rules.RuleError? left, XperienceCommunity.Lucene.Suite.Rules.RuleError? right) -> bool
+static XperienceCommunity.Lucene.Suite.Rules.RuleError.operator ==(XperienceCommunity.Lucene.Suite.Rules.RuleError? left, XperienceCommunity.Lucene.Suite.Rules.RuleError? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym? left, XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym? left, XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteFacet.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteFacet? left, XperienceCommunity.Lucene.Suite.Search.SuiteFacet? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteFacet.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteFacet? left, XperienceCommunity.Lucene.Suite.Search.SuiteFacet? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue? left, XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue? left, XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData? left, XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData? left, XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? right) -> bool
+static XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? right) -> bool
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ClickedSearches.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ClickedSearches.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ClickPositionSum.get -> long
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ClickPositionSum.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Clicks.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Clicks.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Conversions.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Conversions.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ConvertedSearches.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ConvertedSearches.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Day.get -> System.DateTime
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Day.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.IndexName.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.IndexName.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket0.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket0.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket1.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket1.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket2.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket2.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket3.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket3.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket4.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket4.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket5.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket5.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket6.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket6.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket7.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket7.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket8.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket8.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket9.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucket9.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.QueryText.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.QueryText.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SearchDailyID.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SearchDailyID.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Searches.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.Searches.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SessionCount.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SessionCount.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SubmittedSearches.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SubmittedSearches.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ZeroResultSearches.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ZeroResultSearches.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.FacetFilterCount.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.FacetFilterCount.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.IndexName.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.IndexName.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.IsSubmit.get -> bool
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.IsSubmit.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.LatencyMs.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.LatencyMs.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.Origin.get -> XperienceCommunity.Lucene.Suite.Analytics.SearchEventOrigin
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.Origin.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.Page.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.Page.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.PageSize.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.PageSize.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.QueryText.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.QueryText.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.ReceivedUtc.get -> System.DateTime
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.ReceivedUtc.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.ResultCount.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.ResultCount.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SearchEventID.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SearchEventID.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SearchId.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SearchId.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.Sequence.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.Sequence.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SessionId.get -> System.Guid?
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SessionId.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.EventId.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.EventId.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.ItemGuid.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.ItemGuid.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.Position.get -> int?
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.Position.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.ReceivedUtc.get -> System.DateTime
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.ReceivedUtc.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SearchId.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SearchId.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SearchInteractionID.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SearchInteractionID.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.Sequence.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.Sequence.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SessionId.get -> System.Guid?
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SessionId.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.Type.get -> XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionType
+virtual XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.Type.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Actions.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Actions.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Conditions.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Conditions.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Description.get -> string?
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Description.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.DisplayName.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.DisplayName.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Enabled.get -> bool
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Enabled.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.IndexName.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.IndexName.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.LastModified.get -> System.DateTime
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.LastModified.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Priority.get -> int
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.Priority.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.RuleGuid.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.RuleGuid.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.RuleID.get -> int
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.RuleID.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.ValidFromUtc.get -> System.DateTime?
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.ValidFromUtc.set -> void
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.ValidUntilUtc.get -> System.DateTime?
+virtual XperienceCommunity.Lucene.Suite.Rules.RuleInfo.ValidUntilUtc.set -> void
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.BlockedSuggestionGuid.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.BlockedSuggestionGuid.set -> void
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.BlockedSuggestionID.get -> int
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.BlockedSuggestionID.set -> void
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.IndexName.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.IndexName.set -> void
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.LastModified.get -> System.DateTime
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.LastModified.set -> void
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.MatchKey.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.MatchKey.set -> void
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.MatchMode.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.MatchMode.set -> void
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.Text.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.Text.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Enabled.get -> bool
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Enabled.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.IndexName.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.IndexName.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Input.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Input.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Kind.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Kind.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.LastModified.get -> System.DateTime
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.LastModified.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.SynonymGuid.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.SynonymGuid.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.SynonymID.get -> int
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.SynonymID.set -> void
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Terms.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.Terms.set -> void
+XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes
+XperienceCommunity.Lucene.Suite.Analytics.ISearchInteractionLogger
+XperienceCommunity.Lucene.Suite.Analytics.ISearchInteractionLogger.LogClick(XperienceCommunity.Lucene.Suite.Analytics.SearchClick! click) -> void
+XperienceCommunity.Lucene.Suite.Analytics.ISearchInteractionLogger.LogConversion(System.Guid searchId, int sequence, System.Guid itemGuid, int? position = null, System.Guid? eventId = null) -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.<Clone>$() -> XperienceCommunity.Lucene.Suite.Analytics.SearchClick!
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Deconstruct(out System.Guid SearchId, out int Sequence, out System.Guid ItemGuid, out int Position, out System.Guid? EventId, out string? QueryText, out string? ResultTitle) -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Equals(XperienceCommunity.Lucene.Suite.Analytics.SearchClick? other) -> bool
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.EventId.get -> System.Guid?
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.EventId.init -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.ItemGuid.get -> System.Guid
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.ItemGuid.init -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Position.get -> int
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Position.init -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.QueryText.get -> string?
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.QueryText.init -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.ResultTitle.get -> string?
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.ResultTitle.init -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.SearchClick(System.Guid SearchId, int Sequence, System.Guid ItemGuid, int Position, System.Guid? EventId = null, string? QueryText = null, string? ResultTitle = null) -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.SearchId.get -> System.Guid
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.SearchId.init -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Sequence.get -> int
+XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Sequence.init -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo
+XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SearchDailyInfo() -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.SearchDailyInfo(System.Data.DataRow! dr) -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo
+XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SearchEventInfo() -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.SearchEventInfo(System.Data.DataRow! dr) -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchEventOrigin
+XperienceCommunity.Lucene.Suite.Analytics.SearchEventOrigin.Client = 1 -> XperienceCommunity.Lucene.Suite.Analytics.SearchEventOrigin
+XperienceCommunity.Lucene.Suite.Analytics.SearchEventOrigin.Server = 2 -> XperienceCommunity.Lucene.Suite.Analytics.SearchEventOrigin
+XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo
+XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SearchInteractionInfo() -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.SearchInteractionInfo(System.Data.DataRow! dr) -> void
+XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionType
+XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionType.Click = 1 -> XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionType
+XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionType.Conversion = 2 -> XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionType
+XperienceCommunity.Lucene.Suite.LuceneSuiteServiceCollectionExtensions
+XperienceCommunity.Lucene.Suite.Rules.RuleError
+XperienceCommunity.Lucene.Suite.Rules.RuleError.<Clone>$() -> XperienceCommunity.Lucene.Suite.Rules.RuleError!
+XperienceCommunity.Lucene.Suite.Rules.RuleError.Deconstruct(out string! Path, out string! Message) -> void
+XperienceCommunity.Lucene.Suite.Rules.RuleError.Equals(XperienceCommunity.Lucene.Suite.Rules.RuleError? other) -> bool
+XperienceCommunity.Lucene.Suite.Rules.RuleError.Message.get -> string!
+XperienceCommunity.Lucene.Suite.Rules.RuleError.Message.init -> void
+XperienceCommunity.Lucene.Suite.Rules.RuleError.Path.get -> string!
+XperienceCommunity.Lucene.Suite.Rules.RuleError.Path.init -> void
+XperienceCommunity.Lucene.Suite.Rules.RuleError.RuleError(string! Path, string! Message) -> void
+XperienceCommunity.Lucene.Suite.Rules.RuleInfo
+XperienceCommunity.Lucene.Suite.Rules.RuleInfo.RuleInfo() -> void
+XperienceCommunity.Lucene.Suite.Rules.RuleInfo.RuleInfo(System.Data.DataRow! dr) -> void
+XperienceCommunity.Lucene.Suite.Search.DefaultSearchQueryFactory
+XperienceCommunity.Lucene.Suite.Search.DefaultSearchQueryFactory.Create(string! indexName, string! queryText, Lucene.Net.Analysis.Analyzer! analyzer) -> Lucene.Net.Search.Query!
+XperienceCommunity.Lucene.Suite.Search.DefaultSearchQueryFactory.DefaultSearchQueryFactory(Microsoft.Extensions.Options.IOptions<XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions!>! options) -> void
+XperienceCommunity.Lucene.Suite.Search.ISearchQueryFactory
+XperienceCommunity.Lucene.Suite.Search.ISearchQueryFactory.Create(string! indexName, string! queryText, Lucene.Net.Analysis.Analyzer! analyzer) -> Lucene.Net.Search.Query!
+XperienceCommunity.Lucene.Suite.Search.ISuiteSearchService
+XperienceCommunity.Lucene.Suite.Search.ISuiteSearchService.Search(XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest! request) -> XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse!
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Attribution.get -> XperienceCommunity.Lucene.Suite.Search.SuiteAttributionOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.BatchSize.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.BatchSize.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Enabled.get -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Enabled.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.FlushInterval.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.FlushInterval.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Insights.get -> XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Job.get -> XperienceCommunity.Lucene.Suite.Search.SuiteJobOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Merge.get -> XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.QueueCapacity.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.QueueCapacity.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Retention.get -> XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.SuiteAnalyticsOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions.Surfacing.get -> XperienceCommunity.Lucene.Suite.Search.SuiteSurfacingOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.<Clone>$() -> XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym!
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.Deconstruct(out int SynonymId, out string! Term, out string! Replacement) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.Equals(XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym? other) -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.Replacement.get -> string!
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.Replacement.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.SuiteAppliedSynonym(int SynonymId, string! Term, string! Replacement) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.SynonymId.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.SynonymId.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.Term.get -> string!
+XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym.Term.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAttributionOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteAttributionOptions.AttributionWindow.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteAttributionOptions.AttributionWindow.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteAttributionOptions.SuiteAttributionOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.<Clone>$() -> XperienceCommunity.Lucene.Suite.Search.SuiteFacet!
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.Deconstruct(out string! Dimension, out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue!>! Values) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.Dimension.get -> string!
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.Dimension.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.Equals(XperienceCommunity.Lucene.Suite.Search.SuiteFacet? other) -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.SuiteFacet(string! Dimension, System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue!>! Values) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.Values.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteFacet.Values.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.<Clone>$() -> XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue!
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.Count.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.Count.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.Deconstruct(out string! Label, out int Count) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.Equals(XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue? other) -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.Label.get -> string!
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.Label.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteFacetValue.SuiteFacetValue(string! Label, int Count) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.BuriedMinAvgPosition.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.BuriedMinAvgPosition.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.BuriedMinClickedSearches.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.BuriedMinClickedSearches.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.ContentGapMinNoResultRate.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.ContentGapMinNoResultRate.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MaxFindings.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MaxFindings.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MaxQueries.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MaxQueries.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MinAffected.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MinAffected.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MinSearches.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.MinSearches.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.RegressionMinPoints.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.RegressionMinPoints.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.RelevanceMissMaxCtr.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.RelevanceMissMaxCtr.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.SlowMinP95Ms.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.SlowMinP95Ms.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteInsightsOptions.SuiteInsightsOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteJobOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteJobOptions.MaxDaysPerRun.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteJobOptions.MaxDaysPerRun.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteJobOptions.RollupInterval.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteJobOptions.RollupInterval.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteJobOptions.SuiteJobOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.DeepBackspaceRatio.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.DeepBackspaceRatio.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.SuiteMergeOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.TextChangeWindow.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.TextChangeWindow.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.TypoOneEditMinLength.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.TypoOneEditMinLength.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.TypoTwoEditMinLength.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteMergeOptions.TypoTwoEditMinLength.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.DailyRetention.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.DailyRetention.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.RawHardLimit.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.RawHardLimit.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.RawRetention.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.RawRetention.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.SubThresholdPruneAfter.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.SubThresholdPruneAfter.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRetentionOptions.SuiteRetentionOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRulesOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteRulesOptions.CacheMinutes.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteRulesOptions.CacheMinutes.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRulesOptions.MaxBoostFactor.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteRulesOptions.MaxBoostFactor.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRulesOptions.SuiteRulesOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.<Clone>$() -> XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData!
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.Data.get -> System.Text.Json.JsonElement
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.Data.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.Deconstruct(out int RuleId, out System.Text.Json.JsonElement Data) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.Equals(XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData? other) -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.RuleId.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.RuleId.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData.SuiteRuleUserData(int RuleId, System.Text.Json.JsonElement Data) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.<Clone>$() -> XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.Deconstruct(out System.Guid? ItemGuid, out float Score, out System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyList<string!>!>! Fields) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.Equals(XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit? other) -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.Fields.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyList<string!>!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.Fields.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.ItemGuid.get -> System.Guid?
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.ItemGuid.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.PinnedByRuleId.get -> int?
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.PinnedByRuleId.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.Score.get -> float
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.Score.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit.SuiteSearchHit(System.Guid? ItemGuid, float Score, System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyList<string!>!>! Fields) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.Analytics.get -> XperienceCommunity.Lucene.Suite.Search.SuiteAnalyticsOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.FacetValuesPerDimension.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.FacetValuesPerDimension.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.Rules.get -> XperienceCommunity.Lucene.Suite.Search.SuiteRulesOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.SearchFields.get -> System.Collections.Generic.Dictionary<string!, System.Collections.Generic.Dictionary<string!, float>!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.Suggestions.get -> XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.SuiteSearchOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchOptions.Synonyms.get -> XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.<Clone>$() -> XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.ApplyRules.get -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.ApplyRules.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.ApplySynonyms.get -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.ApplySynonyms.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Contexts.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Contexts.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Equals(XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest? other) -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Facets.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyList<string!>!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Facets.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.IndexName.get -> string!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.IndexName.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.IsSubmit.get -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.IsSubmit.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Page.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Page.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.PageSize.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.PageSize.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Query.get -> string?
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Query.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.SearchId.get -> System.Guid?
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.SearchId.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Sequence.get -> int?
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.Sequence.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.SuiteSearchRequest() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.TrackAnalytics.get -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.TrackAnalytics.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.<Clone>$() -> XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.AppliedSynonyms.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteAppliedSynonym!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.AppliedSynonyms.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Deconstruct(out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit!>! Hits, out int TotalHits, out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteFacet!>! Facets, out System.TimeSpan Elapsed) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Elapsed.get -> System.TimeSpan
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Elapsed.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Equals(XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? other) -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Facets.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteFacet!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Facets.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.FiredRuleIds.get -> System.Collections.Generic.IReadOnlyList<int>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.FiredRuleIds.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Hits.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Hits.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.RulesFailed.get -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.RulesFailed.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.SearchId.get -> System.Guid
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.SearchId.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.SuiteSearchResponse(System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit!>! Hits, int TotalHits, System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteFacet!>! Facets, System.TimeSpan Elapsed) -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.SynonymsFailed.get -> bool
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.SynonymsFailed.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.TotalHits.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.TotalHits.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.UserData.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Search.SuiteRuleUserData!>!
+XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.UserData.init -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.CacheMinutes.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.CacheMinutes.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MaxCandidates.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MaxCandidates.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MaxNoResultRate.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MaxNoResultRate.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MaxResults.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MaxResults.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MinInputLength.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MinInputLength.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MinSearches.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.MinSearches.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.SuiteSuggestionOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.WindowDays.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSuggestionOptions.WindowDays.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSurfacingOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteSurfacingOptions.MinDistinctDays.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSurfacingOptions.MinDistinctDays.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSurfacingOptions.MinSearches.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSurfacingOptions.MinSearches.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSurfacingOptions.SuiteSurfacingOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions.CacheMinutes.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions.CacheMinutes.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions.MaxExpansions.get -> int
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions.MaxExpansions.set -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions.SuiteSynonymsOptions() -> void
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions.Weight.get -> double
+XperienceCommunity.Lucene.Suite.Search.SuiteSynonymsOptions.Weight.set -> void
+XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo
+XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.BlockedSuggestionInfo() -> void
+XperienceCommunity.Lucene.Suite.Suggestions.BlockedSuggestionInfo.BlockedSuggestionInfo(System.Data.DataRow! dr) -> void
+XperienceCommunity.Lucene.Suite.Suggestions.ISuiteSuggestions
+XperienceCommunity.Lucene.Suite.Suggestions.ISuiteSuggestions.SuggestAsync(string! indexName, string? input, int? maxResults = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
+XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo
+XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.SynonymInfo() -> void
+XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo.SynonymInfo(System.Data.DataRow! dr) -> void

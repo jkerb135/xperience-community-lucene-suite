@@ -3,7 +3,7 @@ using XperienceCommunity.Lucene.Suite.Rules;
 namespace XperienceCommunity.Lucene.Suite.Synonyms;
 
 /// <summary>How a synonym maps terms.</summary>
-public enum SynonymKind
+internal enum SynonymKind
 {
     /// <summary>Every term of the group finds every other term.</summary>
     TwoWay,
@@ -18,15 +18,15 @@ public enum SynonymKind
 /// <param name="Kind">Two-way group or one-way synonym.</param>
 /// <param name="Input">The expanded term of a one-way synonym; null for a two-way group.</param>
 /// <param name="Terms">The group (two-way) or what the input expands to (one-way), normalized.</param>
-public sealed record SynonymDefinition(int Id, string IndexName, SynonymKind Kind, string? Input, IReadOnlyList<string> Terms);
+internal sealed record SynonymDefinition(int Id, string IndexName, SynonymKind Kind, string? Input, IReadOnlyList<string> Terms);
 
 /// <summary>Either a definition (no errors) or every error found (no definition).</summary>
 /// <param name="Definition">The validated synonym, or null when invalid.</param>
 /// <param name="Errors">All errors; empty when valid. Paths: <c>indexName</c>, <c>kind</c>, <c>input</c>, <c>terms</c>, <c>terms[2]</c>.</param>
-public sealed record SynonymParseResult(SynonymDefinition? Definition, IReadOnlyList<RuleError> Errors);
+internal sealed record SynonymParseResult(SynonymDefinition? Definition, IReadOnlyList<RuleError> Errors);
 
 /// <summary>Size limits enforced by <see cref="SynonymSerializer"/>.</summary>
-public static class SynonymLimits
+internal static class SynonymLimits
 {
     /// <summary>Terms per synonym.</summary>
     public const int Terms = 20;

@@ -11,7 +11,7 @@ namespace XperienceCommunity.Lucene.Suite.Rules;
 /// <param name="ValidUntilUtc">Exclusive end of the validity window; null is unbounded.</param>
 /// <param name="Conditions">OR'd conditions; empty fires on every search of the index.</param>
 /// <param name="Actions">What the rule does when it fires.</param>
-public sealed record RuleDefinition(
+internal sealed record RuleDefinition(
     int Id,
     string IndexName,
     int Priority,
@@ -28,22 +28,22 @@ public sealed record RuleDefinition(
 /// <param name="Enabled">Whether the rule can fire.</param>
 /// <param name="ValidFromUtc">Inclusive start; Unspecified kind is read as UTC.</param>
 /// <param name="ValidUntilUtc">Exclusive end; Unspecified kind is read as UTC.</param>
-public sealed record RuleMetadata(int Id, string IndexName, int Priority, bool Enabled, DateTime? ValidFromUtc, DateTime? ValidUntilUtc);
+internal sealed record RuleMetadata(int Id, string IndexName, int Priority, bool Enabled, DateTime? ValidFromUtc, DateTime? ValidUntilUtc);
 
 /// <summary>One condition; every present part must match.</summary>
 /// <param name="Anchoring">How <paramref name="Pattern"/> is compared; null together with a null pattern means any query.</param>
 /// <param name="Pattern">Normalized pattern; null means any query, "" with <see cref="RuleAnchoring.Is"/> means the empty (browse) query.</param>
 /// <param name="Facets">Facet pairs that must all be applied.</param>
 /// <param name="Contexts">Visitor contexts of which at least one must be present; empty means any visitor.</param>
-public sealed record RuleCondition(RuleAnchoring? Anchoring, string? Pattern, IReadOnlyList<RuleFacet> Facets, IReadOnlyList<string> Contexts);
+internal sealed record RuleCondition(RuleAnchoring? Anchoring, string? Pattern, IReadOnlyList<RuleFacet> Facets, IReadOnlyList<string> Contexts);
 
 /// <summary>An applied facet value.</summary>
 /// <param name="Dimension">Facet dimension (ordinal).</param>
 /// <param name="Value">Facet value (ordinal).</param>
-public sealed record RuleFacet(string Dimension, string Value);
+internal sealed record RuleFacet(string Dimension, string Value);
 
 /// <summary>How a pattern is compared with the query, on whole words.</summary>
-public enum RuleAnchoring
+internal enum RuleAnchoring
 {
     /// <summary>Same word sequence.</summary>
     Is,
@@ -64,7 +64,7 @@ public enum RuleAnchoring
 /// <param name="Boosts">Field/value score adjustments; negative buries.</param>
 /// <param name="UserData">Custom JSON object returned with the results.</param>
 /// <param name="PinsRespectFilters">Whether pinned items must still match the applied facets.</param>
-public sealed record RuleActions(
+internal sealed record RuleActions(
     IReadOnlyList<RulePin> Pins,
     IReadOnlyList<Guid> Hides,
     IReadOnlyList<RuleBoost> Boosts,
@@ -74,16 +74,16 @@ public sealed record RuleActions(
 /// <summary>An item pinned at a 1-based position.</summary>
 /// <param name="ItemGuid">Pinned item.</param>
 /// <param name="Position">1-based position.</param>
-public sealed record RulePin(Guid ItemGuid, int Position);
+internal sealed record RulePin(Guid ItemGuid, int Position);
 
 /// <summary>A score adjustment for documents whose field has the value.</summary>
 /// <param name="Field">Index field name.</param>
 /// <param name="Value">Field value.</param>
 /// <param name="Strength">−100..100, not 0; negative buries.</param>
-public sealed record RuleBoost(string Field, string Value, int Strength);
+internal sealed record RuleBoost(string Field, string Value, int Strength);
 
 /// <summary>Size limits enforced by <see cref="RuleSerializer"/>.</summary>
-public static class RuleLimits
+internal static class RuleLimits
 {
     /// <summary>Conditions per rule.</summary>
     public const int Conditions = 25;

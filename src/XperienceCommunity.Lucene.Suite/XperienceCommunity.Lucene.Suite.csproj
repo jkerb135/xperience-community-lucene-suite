@@ -13,4 +13,8 @@
     <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Admin" />
     <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Widgets" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt;PublicAPI.Unshipped.txt" />
+  </ItemGroup>
 </Project>

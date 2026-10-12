@@ -18,6 +18,10 @@
   <ItemGroup>
     <InternalsVisibleTo Include="XperienceCommunity.Lucene.Suite.Tests" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt;PublicAPI.Unshipped.txt" />
+  </ItemGroup>
 
   <ItemGroup>
     <AdminClientPath Include="Client\dist\**" Exclude="$(SuiteAdminClientStamp)">

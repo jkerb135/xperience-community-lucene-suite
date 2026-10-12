@@ -16,12 +16,13 @@ internal sealed class SearchInteractionLogger(
 {
     private readonly LogThrottle logThrottle = new(timeProvider, TimeSpan.FromMinutes(1));
 
-    public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null)
+    public void LogClick(SearchClick click)
     {
-        Validate(searchId, sequence, itemGuid, position, eventId);
-        if (Capture(searchId, sequence, itemGuid, position, SearchInteractionType.Click, eventId))
+        ArgumentNullException.ThrowIfNull(click);
+        Validate(click.SearchId, click.Sequence, click.ItemGuid, click.Position, click.EventId);
+        if (Capture(click.SearchId, click.Sequence, click.ItemGuid, click.Position, SearchInteractionType.Click, click.EventId))
         {
-            activityLogger.LogClick(itemGuid, position, queryText, resultTitle);
+            activityLogger.LogClick(click.ItemGuid, click.Position, click.QueryText, click.ResultTitle);
         }
     }
 

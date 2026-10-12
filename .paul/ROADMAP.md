@@ -5,8 +5,8 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
-Status: 🚧 In Progress
-Phases: 6 of 7 complete
+Status: ✅ All phases complete — milestone review pending
+Phases: 7 of 7 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -19,7 +19,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 9 | Suggestions | 3/3 | ✅ Complete | 2026-10-12 |
 | 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
 | 11 | Search Insights | 2/2 | ✅ Complete | 2026-10-12 |
-| 12 | Public API Audit | TBD | Not started | - |
+| 12 | Public API Audit | 1/1 | ✅ Complete | 2026-10-12 |
 
 ## Phase Details
 
@@ -86,7 +86,10 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Focus:** Make Core + Admin alone sufficient to build a custom search UI, and Widgets extensible: inventory every public type in Core/Admin/Widgets, close gaps (e.g. rule/synonym/report/insight services usable outside the admin), XML docs everywhere, a public-API baseline (shipped/unshipped list) so later changes are deliberate, and a "build your own UI / author your own widget" guide.
 **Depends on:** Phases 9–11 (their public APIs are included)
 **Decision (2026-10-12, user):** layered packages; instant search goes to v0.4
-**Plans:** TBD
+**Decisions (planning):** PublicApiAnalyzers baseline; admin services stay internal; LogClick(SearchClick) + one Widgets namespace now. XML docs and the custom-UI guide already exist.
+
+**Plans:**
+- [x] 12-01: Inventory + internalize, SearchClick + Widgets namespace, PublicApiAnalyzers baseline + docs/public-api.md
 
 **Constraints (from discussion 2026-10-12):** Suite analytics stay identity-free; reports read rollups only and respect the surfacing threshold; the suggest endpoint serves no results and only threshold-surfaced text; the seed generator is dev-only; settings stay in appsettings (no admin settings page); checkpoints go to `.paul/APPROVAL-CHECKS.md`.
 

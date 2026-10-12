@@ -22,7 +22,7 @@ public sealed class SearchInteractionLoggerTests
         var eventId = Guid.NewGuid();
         var harness = new Harness();
 
-        harness.Logger.LogClick(SearchId, 3, ItemGuid, 12, eventId);
+        harness.Logger.LogClick(new SearchClick(SearchId, 3, ItemGuid, 12, eventId));
 
         var e = Assert.Single(harness.Drain());
         Assert.Equal(new SearchInteractionEvent(SearchId, 3, ItemGuid, 12, SearchInteractionType.Click, eventId, null, Now.UtcDateTime), e);
@@ -68,13 +68,13 @@ public sealed class SearchInteractionLoggerTests
 
         Action call = scenario switch
         {
-            "searchIdEmpty" => () => logger.LogClick(Guid.Empty, 1, ItemGuid, 1),
-            "itemGuidEmpty" => () => logger.LogClick(SearchId, 1, Guid.Empty, 1),
-            "eventIdEmpty" => () => logger.LogClick(SearchId, 1, ItemGuid, 1, Guid.Empty),
-            "sequence0" => () => logger.LogClick(SearchId, 0, ItemGuid, 1),
-            "position0" => () => logger.LogClick(SearchId, 1, ItemGuid, 0),
-            "positionNegative" => () => logger.LogClick(SearchId, 1, ItemGuid, -5),
-            "positionOverWindow" => () => logger.LogClick(SearchId, 1, ItemGuid, SearchExecutor.MaxResultWindow + 1),
+            "searchIdEmpty" => () => logger.LogClick(new SearchClick(Guid.Empty, 1, ItemGuid, 1)),
+            "itemGuidEmpty" => () => logger.LogClick(new SearchClick(SearchId, 1, Guid.Empty, 1)),
+            "eventIdEmpty" => () => logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, 1, Guid.Empty)),
+            "sequence0" => () => logger.LogClick(new SearchClick(SearchId, 0, ItemGuid, 1)),
+            "position0" => () => logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, 0)),
+            "positionNegative" => () => logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, -5)),
+            "positionOverWindow" => () => logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, SearchExecutor.MaxResultWindow + 1)),
             "conversionPosition0" => () => logger.LogConversion(SearchId, 1, ItemGuid, 0),
             _ => () => logger.LogConversion(SearchId, 1, ItemGuid, SearchExecutor.MaxResultWindow + 1),
         };
@@ -104,7 +104,7 @@ public sealed class SearchInteractionLoggerTests
             case "purposePrefetch": harness.Context.Request.Headers["Purpose"] = "prefetch"; break;
         }
 
-        harness.Logger.LogClick(SearchId, 1, ItemGuid, 1);
+        harness.Logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, 1));
         harness.Logger.LogConversion(SearchId, 1, ItemGuid);
 
         Assert.Empty(harness.Drain());
@@ -118,7 +118,7 @@ public sealed class SearchInteractionLoggerTests
     {
         var harness = new Harness(cookieLevel: level);
 
-        harness.Logger.LogClick(SearchId, 1, ItemGuid, 1);
+        harness.Logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, 1));
 
         Assert.Equal(expected, Assert.Single(harness.Drain()).SessionId.HasValue);
     }
@@ -129,7 +129,7 @@ public sealed class SearchInteractionLoggerTests
         var harness = new Harness(cookieLevel: CookieLevelConstants.ALL);
         harness.Accessor.HttpContext = null;
 
-        harness.Logger.LogClick(SearchId, 1, ItemGuid, 1);
+        harness.Logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, 1));
 
         Assert.Null(Assert.Single(harness.Drain()).SessionId);
     }
@@ -139,7 +139,7 @@ public sealed class SearchInteractionLoggerTests
     {
         var harness = new Harness(cookieLevelProvider: new ThrowingCookieLevelProvider());
 
-        harness.Logger.LogClick(SearchId, 1, ItemGuid, 1);
+        harness.Logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, 1));
 
         Assert.Empty(harness.Drain());
     }
@@ -151,7 +151,7 @@ public sealed class SearchInteractionLoggerTests
 
         for (int i = 0; i < 5; i++)
         {
-            harness.Logger.LogClick(SearchId, 1, ItemGuid, 1);
+            harness.Logger.LogClick(new SearchClick(SearchId, 1, ItemGuid, 1));
         }
 
         Assert.Equal(2, harness.Drain().Count);

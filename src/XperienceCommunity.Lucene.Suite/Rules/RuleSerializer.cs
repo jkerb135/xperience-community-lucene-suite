@@ -12,10 +12,10 @@ public sealed record RuleError(string Path, string Message);
 /// <summary>Either a definition (no errors) or every error found (no definition).</summary>
 /// <param name="Definition">The validated rule, or null when invalid.</param>
 /// <param name="Errors">All errors; empty when valid.</param>
-public sealed record RuleParseResult(RuleDefinition? Definition, IReadOnlyList<RuleError> Errors);
+internal sealed record RuleParseResult(RuleDefinition? Definition, IReadOnlyList<RuleError> Errors);
 
 /// <summary>Strict parsing, validation and serialization of rule conditions and actions JSON; never throws on bad input.</summary>
-public static partial class RuleSerializer
+internal static partial class RuleSerializer
 {
     private static readonly JsonSerializerOptions Options = new()
     {

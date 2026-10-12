@@ -1,0 +1,311 @@
+#nullable enable
+const XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.QueryParameter = "sr" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidget.Identifier = "XperienceCommunity.LuceneSuite.SearchFilters" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidget.Identifier = "XperienceCommunity.LuceneSuite.SearchResults" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidget.Identifier = "XperienceCommunity.LuceneSuite.SearchBox" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.FacetPrefix = "f." -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.MaxDimensions = 10 -> int
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.MaxSequence = 10000 -> int
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.MaxValuesPerDimension = 20 -> int
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.PageParameter = "page" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.QueryParameter = "q" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.SearchIdParameter = "sid" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.SequenceParameter = "seq" -> string!
+const XperienceCommunity.Lucene.Suite.Widgets.SuiteEventsEndpoints.MaxBodyBytes = 1024 -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.ToString() -> string!
+override XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Equals(object? obj) -> bool
+override XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.GetHashCode() -> int
+override XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.ToString() -> string!
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel? left, XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Format(System.Guid searchId, int sequence, int position) -> string!
+static XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference left, XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference left, XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.TryParse(string? value, out XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference reference) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.LuceneSuiteWidgetsServiceCollectionExtensions.AddLuceneSuiteWidgets(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult? left, XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult? left, XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.operator !=(XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl? left, XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.operator ==(XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl? left, XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl? right) -> bool
+static XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Parse(Microsoft.AspNetCore.Http.IQueryCollection! query, int pageSize) -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl!
+static XperienceCommunity.Lucene.Suite.Widgets.SuiteEventsEndpoints.MapLuceneSuiteEvents(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! pattern = "/lucenesuite/events") -> Microsoft.AspNetCore.Routing.RouteGroupBuilder!
+static XperienceCommunity.Lucene.Suite.Widgets.SuiteSuggestEndpoints.MapLuceneSuiteSuggestions(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder! endpoints, string! pattern = "/lucenesuite/suggest") -> Microsoft.AspNetCore.Builder.RouteHandlerBuilder!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Deconstruct(out string! Dimension, out string! Label, out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption!>! Options) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Dimension.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Dimension.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Equals(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Label.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Label.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.LuceneSuiteFacetGroup(string! Dimension, string! Label, System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption!>! Options) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Options.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption!>!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup.Options.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Count.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Count.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Deconstruct(out string! Label, out int Count, out bool Selected, out string! Href) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Equals(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Href.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Href.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Label.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Label.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.LuceneSuiteFacetOption(string! Label, int Count, bool Selected, string! Href) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Selected.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetOption.Selected.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.Deconstruct(out XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult! Search, out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup!>! Groups) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.DimensionLabels.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.DimensionLabels.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.Equals(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.Groups.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup!>!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.Groups.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.LuceneSuiteFacetsModel(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult! Search, System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetGroup!>! Groups) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.Search.get -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsModel.Search.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsViewComponent
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsViewComponent.Invoke(string! indexName, string? dimensionLabels = null) -> Microsoft.AspNetCore.Mvc.IViewComponentResult!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteFacetsViewComponent.LuceneSuiteFacetsViewComponent(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch! search) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Current.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Current.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Deconstruct(out int Page, out string! Href, out bool Current) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Equals(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Href.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Href.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.LuceneSuitePageLink(int Page, string! Href, bool Current) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Page.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink.Page.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Deconstruct(out string! Title, out string? Summary, out string? Href, out bool Tracked, out int Position, out XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit! Hit) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Equals(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Hit.get -> XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Hit.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Href.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Href.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.LuceneSuiteResultHit(string! Title, string? Summary, string? Href, bool Tracked, int Position, XperienceCommunity.Lucene.Suite.Search.SuiteSearchHit! Hit) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Position.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Position.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Summary.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Summary.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Title.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Title.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Tracked.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit.Tracked.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Deconstruct(out XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult! Search, out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit!>! Hits, out int FirstPosition, out int TotalPages, out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink!>! Pages, out string? PreviousLink, out string? NextLink, out string? EventsUrl) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Equals(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.EventsUrl.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.EventsUrl.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.FirstPosition.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.FirstPosition.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Hits.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit!>!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Hits.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.LuceneSuiteResultsModel(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult! Search, System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultHit!>! Hits, int FirstPosition, int TotalPages, System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink!>! Pages, string? PreviousLink, string? NextLink, string? EventsUrl) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.NextLink.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.NextLink.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Pages.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuitePageLink!>!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Pages.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.PreviousLink.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.PreviousLink.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Search.get -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.Search.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.TotalPages.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsModel.TotalPages.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsViewComponent
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsViewComponent.Invoke(string! indexName, string! titleField = "Title", string! urlField = "Url", string? summaryField = null) -> Microsoft.AspNetCore.Mvc.IViewComponentResult!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteResultsViewComponent.LuceneSuiteResultsViewComponent(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch! search) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.ActionUrl.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.ActionUrl.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Deconstruct(out string! Query, out string! ActionUrl, out string! Label, out string? Placeholder) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Equals(XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IncludeAssets.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IncludeAssets.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IncludeStyles.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IncludeStyles.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.InputId.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.InputId.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IsEditMode.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IsEditMode.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IsPreview.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.IsPreview.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Label.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Label.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.LuceneSuiteSearchBoxModel(string! Query, string! ActionUrl, string! Label, string? Placeholder) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Placeholder.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Placeholder.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Query.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.Query.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.SuggestIndex.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.SuggestIndex.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.SuggestMinLength.get -> int?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.SuggestMinLength.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.SuggestUrl.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxModel.SuggestUrl.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxViewComponent
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxViewComponent.Invoke(string? actionUrl = null, string! label = "Search", string? placeholder = null, string? indexName = null) -> Microsoft.AspNetCore.Mvc.IViewComponentResult!
+XperienceCommunity.Lucene.Suite.Widgets.Components.LuceneSuiteSearchBoxViewComponent.LuceneSuiteSearchBoxViewComponent(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch! search) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Deconstruct(out System.Guid SearchId, out int Sequence, out int Position) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Equals(XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Position.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Position.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.SearchId.get -> System.Guid
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.SearchId.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Sequence.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Sequence.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.SuiteResultReference() -> void
+XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.SuiteResultReference(System.Guid SearchId, int Sequence, int Position) -> void
+XperienceCommunity.Lucene.Suite.Widgets.LuceneSuiteWidgetsServiceCollectionExtensions
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneIndexOptionsProvider
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneIndexOptionsProvider.GetOptionItems() -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Kentico.Xperience.Admin.Base.FormAnnotations.DropDownOptionItem!>!>!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneIndexOptionsProvider.LuceneIndexOptionsProvider(Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexes) -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidget
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidget.Invoke(Kentico.PageBuilder.Web.Mvc.ComponentViewModel<XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidgetProperties!>! widget) -> Microsoft.AspNetCore.Mvc.IViewComponentResult!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidget.LuceneSuiteFiltersWidget(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch! search, Microsoft.Extensions.Logging.ILogger<XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidget!>! logger) -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidgetProperties
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidgetProperties.DimensionLabels.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidgetProperties.DimensionLabels.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidgetProperties.IndexName.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidgetProperties.IndexName.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteFiltersWidgetProperties.LuceneSuiteFiltersWidgetProperties() -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidget
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidget.Invoke(Kentico.PageBuilder.Web.Mvc.ComponentViewModel<XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties!>! widget) -> Microsoft.AspNetCore.Mvc.IViewComponentResult!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidget.LuceneSuiteResultsWidget(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch! search, Microsoft.Extensions.Logging.ILogger<XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidget!>! logger) -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.IndexName.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.IndexName.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.LuceneSuiteResultsWidgetProperties() -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.SummaryField.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.SummaryField.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.TitleField.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.TitleField.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.UrlField.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteResultsWidgetProperties.UrlField.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidget
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidget.InvokeAsync(Kentico.PageBuilder.Web.Mvc.ComponentViewModel<XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties!>! widget) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IViewComponentResult!>!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidget.LuceneSuiteSearchBoxWidget(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch! search, CMS.Websites.IWebPageUrlRetriever! urls, Microsoft.Extensions.Logging.ILogger<XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidget!>! logger) -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.Label.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.Label.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.LuceneSuiteSearchBoxWidgetProperties() -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.Placeholder.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.Placeholder.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.ResultsPage.get -> System.Collections.Generic.IEnumerable<CMS.Websites.WebPageRelatedItem!>!
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.ResultsPage.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.SuggestionsIndex.get -> string?
+XperienceCommunity.Lucene.Suite.Widgets.PageBuilder.LuceneSuiteSearchBoxWidgetProperties.SuggestionsIndex.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch.EventsUrl(Microsoft.AspNetCore.Http.HttpContext! context) -> string?
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch.For(Microsoft.AspNetCore.Http.HttpContext! context, string! indexName) -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult!
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearch.IndexExists(string? indexName) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult!
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Deconstruct(out XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl! Url, out XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus Status, out XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? Response, out int PageSize, out int Sequence) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Equals(XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.IsEditMode.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.IsEditMode.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.IsPreview.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.IsPreview.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.NextSequence.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.PageSize.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.PageSize.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Response.get -> XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse?
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Response.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Sequence.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Sequence.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Status.get -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Status.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.SuitePageSearchResult(XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl! Url, XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus Status, XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? Response, int PageSize, int Sequence) -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Url.get -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl!
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchResult.Url.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus.Invalid = 2 -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus.NotSearched = 0 -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus.Ok = 1 -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus.Unavailable = 3 -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuitePageSearchStatus
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.<Clone>$() -> XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl!
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Equals(XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl? other) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Facets.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyList<string!>!>!
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Facets.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Invalid.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Invalid.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.IsEmpty.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.IsSelected(string! dimension, string! value) -> bool
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Page.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Page.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.PageLink(int page, System.Guid? searchId, int nextSequence) -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Query.get -> string!
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Query.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.SearchId.get -> System.Guid?
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.SearchId.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Sequence.get -> int?
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.Sequence.init -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.SuiteSearchUrl() -> void
+XperienceCommunity.Lucene.Suite.Widgets.Search.SuiteSearchUrl.ToggleFacetLink(string! dimension, string! value, System.Guid? searchId, int nextSequence) -> string!
+XperienceCommunity.Lucene.Suite.Widgets.SuiteEventsEndpoints
+XperienceCommunity.Lucene.Suite.Widgets.SuiteSuggestEndpoints
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.ContactGroupContexts.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.ContactGroupContexts.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.EventsPerMinute.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.EventsPerMinute.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.PageSize.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.PageSize.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SearchOnEmptyQuery.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SearchOnEmptyQuery.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionIndexes.get -> string![]!
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionIndexes.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionsMaxAgeSeconds.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionsMaxAgeSeconds.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionsPerMinute.get -> int
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionsPerMinute.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionStyles.get -> bool
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuggestionStyles.set -> void
+XperienceCommunity.Lucene.Suite.Widgets.SuiteWidgetsOptions.SuiteWidgetsOptions() -> void
+~override XperienceCommunity.Lucene.Suite.Widgets.Events.SuiteResultReference.Equals(object obj) -> bool

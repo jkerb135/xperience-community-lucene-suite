@@ -11,18 +11,11 @@ namespace XperienceCommunity.Lucene.Suite.Analytics;
 public interface ISearchInteractionLogger
 {
     /// <summary>Logs a click on a search result.</summary>
-    /// <param name="searchId">Search id of the result list (the response's <c>SearchId</c>).</param>
-    /// <param name="sequence">1-based sequence of the search request whose response listed the result.</param>
-    /// <param name="itemGuid">Item GUID of the clicked hit.</param>
-    /// <param name="position">1-based absolute position of the hit: (page − 1) × pageSize + index on the page.</param>
-    /// <param name="eventId">Stable id of this event so a retried call is counted once; minted when null.</param>
-    /// <param name="queryText">Query of the result list, as the client sent it. Untrusted: scrubbed and used only for the contact's
-    /// "Search result clicked" activity, never stored in analytics.</param>
-    /// <param name="resultTitle">Title of the clicked result, as the client sent it. Untrusted: used only as display text of the
-    /// contact's "Search result clicked" activity, never stored in analytics.</param>
-    /// <exception cref="ArgumentException">When <paramref name="searchId"/>, <paramref name="itemGuid"/> or <paramref name="eventId"/> is an empty GUID.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">When <paramref name="sequence"/> is below 1 or <paramref name="position"/> is outside 1–1000.</exception>
-    void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null);
+    /// <param name="click">The clicked result and the search that listed it.</param>
+    /// <exception cref="ArgumentNullException">When <paramref name="click"/> is null.</exception>
+    /// <exception cref="ArgumentException">When <see cref="SearchClick.SearchId"/>, <see cref="SearchClick.ItemGuid"/> or <see cref="SearchClick.EventId"/> is an empty GUID.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">When <see cref="SearchClick.Sequence"/> is below 1 or <see cref="SearchClick.Position"/> is outside 1–1000.</exception>
+    void LogClick(SearchClick click);
 
     /// <summary>Logs a conversion (goal completed) attributed to a search result.</summary>
     /// <param name="searchId">Search id of the result list the visitor came from.</param>

@@ -105,9 +105,9 @@ public sealed class RuleSerializerTests
 
     [Theory]
     [MemberData(nameof(InvalidMetadata))]
-    public void InvalidMetadata_ReportsThePath(RuleMetadata metadata, string expectedPath)
+    public void InvalidMetadata_ReportsThePath(object metadata, string expectedPath)
     {
-        var result = RuleSerializer.Parse(metadata, NoConditions, HideOne);
+        var result = RuleSerializer.Parse((RuleMetadata)metadata, NoConditions, HideOne);
 
         Assert.Null(result.Definition);
         Assert.Equal(expectedPath, Assert.Single(result.Errors).Path);
@@ -185,7 +185,7 @@ public sealed class RuleSerializerTests
         };
     }
 
-    public static TheoryData<RuleMetadata, string> InvalidMetadata() => new()
+    public static TheoryData<object, string> InvalidMetadata() => new()
     {
         { Metadata with { IndexName = " " }, "metadata.indexName" },
         { Metadata with { IndexName = new string('i', 201) }, "metadata.indexName" },
