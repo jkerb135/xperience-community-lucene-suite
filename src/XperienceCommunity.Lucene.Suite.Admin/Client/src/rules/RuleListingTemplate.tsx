@@ -101,15 +101,19 @@ const column = (name: string, caption: string, maxWidth: number, minWidth: numbe
 
 const COLUMNS = [
   column("name", "Name", 40, 16, true, true),
-  column("priority", "Priority", 10, 6, true),
+  column("priority", "Priority", 12, 11, true),
   column("status", "Status", 14, 13, false, true),
-  column("validFrom", "Valid from (UTC)", 18, 12),
-  column("validUntil", "Valid until (UTC)", 18, 12),
+  column("validFrom", "Valid from (UTC)", 18, 17),
+  column("validUntil", "Valid until (UTC)", 18, 17),
   column("conditions", "Conditions", 30, 12),
   column("actions", "Actions", 22, 10),
   // npm Table shows the column name for an empty caption; native listings leave the row-action header blank.
   column("rowActions", " ", 9, 9, false, true),
 ];
+
+// Below this table width the date columns are hidden (the status already says whether a rule is live) so headers never truncate.
+const DATES_MIN_WIDTH = 1100;
+const DATE_COLUMNS = new Set(["validFrom", "validUntil"]);
 
 const text = (value: string, columnName: string): StringCell => ({ type: CellType.String, value, columnName, tooltipText: value || undefined });
 
@@ -272,6 +276,17 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
   };
 
   // Read by the row action cells through a ref, so the cells never depend on changing state.
+  const [showDates, setShowDates] = useState(true);
+  const observer = useRef<ResizeObserver>();
+  const tableBox = useCallback((box: HTMLDivElement | null) => {
+    observer.current?.disconnect();
+    if (box) {
+      observer.current = new ResizeObserver(([entry]) => setShowDates(entry.contentRect.width >= DATES_MIN_WIDTH));
+      observer.current.observe(box);
+    }
+  }, []);
+  const columns = useMemo(() => COLUMNS.map((c) => (DATE_COLUMNS.has(c.name) ? { ...c, visible: showDates } : c)), [showDates]);
+
   const handlers = useRef<RowHandlers>({ remove: () => undefined, edit: () => undefined });
   const navigate = useNavigate();
   const location = useLocation();
@@ -408,76 +423,79 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
           )}
           {notice?.kind === "warning" && <NotificationBarWarning onDismiss={() => setNotice(undefined)}>{notice.text}</NotificationBarWarning>}
           {notice?.kind === "alert" && <NotificationBarAlert onDismiss={() => setNotice(undefined)}>{notice.text}</NotificationBarAlert>}
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: Spacing.L }}>
-            <div role="search" style={{ width: "320px" }}>
-              <Input
-                inputRef={searchRef}
-                placeholder="Search by name"
-                actionElement={<Icon name="xp-magnifier" />}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+          {/* The bulk bar takes the toolbar's place (same minimum height), so selecting a row never shifts the table. */}
+          <div style={canManage && count > 0 ? { position: "sticky", top: Spacing.S, zIndex: 5 } : undefined}>
+            <div aria-live="polite" style={visuallyHidden}>
+              {announcement || (canManage && count > 0 ? `${rulesText(count)} selected` : "")}
             </div>
-            <NameToggleButtons
-              selectedItemId={status}
-              items={STATUSES.map((s) => ({ id: s, label: statusLabel(s, counts?.[s]) }))}
-              onChange={(id) => dispatch({ type: "status", status: id as StatusFilter })}
-            />
-            {loading && result !== undefined && <Spinner />}
-          </div>
-          <div aria-live="polite" style={visuallyHidden}>
-            {announcement || (canManage && count > 0 ? `${rulesText(count)} selected` : "")}
-          </div>
-          {canManage && count > 0 && (
-            <div
-              role="region"
-              aria-label="Bulk actions"
-              style={{
-                position: "sticky",
-                top: Spacing.S,
-                zIndex: 5,
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: Spacing.M,
-                padding: `${Spacing.S} ${Spacing.S} ${Spacing.S} ${Spacing.L}`,
-                borderRadius: BorderRadius.RadiusM,
-                background: "var(--color-background-selected)",
-              }}
-            >
-              <span style={{ fontWeight: 700, color: TEXT }}>{`${rulesText(count)} selected`}</span>
-              {view.allMatching ? (
-                <span style={{ color: LOW }}>All matching rules are selected.</span>
-              ) : (
-                pageAllSelected &&
-                total > pageRows.length && (
+            {canManage && count > 0 ? (
+              <div
+                role="region"
+                aria-label="Bulk actions"
+                style={{
+                  minHeight: Spacing.XXXXL,
+                  boxSizing: "border-box",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: Spacing.M,
+                  padding: `${Spacing.S} ${Spacing.S} ${Spacing.S} ${Spacing.L}`,
+                  borderRadius: BorderRadius.RadiusM,
+                  background: "var(--color-background-selected)",
+                }}
+              >
+                <span style={{ fontWeight: 700, color: TEXT }}>{`${rulesText(count)} selected`}</span>
+                {view.allMatching ? (
+                  <span style={{ color: LOW }}>All matching rules are selected.</span>
+                ) : (
+                  pageAllSelected &&
+                  total > pageRows.length && (
+                    <Button
+                      size={ButtonSize.S}
+                      color={ButtonColor.Tertiary}
+                      label={`Select all ${total.toLocaleString("en-US")} matching`}
+                      onClick={() => {
+                        setAnnouncement("");
+                        dispatch({ type: "selectAllMatching" });
+                      }}
+                    />
+                  )
+                )}
+                <div style={{ marginLeft: "auto", display: "flex", flexWrap: "wrap", gap: Spacing.S }}>
+                  <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-check-circle" label="Enable" inProgress={busy && !dialog} disabled={busy} onClick={() => void run("Enable")} />
+                  <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-minus-circle" label="Disable" disabled={busy} onClick={() => openDialog("Disable")} />
+                  <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-arrows-v" label="Change priority" disabled={busy} onClick={() => openDialog("ChangePriority")} />
+                  <Button size={ButtonSize.S} color={ButtonColor.Secondary} destructive icon="xp-bin" label="Delete" disabled={busy} onClick={() => openDialog("Delete")} />
                   <Button
                     size={ButtonSize.S}
-                    color={ButtonColor.Tertiary}
-                    label={`Select all ${total.toLocaleString("en-US")} matching`}
-                    onClick={() => {
-                      setAnnouncement("");
-                      dispatch({ type: "selectAllMatching" });
-                    }}
+                    color={ButtonColor.Quinary}
+                    icon="xp-times"
+                    aria-label="Clear selection"
+                    title="Clear selection"
+                    onClick={() => dispatch({ type: "clearSelection" })}
                   />
-                )
-              )}
-              <div style={{ marginLeft: "auto", display: "flex", flexWrap: "wrap", gap: Spacing.S }}>
-                <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-check-circle" label="Enable" inProgress={busy && !dialog} disabled={busy} onClick={() => void run("Enable")} />
-                <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-minus-circle" label="Disable" disabled={busy} onClick={() => openDialog("Disable")} />
-                <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-arrows-v" label="Change priority" disabled={busy} onClick={() => openDialog("ChangePriority")} />
-                <Button size={ButtonSize.S} color={ButtonColor.Secondary} destructive icon="xp-bin" label="Delete" disabled={busy} onClick={() => openDialog("Delete")} />
-                <Button
-                  size={ButtonSize.S}
-                  color={ButtonColor.Quinary}
-                  icon="xp-times"
-                  aria-label="Clear selection"
-                  title="Clear selection"
-                  onClick={() => dispatch({ type: "clearSelection" })}
+                </div>
+              </div>
+            ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: Spacing.L, minHeight: Spacing.XXXXL }}>
+              <div role="search" style={{ width: "320px" }}>
+                <Input
+                  inputRef={searchRef}
+                  placeholder="Search by name"
+                  actionElement={<Icon name="xp-magnifier" />}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
+              <NameToggleButtons
+                selectedItemId={status}
+                items={STATUSES.map((s) => ({ id: s, label: statusLabel(s, counts?.[s]) }))}
+                onChange={(id) => dispatch({ type: "status", status: id as StatusFilter })}
+              />
+              {loading && result !== undefined && <Spinner />}
             </div>
-          )}
+            )}
+          </div>
           {result === undefined ? (
             loading ? (
               <Spinner />
@@ -503,11 +521,13 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
               </Callout>
             )
           ) : (
-            <div>
+            <div ref={tableBox}>
               <Table
-                columns={COLUMNS}
+                columns={columns}
                 rows={rows}
                 selectable={canManage}
+                selectRowLabel="Select rule"
+                selectAllRowsLabel="Select all rules on this page"
                 preselectedRows={selectedIds}
                 onSelectedItemsChange={(ids) => {
                   setAnnouncement("");
