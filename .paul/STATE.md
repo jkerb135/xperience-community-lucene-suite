@@ -5,26 +5,27 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — milestone review (APPROVAL-CHECKS #4–#15)
+**Current focus:** v0.2 Measure — Phase 13 Enterprise Screens (handoff), then milestone review (APPROVAL-CHECKS #4–#15)
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 12 of 12 (Public API Audit) — Complete
-Plan: 12-01 complete
-Status: Milestone v0.2 phases complete — milestone review, then /paul:complete-milestone
-Last activity: 2026-10-12 — Phase 12 complete (12-01 unified); v0.2 feature-complete
+Phase: 13 of 13 (Enterprise Screens) — Planning
+Plan: 13-01 APPLY in progress; 13-02 created (awaiting audit, depends on 13-01)
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-12 — Audited 13-01 (.paul/phases/13-enterprise-screens/13-01-AUDIT.md)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [██████████] 100% (7 of 7 phases) — review pending
+- v0.2 Measure: [████████░░] 7 of 8 phases
+- Phase 13: [░░░░░░░░░░] 0% (0/4 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — milestone review next]
+  ✓        ◐        ○     [13-01 applying]
 ```
 
 ## Accumulated Context
@@ -34,6 +35,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Enterprise audit on 13-01-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 13 | Filter-mode bulk commands refused when the match count changed (ExpectedCount); event log records per-rule before → after; bulk concurrency reuses the 03-06 version token; seed cleanup by recorded ids |
+| 2026-10-12: User: new Phase 13 Enterprise Screens = implement project-sidecar/design/design_handoff_lucene_suite_enterprise/README.md with @kentico/xperience-admin-components (replaces the stale 03-08/03-09 rule-builder plans, never applied). Choices: rules listing → custom client template (reverses 'native listing' for that page only); rule edit stays native ModelEditPage (no sticky save bar); condition editor gains contact-group/custom context Selects (bare code names, matching the shipped Widgets resolver) + facet dimension/value Selects; 4 plans (listing, edit, reports, query tester). Handoff deviations per npm 31.9.1/enterprise.md: no SearchInput/SimpleStatus/Snackbar/ConfirmationDialog, Spinner not skeletons, Headline M | Phase 13 | 13-01 created |
 | 2026-10-12: 12-01 unified, Phase 12 complete, v0.2 feature-complete: public API frozen (163 → 147, PublicApiAnalyzers baseline); docs updated by the update-docs flow (bf45a4c, not pushed). Next: milestone review of APPROVAL-CHECKS #4–#15 (open questions #12 audit trail, #13 click text, #14 ranking + cold latency, #15 internalized types), then /paul:complete-milestone | Phase 12 | Milestone review |
 | 2026-10-12: 12-01 applied: 163 → 147 public types (17 internalized: rule/synonym JSON models + serializers, SuiteClientSettings), LogClick(SearchClick), MapLuceneSuite* in Widgets namespace, PublicApiAnalyzers 5.6.0 baseline (RS0016 proven), docs/public-api.md; host Program.cs CRLF was lost by the implementer and restored by me (byte-identical except usings); host smoke check after restart passed (all admin pages incl. rule edit, site-search, endpoints); smoke-test rows removed | Phase 12 | UNIFY next (update-docs, transition, milestone end) |
 | 2026-10-12: Enterprise audit on 12-01-PLAN.md. Applied 2 must-have, 2 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 12 | Host runtime smoke check after internalizing (Kentico reflection discovery); view models of overridable views / widget properties / options stay public; analyzer proven active; non-.NET public surfaces listed in public-api.md |
@@ -246,9 +249,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: v0.2 phases complete
-Next action: milestone review of .paul/APPROVAL-CHECKS.md #4–#15, then /paul:complete-milestone
-Resume file: .paul/APPROVAL-CHECKS.md
+Stopped at: Plan 13-01 created
+Next action: /paul:apply .paul/phases/13-enterprise-screens/13-01-PLAN.md
+Resume file: .paul/phases/13-enterprise-screens/13-01-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

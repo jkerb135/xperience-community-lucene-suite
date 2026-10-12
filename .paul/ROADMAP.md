@@ -5,8 +5,8 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
-Status: ✅ All phases complete — milestone review pending
-Phases: 7 of 7 complete
+Status: In progress — Phase 13 Enterprise Screens added 2026-10-12 (milestone review after it)
+Phases: 7 of 8 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -20,6 +20,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
 | 11 | Search Insights | 2/2 | ✅ Complete | 2026-10-12 |
 | 12 | Public API Audit | 1/1 | ✅ Complete | 2026-10-12 |
+| 13 | Enterprise Screens | 0/4 | Planning | - |
 
 ## Phase Details
 
@@ -92,6 +93,19 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 - [x] 12-01: Inventory + internalize, SearchClick + Widgets namespace, PublicApiAnalyzers baseline + docs/public-api.md
 
 **Constraints (from discussion 2026-10-12):** Suite analytics stay identity-free; reports read rollups only and respect the surfacing threshold; the suggest endpoint serves no results and only threshold-surfaced text; the seed generator is dev-only; settings stay in appsettings (no admin settings page); checkpoints go to `.paul/APPROVAL-CHECKS.md`.
+
+### Phase 13: Enterprise Screens
+**Focus:** Implement `project-sidecar/design/design_handoff_lucene_suite_enterprise/README.md` with `@kentico/xperience-admin-components`: loading/empty/error states on every screen, bulk actions and paging for ~500 rules, data-dense tables.
+**Admin UI:** design via /xbyk-admin-ui:design-screen + enterprise.md (SPECIAL-FLOWS)
+**Depends on:** Phases 3, 8, 8.1, 11
+**Decisions (2026-10-12, user):** rules listing becomes a custom client template (reverses the native-listing decision for that page only); rule edit stays the native ModelEditPage (no sticky save bar — Kentico's Save and unsaved-changes prompt); the condition editor gains contact-group/custom context Selects (bare code names, matching the shipped Widgets resolver) and facet dimension/value Selects from the index
+**Deviations from the handoff (npm 31.9.1 / enterprise.md precedence):** no SearchInput/SimpleStatus/Snackbar/ConfirmationDialog exports → labelled Input, icon + text status, Kentico toasts, Dialog; Spinner instead of hex-gradient skeletons; page title Headline M (native size)
+
+**Plans:**
+- [ ] 13-01: Rules listing — custom template, derived status + counts, search/sort/paging, bulk enable/disable/priority/delete with partial-failure results
+- [ ] 13-02: Rule edit — native form regrouped per handoff, header status, conflict Reload, condition pickers (contexts + facets)
+- [ ] 13-03: Search reports — sparklines, data bars, range footer, loading/empty/error states
+- [ ] 13-04: Query tester — result summary strip, score bars, rank movement in Compare, range footer, states
 
 ## Completed Milestones
 

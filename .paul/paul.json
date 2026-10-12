@@ -8,17 +8,18 @@
     "phases": 7
   },
   "phase": {
-    "number": 12,
-    "name": "Public API Audit",
-    "status": "complete",
-    "plans_completed": 1
+    "number": 13,
+    "name": "Enterprise Screens",
+    "status": "planning"
   },
   "loop": {
-    "position": "IDLE"
+    "position": "PLAN",
+    "plan": "13-01",
+    "plan_path": "phases/13-enterprise-screens/13-01-PLAN.md"
   },
   "timestamps": {
     "created_at": "2026-10-08T00:00:00Z",
-    "updated_at": "2026-10-12T13:00:00Z"
+    "updated_at": "2026-10-12T12:00:00Z"
   },
   "satellite": {
     "groom": true
