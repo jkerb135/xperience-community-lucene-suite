@@ -5,6 +5,7 @@ Completed milestone log for this project.
 | Milestone | Completed | Duration | Stats |
 |-----------|-----------|----------|-------|
 | v0.1 Tune & Capture | 2026-10-12 | 5 days (2026-10-08 → 2026-10-12) | 6 phases, 21 plans |
+| v0.2 Measure | 🚧 In progress (created 2026-10-12) | - | 4 phases planned (7–10) |
 
 ---
 

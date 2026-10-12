@@ -4,12 +4,44 @@
 Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Lucene. Ships in three milestones: tune and start capturing data (v0.1), measure (v0.2), test (v0.3). Event capture starts in v0.1 because reports need accumulated history.
 
 ## Current Milestone
-**v0.1 Tune & Capture** (v0.1.0)
-Status: ✅ Complete
-Completed: 2026-10-12
+**v0.2 Measure** (v0.2.0)
+Status: 🚧 In Progress
+Phases: 0 of 4 complete
+Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
-## Next Milestone
-**v0.2 Measure** — not yet defined. Run /paul:discuss-milestone or /paul:milestone.
+## Phases
+
+| Phase | Name | Plans | Status | Completed |
+|-------|------|-------|--------|-----------|
+| 7 | Report Data | TBD | Not started | - |
+| 8 | Reports Admin | TBD | Not started | - |
+| 9 | Suggestions | TBD | Not started | - |
+| 10 | Custom Activities | TBD | Not started | - |
+
+## Phase Details
+
+### Phase 7: Report Data
+**Focus:** Report query service over `SearchDaily` (KPIs, top queries, no-results, CTR, slowest from the latency histogram; date range; `(other)` handling) and a dev-only seed generator that writes contract-faithful synthetic events across many days and runs the real rollup.
+**Depends on:** v0.1 (capture, rollup, retention)
+**Plans:** TBD (defined during /paul:plan)
+
+### Phase 8: Reports Admin
+**Focus:** Report pages per index in the Site Search app, recomputed on condition change; links into rules and synonyms (e.g. create a rule for a no-results query).
+**Admin UI:** design via /xbyk-admin-ui:design-screen (SPECIAL-FLOWS)
+**Depends on:** Phase 7
+**Plans:** TBD
+
+### Phase 9: Suggestions
+**Focus:** Query suggestions from surfaced queries; a rate-limited suggest endpoint in the Widgets package returning strings only (untracked); a progressive-enhancement search box script (accessible combobox); a per-index blocked-suggestions list with admin editor (blocks suggestions only, not reports).
+**Depends on:** Phase 7 (surfaced queries); Widgets package
+**Plans:** TBD
+
+### Phase 10: Custom Activities
+**Focus:** Kentico custom activity types — search performed (one per logical search, scrubbed text), result clicked, no results — logged only with a current contact and Kentico consent/cookie level allowing it.
+**Depends on:** v0.1 capture pipeline
+**Plans:** TBD
+
+**Constraints (from discussion 2026-10-12):** Suite analytics stay identity-free; reports read rollups only and respect the surfacing threshold; the suggest endpoint serves no results and only threshold-surfaced text; the seed generator is dev-only; settings stay in appsettings (no admin settings page); checkpoints go to `.paul/APPROVAL-CHECKS.md`.
 
 ## Completed Milestones
 
@@ -33,8 +65,7 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 
 | Milestone | Contents |
 |-----------|----------|
-| v0.2 Measure | Reports (CTR, no-results, top, slowest; recompute on condition change), query suggestions, blocked suggestions, custom activities |
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (v0.1 complete)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (v0.1 complete; v0.2 Measure created)*

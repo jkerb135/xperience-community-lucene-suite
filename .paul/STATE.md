@@ -5,25 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.1 complete — define v0.2 Measure next
+**Current focus:** v0.2 Measure — Phase 7 Report Data (report queries + seed generator)
 
 ## Current Position
 
-Milestone: Awaiting next milestone (v0.2 Measure — not yet defined)
-Phase: None active
-Plan: None
-Status: Milestone v0.1 Tune & Capture complete — ready for next
-Last activity: 2026-10-12 — Milestone v0.1 completed (tag v0.1.0)
+Milestone: v0.2 Measure (v0.2.0)
+Phase: 7 of 10 (Report Data) — Not started (v0.2 phases 7–10)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-12 — Milestone v0.2 Measure created
 
 Progress:
-- v0.1 Tune & Capture: [██████████] 100% ✓ (6 phases, 21 plans)
+- v0.1 Tune & Capture: [██████████] 100% ✓
+- v0.2 Measure: [░░░░░░░░░░] 0% (0 of 4 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Milestone complete - ready for next]
+  ○        ○        ○     [Ready for first PLAN]
 ```
 
 ## Accumulated Context
@@ -33,6 +34,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Milestone v0.2 Measure created (user, discuss-milestone): 4 phases — 7 Report Data (report queries + dev-only seed generator through the real rollup), 8 Reports Admin, 9 Suggestions (strings-only rate-limited suggest endpoint + progressive-enhancement script; blocklist hides suggestions only), 10 Custom Activities (search performed / result clicked / no results via Kentico consent); no admin settings page | Milestone | Next: /paul:plan Phase 7 |
 | 2026-10-12: Milestone v0.1 Tune & Capture completed: MILESTONES.md entry, archive .paul/milestones/v0.1.0-ROADMAP.md, version aligned to 0.1.0 (PROJECT, config, paul.json), tag v0.1.0 | Milestone | Next: /paul:discuss-milestone for v0.2 Measure |
 | 2026-10-12: 06-04 applied: host ContentType facet = DataClassInfo display name (fallback code name); index rebuilt via Lucene admin rotate button; counts unchanged | Phase 6 | v0.1 follow-up closed |
 | 2026-10-12: v0.1 milestone review (user): APPROVAL-CHECKS #2 and #3 approved; facet values fixed in the host index strategy (not a widget value-label property); test traffic kept | Milestone | Follow-up host quick fix, then complete milestone |
@@ -156,16 +158,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03: all 
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 808445b docs(paul): 06-04 closed (milestone commit + tag v0.1.0 follow)
+Last commit: 98cc68e docs(paul): v0.2 Measure milestone context (v0.1.0 tagged at 6acf358)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Milestone v0.1 Tune & Capture complete
-Next action: /paul:discuss-milestone (define v0.2 Measure) or /paul:milestone
-Resume file: .paul/MILESTONES.md
+Stopped at: Milestone v0.2 Measure created, ready to plan
+Next action: /paul:plan for Phase 7 (Report Data)
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

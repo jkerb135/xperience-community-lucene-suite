@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.1.0 |
-| Status | v0.1 Tune & Capture complete (2026-10-12); next milestone v0.2 Measure (not yet defined) |
+| Status | v0.2 Measure in progress (created 2026-10-12): Phase 7 Report Data next |
 | Last Updated | 2026-10-12 |
 
 ## Requirements
@@ -61,10 +61,13 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Page Builder widgets (search box with results-page selector, results, filters with dimension labels); preview/edit mode never tracked; contact-group query DB-proven; CommunityProjects Site search page producing real Suite traffic — Phase 6 (06-03)
 
 ### Active (In Progress)
-- (none — define v0.2 Measure with /paul:discuss-milestone)
+- [ ] Analytics reports per index (CTR, no-results, top, slowest; date range; recompute on condition change) — v0.2 Phases 7–8
+- [ ] Dev-only seed generator producing contract-faithful history through the real rollup — v0.2 Phase 7
+- [ ] Query suggestions from surfaced queries via a strings-only, rate-limited suggest endpoint + progressive-enhancement search box script — v0.2 Phase 9
+- [ ] Blocked suggestions per index (suggestions only, reports unaffected) — v0.2 Phase 9
+- [ ] Kentico custom activities: search performed, result clicked, no results (contact + consent required) — v0.2 Phase 10
 
 ### Planned (Next)
-- v0.2 Measure: reports, query suggestions, blocked suggestions, custom activities
 - v0.3 Test: A/B testing of rule sets + comparison reports
 
 ### Out of Scope
@@ -144,6 +147,7 @@ Marketers tune, test and measure site search without a developer.
 | Widgets package: server-rendered view components + Page Builder widgets over one URL-driven search per request; page size and contact-group contexts are site-wide options; sr= always on same-site result links; preview/edit never tracked | User decisions (Phase 6); shared search makes per-widget settings conflict | 2026-10-11 | Active |
 | Package endpoints never reconfigure the host (own rate limiter; no AddRateLimiter/UseRateLimiter) | A library must not change host-wide middleware behaviour | 2026-10-11 | Active |
 | Human-verify checkpoints are deferred to .paul/APPROVAL-CHECKS.md and reviewed at milestone end | User decision | 2026-10-11 | Active |
+| v0.2 scope: reports + seed generator + suggestions (suggest endpoint returns strings only — extends v0.1's "no public search API") + blocklist (suggestions only) + custom activities (search/click/no results); settings stay in appsettings | User decisions (discuss-milestone) | 2026-10-12 | Active |
 | Test host content changes stay minimal and recorded: host files backed up before edits (byte-preserving), new pages rather than reusing existing ones, temporary data cleaned unless the user keeps it | User decisions across v0.1 | 2026-10-12 | Active |
 
 ## Success Metrics
