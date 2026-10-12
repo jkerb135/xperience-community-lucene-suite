@@ -78,7 +78,8 @@ Marketers tune, test and measure site search without a developer.
 ### Active (In Progress)
 
 ### Planned (Next)
-- [ ] Public API audit: Core + Admin alone are enough to build a custom UI; documented, baselined public surface — v0.2 Phase 11
+- [ ] Search insights: rules-based report findings (configurable per-site thresholds in appsettings), each linking to its pre-filled fix — v0.2 Phase 11
+- [ ] Public API audit: Core + Admin alone are enough to build a custom UI; documented, baselined public surface — v0.2 Phase 12
 - v0.3 Test: A/B testing of rule sets + comparison reports
 - v0.4 Instant Search: public, opt-in search endpoint (index + field allow-list, rate limit, searchId analytics) and an Algolia-InstantSearch-style JS widget library
 

@@ -5,11 +5,11 @@
     "name": "v0.2 Measure",
     "version": "0.2.0",
     "status": "in_progress",
-    "phases": 6
+    "phases": 7
   },
   "phase": {
     "number": 11,
-    "name": "Public API Audit",
+    "name": "Search Insights",
     "status": "not_started",
     "plans_completed": 0
   },

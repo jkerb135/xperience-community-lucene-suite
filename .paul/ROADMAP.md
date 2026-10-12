@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 5 of 6 complete
+Phases: 5 of 7 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -18,7 +18,8 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 8.1 | Admin UI Consistency Audit | 5/5 | ✅ Complete | 2026-10-12 |
 | 9 | Suggestions | 3/3 | ✅ Complete | 2026-10-12 |
 | 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
-| 11 | Public API Audit | TBD | Not started | - |
+| 11 | Search Insights | TBD | Not started | - |
+| 12 | Public API Audit | TBD | Not started | - |
 
 ## Phase Details
 
@@ -70,9 +71,16 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Plans:**
 - [x] 10-01: Activity types (installer v7) + search/no-results/click activities in Core + click contract v2
 
-### Phase 11: Public API Audit
-**Focus:** Make Core + Admin alone sufficient to build a custom search UI, and Widgets extensible: inventory every public type in Core/Admin/Widgets, close gaps (e.g. rule/synonym/report services usable outside the admin), XML docs everywhere, a public-API baseline (shipped/unshipped list) so later changes are deliberate, and a "build your own UI / author your own widget" guide.
-**Depends on:** Phases 9–10 (their public APIs are included)
+### Phase 11: Search Insights
+**Focus:** Rules-based findings over the existing report data, each linking straight to its fix. Rules run per surfaced query (on top of the surfacing threshold) only when the query reaches a minimum search count in the selected range: content gap (high no-result rate → add synonym), relevance miss (results but low CTR → create rule / pin), buried answer (high average click position → create rule / pin), slow query (p95 over a cutoff or overflow bucket → query tester), regression (period-over-period worsening of no-result rate or CTR; skipped when the previous period is partial). Findings are computed on read from `SearchReportService` (no new tables) and replace/extend the reports "Needs attention" panel; actions reuse the 08-02 row-action prefill (query tester, create rule, add synonym) and the 09-03 "Block suggestion" command.
+**Admin UI:** /xbyk-admin-ui:design-screen (SPECIAL-FLOWS), Conventions 1–10 from Phase 8.1
+**Depends on:** Phase 7 (report service), Phase 8 / 8.1 (reports page, row actions), Phase 9 (block suggestion)
+**Decisions (2026-10-12, user):** every threshold is configurable per site in appsettings (`LuceneSuite:Analytics:Insights` — minimum searches, rate cutoffs, click-position cutoff, latency cutoff, regression %) with sensible defaults, so small and large sites can tune it (no admin settings page, per milestone constraint); every finding links directly to its fix, pre-filled. Not in scope: LLM/AIRA analysis (no public bring-your-own-agent API in Xperience as of 2026-10-12), typo-pair detection, stored findings.
+**Plans:** TBD
+
+### Phase 12: Public API Audit
+**Focus:** Make Core + Admin alone sufficient to build a custom search UI, and Widgets extensible: inventory every public type in Core/Admin/Widgets, close gaps (e.g. rule/synonym/report/insight services usable outside the admin), XML docs everywhere, a public-API baseline (shipped/unshipped list) so later changes are deliberate, and a "build your own UI / author your own widget" guide.
+**Depends on:** Phases 9–11 (their public APIs are included)
 **Decision (2026-10-12, user):** layered packages; instant search goes to v0.4
 **Plans:** TBD
 
@@ -104,4 +112,4 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 | v0.4 Instant Search | Public opt-in search endpoint (index + field allow-list, rate limit, searchId analytics via the JS client contract) + Algolia-InstantSearch-style JS widget library (search box, hits, refinements, pagination, stats) building on Phase 9 suggestions |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 10 complete)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 10 complete; Phase 11 Search Insights added, Public API Audit → Phase 12)*

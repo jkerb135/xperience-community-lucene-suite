@@ -10,14 +10,14 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 11 of 11 (Public API Audit) — Not started
+Phase: 11 of 12 (Search Insights) — Not started
 Plan: Not started
 Status: Ready to plan
 Last activity: 2026-10-12 — Phase 10 complete (10-01 unified), transitioned to Phase 11
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [████████░░] 83% (5 of 6 phases)
+- v0.2 Measure: [███████░░░] 71% (5 of 7 phases)
 
 ## Loop Position
 
@@ -34,6 +34,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: User: new v0.2 Phase 11 Search Insights (rules-based findings over report data: content gap, relevance miss, buried answer, slow query, regression; computed on read, no new tables). Choices: thresholds configurable per site in appsettings `LuceneSuite:Analytics:Insights` (sized for small vs large sites); every finding links to its pre-filled fix (synonym / rule / query tester / block suggestion). AIRA bring-your-own-agent not available in Xperience docs → no LLM analysis. Public API Audit renumbered to Phase 12 (the 10-01 "Phase 11 input list" now belongs to Phase 12); next: /paul:plan Phase 11 Search Insights | Milestone | v0.2 now 7 phases |
 | 2026-10-12: 10-01 unified, Phase 10 complete: search activities shipped (all ACs pass); Phase 11 input list: SuiteActivityTypes, LogClick optional params (request record?), BlockSuggestion DTOs, MapLuceneSuite* namespaces, ISuiteSuggestions review, WebPageItemInfo internal use | Phase 10 | Next: /paul:plan Phase 11 |
 | 2026-10-12: 10-01 applied: installer v7 (3 custom activity types, disabled), Core search/no-results/click activities, click contract v2; implementer decompiled 31.9.1: MVC ActivityURL defaults to the raw Referer (audit leak confirmed) → Suite sets URL explicitly; changed in APPLY: click ActivityURL = results page (scrubbed Referer) instead of the beacon endpoint. Host E2E: disabled → none; enabled → exact titles/values, page link, no 'jane' anywhere; continuation none; admin toggle without restart; restored + 4 test activities deleted; no consent action needed (pane already tracked) | Phase 10 | UNIFY next |
 | 2026-10-12: Enterprise audit on 10-01-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 10 | Suite sets ActivityURL/Referrer without query string (raw q incl. emails would leak via Kentico auto-fill); no HttpContext → nothing logged; control chars stripped; provider cache for type enabled + toggle without restart; docs note Kentico page-visit URL keeps raw q |
