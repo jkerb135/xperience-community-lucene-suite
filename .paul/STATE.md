@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 8.1 (Admin UI Consistency Audit, inserted) — Applying
-Plan: 08.1-01 complete; next 08.1-02
-Status: Ready to plan 08.1-02
-Last activity: 2026-10-12 — Unified 08.1-01 (findings + conventions; fixes split into 08.1-02/03)
+Plan: 08.1-02 complete; next 08.1-03
+Status: Ready to plan 08.1-03
+Last activity: 2026-10-12 — Unified 08.1-02
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready to plan 08.1-02]
+  ✓        ✓        ✓     [Loop complete — ready to plan 08.1-03]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,10 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 08.1-02 applied: native action bar (Input aria-label "Query" verified in a11y tree; placeholder 285/484 px), chips + switches rows; focus.ts returnFocus (per-frame, ≤1 s, only while focus lost/in a side-panel___ element; 6 node tests) → every Filter/detail/Contact-groups close lands on its opener incl. chip opener; Row-in-Stack wrapped at 11 sites incl. rule editors (deviation: plan boundary listed rules files; spacing-only) → 24 px region gaps, 12 px editor rows; new M6 (rule-row Remove buttons overflow card by 31–47 px at 669 px) → 08.1-03; host counts unchanged | Phase 8.1 | 08.1-03 includes M6 |
+| 2026-10-12: User: search reports should look like Kentico Community Portal reporting (kit README screenshot; source CommunityStatsLayoutTemplate.tsx uses own shadcn-style Card + Tailwind + community-stats.css + amCharts 5, only Button/DateTimeRangeInput from npm). Decision (user option 2): redesign folded into 08.1-03, built from npm 31.9.1 components + tokens + our SVG chart (no Tailwind, CSS loader or amCharts). User: "use the components but add an enterprise application level flare like that image" → becomes a dashboard-page convention (two-panel layout, eyebrow labels, accent/selectable KPI tiles, coloured deltas) for 08.1-03 and Phase 9 | Phase 8.1 | 08.1-03 grows; plan it after 08.1-02 |
+| 2026-10-12: Enterprise audit on 08.1-02-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8.1 | returnFocus never fights the user (only while focus is null/body/inside the closing panel); "Query" accessible name verified on the input (hidden-label fallback); chip opener honoured; every Row sweep site checked at both widths; placeholder not truncated at 669 px |
+| 2026-10-12: 08.1-02 planned: query tester native action bar (Input aria-label "Query" + Filter on one row, chips row, switches row; no visible label/explanation); shared focus.ts returnFocus (per-frame retry ≤ 1 s, node-tested) for Filter, hit-detail and Contact-groups panels; Row-in-Stack sweep (reports KPI row, compare row); APPROVAL-CHECKS #7 | Phase 8.1 | 08.1-02 created |
 | 2026-10-12: 08.1-01 unified: query tester chips/search already native (Tag rgb(6,119,168) 32 px, 40 px pill) — defect is the form-style toolbar; query table rows 50 px vs 104 px content (08-02 miss); Filter/Contact-groups panels drop focus (native returns it); Row-in-Stack zeroes gaps; coverage gap: some surfaces checked at 669 px only | Phase 8.1 | 08.1-02/03 validate every touched screen at both widths |
 | 2026-10-12: 08.1-01 decision (user): must-should — fix M1–M5 + S1–S4 (+ C1–C3) in 08.1-02 (action bar/chips, side-panel focus, Row-in-Stack spacing) and 08.1-03 (query table rows/actions menu, headers, heading scale, validation); conventions in 08.1-01-FINDINGS.md bind Phase 9 admin UI | Phase 8.1 | Phase 8.1 = 3 plans |
 | 2026-10-12: Enterprise audit on 08.1-01-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 8.1 | Reference precedence native runtime > npm > kit; fixed severity criteria; reproducible capture setup + standalone evidence; host SearchEvent/Rule/Synonym counts before/after; a11y procedure; every Must mapped or declined |
@@ -163,7 +167,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -182,6 +186,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 8.1: APPROVAL-CHECKS #7 (query tester action bar/focus/spacing; confirm removed visible label + rule-editor scope addition; one unreproduced Contact-groups focus landing) pending | Milestone review | Milestone review |
 | Phase 8: APPROVAL-CHECKS #5 (reports page) and #6 (query table + row actions; permission-disabled state code/test-only; one unreproduced "7 days" restore) pending | Milestone review | Milestone review |
 | Phase 7: APPROVAL-CHECKS #4 pending — keep or clear seeded host history (2026-08-12..2026-10-10) and accept its effect on real-query surfacing | Phase 8 demos use it | Milestone review |
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
@@ -194,9 +199,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 08.1-01 unified
-Next action: /paul:plan for 08.1-02 (action bar, chips, side-panel focus, spacing)
-Resume file: .paul/phases/08.1-admin-ui-consistency-audit/08.1-01-SUMMARY.md
+Stopped at: 08.1-02 unified
+Next action: /paul:plan for 08.1-03 (reports dashboard redesign + table/heading/validation fixes; consider splitting)
+Resume file: .paul/phases/08.1-admin-ui-consistency-audit/08.1-02-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

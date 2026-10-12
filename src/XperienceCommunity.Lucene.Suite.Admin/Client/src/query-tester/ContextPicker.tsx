@@ -15,6 +15,7 @@ import {
   Tag,
 } from "@kentico/xperience-admin-components";
 import { addContext, contextLabel, withGroups, type ContactGroup } from "./compare";
+import { returnFocus } from "./focus";
 
 /** The ContactGroups command's answer. */
 export interface ContactGroupsState {
@@ -88,8 +89,7 @@ export const ContextPicker = ({
       );
     }
     setDraft(undefined);
-    // Deferred so it runs after the SidePanel has finished moving focus itself.
-    requestAnimationFrame(() => opener.current?.focus());
+    returnFocus(() => opener.current);
   };
 
   return (

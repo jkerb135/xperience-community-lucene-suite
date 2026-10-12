@@ -42,28 +42,30 @@ export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
         {hides.map((guid, index) => {
           const path = `actions.hides[${index}]`;
           return (
-            <Row key={`${guid}-${index}`} spacingX={Spacing.M}>
-              <Column cols={editable ? Cols.Col9 : Cols.Col12}>
-                <ItemSummary guid={guid} item={title(guid)} />
-                {byPath.has(path) && (
-                  <span role="alert" style={{ color: "var(--color-alert-text)" }}>
-                    {byPath.get(path)}
-                  </span>
-                )}
-              </Column>
-              {editable && (
-                <Column cols={Cols.Col3}>
-                  <Button
-                    label="Remove"
-                    title={`Remove hidden item ${index + 1}`}
-                    icon="xp-bin"
-                    color={ButtonColor.Tertiary}
-                    buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
-                    onClick={() => remove(index)}
-                  />
+            <div key={`${guid}-${index}`}>
+              <Row spacingX={Spacing.M}>
+                <Column cols={editable ? Cols.Col9 : Cols.Col12}>
+                  <ItemSummary guid={guid} item={title(guid)} />
+                  {byPath.has(path) && (
+                    <span role="alert" style={{ color: "var(--color-alert-text)" }}>
+                      {byPath.get(path)}
+                    </span>
+                  )}
                 </Column>
-              )}
-            </Row>
+                {editable && (
+                  <Column cols={Cols.Col3}>
+                    <Button
+                      label="Remove"
+                      title={`Remove hidden item ${index + 1}`}
+                      icon="xp-bin"
+                      color={ButtonColor.Tertiary}
+                      buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
+                      onClick={() => remove(index)}
+                    />
+                  </Column>
+                )}
+              </Row>
+            </div>
           );
         })}
         {editable && (

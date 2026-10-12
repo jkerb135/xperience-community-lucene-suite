@@ -9,7 +9,6 @@ import {
   CalloutType,
   CellType,
   Checkbox,
-  Cols,
   Column,
   ColumnContentType,
   Headline,
@@ -50,6 +49,7 @@ import {
 import type { Hit, SearchResult } from "./compare";
 import { CompareView } from "./CompareView";
 import { clear, peek } from "../reports/handoff";
+import { openerOrFallback, returnFocus } from "./focus";
 
 interface QueryTesterProps {
   readonly isFaceted: boolean;
@@ -85,9 +85,6 @@ const cell = (value: string, columnName: string): StringCell => ({ type: CellTyp
 
 const fieldText = (hit: Hit, field: string) => (hit.fields[field] ?? []).join(", ");
 
-// Deferred so it runs after the SidePanel has finished moving focus itself.
-const focusLater = (target: () => HTMLElement | null | undefined) => requestAnimationFrame(() => target()?.focus());
-
 // Module-level so the callback ref is stable: it focuses a panel's content once, when it mounts.
 const focusOnMount = (element: HTMLElement | null) => element?.focus();
 
@@ -120,6 +117,8 @@ export const QueryTesterTemplate = ({
   const applySynonymsRef = useRef(true);
   const tableArea = useRef<HTMLDivElement>(null);
   const filterButton = useRef<HTMLButtonElement>(null);
+  // The Filter button or the chip that opened the panel.
+  const filterOpener = useRef<HTMLElement | null>(null);
 
   const search = useCallback(
     async (searchQuery: string, searchPage: number, facets: FacetSelection) => {
@@ -178,7 +177,7 @@ export const QueryTesterTemplate = ({
     const returnTo = detail?.returnTo;
     setDetail(undefined);
     // The npm Table's row button is display: contents and cannot take focus, so table rows return focus to the table itself.
-    focusLater(() => returnTo ?? tableArea.current);
+    returnFocus(() => returnTo ?? tableArea.current);
   };
 
   const closeFilters = (commit: boolean) => {
@@ -186,7 +185,12 @@ export const QueryTesterTemplate = ({
       applySelection(draft);
     }
     setDraft(undefined);
-    focusLater(() => filterButton.current);
+    returnFocus(() => openerOrFallback(filterOpener.current, filterButton.current));
+  };
+
+  const openFilters = () => {
+    filterOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setDraft(selection);
   };
 
   const hits = result?.hits ?? [];
@@ -236,72 +240,56 @@ export const QueryTesterTemplate = ({
       {!compare && result?.synonymsFailed && (
         <NotificationBarWarning>Synonyms could not be applied — the original text was searched.</NotificationBarWarning>
       )}
-      <Row spacingX={Spacing.XL}>
-        <Column cols={Cols.Col12} colsMd={Cols.Col9} colsLg={Cols.Col9}>
-          <form onSubmit={submit} role="search">
-            <Input
-              label="Query"
-              explanationText="Leave empty to list all documents. Press Enter to search."
-              actionElement={<Icon name="xp-magnifier" />}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </form>
-        </Column>
-        <Column cols={Cols.Col12} colsMd={Cols.Col3} colsLg={Cols.Col3}>
-          <Stack spacing={Spacing.S}>
-            <Switch label="Compare" size={SwitchSize.M} value={compare} onChange={setCompare} />
-            {!compare && <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />}
-            {!compare && <Switch label="Apply synonyms" size={SwitchSize.M} value={applySynonyms} onChange={toggleSynonyms} />}
-          </Stack>
-        </Column>
-      </Row>
-      {isFaceted && (
-        <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: Spacing.M }}>
+        <form onSubmit={submit} role="search" style={{ flex: 1, minWidth: 0 }}>
+          <Input
+            aria-label="Query"
+            placeholder="Search — leave empty to list all documents"
+            actionElement={<Icon name="xp-magnifier" />}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </form>
+        {isFaceted && (
           <Button
             label="Filter"
             icon="xp-filter-1"
-            size={ButtonSize.S}
             color={ButtonColor.Secondary}
             badge={applied.length > 0}
             buttonRef={filterButton}
-            onClick={() => setDraft(selection)}
+            onClick={openFilters}
           />
-          {applied.length > 0 && [
-            <div
-              key="label"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                height: "100%",
-                marginLeft: Spacing.M,
-                color: "var(--color-text-low-emphasis)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Applied filters:
-            </div>,
-            <Button
-              key="clear"
-              label="Clear all"
-              icon="xp-times-circle"
-              size={ButtonSize.S}
-              color={ButtonColor.Tertiary}
+        )}
+      </div>
+      {applied.length > 0 && (
+        <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
+          <div style={{ display: "flex", alignItems: "center", height: "100%", color: "var(--color-text-low-emphasis)", whiteSpace: "nowrap" }}>
+            Applied filters:
+          </div>
+          <Button
+            label="Clear all"
+            icon="xp-times-circle"
+            size={ButtonSize.S}
+            color={ButtonColor.Tertiary}
+            disabled={inProgress}
+            onClick={() => applySelection({})}
+          />
+          {applied.map(({ dimension, label }) => (
+            <Tag
+              key={`${dimension}\u0000${label}`}
+              label={`${humanizeFieldName(dimension)}: ${label}`}
               disabled={inProgress}
-              onClick={() => applySelection({})}
-            />,
-            ...applied.map(({ dimension, label }) => (
-              <Tag
-                key={`${dimension}\u0000${label}`}
-                label={`${humanizeFieldName(dimension)}: ${label}`}
-                disabled={inProgress}
-                onClick={() => setDraft(selection)}
-                onRemoveClick={() => applySelection(toggleSelection(selection, dimension, label, false))}
-              />
-            )),
-          ]}
+              onClick={openFilters}
+              onRemoveClick={() => applySelection(toggleSelection(selection, dimension, label, false))}
+            />
+          ))}
         </Inline>
       )}
+      <Inline spacingX={Spacing.L} spacingY={Spacing.S}>
+        <Switch label="Compare" size={SwitchSize.M} value={compare} onChange={setCompare} />
+        {!compare && <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />}
+        {!compare && <Switch label="Apply synonyms" size={SwitchSize.M} value={applySynonyms} onChange={toggleSynonyms} />}
+      </Inline>
       {compare ? (
         <CompareView
           query={submittedQuery}

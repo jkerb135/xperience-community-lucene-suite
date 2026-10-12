@@ -90,43 +90,45 @@ export const RulePinsFormComponent = (props: RuleItemsFormComponentProps) => {
           const positionPath = `actions.pins[${index}].position`;
           const itemPath = `actions.pins[${index}].itemGuid`;
           return (
-            <Row key={`${row.itemGuid}-${index}`} spacingX={Spacing.M}>
-              <Column cols={Cols.Col4} colsLg={Cols.Col2}>
-                <Input
-                  id={`${props.name}-pin-${index}-position`}
-                  label="Position"
-                  type="number"
-                  min={1}
-                  max={props.maxPosition}
-                  value={row.position}
-                  readOnly={!editable}
-                  invalid={visible(positionPath) && byPath.has(positionPath)}
-                  validationMessage={visible(positionPath) ? byPath.get(positionPath) : undefined}
-                  onBlur={() => touch(positionPath)}
-                  onChange={(event) => update(replaceAt(rows, index, { ...row, position: event.target.value }))}
-                />
-              </Column>
-              <Column cols={Cols.Col8} colsLg={editable ? Cols.Col7 : Cols.Col10}>
-                <ItemSummary guid={row.itemGuid} item={title(row.itemGuid)} />
-                {byPath.has(itemPath) && (
-                  <span role="alert" style={{ color: "var(--color-alert-text)" }}>
-                    {byPath.get(itemPath)}
-                  </span>
-                )}
-              </Column>
-              {editable && (
-                <Column cols={Cols.Col12} colsLg={Cols.Col3}>
-                  <Button
-                    label="Remove"
-                    title={`Remove pin ${index + 1}`}
-                    icon="xp-bin"
-                    color={ButtonColor.Tertiary}
-                    buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
-                    onClick={() => remove(index)}
+            <div key={`${row.itemGuid}-${index}`}>
+              <Row spacingX={Spacing.M}>
+                <Column cols={Cols.Col4} colsLg={Cols.Col2}>
+                  <Input
+                    id={`${props.name}-pin-${index}-position`}
+                    label="Position"
+                    type="number"
+                    min={1}
+                    max={props.maxPosition}
+                    value={row.position}
+                    readOnly={!editable}
+                    invalid={visible(positionPath) && byPath.has(positionPath)}
+                    validationMessage={visible(positionPath) ? byPath.get(positionPath) : undefined}
+                    onBlur={() => touch(positionPath)}
+                    onChange={(event) => update(replaceAt(rows, index, { ...row, position: event.target.value }))}
                   />
                 </Column>
-              )}
-            </Row>
+                <Column cols={Cols.Col8} colsLg={editable ? Cols.Col7 : Cols.Col10}>
+                  <ItemSummary guid={row.itemGuid} item={title(row.itemGuid)} />
+                  {byPath.has(itemPath) && (
+                    <span role="alert" style={{ color: "var(--color-alert-text)" }}>
+                      {byPath.get(itemPath)}
+                    </span>
+                  )}
+                </Column>
+                {editable && (
+                  <Column cols={Cols.Col12} colsLg={Cols.Col3}>
+                    <Button
+                      label="Remove"
+                      title={`Remove pin ${index + 1}`}
+                      icon="xp-bin"
+                      color={ButtonColor.Tertiary}
+                      buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
+                      onClick={() => remove(index)}
+                    />
+                  </Column>
+                )}
+              </Row>
+            </div>
           );
         })}
         {editable && (

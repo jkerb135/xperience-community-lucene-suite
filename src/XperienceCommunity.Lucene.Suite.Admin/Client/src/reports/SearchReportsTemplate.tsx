@@ -233,15 +233,17 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
               />
             </FormItemWrapper>
           )}
-          <Row spacingX={Spacing.XL}>
-            <Column>
-              <TextWithLabel label="Reporting (UTC days)" value={rangeLabel(range)} />
-            </Column>
-            <Column>
-              <TextWithLabel label="Compared with" value={rangeLabel(previous)} />
-            </Column>
-            <Column>{inProgress && <Spinner />}</Column>
-          </Row>
+          <div>
+            <Row spacingX={Spacing.XL}>
+              <Column>
+                <TextWithLabel label="Reporting (UTC days)" value={rangeLabel(range)} />
+              </Column>
+              <Column>
+                <TextWithLabel label="Compared with" value={rangeLabel(previous)} />
+              </Column>
+              <Column>{inProgress && <Spinner />}</Column>
+            </Row>
+          </div>
         </Stack>
       </Card>
       {failed && <NotificationBarAlert>The report could not be loaded. The last loaded report is shown; choose the period again to retry.</NotificationBarAlert>}
@@ -267,20 +269,22 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
             </Card>
           ) : (
             <>
-              <Row spacingX={Spacing.L} spacingY={Spacing.L}>
-                {[
-                  { caption: "Searches", tooltip: DEFINITIONS.searches, text: formatCount(current.searches), details: countDelta(result.deltas.searches, partial) },
-                  { caption: "No-result rate", tooltip: DEFINITIONS.noResults, text: formatRate(current.noResultRate), details: rateDelta(current.noResultRate, result.previous.noResultRate, partial) },
-                  { caption: "Click-through rate", tooltip: DEFINITIONS.ctr, text: formatRate(current.ctr), details: rateDelta(current.ctr, result.previous.ctr, partial) },
-                  { caption: "Conversion rate", tooltip: DEFINITIONS.conversion, text: formatRate(current.conversionRate), details: rateDelta(current.conversionRate, result.previous.conversionRate, partial) },
-                  { caption: "Avg. click position", tooltip: DEFINITIONS.position, text: formatPosition(current.avgClickPosition), details: positionDelta(current.avgClickPosition, result.previous.avgClickPosition, partial) },
-                  { caption: "Session-days", tooltip: DEFINITIONS.sessions, text: formatCount(current.sessionDays), details: countDelta(result.deltas.sessionDays, partial) },
-                ].map((kpi) => (
-                  <Column key={kpi.caption} cols={Cols.Col6} colsMd={Cols.Col4} colsLg={Cols.Col4}>
-                    <InfoCard {...kpi} />
-                  </Column>
-                ))}
-              </Row>
+              <div>
+                <Row spacingX={Spacing.L} spacingY={Spacing.L}>
+                  {[
+                    { caption: "Searches", tooltip: DEFINITIONS.searches, text: formatCount(current.searches), details: countDelta(result.deltas.searches, partial) },
+                    { caption: "No-result rate", tooltip: DEFINITIONS.noResults, text: formatRate(current.noResultRate), details: rateDelta(current.noResultRate, result.previous.noResultRate, partial) },
+                    { caption: "Click-through rate", tooltip: DEFINITIONS.ctr, text: formatRate(current.ctr), details: rateDelta(current.ctr, result.previous.ctr, partial) },
+                    { caption: "Conversion rate", tooltip: DEFINITIONS.conversion, text: formatRate(current.conversionRate), details: rateDelta(current.conversionRate, result.previous.conversionRate, partial) },
+                    { caption: "Avg. click position", tooltip: DEFINITIONS.position, text: formatPosition(current.avgClickPosition), details: positionDelta(current.avgClickPosition, result.previous.avgClickPosition, partial) },
+                    { caption: "Session-days", tooltip: DEFINITIONS.sessions, text: formatCount(current.sessionDays), details: countDelta(result.deltas.sessionDays, partial) },
+                  ].map((kpi) => (
+                    <Column key={kpi.caption} cols={Cols.Col6} colsMd={Cols.Col4} colsLg={Cols.Col4}>
+                      <InfoCard {...kpi} />
+                    </Column>
+                  ))}
+                </Row>
+              </div>
               <Card headline={heading(2, "Searches per day")}>
                 <Stack spacing={Spacing.M}>
                   <Switch label="Show as table" size={SwitchSize.M} value={trendTable} onChange={setTrendTable} />
@@ -315,17 +319,19 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
               </Card>
               <Card headline={heading(2, "Latency")}>
                 <Stack spacing={Spacing.M}>
-                  <Row spacingX={Spacing.XL}>
-                    <Column>
-                      <TextWithLabel label="Median (p50)" value={percentileLabel(result.latency.p50, bounds)} />
-                    </Column>
-                    <Column>
-                      <TextWithLabel label="p95" value={percentileLabel(result.latency.p95, bounds)} />
-                    </Column>
-                    <Column>
-                      <TextWithLabel label="p99" value={percentileLabel(result.latency.p99, bounds)} />
-                    </Column>
-                  </Row>
+                  <div>
+                    <Row spacingX={Spacing.XL}>
+                      <Column>
+                        <TextWithLabel label="Median (p50)" value={percentileLabel(result.latency.p50, bounds)} />
+                      </Column>
+                      <Column>
+                        <TextWithLabel label="p95" value={percentileLabel(result.latency.p95, bounds)} />
+                      </Column>
+                      <Column>
+                        <TextWithLabel label="p99" value={percentileLabel(result.latency.p99, bounds)} />
+                      </Column>
+                    </Row>
+                  </div>
                   <Switch label="Show histogram as table" size={SwitchSize.M} value={latencyTable} onChange={setLatencyTable} />
                   {latencyTable ? (
                     <Table

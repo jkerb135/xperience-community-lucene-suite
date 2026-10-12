@@ -63,23 +63,25 @@ export const RuleBoostsFormComponent = (props: RuleJsonFormComponentProps) => {
           <NotificationBarAlert>{unmatched.map((error) => error.message).join(" ")}</NotificationBarAlert>
         )}
         {rows.map((_, index) => (
-          <Row key={index} spacingX={Spacing.M}>
-            <Column cols={Cols.Col4}>{field(index, "field", "Field")}</Column>
-            <Column cols={Cols.Col4}>{field(index, "value", "Value")}</Column>
-            <Column cols={Cols.Col2}>{field(index, "strength", "Strength", { type: "number", min: -100, max: 100 })}</Column>
-            {editable && (
-              <Column cols={Cols.Col2}>
-                <Button
-                  label="Remove"
-                  title={`Remove boost ${index + 1}`}
-                  icon="xp-bin"
-                  color={ButtonColor.Tertiary}
-                  buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
-                  onClick={() => remove(index)}
-                />
-              </Column>
-            )}
-          </Row>
+          <div key={index}>
+            <Row spacingX={Spacing.M}>
+              <Column cols={Cols.Col4}>{field(index, "field", "Field")}</Column>
+              <Column cols={Cols.Col4}>{field(index, "value", "Value")}</Column>
+              <Column cols={Cols.Col2}>{field(index, "strength", "Strength", { type: "number", min: -100, max: 100 })}</Column>
+              {editable && (
+                <Column cols={Cols.Col2}>
+                  <Button
+                    label="Remove"
+                    title={`Remove boost ${index + 1}`}
+                    icon="xp-bin"
+                    color={ButtonColor.Tertiary}
+                    buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
+                    onClick={() => remove(index)}
+                  />
+                </Column>
+              )}
+            </Row>
+          </div>
         ))}
         {editable && (
           <div>

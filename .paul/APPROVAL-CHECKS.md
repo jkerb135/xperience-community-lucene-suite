@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 7 | 08.1-02 | Query tester native action bar + chips row, side-panel focus return, 24 px region gaps | Pending |
 
 ---
 
@@ -191,3 +192,41 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **The reason a button is disabled** (missing permission, browse row, `{email}`/`{number}` text) shows as a hover tooltip. A disabled button can't take keyboard focus, so keyboard users don't hear the reason.
    - **The permission-disabled state** is verified in code and tests only. The host has no user without Manage rules / Manage synonyms, and the editors of existing rules and synonyms couldn't be exercised because the host has none. The guard against filling them is covered by a node test (sibling edit path).
    - **Unexplained, not reproduced:** once during testing the saved report state showed "7 days" without that preset being clicked. Three deliberate repeats restored and saved correctly. Watch for it.
+
+---
+
+## 7. 08.1-02: Query tester action bar, side-panel focus, spacing (v0.2)
+
+1. **Where:** Site search → DancingGoatSample → Query tester (also Search reports, Create rule).
+2. **Captures** (project-sidecar/docs/ui-audit/): before `qt-default-1100.jpg`, `qt-chips-1100.jpg`; after `after-qt-default-1100.jpg`, `after-qt-default-1700.jpg`, `after-reports-top-1100.jpg`, `after-rule-rows-1700.jpg`; native reference `ref-contenthub-chips-1100.jpg`.
+3. **What I verified in the browser pane:**
+   - **Layout, at 669 px and 1269 px content width:**
+     - The search box and the Filter button share one row.
+     - Applied filters are on their own row, 40 px under the search.
+     - The switches are on their own row.
+     - The input's accessible name is "Query" (accessibility tree).
+     - The placeholder fits: it needs 285 px of the 484 px available.
+     - On the Test index (no facets) there is no Filter button and the search takes the full width.
+   - **Focus after closing a panel** (`document.activeElement`):
+
+     | Panel | Close by | Lands on |
+     |---|---|---|
+     | Filter | Cancel / Apply / X / Escape | Filter button ✓ |
+     | Filter opened from a chip | Cancel | that chip ✓ |
+     | Filter opened from a chip | Apply that removed the chip | Filter button ✓ |
+     | Filter | Cancel, then Tab to a switch within 30 ms | the switch (not pulled back) ✓ |
+     | Hit detail | Escape | table area ✓ (rows can't take focus, known since 03-02) |
+     | Contact groups, Baseline | Cancel / Escape / X | its button ✓ |
+     | Contact groups, Tuned | Escape / X, and Cancel when repeated on its own | its button ✓ |
+
+     - In one scripted run, Tuned → Cancel landed on the Baseline button while the previous panel was still animating closed. A direct repeat landed correctly. Watch for it.
+     - While the pane is hidden, focus sits on the page body for about 0.5 s before returning (animation frames throttled in the background). It is immediate in a visible window.
+   - **Gaps, at both widths:**
+     - Reports: Period → KPI 24 px, KPI → chart 24 px.
+     - Compare: note → columns 24 px, columns side by side at 1269 px.
+     - Rule editor: condition and boost rows 12 px apart (were 0).
+   - **Host data:** SearchEvent 19 / 19, Rule 0 / 0, Synonym 0 / 0, Interaction 2 / 2. Nothing saved.
+4. **Your decisions to confirm:**
+   - **The visible "Query" label and explanation are gone** (native listing style). The hint "leave empty to list all documents" now lives in the placeholder and disappears while typing.
+   - **The rule editors got the spacing fix as well,** although the plan listed them as off-limits. Their rows were collapsed to 0 px gaps by the same Row-in-Stack cause, and the change is spacing only.
+   - **New finding for 08.1-03 (M6):** at 669 px, the Remove buttons of facet, context and boost rows overflow the rule form card by 31–47 px (`after-rule-rows-1100-remove-overflow.jpg`). This is not caused by this plan: the wrapper doesn't change the Row's width.

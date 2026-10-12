@@ -245,18 +245,20 @@ export const CompareView = ({ query, selection, titleField, maxContexts, maxCont
   };
 
   return (
-    <Stack spacing={Spacing.S}>
+    <Stack spacing={Spacing.XL}>
       <span style={{ color: "var(--color-text-low-emphasis)" }}>
         {`Both columns show the first ${ComparePageSize} results. Contexts are sent as the site would send them; contact-group membership is not checked.`}
       </span>
-      <Row spacingX={Spacing.L} spacingY={Spacing.L}>
-        <Column cols={Cols.Col12} colsMd={Cols.Col6} colsLg={Cols.Col6}>
-          {column("baseline", "Baseline", baseline)}
-        </Column>
-        <Column cols={Cols.Col12} colsMd={Cols.Col6} colsLg={Cols.Col6}>
-          {column("tuned", "Tuned", tuned)}
-        </Column>
-      </Row>
+      <div>
+        <Row spacingX={Spacing.L} spacingY={Spacing.L}>
+          <Column cols={Cols.Col12} colsMd={Cols.Col6} colsLg={Cols.Col6}>
+            {column("baseline", "Baseline", baseline)}
+          </Column>
+          <Column cols={Cols.Col12} colsMd={Cols.Col6} colsLg={Cols.Col6}>
+            {column("tuned", "Tuned", tuned)}
+          </Column>
+        </Row>
+      </div>
     </Stack>
   );
 };

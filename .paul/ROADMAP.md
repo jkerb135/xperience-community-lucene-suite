@@ -15,7 +15,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 |-------|------|-------|--------|-----------|
 | 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
 | 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
-| 8.1 | Admin UI Consistency Audit | 1/3 | In progress | - |
+| 8.1 | Admin UI Consistency Audit | 2/3 | In progress | - |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |
 
@@ -46,8 +46,8 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Depends on:** Phase 8
 **Plans:**
 - [x] 08.1-01: Design audit (read-only) — captures vs native Kentico + kit, ranked findings, Suite admin UI conventions, user-chosen fix split
-- [ ] 08.1-02: Action bar + applied-filter chips (native listing layout), side-panel focus return, Row-in-Stack spacing (M3, M4, M5, S1)
-- [ ] 08.1-03: Query table one-line rows + actions menu, headers at 669 px, heading scale, validation pattern/timing, Could items (M1, M2, S2, S3, S4, C1–C3)
+- [x] 08.1-02: Action bar + applied-filter chips (native listing layout), side-panel focus return, Row-in-Stack spacing (M3, M4, M5, S1)
+- [ ] 08.1-03: Reports dashboard redesign after the Kentico Community Portal reporting screen (two-panel focus + insights layout, eyebrow section labels, selectable KPI tiles driving the chart, coloured deltas, rolling-average line; npm components + tokens + our SVG chart only) + query table one-line rows/actions menu, headers at 669 px, heading scale, validation pattern/timing, Could items (M1, M2, M6, S2, S3, S4, C1–C3)
 
 ### Phase 9: Suggestions
 **Focus:** Query suggestions from surfaced queries; a rate-limited suggest endpoint in the Widgets package returning strings only (untracked); a progressive-enhancement search box script (accessible combobox); a per-index blocked-suggestions list with admin editor (blocks suggestions only, not reports).
