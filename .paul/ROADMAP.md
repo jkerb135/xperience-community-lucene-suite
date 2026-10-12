@@ -26,7 +26,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Decisions (2026-10-12):** seed generator = opt-in test runner; vocabulary from the index; seed the host (~60 removable days); overview compares with the previous period
 
 **Plans:**
-- [ ] 07-01: Report query service (overview + previous period, trend, surfaced query tables + (other), latency percentiles)
+- [x] 07-01: Report query service (overview + previous period, trend, surfaced query tables + (other), latency percentiles)
 - [ ] 07-02: Seed generator (contract-faithful synthetic sessions → RollupEngine → SearchDaily before the job start, --clear) + host seeding
 
 ### Phase 8: Reports Admin
