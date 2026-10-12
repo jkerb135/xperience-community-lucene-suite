@@ -22,7 +22,7 @@ How the Site Search report numbers are defined. All of them are computed from th
 
 ## Counts
 
-Each count is a number of **logical searches**: the as-you-type requests that the rollup merged into one search (see [analytics-client-contract.md](analytics-client-contract.md)).
+Each count is a number of **logical searches**: the as-you-type requests that the rollup merged into one search (see [analytics-client-contract.md](analytics-client-contract)).
 
 | Metric | Meaning |
 |---|---|

@@ -8,4 +8,4 @@ nav_order: 1
 
 Search tuning, analytics and ready-made widgets on top of `Kentico.Xperience.Lucene`.
 
-Guides and reference for the Suite are listed in the navigation.
+Start with [Getting started](getting-started), then follow the [Samples](samples) for copy-paste setups.
