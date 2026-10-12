@@ -108,7 +108,7 @@ const COLUMNS = [
   column("conditions", "Conditions", 30, 12),
   column("actions", "Actions", 22, 10),
   // npm Table shows the column name for an empty caption; native listings leave the row-action header blank.
-  column("rowActions", " ", 9, 9, false, true),
+  column("rowActions", "\u00a0", 9, 7, false, true),
 ];
 
 // Below this table width the date columns are hidden (the status already says whether a rule is live) so headers never truncate.
