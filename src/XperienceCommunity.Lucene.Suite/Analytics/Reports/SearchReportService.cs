@@ -81,7 +81,7 @@ internal sealed class SearchReportService(
 
         // Surfaced membership is decided by SQL on both sides, so the database collation alone defines text equality.
         var namedRows = Summed(range, nameof(SearchDailyInfo.QueryText))
-            .WhereIn(nameof(SearchDailyInfo.QueryText), Surfaced(range.IndexName))
+            .WhereIn(nameof(SearchDailyInfo.QueryText), Surfacing.Query(daily, range.IndexName, options.Value.Analytics.Surfacing))
             .GetEnumerableTypedResult()
             .ToList();
         var named = namedRows.Select(row => ToRow(row.QueryText, ToTotals([row])));
@@ -201,17 +201,5 @@ internal sealed class SearchReportService(
         return groupBy is null
             ? query.Columns(sums.ToArray())
             : query.Columns([new QueryColumn(groupBy), .. sums]).GroupBy(groupBy);
-    }
-
-    private ObjectQuery<SearchDailyInfo> Surfaced(string indexName)
-    {
-        var surfacing = options.Value.Analytics.Surfacing;
-        return daily.Get()
-            .Column(nameof(SearchDailyInfo.QueryText))
-            .WhereEquals(nameof(SearchDailyInfo.IndexName), indexName)
-            .WhereNotNull(nameof(SearchDailyInfo.QueryText))
-            .GroupBy(nameof(SearchDailyInfo.QueryText))
-            // Rows are unique per (Day, IndexName, QueryText) under the collation, so COUNT(*) is the number of distinct days. Values are validated ints.
-            .Having(string.Create(CultureInfo.InvariantCulture, $"SUM([Searches]) >= {surfacing.MinSearches} AND COUNT(*) >= {surfacing.MinDistinctDays}"));
     }
 }

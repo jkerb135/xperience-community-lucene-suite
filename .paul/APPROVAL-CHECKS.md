@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 10 | 09-01 | Suggestions public API (ISuiteSuggestions, MapLuceneSuiteSuggestions, options) + endpoint behaviour; seeded history now public | Pending |
 | 9 | 08.1-05 | Rule/synonym editors: icon removes, condition blocks, error timing, inline errors; query tester empty column | Pending |
 | 8 | 08.1-03 | Search reports dashboard redesign, range stepping, listing-style query row actions | Pending |
 | 7 | 08.1-02 | Query tester native action bar + chips row, side-panel focus return, 24 px region gaps | Pending |
@@ -286,3 +287,31 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
      - read-only (View) forms (no such user);
      - a failed Save with errors visible: Save stayed disabled for the empty Name, so no save attempt was made.
    - **Accessibility tree:** the read_page tree showed the synonym "Add a term" input without a name. Its label uses the same id mechanism as the rule inputs, which `input.labels` confirms are labelled. Unverified.
+
+---
+
+## 10. 09-01: Query suggestions: public API and endpoint (v0.2)
+
+1. **Public API added** (layered-package rule; your decision):
+   - Core: `ISuiteSuggestions.SuggestAsync(indexName, input, maxResults?, ct)`, plus `MaxInputLength = 100` and `MaxResultsLimit = 20`.
+   - Options `LuceneSuite:Suggestions`: WindowDays 90, MaxNoResultRate 0.5, MinSearches 5, MaxCandidates 2 000, MinInputLength 2, MaxResults 8, CacheMinutes 60.
+   - Widgets: `MapLuceneSuiteSuggestions(pattern = "/lucenesuite/suggest")` and `SuiteWidgetsOptions.SuggestionIndexes` (opt-in), `SuggestionsPerMinute` (300), `SuggestionsMaxAgeSeconds` (60).
+   - Module class `LuceneSuite.BlockedSuggestion` (installer v6).
+2. **Host** (CommunityProjects; files backed up to project-sidecar/backups/09-01):
+   - `SearchStartupExtensions.cs`: `AddLuceneSuiteWidgets(o => o.SuggestionIndexes = [DancingGoatSample])`.
+   - `Program.cs`: `app.MapLuceneSuiteSuggestions()` plus `using XperienceCommunity.Lucene.Suite.Widgets.Suggestions;`.
+   - The installer upgraded comm_projects 5 → 6, and the table exists.
+3. **What I verified with curl:**
+   - `co` returns colombia carlos imbachi, coffee processing techniques, coffee, colombia, coffee plunger.
+   - `bl` returns bleached, bleached paper filters v60-01, black, t-shirt black (the later-word group).
+   - `grinder` returns grinder, hario skerton hand grinder, porlex tall ceramic burr grinder.
+   - `x` returns `[]` (input too short).
+   - Headers: `Content-Type: application/json`, `Cache-Control: public, max-age=60`.
+   - Another index → 404; 101 characters → 400; no `q` → `[]`.
+   - Host data unchanged: SearchEvent 19 / 19, SearchDaily 3 389 / 3 389.
+   - The 429 path is proven by the endpoint tests; it was not run on the host.
+4. **Your decisions to confirm:**
+   - **Seeded demo history is now public** on the host via suggestions; these strings come from it. Clearing #4 shrinks suggestions to real traffic.
+   - **Developer friction:** each endpoint family has its own namespace, so the host needed an extra `using` for `MapLuceneSuiteSuggestions`. Candidate for the Phase 11 API audit, which should consider one namespace for all `MapLuceneSuite*` mappings.
+   - `maxResults` outside 1–20 throws `ArgumentOutOfRangeException` from the C# API; the endpoint never passes it.
+   - Accents are not folded ("creme" does not match "crème"), as with synonyms (MatchKey).

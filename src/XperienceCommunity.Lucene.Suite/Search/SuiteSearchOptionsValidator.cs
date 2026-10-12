@@ -99,6 +99,29 @@ internal sealed class SuiteSearchOptionsValidator : IValidateOptions<SuiteSearch
             failures.Add($"{synonyms}{nameof(options.Synonyms.CacheMinutes)} must be between 0 and 1440 (was {options.Synonyms.CacheMinutes}).");
         }
 
+        const string suggestions = SuiteSearchOptions.SectionName + ":Suggestions:";
+        var s = options.Suggestions;
+        int retentionDays = (int)a.Retention.DailyRetention.TotalDays;
+        void Range(int value, int min, int max, string key)
+        {
+            if (value < min || value > max)
+            {
+                failures.Add($"{suggestions}{key} must be between {min} and {max} (was {value}).");
+            }
+        }
+
+        Range(s.WindowDays, 1, Math.Max(1, retentionDays), nameof(s.WindowDays));
+        if (!(s.MaxNoResultRate >= 0 && s.MaxNoResultRate <= 1))
+        {
+            failures.Add($"{suggestions}{nameof(s.MaxNoResultRate)} must be between 0 and 1 (was {s.MaxNoResultRate}).");
+        }
+
+        Range(s.MinSearches, 1, int.MaxValue, nameof(s.MinSearches));
+        Range(s.MaxCandidates, 1, 20_000, nameof(s.MaxCandidates));
+        Range(s.MinInputLength, 1, 20, nameof(s.MinInputLength));
+        Range(s.MaxResults, 1, 20, nameof(s.MaxResults));
+        Range(s.CacheMinutes, 0, 1440, nameof(s.CacheMinutes));
+
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
     }
 }

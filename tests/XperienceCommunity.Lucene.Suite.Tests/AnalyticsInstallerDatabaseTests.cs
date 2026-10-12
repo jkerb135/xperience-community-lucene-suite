@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Rules;
+using XperienceCommunity.Lucene.Suite.Suggestions;
 using XperienceCommunity.Lucene.Suite.Synonyms;
 
 using static XperienceCommunity.Lucene.Suite.Tests.DatabaseTestHost;
@@ -198,6 +199,26 @@ public sealed class AnalyticsInstallerDatabaseTests
     }
 
     [DatabaseFact]
+    public void Version5Database_UpgradesToVersion6_LeavingVersion5ObjectsUntouched()
+    {
+        var services = KenticoServices.Value;
+        CreateInstaller(services).Install();
+        string[] kept = [SearchEventInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME, RuleInfo.CLASS_NAME, SynonymInfo.CLASS_NAME];
+        RemoveSuiteObjects(keep: kept);
+        SetInstalledVersion(5);
+        string[] definitions = kept.Select(ClassDefinition).ToArray();
+
+        CreateInstaller(services).Install();
+        CreateInstaller(services).Install();
+
+        AssertInstalledOnce();
+        Assert.Equal(definitions, kept.Select(ClassDefinition).ToArray());
+        Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{BlockedSuggestionInfo.CLASS_NAME}' AND ClassDisplayName = 'Lucene Suite blocked suggestion'"));
+        Assert.Equal(6, Scalar($"SELECT COUNT(*) FROM sys.columns WHERE object_id = OBJECT_ID('LuceneSuite_BlockedSuggestion') AND name IN ('BlockedSuggestionID', 'BlockedSuggestionGuid', 'IndexName', 'Text', 'MatchKey', 'MatchMode')"));
+        Assert.False(BlockedSuggestionInfo.TYPEINFO.ContinuousIntegrationSettings.Enabled);
+    }
+
+    [DatabaseFact]
     public void RuleInfo_RoundTripsThroughToDefinition()
     {
         var services = KenticoServices.Value;
@@ -300,7 +321,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     // Raw SQL because Kentico refuses to delete a class whose Info type is compiled in; the caches are cleared afterwards.
     private static void RemoveSuiteObjects(string[] keep)
     {
-        string[] all = [SynonymInfo.CLASS_NAME, RuleInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
+        string[] all = [BlockedSuggestionInfo.CLASS_NAME, SynonymInfo.CLASS_NAME, RuleInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
         foreach (string className in all.Except(keep))
         {
             Execute($"DROP TABLE IF EXISTS [{className.Replace('.', '_')}]; DELETE FROM CMS_Class WHERE ClassName = '{className}';");
@@ -351,6 +372,7 @@ public sealed class AnalyticsInstallerDatabaseTests
             (SearchDailyInfo.CLASS_NAME, AnalyticsModuleInstaller.DailyKeyIndexName, 3, 1),
             (RuleInfo.CLASS_NAME, AnalyticsModuleInstaller.RuleIndexName, 1, 0),
             (SynonymInfo.CLASS_NAME, AnalyticsModuleInstaller.SynonymIndexName, 1, 0),
+            (BlockedSuggestionInfo.CLASS_NAME, AnalyticsModuleInstaller.BlockedSuggestionIndexName, 1, 0),
         })
         {
             Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{className}'"));

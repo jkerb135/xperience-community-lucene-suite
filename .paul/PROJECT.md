@@ -75,7 +75,9 @@ Marketers tune, test and measure site search without a developer.
 - [ ] Kentico custom activities: search performed, result clicked, no results (contact + consent required) — v0.2 Phase 10
 
 ### Planned (Next)
+- [ ] Public API audit: Core + Admin alone are enough to build a custom UI; documented, baselined public surface — v0.2 Phase 11
 - v0.3 Test: A/B testing of rule sets + comparison reports
+- v0.4 Instant Search: public, opt-in search endpoint (index + field allow-list, rate limit, searchId analytics) and an Algolia-InstantSearch-style JS widget library
 
 ### Out of Scope
 - PDF export of reports — parked; cheapest route if revived is browser print stylesheet
@@ -158,6 +160,7 @@ Marketers tune, test and measure site search without a developer.
 | Reports read SearchDaily only; "(other)" = range totals − named totals (surfaced membership decided by SQL, never C# string matching); the report service performs no authorization (admin pages gate on View + index exists) | 07-01 (NOT IN over nullable QueryText timed out at volume; collation defines text equality) | 2026-10-12 | Active |
 | Demo history is seeded only by a dev runner in the test project, written without Kentico into empty days no real process can own, behind a DB-name confirmation and the rollup lock | 07-02 / audit (running host, operator error) | 2026-10-12 | Active |
 | Test host content changes stay minimal and recorded: host files backed up before edits (byte-preserving), new pages rather than reusing existing ones, temporary data cleaned unless the user keeps it | User decisions across v0.1 | 2026-10-12 | Active |
+| Layered packages (user, 2026-10-12): (1) Core + Admin alone expose a documented public C# API complete enough for a custom UI; (2) Widgets ships tag helpers/widgets out of the box plus public building blocks to author your own; (3) an instant-search JS library over a public search endpoint (v0.4). Supersedes "no public search API" from v0.4 on; until then the only public HTTP surfaces are events, settings and strings-only suggestions | User direction during 09-01 planning | 2026-10-12 | Active |
 | Admin UI follows Suite Conventions 1–10 (08.1-01-FINDINGS.md): reference precedence native 31.9.1 runtime > npm exports > kit repo; listing pages on the desk, dashboards in Papers, editors in native forms; errors only after leave/save; side panels return focus; tokens verified at runtime; npm Spacing values are strings. Rules mirrored into the design-screen skill (enterprise.md) | Earlier per-screen validation let cross-screen drift through (08.1 audit, user) | 2026-10-12 | Active |
 | Admin cross-page prefill = one-time sessionStorage handoff bound to target, index, exact page path and expiry; consumers fill only empty forms; never URL query strings or server state | 08-01 (URL state raced the admin router) / 08-02 audit | 2026-10-12 | Active |
 

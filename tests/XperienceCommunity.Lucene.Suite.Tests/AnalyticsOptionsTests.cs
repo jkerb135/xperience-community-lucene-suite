@@ -128,6 +128,52 @@ public sealed class AnalyticsOptionsTests
     }
 
     [Fact]
+    public void SuggestionDefaults_AreValid_AndBindFromTheSuggestionsSection()
+    {
+        var s = Resolve([]).Suggestions;
+        Assert.Equal((90, 0.5, 5, 2000, 2, 8, 60), (s.WindowDays, s.MaxNoResultRate, s.MinSearches, s.MaxCandidates, s.MinInputLength, s.MaxResults, s.CacheMinutes));
+
+        s = Resolve(new() { ["LuceneSuite:Suggestions:WindowDays"] = "762", ["LuceneSuite:Suggestions:MaxNoResultRate"] = "1", ["LuceneSuite:Suggestions:CacheMinutes"] = "0" }).Suggestions;
+        Assert.Equal((762, 1.0, 0), (s.WindowDays, s.MaxNoResultRate, s.CacheMinutes));
+    }
+
+    [Theory]
+    [InlineData("WindowDays", "0")]
+    [InlineData("WindowDays", "763")]
+    [InlineData("MaxNoResultRate", "-0.1")]
+    [InlineData("MaxNoResultRate", "1.1")]
+    [InlineData("MaxNoResultRate", "NaN")]
+    [InlineData("MinSearches", "0")]
+    [InlineData("MaxCandidates", "0")]
+    [InlineData("MaxCandidates", "20001")]
+    [InlineData("MinInputLength", "0")]
+    [InlineData("MinInputLength", "21")]
+    [InlineData("MaxResults", "0")]
+    [InlineData("MaxResults", "21")]
+    [InlineData("CacheMinutes", "-1")]
+    [InlineData("CacheMinutes", "1441")]
+    public void InvalidSuggestionSetting_FailsNamingTheSetting(string key, string value)
+    {
+        var error = Assert.Throws<OptionsValidationException>(() => Resolve(new() { ["LuceneSuite:Suggestions:" + key] = value }));
+
+        Assert.Contains(error.Failures, failure => failure.StartsWith("LuceneSuite:Suggestions:" + key + " ", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void SuggestionWindow_IsCappedByDailyRetention()
+    {
+        Dictionary<string, string?> settings = new()
+        {
+            ["LuceneSuite:Analytics:Retention:DailyRetention"] = "30.00:00:00",
+            ["LuceneSuite:Suggestions:WindowDays"] = "30",
+        };
+        Assert.Equal(30, Resolve(settings).Suggestions.WindowDays);
+
+        settings["LuceneSuite:Suggestions:WindowDays"] = "31";
+        Assert.Throws<OptionsValidationException>(() => Resolve(settings));
+    }
+
+    [Fact]
     public void RawRetention_MustKeepEveryDayRollableForOneIntervalPlusOneHour()
     {
         // 1 day + 3 × 2 h + 2 s flush + 5 min margin + 30 min + 1 h = 1.07:35:02.

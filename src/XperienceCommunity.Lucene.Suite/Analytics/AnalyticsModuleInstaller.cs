@@ -9,6 +9,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using XperienceCommunity.Lucene.Suite.Rules;
+using XperienceCommunity.Lucene.Suite.Suggestions;
 using XperienceCommunity.Lucene.Suite.Synonyms;
 
 namespace XperienceCommunity.Lucene.Suite.Analytics;
@@ -29,7 +30,7 @@ internal sealed class AnalyticsModuleInstaller(
     internal const string WatermarkKeyName = "LuceneSuiteRollupWatermark";
 
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
-    internal const int Version = 5;
+    internal const int Version = 6;
 
     internal const string ReceivedIndexName = "IX_LuceneSuite_SearchEvent_ReceivedUtc_SearchId";
 
@@ -39,6 +40,7 @@ internal sealed class AnalyticsModuleInstaller(
 
     internal const string RuleIndexName = "IX_LuceneSuite_Rule_IndexName";
     internal const string SynonymIndexName = "IX_LuceneSuite_Synonym_IndexName";
+    internal const string BlockedSuggestionIndexName = "IX_LuceneSuite_BlockedSuggestion_IndexName";
 
     private const string LockResource = "LuceneSuite.Install";
     private const int LockTimeoutMs = 120_000;
@@ -90,6 +92,10 @@ internal sealed class AnalyticsModuleInstaller(
         // Version 5: synonyms.
         EnsureClass(resource, SynonymInfo.TYPEINFO, "Lucene Suite synonym", SynonymForm());
         CreateAscendingIndex(SynonymIndexName, SynonymInfo.CLASS_NAME, false, nameof(SynonymInfo.IndexName));
+
+        // Version 6: suggestion blocklist.
+        EnsureClass(resource, BlockedSuggestionInfo.TYPEINFO, "Lucene Suite blocked suggestion", BlockedSuggestionForm());
+        CreateAscendingIndex(BlockedSuggestionIndexName, BlockedSuggestionInfo.CLASS_NAME, false, nameof(BlockedSuggestionInfo.IndexName));
 
         if (installed < Version)
         {
@@ -166,6 +172,18 @@ internal sealed class AnalyticsModuleInstaller(
         Add(form, nameof(SynonymInfo.Terms), FieldDataType.LongText);
         Add(form, nameof(SynonymInfo.Enabled), FieldDataType.Boolean);
         Add(form, nameof(SynonymInfo.LastModified), FieldDataType.DateTime);
+        return form;
+    }
+
+    internal static FormInfo BlockedSuggestionForm()
+    {
+        var form = FormHelper.GetBasicFormDefinition(nameof(BlockedSuggestionInfo.BlockedSuggestionID));
+        Add(form, nameof(BlockedSuggestionInfo.BlockedSuggestionGuid), FieldDataType.Guid);
+        Add(form, nameof(BlockedSuggestionInfo.IndexName), FieldDataType.Text, RuleLimits.IndexNameLength);
+        Add(form, nameof(BlockedSuggestionInfo.Text), FieldDataType.Text, BlockedSuggestionInfo.TextMaxLength);
+        Add(form, nameof(BlockedSuggestionInfo.MatchKey), FieldDataType.Text, BlockedSuggestionInfo.TextMaxLength);
+        Add(form, nameof(BlockedSuggestionInfo.MatchMode), FieldDataType.Text, BlockedSuggestionInfo.MatchModeMaxLength);
+        Add(form, nameof(BlockedSuggestionInfo.LastModified), FieldDataType.DateTime);
         return form;
     }
 

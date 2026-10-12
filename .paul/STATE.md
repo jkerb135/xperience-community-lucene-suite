@@ -10,21 +10,21 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 9 of 10 (Suggestions) — Not started
-Plan: Not started (3 plans decided: 09-01 core + endpoint, 09-02 combobox script, 09-03 blocklist admin)
-Status: Ready to plan
-Last activity: 2026-10-12 — Phase 8.1 complete (08.1-05 unified), transitioned to Phase 9
+Phase: 9 of 10 (Suggestions) — Planning
+Plan: 09-01 complete; next 09-02
+Status: Ready to plan 09-02
+Last activity: 2026-10-12 — Unified 09-01
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [██████░░░░] 60% (3 of 5 phases)
+- v0.2 Measure: [█████░░░░░] 50% (3 of 6 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 8.1 complete — ready to plan Phase 9]
+  ✓        ✓        ✓     [Loop complete — ready to plan 09-02]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,10 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 09-01 unified: suggestions core (v6 BlockedSuggestion, shared Surfacing, ISuiteSuggestions, MinSearches public floor) + Widgets MapLuceneSuiteSuggestions (opt-in, limiter, max-age); host comm_projects at v6; 674 tests green; implementation delegated to an implementer agent and re-verified; Phase 11 to consider one namespace for MapLuceneSuite* | Phase 9 | 09-02 script consumes /lucenesuite/suggest (textContent only) |
+| 2026-10-12: Enterprise audit on 09-01-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 9 | Public exposure floor Suggestions.MinSearches (in window) on top of surfacing; SuggestionsMaxAgeSeconds (0 → no-store) with honest block-latency docs; index existence check before cache; ForwardedHeaders + textContent contract documented; seeded host history feeds suggestions (#10 ↔ #4) |
+| 2026-10-12: User direction (09-01 planning): layered packages — Core+Admin public C# API sufficient for custom UIs; Widgets OOB + authorable building blocks; Algolia-style instant search JS library. Decisions: ISuiteSuggestions stays public; new v0.2 Phase 11 Public API Audit (after Phase 10); new milestone v0.4 Instant Search after v0.3 Test (supersedes "no public search API" from v0.4) | Milestone | v0.2 now 6 phases |
+| 2026-10-12: 09-01 planned: LuceneSuite.BlockedSuggestion (installer v6; Exact/Word by MatchKey); candidates = shared Surfacing SQL (extracted from SearchReportService, behaviour-preserving) over 90 complete days, no-result rate < 0.5, no placeholders/browse/(other), top 2 000 by searches; pure engine (prefix group then word-prefix group, searches desc, max 8); public ISuiteSuggestions (cached per index 60 min, blocklist via object-type dependency); Widgets MapLuceneSuiteSuggestions GET strings-only, opt-in SuggestionIndexes (empty → 404), own per-IP limiter 300/min, public max-age=60; host wiring; APPROVAL-CHECKS #10 (public API) | Phase 9 | 09-01 created |
 | 2026-10-12: Phase 8.1 complete (5 plans; 08.1-04 merged into 08.1-03): every 08.1-01 Must/Should resolved (M1–M6, S1–S4, C1–C3); Conventions 1–10 bind Phase 9 admin UI (blocklist editor reuses RemoveButton, InlineError, isShown, RowActions); APPROVAL-CHECKS #7–#9 pending milestone review | Phase 8.1 | Next: /paul:plan Phase 9 |
 | 2026-10-12: Enterprise audit on 08.1-05-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8.1 | Inline errors aria-live polite + aria-describedby (no role=alert re-announcing during 400 ms re-validation); group blur incl. null relatedTarget; read-only unchanged; buttonRefs kept |
 | 2026-10-12: 08.1-05 planned: root cause of S4 = group/unmatched errors bypass the visible() blur gate and render as NotificationBarAlert; fix = shared node-tested isShown (path or group touched, or props.invalid) + InlineError (role=alert, alert-text token); icon-only row removes (M6); condition block = bordered panel with Headline S level 3 + header remove (S3, C2); synonym spacing (C3); hide empty key-field columns in the query tester (C1); APPROVAL-CHECKS #9 | Phase 8.1 | Last 08.1 plan |
@@ -175,7 +179,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -194,6 +198,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 9: APPROVAL-CHECKS #10 (suggestions public API + endpoint; seeded history now public on host) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #9 (editors: error timing, 14 px condition headings, icon removes; read-only/failed-save not observed) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #8 (reports dashboard v2, icon row actions, range stepping, paged trend table) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #7 (query tester action bar/focus/spacing; confirm removed visible label + rule-editor scope addition; one unreproduced Contact-groups focus landing) pending | Milestone review | Milestone review |
@@ -209,9 +214,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Phase 8.1 complete, ready to plan Phase 9
-Next action: /paul:plan for Phase 9 (Suggestions) — decisions already recorded
-Resume file: .paul/ROADMAP.md
+Stopped at: 09-01 unified
+Next action: /paul:plan 09-02 (accessible combobox script in the search box)
+Resume file: .paul/phases/09-suggestions/09-01-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

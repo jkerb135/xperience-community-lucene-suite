@@ -20,6 +20,34 @@ public sealed class SuiteSearchOptions
 
     /// <summary>Synonym settings (<c>LuceneSuite:Synonyms</c>).</summary>
     public SuiteSynonymsOptions Synonyms { get; } = new();
+
+    /// <summary>Query suggestion settings (<c>LuceneSuite:Suggestions</c>).</summary>
+    public SuiteSuggestionOptions Suggestions { get; } = new();
+}
+
+/// <summary>Query suggestion settings (<c>LuceneSuite:Suggestions</c>): surfaced queries of a recent window that mostly found results.</summary>
+public sealed class SuiteSuggestionOptions
+{
+    /// <summary>Complete UTC days (ending yesterday) whose searches feed suggestions. Default 90, range 1–Analytics:Retention:DailyRetention days.</summary>
+    public int WindowDays { get; set; } = 90;
+
+    /// <summary>A query whose no-result searches are at least this share of its searches in the window is not suggested. Default 0.5, range 0–1.</summary>
+    public double MaxNoResultRate { get; set; } = 0.5;
+
+    /// <summary>Fewest searches inside the window a query needs to be suggested, on top of the surfacing threshold. Default 5, at least 1.</summary>
+    public int MinSearches { get; set; } = 5;
+
+    /// <summary>Most query texts loaded per index, the most searched first. Default 2 000, range 1–20 000.</summary>
+    public int MaxCandidates { get; set; } = 2_000;
+
+    /// <summary>Shortest input (characters, after normalization) that gets suggestions. Default 2, range 1–20.</summary>
+    public int MinInputLength { get; set; } = 2;
+
+    /// <summary>Most suggestions returned when the caller does not ask for a number. Default 8, range 1–20.</summary>
+    public int MaxResults { get; set; } = 8;
+
+    /// <summary>How long the candidates of an index are cached; blocklist changes apply at once regardless. 0 disables caching. Default 60, range 0–1440.</summary>
+    public int CacheMinutes { get; set; } = 60;
 }
 
 /// <summary>Synonym settings (<c>LuceneSuite:Synonyms</c>).</summary>
