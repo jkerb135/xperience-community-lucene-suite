@@ -20,7 +20,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
 | 11 | Search Insights | 2/2 | ✅ Complete | 2026-10-12 |
 | 12 | Public API Audit | 1/1 | ✅ Complete | 2026-10-12 |
-| 13 | Enterprise Screens | 0/4 | Planning | - |
+| 13 | Enterprise Screens | 1/4 | In progress | - |
 
 ## Phase Details
 
@@ -102,7 +102,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Deviations from the handoff (npm 31.9.1 / enterprise.md precedence):** no SearchInput/SimpleStatus/Snackbar/ConfirmationDialog exports → labelled Input, icon + text status, Kentico toasts, Dialog; Spinner instead of hex-gradient skeletons; page title Headline M (native size)
 
 **Plans:**
-- [ ] 13-01: Rules listing — custom template, derived status + counts, search/sort/paging, bulk enable/disable/priority/delete with partial-failure results
+- [x] 13-01 (complete 2026-10-12): Rules listing — custom template, derived status + counts, search/sort/paging, bulk enable/disable/priority/delete with partial-failure results
 - [ ] 13-02: Rule edit — native form regrouped per handoff, header status, conflict Reload, condition pickers (contexts + facets)
 - [ ] 13-03: Search reports — sparklines, data bars, range footer, loading/empty/error states
 - [ ] 13-04: Query tester — result summary strip, score bars, rank movement in Compare, range footer, states
