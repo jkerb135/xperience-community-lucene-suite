@@ -120,8 +120,8 @@ Use a monotonic clock (`performance.now()`) for `now`. `cfg` holds the server's 
 Call `ISearchInteractionLogger` from your endpoint or controller:
 
 ```csharp
-logger.LogClick(searchId, sequence, itemGuid, position, eventId);       // the visitor opened a result
-logger.LogConversion(searchId, sequence, itemGuid, position, eventId);  // a goal attributed to a result; position optional
+logger.LogClick(new SearchClick(searchId, sequence, itemGuid, position, eventId)); // the visitor opened a result
+logger.LogConversion(searchId, sequence, itemGuid, position, eventId);              // a goal attributed to a result; position optional
 ```
 
 - `sequence` is the `Sequence` of the request whose **response** listed the item, not the latest one sent.
@@ -137,7 +137,7 @@ logger.LogConversion(searchId, sequence, itemGuid, position, eventId);  // a goa
 A click may also carry the query of the result list and the title of the clicked result, for the contact's **Search result clicked** activity (see docs/activities.md):
 
 ```csharp
-logger.LogClick(searchId, sequence, itemGuid, position, eventId, queryText, resultTitle);
+logger.LogClick(new SearchClick(searchId, sequence, itemGuid, position, eventId, queryText, resultTitle));
 ```
 
 - Both are optional. v1 calls and beacon bodies without them keep working unchanged; the click is recorded exactly as before.

@@ -48,7 +48,7 @@ Kentico decides, not the Suite:
 
 ## Click text (events contract v2)
 
-The click beacon can send the search `query` and the result `title` (optional, at most 100 characters each). The Suite widgets send both; custom UIs can add them to `ISearchInteractionLogger.LogClick(..., queryText, resultTitle)` or to the `/lucenesuite/events` body. See [analytics-client-contract.md](analytics-client-contract) §3.
+The click beacon can send the search `query` and the result `title` (optional, at most 100 characters each). The Suite widgets send both; custom UIs can add them to `ISearchInteractionLogger.LogClick(new SearchClick(..., queryText, resultTitle))` or to the `/lucenesuite/events` body. See [analytics-client-contract.md](analytics-client-contract) §3.
 
 - Both values come from the browser and are **untrusted**. They are used only for the activity title and value and are never stored in Suite analytics. A forged beacon can only write text into the activities of the forging visitor's own contact.
 - Without them, the click activity title falls back to the item GUID and has no value.

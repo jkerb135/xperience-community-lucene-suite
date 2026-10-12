@@ -22,8 +22,6 @@ using MySite.Search;
 
 using XperienceCommunity.Lucene.Suite;
 using XperienceCommunity.Lucene.Suite.Widgets;
-using XperienceCommunity.Lucene.Suite.Widgets.Events;
-using XperienceCommunity.Lucene.Suite.Widgets.Suggestions;
 
 var builder = WebApplication.CreateBuilder(args);
 

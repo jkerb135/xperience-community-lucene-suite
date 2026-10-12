@@ -40,8 +40,6 @@ In `Program.cs`, register Kentico Lucene first, then the Suite, then the Widgets
 ```csharp
 using XperienceCommunity.Lucene.Suite;
 using XperienceCommunity.Lucene.Suite.Widgets;
-using XperienceCommunity.Lucene.Suite.Widgets.Events;
-using XperienceCommunity.Lucene.Suite.Widgets.Suggestions;
 
 builder.Services.AddKenticoLucene(lucene => lucene.RegisterStrategy<SiteSearchIndexingStrategy>("SiteSearch"), builder.Configuration);
 
