@@ -1,10 +1,35 @@
 @model LuceneSuiteSearchBoxModel
-<form class="lucene-suite-search-box" role="search" method="get" action="@Model.ActionUrl">
+@if (Model.InputId is null)
+{
+@:<form class="lucene-suite-search-box" role="search" method="get" action="@Model.ActionUrl">
+}
+else
+{
+@:<form class="lucene-suite-search-box" role="search" method="get" action="@Model.ActionUrl" data-lucene-suite-suggest="@Model.SuggestUrl" data-lucene-suite-index="@Model.SuggestIndex" data-lucene-suite-min-length="@Model.SuggestMinLength">
+}
     <fieldset class="lucene-suite-search-box__fields" disabled="@Model.IsPreview">
+@if (Model.InputId is not null)
+{
+        @:<div class="lucene-suite-suggest">
+}
         <label class="lucene-suite-search-box__label">
             <span class="lucene-suite-search-box__label-text">@Model.Label</span>
-            <input class="lucene-suite-search-box__input" type="search" name="@SuiteSearchUrl.QueryParameter" value="@Model.Query" placeholder="@Model.Placeholder" maxlength="256" autocomplete="off" />
+            <input class="lucene-suite-search-box__input" id="@Model.InputId" type="search" name="@SuiteSearchUrl.QueryParameter" value="@Model.Query" placeholder="@Model.Placeholder" maxlength="256" autocomplete="off" />
         </label>
+@if (Model.InputId is not null)
+{
+        <ul class="lucene-suite-suggest__list" id="@(Model.InputId)-listbox" role="listbox" aria-label="Suggestions" hidden></ul>
+        @:</div>
+        <div class="lucene-suite-suggest__status" id="@(Model.InputId)-status" role="status" aria-live="polite" aria-atomic="true"></div>
+}
         <button class="lucene-suite-search-box__submit" type="submit">@Model.Label</button>
     </fieldset>
-</form>
+@Html.Raw("</form>")
+@if (Model.IncludeStyles)
+{
+<link rel="stylesheet" href="~/_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite-suggest.css" asp-append-version="true" />
+}
+@if (Model.IncludeAssets)
+{
+<script type="module" src="~/_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite-suggest.js" asp-append-version="true"></script>
+}

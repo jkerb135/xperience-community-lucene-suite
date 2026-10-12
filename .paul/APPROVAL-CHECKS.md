@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 11 | 09-02 | Search box autocomplete (ARIA combobox script, opt-in, stylesheet) + admin right gutter (Convention 2b) | Pending |
 | 10 | 09-01 | Suggestions public API (ISuiteSuggestions, MapLuceneSuiteSuggestions, options) + endpoint behaviour; seeded history now public | Pending |
 | 9 | 08.1-05 | Rule/synonym editors: icon removes, condition blocks, error timing, inline errors; query tester empty column | Pending |
 | 8 | 08.1-03 | Search reports dashboard redesign, range stepping, listing-style query row actions | Pending |
@@ -315,3 +316,32 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **Developer friction:** each endpoint family has its own namespace, so the host needed an extra `using` for `MapLuceneSuiteSuggestions`. Candidate for the Phase 11 API audit, which should consider one namespace for all `MapLuceneSuite*` mappings.
    - `maxResults` outside 1–20 throws `ArgumentOutOfRangeException` from the C# API; the endpoint never passes it.
    - Accents are not folded ("creme" does not match "crème"), as with synonyms (MatchKey).
+
+---
+
+## 11. 09-02: Search box autocomplete (v0.2)
+
+1. **Where:** http://localhost:27340/site-search (CommunityProjects; no host content edited).
+2. **What I verified on the live page** (the real script in the real page, driven by dispatched input and keydown events because the browser pane was hidden):
+   - **Markup:**
+     - the single-index fallback enabled DancingGoatSample;
+     - the form carries `data-lucene-suite-suggest`, `-index` and `-min-length`;
+     - ids `lucene-suite-q-1`, `-listbox`, `-status`;
+     - assets `lucene-suite-suggest.js/.css?v=…`, referenced once.
+   - **Typing:** "c, co, cof, coff" in quick succession → **one** request (`q=coff`). It shows 3 options with "coff" highlighted (`<mark>`) and a polite "3 suggestions available".
+   - **Keys:** ↓↓ → option 2 active (`aria-activedescendant`, `aria-selected`); ↑×3 wraps correctly; Escape closes (value kept); a second Escape clears.
+   - **Enter:** on "coffee" → `/site-search?q=coffee`, 10 results.
+   - **Analytics:** SearchEvent 19 → 20, exactly the submitted search. The suggest calls wrote nothing.
+   - **Accessibility:** the input is `role="combobox"`, labelled "Search" by its `<label>`. The accessibility-tree reader showed the placeholder as its name; the DOM label is correct.
+3. **Automated checks:**
+   - node 41/41 (incl. the XSS test: `<img onerror>` shown as text; the 429 back-off; nothing over 100 characters);
+   - .NET 683 passed, including golden-HTML tests proving the off path is byte-identical;
+   - two boxes on a page get unique ids, with the assets referenced once.
+4. **Also in this step:** admin **right gutter** (Convention 2b, your request). Custom templates (Query tester, Search reports) now keep native's 104 px between content and the scrollbar, measured at 669 and 1269 px content width. The page has no horizontal overflow.
+5. **Your decisions to confirm:**
+   - **Auto-index:** used when exactly one index is configured.
+   - **Shipped stylesheet:** `lucene-suite-suggest.css`; turn off with `SuggestionStyles = false`.
+   - **Not observed:**
+     - real OS keyboard and mouse input (pane hidden);
+     - whether the widget's optional "Suggestions index" dropdown can be cleared once a value is picked (needs Page Builder);
+     - after closing, the status text keeps "3 suggestions available". It is not re-announced, but could be cleared.

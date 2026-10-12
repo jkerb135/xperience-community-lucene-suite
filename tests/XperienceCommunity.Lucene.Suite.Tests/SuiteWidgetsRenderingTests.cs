@@ -15,6 +15,7 @@ using XperienceCommunity.Lucene.Suite.Widgets.Components;
 using XperienceCommunity.Lucene.Suite.Widgets.Events;
 using XperienceCommunity.Lucene.Suite.Widgets.PageBuilder;
 using XperienceCommunity.Lucene.Suite.Widgets.Search;
+using XperienceCommunity.Lucene.Suite.Widgets.Suggestions;
 
 namespace XperienceCommunity.Lucene.Suite.Tests;
 
@@ -186,7 +187,106 @@ public sealed class SuiteWidgetsRenderingTests
         Assert.Equal(1, service.Calls);
     }
 
-    private static async Task<string> Render(string url, bool mapEvents = true, CannedSearch? service = null, string? preview = null)
+    // Captured before suggestions existed (09-02): with suggestions off, the search box must render exactly this.
+    private const string GoldenBox =
+        "<form class=\"lucene-suite-search-box\" role=\"search\" method=\"get\" action=\"/test/box\">\r\n" +
+        "    <fieldset class=\"lucene-suite-search-box__fields\">\r\n" +
+        "        <label class=\"lucene-suite-search-box__label\">\r\n" +
+        "            <span class=\"lucene-suite-search-box__label-text\">Search</span>\r\n" +
+        "            <input class=\"lucene-suite-search-box__input\" type=\"search\" name=\"q\" value=\"&lt;b&gt;tea&lt;/b&gt;\" maxlength=\"256\" autocomplete=\"off\" />\r\n" +
+        "        </label>\r\n" +
+        "        <button class=\"lucene-suite-search-box__submit\" type=\"submit\">Search</button>\r\n" +
+        "    </fieldset>\r\n" +
+        "</form>\r\n";
+
+    private const string GoldenPreviewBox =
+        "<form class=\"lucene-suite-search-box\" role=\"search\" method=\"get\" action=\"/test/box\">\r\n" +
+        "    <fieldset class=\"lucene-suite-search-box__fields\" disabled=\"disabled\">\r\n" +
+        "        <label class=\"lucene-suite-search-box__label\">\r\n" +
+        "            <span class=\"lucene-suite-search-box__label-text\">Search</span>\r\n" +
+        "            <input class=\"lucene-suite-search-box__input\" type=\"search\" name=\"q\" value=\"\" maxlength=\"256\" autocomplete=\"off\" />\r\n" +
+        "        </label>\r\n" +
+        "        <button class=\"lucene-suite-search-box__submit\" type=\"submit\">Search</button>\r\n" +
+        "    </fieldset>\r\n" +
+        "</form>\r\n";
+
+    private static readonly string TeaQuery = "?q=" + Uri.EscapeDataString("<b>tea</b>");
+
+    [Theory]
+    [InlineData(null, true)] // no suggestion index configured
+    [InlineData("Other", true)] // index not in SuggestionIndexes
+    [InlineData("Shop", false)] // endpoint not mapped
+    public async Task SearchBox_WithSuggestionsOff_IsByteIdenticalToTheGolden(string? index, bool mapSuggest)
+    {
+        string[] indexes = index is null ? [] : ["Shop", "Second"];
+        string url = "/test/box" + TeaQuery + (index is null ? string.Empty : "&index=" + index);
+
+        Assert.Equal(GoldenBox, await Render(url, suggestionIndexes: indexes, mapSuggest: mapSuggest));
+    }
+
+    [Fact]
+    public async Task SearchBox_InPreview_HasNoSuggestions_AndIsByteIdenticalToTheGolden()
+    {
+        Assert.Equal(GoldenPreviewBox, await Render("/test/box?index=Shop", preview: "preview", suggestionIndexes: ["Shop"]));
+        Assert.DoesNotContain("data-lucene-suite", await Render("/test/box", preview: "edit", suggestionIndexes: ["Shop"]));
+    }
+
+    [Fact]
+    public async Task SearchBox_WithSeveralIndexesAndNoneChosen_HasNoSuggestions()
+    {
+        Assert.Equal(GoldenBox, await Render("/test/box" + TeaQuery, suggestionIndexes: ["Shop", "Second"]));
+    }
+
+    [Fact]
+    public async Task SearchBox_WithSuggestions_RendersTheComboboxHooks_AndAssetsOnce()
+    {
+        string html = await Render("/test/box?index=shop", suggestionIndexes: ["Second", "Shop"]);
+
+        Assert.Contains("<form class=\"lucene-suite-search-box\" role=\"search\" method=\"get\" action=\"/test/box\" data-lucene-suite-suggest=\"/lucenesuite/suggest\" data-lucene-suite-index=\"Shop\" data-lucene-suite-min-length=\"2\">", html);
+        Assert.Contains("<div class=\"lucene-suite-suggest\">", html);
+        Assert.Contains("<input class=\"lucene-suite-search-box__input\" id=\"lucene-suite-q-1\" type=\"search\"", html);
+        Assert.Contains("<ul class=\"lucene-suite-suggest__list\" id=\"lucene-suite-q-1-listbox\" role=\"listbox\" aria-label=\"Suggestions\" hidden></ul>", html);
+        Assert.Contains("<div class=\"lucene-suite-suggest__status\" id=\"lucene-suite-q-1-status\" role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"></div>", html);
+        Assert.Contains("<link rel=\"stylesheet\" href=\"/_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite-suggest.css", html);
+        Assert.Contains("<script type=\"module\" src=\"/_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite-suggest.js", html);
+        Assert.DoesNotContain("style=", html);
+        Assert.DoesNotContain("<script>", html);
+        Assert.Equal(html.Split("<div").Length - 1, html.Split("</div>").Length - 1);
+    }
+
+    [Fact]
+    public async Task SearchBox_SingleSuggestionIndex_IsTheFallback_AndStylesCanBeOff()
+    {
+        string html = await Render("/test/box", suggestionIndexes: ["Shop"], suggestionStyles: false);
+
+        Assert.Contains("data-lucene-suite-index=\"Shop\"", html);
+        Assert.Contains("lucene-suite-suggest.js", html);
+        Assert.DoesNotContain("lucene-suite-suggest.css", html);
+    }
+
+    [Fact]
+    public async Task SearchBox_TwoOnAPage_GetUniqueIds_AndTheAssetsOnce()
+    {
+        string html = await Render("/test/two-boxes", suggestionIndexes: ["Shop"]);
+
+        Assert.Contains("id=\"lucene-suite-q-1\"", html);
+        Assert.Contains("id=\"lucene-suite-q-1-listbox\"", html);
+        Assert.Contains("id=\"lucene-suite-q-2\"", html);
+        Assert.Contains("id=\"lucene-suite-q-2-listbox\"", html);
+        Assert.Contains("id=\"lucene-suite-q-2-status\"", html);
+        Assert.Equal(2, html.Split("data-lucene-suite-suggest=").Length - 1);
+        Assert.Equal(1, html.Split("lucene-suite-suggest.js").Length - 1);
+        Assert.Equal(1, html.Split("lucene-suite-suggest.css").Length - 1);
+    }
+
+    [Fact]
+    public async Task SearchBoxWidget_PassesItsSuggestionsIndex()
+    {
+        Assert.Contains("data-lucene-suite-index=\"Second\"", await Render("/test/widget/box?index=Second", suggestionIndexes: ["Shop", "Second"]));
+        Assert.DoesNotContain("data-lucene-suite", await Render("/test/widget/box?index=Missing", suggestionIndexes: ["Shop", "Second"]));
+    }
+
+    private static async Task<string> Render(string url, bool mapEvents = true, CannedSearch? service = null, string? preview = null, string[]? suggestionIndexes = null, bool mapSuggest = true, bool suggestionStyles = true)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseTestServer();
@@ -196,7 +296,12 @@ public sealed class SuiteWidgetsRenderingTests
         builder.Services.AddSingleton<SuiteContactGroupContexts>(new SuiteSearchUrlTests.StubGroups(null, []));
         builder.Services.AddSingleton<ISuitePreviewState>(new HeaderPreview());
         builder.Services.AddSingleton<CMS.Websites.IWebPageUrlRetriever>(new OnePageUrl());
-        builder.Services.AddLuceneSuiteWidgets();
+        builder.Services.AddSingleton<XperienceCommunity.Lucene.Suite.Suggestions.ISuiteSuggestions>(new NoSuggestions());
+        builder.Services.AddLuceneSuiteWidgets(o =>
+        {
+            o.SuggestionIndexes = suggestionIndexes ?? [];
+            o.SuggestionStyles = suggestionStyles;
+        });
         builder.Services.AddControllersWithViews()
             .AddApplicationPart(typeof(LuceneSuiteResultsViewComponent).Assembly)
             .AddApplicationPart(typeof(SuiteWidgetsRenderingTests).Assembly);
@@ -205,6 +310,11 @@ public sealed class SuiteWidgetsRenderingTests
         if (mapEvents)
         {
             app.MapLuceneSuiteEvents();
+        }
+
+        if (mapSuggest)
+        {
+            app.MapLuceneSuiteSuggestions();
         }
 
         await app.StartAsync();
@@ -298,6 +408,12 @@ public sealed class SuiteWidgetsRenderingTests
         public Task<CMS.Websites.WebPageUrl> Retrieve(string webPageTreePath, string websiteChannelName, string languageName, bool forPreview = false, CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }
 
+    private sealed class NoSuggestions : XperienceCommunity.Lucene.Suite.Suggestions.ISuiteSuggestions
+    {
+        public Task<IReadOnlyList<string>> SuggestAsync(string indexName, string? input, int? maxResults = null, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<string>>([]);
+    }
+
     private sealed class NoLogger : ISearchInteractionLogger
     {
         public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null)
@@ -314,7 +430,21 @@ public sealed class SuiteWidgetsRenderingTests
 public sealed class WidgetsTestController : Controller
 {
     [HttpGet("/test/box")]
-    public IActionResult Box() => ViewComponent(typeof(LuceneSuiteSearchBoxViewComponent));
+    public IActionResult Box(string? index) => ViewComponent(typeof(LuceneSuiteSearchBoxViewComponent), new { indexName = index });
+
+    [HttpGet("/test/two-boxes")]
+    public async Task TwoBoxes()
+    {
+        // Buffered so the second render can still set headers: two boxes in one request.
+        var body = Response.Body;
+        using var buffer = new MemoryStream();
+        Response.Body = buffer;
+        await ViewComponent(typeof(LuceneSuiteSearchBoxViewComponent)).ExecuteResultAsync(ControllerContext);
+        await ViewComponent(typeof(LuceneSuiteSearchBoxViewComponent)).ExecuteResultAsync(ControllerContext);
+        Response.Body = body;
+        buffer.Position = 0;
+        await buffer.CopyToAsync(body);
+    }
 
     [HttpGet("/test/results")]
     public IActionResult Results() => ViewComponent(typeof(LuceneSuiteResultsViewComponent), new { indexName = SuiteSearchUrlTests.Index, summaryField = "Summary" });
@@ -335,10 +465,11 @@ public sealed class WidgetsTestController : Controller
     });
 
     [HttpGet("/test/widget/box")]
-    public IActionResult BoxWidget(string? page) => ViewComponent(typeof(LuceneSuiteSearchBoxWidget), new
+    public IActionResult BoxWidget(string? page, string? index) => ViewComponent(typeof(LuceneSuiteSearchBoxWidget), new
     {
         widget = ComponentViewModel<LuceneSuiteSearchBoxWidgetProperties>.Create(new RoutedWebPage { LanguageName = "en" }, new LuceneSuiteSearchBoxWidgetProperties
         {
+            SuggestionsIndex = index,
             ResultsPage = page switch
             {
                 "none" => [],

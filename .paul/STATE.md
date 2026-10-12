@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 9 of 10 (Suggestions) — Planning
-Plan: 09-01 complete; next 09-02
-Status: Ready to plan 09-02
-Last activity: 2026-10-12 — Unified 09-01
+Plan: 09-02 complete; next 09-03
+Status: Ready to plan 09-03
+Last activity: 2026-10-12 — Unified 09-02
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready to plan 09-02]
+  ✓        ✓        ✓     [Loop complete — ready to plan 09-03]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,10 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 09-02 unified: lucene-suite-suggest.js (ARIA 1.2 combobox, CSP-safe, textContent only, 429 back-off) + opt-in search box (single-index fallback, golden-proven byte-identical off path) live on /site-search (only submitted searches tracked); Convention 2b right gutter 104 px; implementation delegated and re-verified | Phase 9 | 09-03 blocklist admin next |
+| 2026-10-12: User: page content ran into the scrollbar on custom templates → Convention 2b right gutter = native 104 px (measured: native listing and edit form, 669/932/1269 px content width); shared Client/src/layout.ts pageStyle on QueryTesterTemplate + SearchReportsTemplate (now 104 px like native at both widths); rule added to the design-screen skill enterprise.md | Phase 9 (09-02 apply) | All future custom admin pages |
+| 2026-10-12: Enterprise audit on 09-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 9 | Unique ids per request (counter) + single asset emission; golden pre-change HTML for byte-identical test; CSP-safe (no inline script/style); 30 s back-off after 429; no request > 100 chars |
+| 2026-10-12: 09-02 planned: dependency-free ES module lucene-suite-suggest.js (fetchSuggestions / createSuggestState / enhanceSearchBox / autoInit) implementing the ARIA 1.2 combobox over /lucenesuite/suggest (150 ms debounce, latest-wins, per-page cache, textContent only); optional themable CSS (SuggestionStyles); search box opt-in via indexName / widget "Suggestions index", falling back to the single SuggestionIndexes entry (no host content edit); HTML byte-identical when off; APPROVAL-CHECKS #11 | Phase 9 | 09-02 created |
 | 2026-10-12: 09-01 unified: suggestions core (v6 BlockedSuggestion, shared Surfacing, ISuiteSuggestions, MinSearches public floor) + Widgets MapLuceneSuiteSuggestions (opt-in, limiter, max-age); host comm_projects at v6; 674 tests green; implementation delegated to an implementer agent and re-verified; Phase 11 to consider one namespace for MapLuceneSuite* | Phase 9 | 09-02 script consumes /lucenesuite/suggest (textContent only) |
 | 2026-10-12: Enterprise audit on 09-01-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 9 | Public exposure floor Suggestions.MinSearches (in window) on top of surfacing; SuggestionsMaxAgeSeconds (0 → no-store) with honest block-latency docs; index existence check before cache; ForwardedHeaders + textContent contract documented; seeded host history feeds suggestions (#10 ↔ #4) |
 | 2026-10-12: User direction (09-01 planning): layered packages — Core+Admin public C# API sufficient for custom UIs; Widgets OOB + authorable building blocks; Algolia-style instant search JS library. Decisions: ISuiteSuggestions stays public; new v0.2 Phase 11 Public API Audit (after Phase 10); new milestone v0.4 Instant Search after v0.3 Test (supersedes "no public search API" from v0.4) | Milestone | v0.2 now 6 phases |
@@ -179,7 +183,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01, 09-02: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -198,6 +202,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 9: APPROVAL-CHECKS #11 (autocomplete + gutter; real keyboard and widget dropdown clearing not observed) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #10 (suggestions public API + endpoint; seeded history now public on host) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #9 (editors: error timing, 14 px condition headings, icon removes; read-only/failed-save not observed) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #8 (reports dashboard v2, icon row actions, range stepping, paged trend table) pending | Milestone review | Milestone review |
@@ -214,9 +219,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 09-01 unified
-Next action: /paul:plan 09-02 (accessible combobox script in the search box)
-Resume file: .paul/phases/09-suggestions/09-01-SUMMARY.md
+Stopped at: 09-02 unified
+Next action: /paul:plan 09-03 (blocked-suggestions admin + report "Block suggestion" action)
+Resume file: .paul/phases/09-suggestions/09-02-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

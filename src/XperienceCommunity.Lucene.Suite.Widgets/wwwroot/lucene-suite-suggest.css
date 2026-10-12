@@ -1,0 +1,72 @@
+/* Lucene Suite search suggestions. Theme with the custom properties; or skip this file (SuggestionStyles = false) and style the classes. */
+.lucene-suite-suggest {
+  position: relative;
+}
+
+.lucene-suite-suggest__list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 20em;
+  overflow-y: auto;
+  margin: 0.25em 0 0;
+  padding: 0.25em 0;
+  list-style: none;
+  background: var(--lucene-suite-suggest-bg, #fff);
+  color: var(--lucene-suite-suggest-fg, #1a1a1a);
+  border: 1px solid var(--lucene-suite-suggest-border, #767676);
+  border-radius: var(--lucene-suite-suggest-radius, 0.25em);
+  box-shadow: var(--lucene-suite-suggest-shadow, 0 0.25em 0.75em rgb(0 0 0 / 0.15));
+  animation: lucene-suite-suggest-in 0.12s ease-out;
+}
+
+.lucene-suite-suggest__list[hidden] {
+  display: none;
+}
+
+.lucene-suite-suggest__option {
+  padding: 0.375em 0.75em;
+  cursor: pointer;
+  /* Transparent outlines become visible in forced-colors (high contrast) mode. */
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+}
+
+.lucene-suite-suggest__option:hover {
+  text-decoration: underline;
+}
+
+/* Default active colours: #1f4e8c on #fff is 8.3:1 (non-text minimum 3:1). */
+.lucene-suite-suggest__option[aria-selected="true"] {
+  background: var(--lucene-suite-suggest-active-bg, #1f4e8c);
+  color: var(--lucene-suite-suggest-active-fg, #fff);
+}
+
+.lucene-suite-suggest__match {
+  background: none;
+  color: inherit;
+  font-weight: 700;
+}
+
+.lucene-suite-suggest__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes lucene-suite-suggest-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lucene-suite-suggest__list {
+    animation: none;
+  }
+}

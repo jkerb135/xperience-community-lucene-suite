@@ -38,6 +38,11 @@ public sealed class LuceneSuiteSearchBoxWidgetProperties : IWidgetProperties
     /// <summary>Input placeholder.</summary>
     [TextInputComponent(Label = "Placeholder", Order = 3)]
     public string? Placeholder { get; set; }
+
+    /// <summary>Index whose suggestions are shown as the visitor types; empty uses the only configured suggestion index, if exactly one.</summary>
+    [DropDownComponent(Label = "Suggestions index", DataProviderType = typeof(LuceneIndexOptionsProvider), Order = 4,
+        ExplanationText = "Shows search suggestions from this index while visitors type. The index must be listed in the site's SuggestionIndexes setting. Leave empty to use the only listed index, if there is exactly one.")]
+    public string? SuggestionsIndex { get; set; }
 }
 
 /// <summary>Properties of the search results widget.</summary>
@@ -104,7 +109,7 @@ public sealed class LuceneSuiteSearchBoxWidget(SuitePageSearch search, IWebPageU
         }
 
         return View(LuceneSuiteSearchBoxViewComponent.ViewPath, LuceneSuiteSearchBoxViewComponent.Build(
-            search, HttpContext, actionUrl, string.IsNullOrWhiteSpace(properties.Label) ? "Search" : properties.Label, properties.Placeholder));
+            search, HttpContext, actionUrl, string.IsNullOrWhiteSpace(properties.Label) ? "Search" : properties.Label, properties.Placeholder, properties.SuggestionsIndex));
     }
 }
 

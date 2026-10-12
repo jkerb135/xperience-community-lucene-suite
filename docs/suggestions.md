@@ -136,3 +136,73 @@ Mitigations:
 - shorten `WindowDays`;
 - block the text (exact) or a word of it;
 - keep suggestions off an index by leaving it out of `SuggestionIndexes`.
+
+## Search box autocomplete
+
+The Lucene Suite search box shows suggestions as the visitor types when all of these hold:
+
+- an index is chosen: the `indexName` parameter (`<vc:lucene-suite-search-box index-name="DancingGoatSample" />`) or the widget's **Suggestions index** property; when empty, the only `SuggestionIndexes` entry is used if exactly one is configured;
+- that index is in `SuggestionIndexes`;
+- `MapLuceneSuiteSuggestions` was called;
+- the page is not in preview or Page Builder edit mode.
+
+Otherwise the box renders exactly as before. Without JavaScript the form still submits normally.
+
+When enabled, the form carries `data-lucene-suite-suggest` (endpoint URL), `data-lucene-suite-index` and `data-lucene-suite-min-length` (`LuceneSuite:Suggestions:MinInputLength`). The first enhanced box of a page references `lucene-suite-suggest.js` (and `lucene-suite-suggest.css` unless `SuggestionStyles = false`). There is no inline script or style, so a strict Content-Security-Policy works.
+
+### JS API
+
+`~/_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite-suggest.js` is a dependency-free ES module; it enhances every `form[data-lucene-suite-suggest]` on load.
+
+| Export | Purpose |
+|---|---|
+| `fetchSuggestions(url, index, q, { signal })` | `Promise<string[]>`; throws on a non-2xx answer (`error.status`) |
+| `createSuggestState()` | Keyboard/selection state without DOM: `setItems`, `key(key)` → action, `pick(i)`, `close` |
+| `enhanceSearchBox(form, { delayMs, minLength, url, index, fetcher })` | Binds the combobox to a form holding the search input, an empty `[role="listbox"]` and a `[role="status"]` |
+| `autoInit()` | Enhances every `form[data-lucene-suite-suggest]` once |
+
+Behaviour: 150 ms debounce, only the latest request is shown, answers cached per page (50), nothing requested below the minimum length or above 100 characters, 30 s pause after a 429, errors hide the list (one console warning per page).
+
+### Classes and theming
+
+| Class | Element |
+|---|---|
+| `lucene-suite-suggest` | Relative wrapper around the label, input and list |
+| `lucene-suite-suggest__list` | The listbox (`hidden` when closed) |
+| `lucene-suite-suggest__option` | An option; the active one has `aria-selected="true"` |
+| `lucene-suite-suggest__match` | `<mark>` around the matched text |
+| `lucene-suite-suggest__status` | Polite live region ("3 suggestions available"), visually hidden |
+
+CSS custom properties: `--lucene-suite-suggest-bg`, `-fg`, `-active-bg`, `-active-fg`, `-border`, `-radius`, `-shadow` (all prefixed `--lucene-suite-suggest`).
+
+### Your own UI
+
+Any layer works without the widget. For example, a custom box that only needs the strings:
+
+```js
+import { fetchSuggestions } from "/_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite-suggest.js";
+
+const controller = new AbortController();
+const items = await fetchSuggestions("/lucenesuite/suggest", "DancingGoatSample", "coff", { signal: controller.signal });
+for (const text of items) {
+  const li = document.createElement("li");
+  li.textContent = text; // never innerHTML: suggestions are visitor-typed text
+  list.append(li);
+}
+```
+
+Or skip the endpoint and call `ISuiteSuggestions` from your own controller or endpoint.
+
+### Accessibility
+
+The box follows the WAI-ARIA 1.2 combobox pattern:
+- **Roles and states:** the input gets `role="combobox"`, `aria-autocomplete="list"`, `aria-expanded`, `aria-controls` and `aria-activedescendant`. The list is a `listbox` of `option`s with `aria-selected`.
+- **Keys:**
+  - ↓/↑ open the list and move through it, wrapping around;
+  - Enter on an active option fills the box and submits; Enter without one submits what was typed;
+  - Escape closes the list, and a second Escape clears the box;
+  - Tab or leaving the box closes it.
+- **Announcements:** a polite live region announces the number of suggestions without moving focus.
+- **Ids:** each box on a page gets its own ids, so several boxes don't collide.
+- **Strings:** the strings ("Suggestions", "3 suggestions available") are English, like the rest of the Widgets package.
+

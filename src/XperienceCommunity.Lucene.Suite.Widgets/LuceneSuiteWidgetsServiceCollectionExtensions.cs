@@ -36,6 +36,9 @@ public sealed class SuiteWidgetsOptions
 
     /// <summary>How long browsers and CDNs may cache a suggest response (0–3600 s), so also how long a blocklist change can take to reach a visitor; 0 sends no-store. Default 60.</summary>
     public int SuggestionsMaxAgeSeconds { get; set; } = 60;
+
+    /// <summary>Whether a search box with suggestions references the shipped <c>lucene-suite-suggest.css</c>. Turn off to style the documented class names yourself. Default true.</summary>
+    public bool SuggestionStyles { get; set; } = true;
 }
 
 /// <summary>Registers the Lucene Suite Widgets services.</summary>
@@ -66,6 +69,7 @@ public static class LuceneSuiteWidgetsServiceCollectionExtensions
         services.TryAddSingleton<SuiteEventsRateLimiter>();
         services.TryAddSingleton<SuiteSuggestRateLimiter>();
         services.TryAddSingleton<SuiteEventsPath>();
+        services.TryAddSingleton<SuiteSuggestPath>();
         services.TryAddSingleton<SuiteContactGroupContexts>();
         services.TryAddSingleton<ISuitePreviewState, KenticoPreviewState>();
         services.TryAddSingleton(provider => new SuitePageSearch(

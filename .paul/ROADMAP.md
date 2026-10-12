@@ -16,7 +16,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
 | 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
 | 8.1 | Admin UI Consistency Audit | 5/5 | ✅ Complete | 2026-10-12 |
-| 9 | Suggestions | 1/3 | In progress | - |
+| 9 | Suggestions | 2/3 | In progress | - |
 | 10 | Custom Activities | TBD | Not started | - |
 | 11 | Public API Audit | TBD | Not started | - |
 
@@ -59,7 +59,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 
 **Plans:**
 - [x] 09-01: Blocklist model (installer v6) + cached suggestion source + rate-limited GET suggest endpoint (strings only, untracked)
-- [ ] 09-02: Accessible combobox script (progressive enhancement) wired into the search box
+- [x] 09-02: Accessible combobox script (progressive enhancement) wired into the search box
 - [ ] 09-03: Blocked-suggestions admin (listing/create/edit) + report row action
 
 ### Phase 10: Custom Activities

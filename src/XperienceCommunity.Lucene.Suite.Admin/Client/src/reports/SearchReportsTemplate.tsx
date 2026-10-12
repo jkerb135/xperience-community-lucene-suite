@@ -81,6 +81,7 @@ import { BarChart } from "./TrendChart.tsx";
 import { indexFromPath, loadReportState, saveReportState } from "./handoff.ts";
 import { NeedsAttention } from "./NeedsAttention.tsx";
 import { QueryTable, SORTS } from "./QueryTable.tsx";
+import { pageStyle } from "../layout.ts";
 
 interface SearchReportsProps {
   readonly today: string;
@@ -285,300 +286,302 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
     result && <MetricTile key={m.id} metric={m} selected={m.id === metric.id} result={result} onSelect={() => setMetric(m)} />;
 
   return (
-    <Stack spacing={Spacing.XL}>
-      <div role="heading" aria-level={1}>
-        <Headline size={HeadlineSize.M}>Search reports</Headline>
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: Spacing.M }}>
-        <NameToggleButtons
-          selectedItemId={preset}
-          items={[...PRESETS.map((p) => ({ id: p.id, label: p.label })), { id: CUSTOM, label: "Custom" }]}
-          onChange={choosePreset}
-        />
-        <div style={{ display: "flex", alignItems: "center", gap: Spacing.XS }}>
-          <Button
-            icon="xp-chevron-left"
-            size={ButtonSize.S}
-            color={ButtonColor.Quinary}
-            borderless
-            aria-label={`Previous ${lengthOf(range)} days`}
-            title={`Previous ${lengthOf(range)} days`}
-            disabled={shiftRange(range, -1, today, maxDays) === null}
-            onClick={() => step(-1)}
-          />
-          <span aria-live="polite" style={{ color: "var(--color-text-default-on-light)" }}>
-            {`${rangeLabel(range)} (UTC)`}
-            <span style={{ color: "var(--color-text-low-emphasis)" }}>{`, compared with ${rangeLabel(previous)}`}</span>
-          </span>
-          <Button
-            icon="xp-chevron-right"
-            size={ButtonSize.S}
-            color={ButtonColor.Quinary}
-            borderless
-            aria-label={`Next ${lengthOf(range)} days`}
-            title={`Next ${lengthOf(range)} days`}
-            disabled={shiftRange(range, 1, today, maxDays) === null}
-            onClick={() => step(1)}
-          />
+    <div style={pageStyle}>
+      <Stack spacing={Spacing.XL}>
+        <div role="heading" aria-level={1}>
+          <Headline size={HeadlineSize.M}>Search reports</Headline>
         </div>
-        {inProgress && <Spinner />}
-      </div>
-      {preset === CUSTOM && (
-        <FormItemWrapper label="Custom range">
-          <DateTimeRangeInput
-            value={{ from: toPickerDate(range.from), to: toPickerDate(range.to) }}
-            minDate={toPickerDate(minDay)}
-            maxDate={toPickerDate(today)}
-            onChange={chooseCustom}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: Spacing.M }}>
+          <NameToggleButtons
+            selectedItemId={preset}
+            items={[...PRESETS.map((p) => ({ id: p.id, label: p.label })), { id: CUSTOM, label: "Custom" }]}
+            onChange={choosePreset}
           />
-        </FormItemWrapper>
-      )}
-      {failed && <NotificationBarAlert>The report could not be loaded. The last loaded report is shown; choose the period again to retry.</NotificationBarAlert>}
-      {error && <NotificationBarAlert>{error}</NotificationBarAlert>}
-      {result === undefined && !failed && !error && <Spinner />}
-      {result !== undefined && current !== undefined && facts && (
-        <>
-          {partial && (
-            <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnDesk} headline="No comparison">
-              {`The previous period starts before the first data${result.firstDataDay ? ` (${dayLabel(result.firstDataDay)})` : ""}, so changes are not shown.`}
-            </Callout>
-          )}
-          {notFinal > 0 && (
-            <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnDesk} headline="Recent days are not final">
-              {result.completeThrough
-                ? `Days after ${dayLabel(result.completeThrough)} have not been rolled up yet; their numbers can still grow.`
-                : "No day has been rolled up yet, so every day can still change."}
-            </Callout>
-          )}
-          {current.searches === 0 ? (
-            <Card headline={cardHeadline("Overview", "No searches")}>
-              <p style={{ margin: 0, color: "var(--color-text-default-on-light)" }}>No searches were recorded on this index in the selected period.</p>
-            </Card>
-          ) : (
-            <>
-              <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL}>
-                <div style={panelStyle}>
-                  <Stack spacing={Spacing.M}>
-                    <span style={visuallyHidden} role="heading" aria-level={2}>
-                      Key metrics
-                    </span>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: Spacing.XL }}>
-                      <MetricGroup label="Volume" metrics={VOLUME} flex="2 1 18rem">
-                        {tile}
-                      </MetricGroup>
-                      <MetricGroup label="Quality" metrics={QUALITY} flex="4 1 18rem">
-                        {tile}
-                      </MetricGroup>
-                    </div>
-                    <span style={{ fontSize: "smaller", color: "var(--color-text-low-emphasis)" }}>Select a metric to chart it below.</span>
-                  </Stack>
-                </div>
-              </Paper>
-              <div>
-                <Row spacingX={Spacing.L} spacingY={Spacing.L}>
-                  <Column cols={Cols.Col12} colsMd={Cols.Col8} colsLg={Cols.Col8}>
-                    <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL} fullHeight>
-                      <div style={panelStyle}>
-                        <Stack spacing={Spacing.L}>
-                          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: Spacing.M }}>
-                            <div>
-                              <SectionHeading eyebrow="Trend" title={`${metric.caption} per day`} />
-                              <p style={{ margin: 0, color: "var(--color-text-low-emphasis)" }}>{metric.definition}</p>
-                            </div>
-                            <Button
-                              label="Show breakdown"
-                              icon="xp-list"
-                              size={ButtonSize.S}
-                              color={ButtonColor.Secondary}
-                              buttonRef={breakdownButton}
-                              aria-label={`Show the ${metric.caption.toLowerCase()} breakdown for this period`}
-                              onClick={() => setPanel("breakdown")}
-                            />
-                          </div>
-                          <Switch label="Show as table" size={SwitchSize.M} value={trendTable} onChange={setTrendTable} />
-                          {trendTable ? (
-                            <Stack spacing={Spacing.M}>
-                              <Table
-                                columns={[column("day", "Day"), column("value", metric.caption), column("average", "7-day average"), column("final", "Final")]}
-                                rows={result.days
-                                  .map((day, i) => ({ day, i }))
-                                  .reverse()
-                                  .slice((trendPage - 1) * TREND_PAGE, trendPage * TREND_PAGE)
-                                  .map(
-                                    ({ day, i }): TableRow => ({
-                                      identifier: i,
-                                      disabled: false,
-                                      cells: [
-                                        cell(dayLabel(day.day), "day"),
-                                        cell(format(values[i]), "value"),
-                                        cell(format(rolling[i]), "average"),
-                                        cell(day.isComplete ? "Yes" : "Not yet", "final"),
-                                      ],
-                                    }),
-                                  )}
-                              />
-                              {result.days.length > TREND_PAGE && (
-                                <Pagination selectedPage={trendPage} totalPages={Math.ceil(result.days.length / TREND_PAGE)} onPageChange={setTrendPage} />
-                              )}
-                            </Stack>
-                          ) : (
-                            <BarChart
-                              bars={result.days.map((day, i) => ({ label: dayLabel(day.day, undefined, true), value: values[i] ?? 0, muted: !day.isComplete }))}
-                              line={rolling}
-                              lineLabel="7-day rolling average"
-                              fractional={metric.kind !== "count"}
-                              summary={`${metric.caption} per day from ${rangeLabel(range)}: ${format(facts.value)} for the period${facts.peak ? `, highest on ${dayLabel(facts.peak.day)} (${format(facts.peak.value)})` : ""}. Use "Show as table" for each day's values.`}
-                              valueLabel={metric.caption}
-                              mutedLabel="Not final yet"
-                              formatValue={(v) => format(v)}
-                            />
-                          )}
-                        </Stack>
-                      </div>
-                    </Paper>
-                  </Column>
-                  <Column cols={Cols.Col12} colsMd={Cols.Col4} colsLg={Cols.Col4}>
-                    <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL} fullHeight>
-                      <div style={panelStyle}>
-                        <Stack spacing={Spacing.M}>
-                          <SectionHeading eyebrow="Needs attention" title="Queries without results" />
-                          <NeedsAttention
-                            range={range}
-                            canManageRules={props.canManageRules}
-                            canManageSynonyms={props.canManageSynonyms}
-                            queryTesterPath={props.queryTesterPath}
-                            ruleCreatePath={props.ruleCreatePath}
-                            synonymCreatePath={props.synonymCreatePath}
-                          />
-                          <Divider orientation={DividerOrientation.Horizontal} />
-                          <SectionHeading eyebrow="Performance" title="Response time" level={3} size={HeadlineSize.S} />
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: Spacing.L }}>
-                            <TextWithLabel label="Median" value={percentileLabel(result.latency.p50, bounds)} />
-                            <TextWithLabel label="p95" value={percentileLabel(result.latency.p95, bounds)} />
-                            <TextWithLabel label="p99" value={percentileLabel(result.latency.p99, bounds)} />
-                          </div>
-                          <div>
-                            <Button
-                              label="Response-time details"
-                              icon="xp-graph"
-                              size={ButtonSize.S}
-                              color={ButtonColor.Tertiary}
-                              buttonRef={latencyButton}
-                              onClick={() => setPanel("latency")}
-                            />
-                          </div>
-                        </Stack>
-                      </div>
-                    </Paper>
-                  </Column>
-                </Row>
-              </div>
-              <QueryTable
-                range={range}
-                sort={sort}
-                page={page}
-                onSortChange={(next) => {
-                  setSort(next);
-                  setPage(1);
-                }}
-                onPageChange={setPage}
-                bucketBounds={bounds}
-                canManageRules={props.canManageRules}
-                canManageSynonyms={props.canManageSynonyms}
-                queryTesterPath={props.queryTesterPath}
-                ruleCreatePath={props.ruleCreatePath}
-                synonymCreatePath={props.synonymCreatePath}
-              />
-              <SidePanel
-                headline={`${metric.caption}: period breakdown`}
-                size={SidePanelSize.Stackable}
-                isVisible={panel === "breakdown"}
-                tooltips={{ close: "Close" }}
-                onClose={closePanel}
-              >
-                {panel === "breakdown" && (
-                  <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
-                    <Stack spacing={Spacing.XL}>
-                      <Stack spacing={Spacing.M}>
-                        <SectionHeading eyebrow="At a glance" title={rangeLabel(range)} level={3} size={HeadlineSize.S} />
-                        <Fact label={metric.kind === "count" ? "Total for the period" : "For the period"} value={format(facts.value)} detail={metric.definition} />
-                        <Fact
-                          label="Previous period"
-                          value={format(facts.previous)}
-                          detail={<DeltaText text={formatMetricDelta(metric, facts.value, facts.previous, partial, facts.delta)} tone={facts.tone} />}
-                        />
-                        <Fact
-                          label="Average per day"
-                          value={format(facts.dailyAverage)}
-                          detail={metric.kind === "count" ? `Over all ${facts.totalDays} days` : "Over the days that had searches"}
-                        />
-                      </Stack>
-                      <Stack spacing={Spacing.M}>
-                        <SectionHeading eyebrow="Highest and lowest days" title="Final days only" level={3} size={HeadlineSize.S} />
-                        <Fact label="Highest day" value={format(facts.peak?.value ?? null)} detail={facts.peak ? dayLabel(facts.peak.day) : "No final day yet"} />
-                        <Fact label="Lowest day" value={format(facts.lowest?.value ?? null)} detail={facts.lowest ? dayLabel(facts.lowest.day) : "No final day yet"} />
-                      </Stack>
-                      <div
-                        style={{
-                          background: "var(--color-info-background-low-emphasis)",
-                          border: `${Spacing.Micro} dashed var(--color-background-selected)`,
-                          borderRadius: BorderRadius.RadiusM,
-                          padding: Spacing.L,
-                        }}
-                      >
-                        <Stack spacing={Spacing.S}>
-                          <SectionHeading eyebrow="Patterns" title="What stands out" level={3} size={HeadlineSize.S} />
-                          <TextWithLabel label="Days with searches" value={`${facts.activeDays} of ${facts.totalDays}`} />
-                          <TextWithLabel
-                            label="Latest final day vs its 7-day average"
-                            value={facts.latest ? `${format(facts.latest.value)} vs ${format(facts.latest.average)} (${dayLabel(facts.latest.day)})` : "No final day yet"}
-                          />
-                          <TextWithLabel label="Searches with no results" value={formatRate(facts.noResultShare)} />
-                        </Stack>
-                      </div>
-                    </Stack>
-                  </div>
-                )}
-              </SidePanel>
-              <SidePanel
-                headline="Response time"
-                size={SidePanelSize.Stackable}
-                isVisible={panel === "latency"}
-                tooltips={{ close: "Close" }}
-                onClose={closePanel}
-              >
-                {panel === "latency" && (
-                  <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: Spacing.XS }}>
+            <Button
+              icon="xp-chevron-left"
+              size={ButtonSize.S}
+              color={ButtonColor.Quinary}
+              borderless
+              aria-label={`Previous ${lengthOf(range)} days`}
+              title={`Previous ${lengthOf(range)} days`}
+              disabled={shiftRange(range, -1, today, maxDays) === null}
+              onClick={() => step(-1)}
+            />
+            <span aria-live="polite" style={{ color: "var(--color-text-default-on-light)" }}>
+              {`${rangeLabel(range)} (UTC)`}
+              <span style={{ color: "var(--color-text-low-emphasis)" }}>{`, compared with ${rangeLabel(previous)}`}</span>
+            </span>
+            <Button
+              icon="xp-chevron-right"
+              size={ButtonSize.S}
+              color={ButtonColor.Quinary}
+              borderless
+              aria-label={`Next ${lengthOf(range)} days`}
+              title={`Next ${lengthOf(range)} days`}
+              disabled={shiftRange(range, 1, today, maxDays) === null}
+              onClick={() => step(1)}
+            />
+          </div>
+          {inProgress && <Spinner />}
+        </div>
+        {preset === CUSTOM && (
+          <FormItemWrapper label="Custom range">
+            <DateTimeRangeInput
+              value={{ from: toPickerDate(range.from), to: toPickerDate(range.to) }}
+              minDate={toPickerDate(minDay)}
+              maxDate={toPickerDate(today)}
+              onChange={chooseCustom}
+            />
+          </FormItemWrapper>
+        )}
+        {failed && <NotificationBarAlert>The report could not be loaded. The last loaded report is shown; choose the period again to retry.</NotificationBarAlert>}
+        {error && <NotificationBarAlert>{error}</NotificationBarAlert>}
+        {result === undefined && !failed && !error && <Spinner />}
+        {result !== undefined && current !== undefined && facts && (
+          <>
+            {partial && (
+              <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnDesk} headline="No comparison">
+                {`The previous period starts before the first data${result.firstDataDay ? ` (${dayLabel(result.firstDataDay)})` : ""}, so changes are not shown.`}
+              </Callout>
+            )}
+            {notFinal > 0 && (
+              <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnDesk} headline="Recent days are not final">
+                {result.completeThrough
+                  ? `Days after ${dayLabel(result.completeThrough)} have not been rolled up yet; their numbers can still grow.`
+                  : "No day has been rolled up yet, so every day can still change."}
+              </Callout>
+            )}
+            {current.searches === 0 ? (
+              <Card headline={cardHeadline("Overview", "No searches")}>
+                <p style={{ margin: 0, color: "var(--color-text-default-on-light)" }}>No searches were recorded on this index in the selected period.</p>
+              </Card>
+            ) : (
+              <>
+                <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL}>
+                  <div style={panelStyle}>
                     <Stack spacing={Spacing.M}>
-                      <span style={{ color: "var(--color-text-low-emphasis)" }}>{`How long searches took, ${rangeLabel(range)}.`}</span>
-                      <Switch label="Show as table" size={SwitchSize.M} value={latencyTable} onChange={setLatencyTable} />
-                      {latencyTable ? (
-                        <Table
-                          columns={[column("bucket", "Response time"), column("searches", "Searches")]}
-                          rows={bucketLabels(bounds).map(
-                            (label, i): TableRow => ({
-                              identifier: i,
-                              disabled: false,
-                              cells: [cell(label, "bucket"), cell(formatCount(result.latency.buckets[i] ?? 0), "searches")],
-                            }),
-                          )}
-                        />
-                      ) : (
-                        <BarChart
-                          bars={bucketLabels(bounds).map((label, i) => ({ label, value: result.latency.buckets[i] ?? 0 }))}
-                          summary={`Searches by response time: median ${percentileLabel(result.latency.p50, bounds)}, p95 ${percentileLabel(result.latency.p95, bounds)}. Use "Show as table" for each bucket.`}
-                          valueLabel="Searches"
-                          formatValue={formatCount}
-                        />
-                      )}
+                      <span style={visuallyHidden} role="heading" aria-level={2}>
+                        Key metrics
+                      </span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: Spacing.XL }}>
+                        <MetricGroup label="Volume" metrics={VOLUME} flex="2 1 18rem">
+                          {tile}
+                        </MetricGroup>
+                        <MetricGroup label="Quality" metrics={QUALITY} flex="4 1 18rem">
+                          {tile}
+                        </MetricGroup>
+                      </div>
+                      <span style={{ fontSize: "smaller", color: "var(--color-text-low-emphasis)" }}>Select a metric to chart it below.</span>
                     </Stack>
                   </div>
-                )}
-              </SidePanel>
-            </>
-          )}
-        </>
-      )}
-    </Stack>
+                </Paper>
+                <div>
+                  <Row spacingX={Spacing.L} spacingY={Spacing.L}>
+                    <Column cols={Cols.Col12} colsMd={Cols.Col8} colsLg={Cols.Col8}>
+                      <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL} fullHeight>
+                        <div style={panelStyle}>
+                          <Stack spacing={Spacing.L}>
+                            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: Spacing.M }}>
+                              <div>
+                                <SectionHeading eyebrow="Trend" title={`${metric.caption} per day`} />
+                                <p style={{ margin: 0, color: "var(--color-text-low-emphasis)" }}>{metric.definition}</p>
+                              </div>
+                              <Button
+                                label="Show breakdown"
+                                icon="xp-list"
+                                size={ButtonSize.S}
+                                color={ButtonColor.Secondary}
+                                buttonRef={breakdownButton}
+                                aria-label={`Show the ${metric.caption.toLowerCase()} breakdown for this period`}
+                                onClick={() => setPanel("breakdown")}
+                              />
+                            </div>
+                            <Switch label="Show as table" size={SwitchSize.M} value={trendTable} onChange={setTrendTable} />
+                            {trendTable ? (
+                              <Stack spacing={Spacing.M}>
+                                <Table
+                                  columns={[column("day", "Day"), column("value", metric.caption), column("average", "7-day average"), column("final", "Final")]}
+                                  rows={result.days
+                                    .map((day, i) => ({ day, i }))
+                                    .reverse()
+                                    .slice((trendPage - 1) * TREND_PAGE, trendPage * TREND_PAGE)
+                                    .map(
+                                      ({ day, i }): TableRow => ({
+                                        identifier: i,
+                                        disabled: false,
+                                        cells: [
+                                          cell(dayLabel(day.day), "day"),
+                                          cell(format(values[i]), "value"),
+                                          cell(format(rolling[i]), "average"),
+                                          cell(day.isComplete ? "Yes" : "Not yet", "final"),
+                                        ],
+                                      }),
+                                    )}
+                                />
+                                {result.days.length > TREND_PAGE && (
+                                  <Pagination selectedPage={trendPage} totalPages={Math.ceil(result.days.length / TREND_PAGE)} onPageChange={setTrendPage} />
+                                )}
+                              </Stack>
+                            ) : (
+                              <BarChart
+                                bars={result.days.map((day, i) => ({ label: dayLabel(day.day, undefined, true), value: values[i] ?? 0, muted: !day.isComplete }))}
+                                line={rolling}
+                                lineLabel="7-day rolling average"
+                                fractional={metric.kind !== "count"}
+                                summary={`${metric.caption} per day from ${rangeLabel(range)}: ${format(facts.value)} for the period${facts.peak ? `, highest on ${dayLabel(facts.peak.day)} (${format(facts.peak.value)})` : ""}. Use "Show as table" for each day's values.`}
+                                valueLabel={metric.caption}
+                                mutedLabel="Not final yet"
+                                formatValue={(v) => format(v)}
+                              />
+                            )}
+                          </Stack>
+                        </div>
+                      </Paper>
+                    </Column>
+                    <Column cols={Cols.Col12} colsMd={Cols.Col4} colsLg={Cols.Col4}>
+                      <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL} fullHeight>
+                        <div style={panelStyle}>
+                          <Stack spacing={Spacing.M}>
+                            <SectionHeading eyebrow="Needs attention" title="Queries without results" />
+                            <NeedsAttention
+                              range={range}
+                              canManageRules={props.canManageRules}
+                              canManageSynonyms={props.canManageSynonyms}
+                              queryTesterPath={props.queryTesterPath}
+                              ruleCreatePath={props.ruleCreatePath}
+                              synonymCreatePath={props.synonymCreatePath}
+                            />
+                            <Divider orientation={DividerOrientation.Horizontal} />
+                            <SectionHeading eyebrow="Performance" title="Response time" level={3} size={HeadlineSize.S} />
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: Spacing.L }}>
+                              <TextWithLabel label="Median" value={percentileLabel(result.latency.p50, bounds)} />
+                              <TextWithLabel label="p95" value={percentileLabel(result.latency.p95, bounds)} />
+                              <TextWithLabel label="p99" value={percentileLabel(result.latency.p99, bounds)} />
+                            </div>
+                            <div>
+                              <Button
+                                label="Response-time details"
+                                icon="xp-graph"
+                                size={ButtonSize.S}
+                                color={ButtonColor.Tertiary}
+                                buttonRef={latencyButton}
+                                onClick={() => setPanel("latency")}
+                              />
+                            </div>
+                          </Stack>
+                        </div>
+                      </Paper>
+                    </Column>
+                  </Row>
+                </div>
+                <QueryTable
+                  range={range}
+                  sort={sort}
+                  page={page}
+                  onSortChange={(next) => {
+                    setSort(next);
+                    setPage(1);
+                  }}
+                  onPageChange={setPage}
+                  bucketBounds={bounds}
+                  canManageRules={props.canManageRules}
+                  canManageSynonyms={props.canManageSynonyms}
+                  queryTesterPath={props.queryTesterPath}
+                  ruleCreatePath={props.ruleCreatePath}
+                  synonymCreatePath={props.synonymCreatePath}
+                />
+                <SidePanel
+                  headline={`${metric.caption}: period breakdown`}
+                  size={SidePanelSize.Stackable}
+                  isVisible={panel === "breakdown"}
+                  tooltips={{ close: "Close" }}
+                  onClose={closePanel}
+                >
+                  {panel === "breakdown" && (
+                    <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
+                      <Stack spacing={Spacing.XL}>
+                        <Stack spacing={Spacing.M}>
+                          <SectionHeading eyebrow="At a glance" title={rangeLabel(range)} level={3} size={HeadlineSize.S} />
+                          <Fact label={metric.kind === "count" ? "Total for the period" : "For the period"} value={format(facts.value)} detail={metric.definition} />
+                          <Fact
+                            label="Previous period"
+                            value={format(facts.previous)}
+                            detail={<DeltaText text={formatMetricDelta(metric, facts.value, facts.previous, partial, facts.delta)} tone={facts.tone} />}
+                          />
+                          <Fact
+                            label="Average per day"
+                            value={format(facts.dailyAverage)}
+                            detail={metric.kind === "count" ? `Over all ${facts.totalDays} days` : "Over the days that had searches"}
+                          />
+                        </Stack>
+                        <Stack spacing={Spacing.M}>
+                          <SectionHeading eyebrow="Highest and lowest days" title="Final days only" level={3} size={HeadlineSize.S} />
+                          <Fact label="Highest day" value={format(facts.peak?.value ?? null)} detail={facts.peak ? dayLabel(facts.peak.day) : "No final day yet"} />
+                          <Fact label="Lowest day" value={format(facts.lowest?.value ?? null)} detail={facts.lowest ? dayLabel(facts.lowest.day) : "No final day yet"} />
+                        </Stack>
+                        <div
+                          style={{
+                            background: "var(--color-info-background-low-emphasis)",
+                            border: `${Spacing.Micro} dashed var(--color-background-selected)`,
+                            borderRadius: BorderRadius.RadiusM,
+                            padding: Spacing.L,
+                          }}
+                        >
+                          <Stack spacing={Spacing.S}>
+                            <SectionHeading eyebrow="Patterns" title="What stands out" level={3} size={HeadlineSize.S} />
+                            <TextWithLabel label="Days with searches" value={`${facts.activeDays} of ${facts.totalDays}`} />
+                            <TextWithLabel
+                              label="Latest final day vs its 7-day average"
+                              value={facts.latest ? `${format(facts.latest.value)} vs ${format(facts.latest.average)} (${dayLabel(facts.latest.day)})` : "No final day yet"}
+                            />
+                            <TextWithLabel label="Searches with no results" value={formatRate(facts.noResultShare)} />
+                          </Stack>
+                        </div>
+                      </Stack>
+                    </div>
+                  )}
+                </SidePanel>
+                <SidePanel
+                  headline="Response time"
+                  size={SidePanelSize.Stackable}
+                  isVisible={panel === "latency"}
+                  tooltips={{ close: "Close" }}
+                  onClose={closePanel}
+                >
+                  {panel === "latency" && (
+                    <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
+                      <Stack spacing={Spacing.M}>
+                        <span style={{ color: "var(--color-text-low-emphasis)" }}>{`How long searches took, ${rangeLabel(range)}.`}</span>
+                        <Switch label="Show as table" size={SwitchSize.M} value={latencyTable} onChange={setLatencyTable} />
+                        {latencyTable ? (
+                          <Table
+                            columns={[column("bucket", "Response time"), column("searches", "Searches")]}
+                            rows={bucketLabels(bounds).map(
+                              (label, i): TableRow => ({
+                                identifier: i,
+                                disabled: false,
+                                cells: [cell(label, "bucket"), cell(formatCount(result.latency.buckets[i] ?? 0), "searches")],
+                              }),
+                            )}
+                          />
+                        ) : (
+                          <BarChart
+                            bars={bucketLabels(bounds).map((label, i) => ({ label, value: result.latency.buckets[i] ?? 0 }))}
+                            summary={`Searches by response time: median ${percentileLabel(result.latency.p50, bounds)}, p95 ${percentileLabel(result.latency.p95, bounds)}. Use "Show as table" for each bucket.`}
+                            valueLabel="Searches"
+                            formatValue={formatCount}
+                          />
+                        )}
+                      </Stack>
+                    </div>
+                  )}
+                </SidePanel>
+              </>
+            )}
+          </>
+        )}
+      </Stack>
+    </div>
   );
 };

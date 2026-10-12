@@ -3,6 +3,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Suggestions;
@@ -19,8 +20,12 @@ public static class SuiteSuggestEndpoints
     /// Records no analytics. Requires AddLuceneSuiteWidgets.
     /// </summary>
     /// <returns>The endpoint, for host-specific conventions.</returns>
-    public static RouteHandlerBuilder MapLuceneSuiteSuggestions(this IEndpointRouteBuilder endpoints, string pattern = "/lucenesuite/suggest") =>
-        endpoints.MapGet("/" + pattern.Trim('/'), Get);
+    public static RouteHandlerBuilder MapLuceneSuiteSuggestions(this IEndpointRouteBuilder endpoints, string pattern = "/lucenesuite/suggest")
+    {
+        string path = "/" + pattern.Trim('/');
+        endpoints.ServiceProvider.GetRequiredService<SuiteSuggestPath>().Value = path;
+        return endpoints.MapGet(path, Get);
+    }
 
     private static async Task<IResult> Get(HttpContext context, SuiteSuggestRateLimiter limiter, ISuiteSuggestions suggestions, IOptions<SuiteWidgetsOptions> options)
     {
@@ -50,4 +55,10 @@ public static class SuiteSuggestEndpoints
             : string.Create(CultureInfo.InvariantCulture, $"public, max-age={widgets.SuggestionsMaxAgeSeconds}");
         return Results.Json(result);
     }
+}
+
+/// <summary>The path <see cref="SuiteSuggestEndpoints.MapLuceneSuiteSuggestions"/> mapped, without PathBase; null until it is called.</summary>
+internal sealed class SuiteSuggestPath
+{
+    public string? Value { get; set; }
 }
