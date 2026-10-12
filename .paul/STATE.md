@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 8 of 10 (Reports Admin) — In progress (1 of 2 plans)
-Plan: 08-01 complete
-Status: Ready for next PLAN (08-02 query tables + row actions)
-Last activity: 2026-10-12 — Unified 08-01 (08-01-SUMMARY.md)
+Phase: 8 of 10 (Reports Admin) — Planning
+Plan: 08-02 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-12 — Audited .paul/phases/08-reports-admin/08-02-PLAN.md (08-02-AUDIT.md)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Enterprise audit on 08-02-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8 | Handoff bound to the exact target page path (never lands in an existing rule/synonym edit page); {email}/{number} placeholder texts cannot become rules/synonyms (server HasPlaceholder); prefilled tester search untracked; report range/sort/page restored per index from sessionStorage |
+| 2026-10-12: 08-02 planning (user choices): row-action prefill via one-time sessionStorage handoff {target, index, query, expiry} read by our own client pieces (query tester, rule conditions editor, synonym terms editor) — no URL query strings, no server state; one query table with sort switch, 25/page, (other) line; actions without permission shown disabled with a tooltip. Design-screen in PLAN: npm Table ActionCell (focusable icon buttons) avoids the row-focus gap | Phase 8 | 08-02 created |
 | 2026-10-12: 08-01 applied: SearchReportsPage resolves the internal SearchReportService via IServiceProvider (public page ctor cannot take internal types); URL range persistence dropped (replaceState raced Kentico's admin router → /admin/?from=…); admin 31.9.1 runtime lacks the kit repo's newer CSS variables (--color-background-primary, --spacing-*, --font-size-*) → chart uses runtime tokens (--color-icon-highlighted etc.), npm Spacing enum, relative font size; no CSS loader in the client → inline token styles (no reports.css); DateTimeRangeInput ships its own non-removable shortcuts | Phase 8 | 08-02 reuses the page and the runtime-token rule |
 | 2026-10-12: Enterprise audit on 08-01-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8 | UTC-day strings end to end (no toISOString / Date parsing; TZ-tested); rate deltas in percentage points; command failures shown with last result kept; host watermark checked first; URL persistence dropped if it conflicts with the admin router |
 | 2026-10-12: Phase 8 planning (user choices): trend = token-styled SVG chart + "Show as table" (npm 31.9.1 exports no ColumnChart; amCharts not externalized → own unlicensed ~1 MB bundle); range = presets (7/30/90 days, 12 months) + custom DateTimeRangeInput; row actions = open in query tester, create rule for query, add synonym; two plans (08-01 page/range/KPIs/trend/latency, 08-02 query tables + row actions). Design-screen in PLAN: composed Stack/Row/Card layout, InfoCard KPIs (strings only → delta in details), NameToggleButtons presets | Phase 8 | 08-01 created |
@@ -168,16 +170,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 0601a20 feat(08-01): search reports admin page
+Last commit: 8cbe68c docs(paul): unify 08-01 search reports page
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 08-01 unified
-Next action: /paul:plan (08-02 query tables + row actions; prefill without URL query strings)
-Resume file: .paul/phases/08-reports-admin/08-01-SUMMARY.md
+Stopped at: Plan 08-02 audited
+Next action: /paul:apply .paul/phases/08-reports-admin/08-02-PLAN.md
+Resume file: .paul/phases/08-reports-admin/08-02-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
