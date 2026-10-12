@@ -11,14 +11,14 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 13 of 13 (Enterprise Screens) — In progress
-Plan: 13-02 applied
-Status: APPLY complete, ready for UNIFY
-Last activity: 2026-10-12 — Applied 13-02 (3/3 tasks)
+Plan: 13-02 complete; next 13-03
+Status: Ready to plan 13-03
+Last activity: 2026-10-12 — Unified 13-02
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
 - v0.2 Measure: [████████░░] 7 of 8 phases
-- Phase 13: [██▌░░░░░░░] 25% (1/4 plans)
+- Phase 13: [█████░░░░░] 50% (2/4 plans)
 
 ## Loop Position
 
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 13-02 unified: rule edit per handoff shipped (all ACs pass; permission/stale/failure paths test-only); two pre-existing defects recorded (second-save false conflict on rules+synonyms, misleading (UTC) date labels) — recommend a quick fix before the milestone review | Phase 13 | Next: 13-03 |
 | 2026-10-12: 13-02 applied: rule edit per handoff (FormCategory sections, server-computed live status via RuleListing.Of, contact-group/custom context and facet dimension/value pickers with counts, pins/hides layouts); host verified (unedited save byte-identical, bare code name stored, facet counts = index, labelled reveal inputs, error on the right control, Kentico unsaved prompt exists, no overflow 1100/1700). Found pre-existing: second Save without reload → false concurrency conflict on rule AND synonym edit (LoadedVersion not refreshed in returned form items); '(UTC)' date labels misleading (DateTimeInput is browser-local). Admin dev server had to be restarted after the node_modules incident. APPROVAL-CHECKS #16 | Phase 13 | UNIFY next |
 | 2026-10-12: Enterprise audit on 13-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 13 | Blocking checkpoint → Task 3 host checks recorded in APPROVAL-CHECKS (project decision 2026-10-11; autonomous true); FacetValues also synonyms/contexts off; no onChange on mount + stored-value round-trip tests; UTC status under a non-UTC TZ; labels for revealed inputs |
 | 2026-10-12: 13-01 unified: custom rules listing shipped (all 10 ACs pass; host: 501 rules, List ≈ 14 ms, RULES_BULK_* event-log entries written at Information). Checkpoint fixes: custom templates with child pages need RoutingContentPlaceholder; in-admin navigation via react-router-dom useNavigate (external in Kentico webpack; devDependency 7.18.4 for types); bulk bar takes the toolbar slot (no shift); npm Table ignores TableColumn.visible and selectRowLabel. User chose fast-forwarding main to verify on the host (main now carries 13-01, not pushed) | Phase 13 | 13-02 reuses RuleListing.Of; 13-03/13-04 should switch full-page-load links to useNavigate |
@@ -254,9 +255,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 13-02 applied (host verified; APPROVAL-CHECKS #16)
-Next action: /paul:unify .paul/phases/13-enterprise-screens/13-02-PLAN.md
-Resume file: .paul/phases/13-enterprise-screens/13-01-SUMMARY.md
+Stopped at: 13-02 unified
+Next action: /paul:plan 13-03 (search reports per handoff); consider a quick fix for the second-save false conflict first
+Resume file: .paul/phases/13-enterprise-screens/13-02-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
