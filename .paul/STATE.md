@@ -5,26 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 9 Suggestions
+**Current focus:** v0.2 Measure — Phase 8.1 Admin UI Consistency Audit
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 9 of 10 (Suggestions) — Not started
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-12 — Unified 08-02; Phase 8 complete, transitioned to Phase 9
+Phase: 8.1 (Admin UI Consistency Audit, inserted) — Applying
+Plan: 08.1-01 complete; next 08.1-02
+Status: Ready to plan 08.1-02
+Last activity: 2026-10-12 — Unified 08.1-01 (findings + conventions; fixes split into 08.1-02/03)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [█████░░░░░] 50% (2 of 4 phases)
+- v0.2 Measure: [████░░░░░░] 40% (2 of 5 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 8 complete — ready to plan Phase 9]
+  ✓        ✓        ✓     [Loop complete — ready to plan 08.1-02]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,12 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 08.1-01 unified: query tester chips/search already native (Tag rgb(6,119,168) 32 px, 40 px pill) — defect is the form-style toolbar; query table rows 50 px vs 104 px content (08-02 miss); Filter/Contact-groups panels drop focus (native returns it); Row-in-Stack zeroes gaps; coverage gap: some surfaces checked at 669 px only | Phase 8.1 | 08.1-02/03 validate every touched screen at both widths |
+| 2026-10-12: 08.1-01 decision (user): must-should — fix M1–M5 + S1–S4 (+ C1–C3) in 08.1-02 (action bar/chips, side-panel focus, Row-in-Stack spacing) and 08.1-03 (query table rows/actions menu, headers, heading scale, validation); conventions in 08.1-01-FINDINGS.md bind Phase 9 admin UI | Phase 8.1 | Phase 8.1 = 3 plans |
+| 2026-10-12: Enterprise audit on 08.1-01-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 8.1 | Reference precedence native runtime > npm > kit; fixed severity criteria; reproducible capture setup + standalone evidence; host SearchEvent/Rule/Synonym counts before/after; a11y procedure; every Must mapped or declined |
+| 2026-10-12: Phase 9 planning (user choices): suggestions = surfaced queries from the last 90 days ranked by searches, excluding texts with no-result rate ≥ 50% and {email}/{number} placeholders; blocklist entries match exact query or contains word (MatchKey-normalized), per entry; blocklist edited via native per-index listing/create/edit (Manage synonyms) + "Block suggestion" row action on the report query table reusing the 08-02 handoff; 3 plans — 09-01 blocklist model (installer v6) + cached suggestion source + rate-limited GET suggest endpoint, 09-02 accessible combobox script in the search box, 09-03 blocklist admin + report action | Phase 9 | Planned after Phase 8.1 |
+| 2026-10-12: 08.1-01 planned (complex track → audit first, fixes in 08.1-02+): read-only research plan; references = native Kentico 31.9.1 screens (Content hub filters/chips, native listing/edit) + kit previews + cross-screen comparison (earlier validation was per-screen only); Must/Should/Could findings with exported-component fixes; ≤1-page Suite admin UI conventions; ends in a decision checkpoint on fix scope | Phase 8.1 | 08.1-01 created |
+| 2026-10-12: Added Phase 8.1 Admin UI Consistency Audit (user: non-uniform admin UI, e.g. query tester search bar and filter chips odd-looking and not in a white card) — inserted before Suggestions so Phase 9 builds on fixed patterns. Phase 9 planning questions answered (see Phase 9 planning row) | Phase 8 | Extends milestone scope |
 | 2026-10-12: 08-02 unified, Phase 8 complete: verification re-run at UNIFY (build 0 warnings; admin + report DB tests pass on comm_projects_test; client 50/50). Skill gaps: design-screen APPLY re-invoke, csharp-refactoring, content-retrieval not evidenced (APPLY in an earlier session). Cross-page prefill handoff logged as a PROJECT key decision | Phase 8 | Phase 9 may reuse the handoff for report-row actions |
 | 2026-10-12: 08-02 applied: npm 31.9.1 ActionCell icon buttons are all aria-label="button" → labelled Buttons stacked in a ComponentCell; 31.9.1 ComponentCell needs a component type (an element crashes the page); Button title renders as a hover tooltip on its wrapper; handoff split into side-effect-free peek (render) + idempotent clear (effect) so StrictMode double calls cannot lose it; host: tester/rule/synonym prefill once each, untracked tester search, report state restored, 0 rules/synonyms saved | Phase 8 | Reports loop closed; runtime-vs-kit rule extended to components |
 | 2026-10-12: Enterprise audit on 08-02-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8 | Handoff bound to the exact target page path (never lands in an existing rule/synonym edit page); {email}/{number} placeholder texts cannot become rules/synonyms (server HasPlaceholder); prefilled tester search untracked; report range/sort/page restored per index from sessionStorage |
@@ -157,7 +163,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -188,9 +194,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Phase 8 complete, ready to plan Phase 9
-Next action: /paul:plan for Phase 9 (Suggestions)
-Resume file: .paul/ROADMAP.md
+Stopped at: 08.1-01 unified
+Next action: /paul:plan for 08.1-02 (action bar, chips, side-panel focus, spacing)
+Resume file: .paul/phases/08.1-admin-ui-consistency-audit/08.1-01-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

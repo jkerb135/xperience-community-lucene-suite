@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 2 of 4 complete
+Phases: 2 of 5 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -15,6 +15,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 |-------|------|-------|--------|-----------|
 | 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
 | 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
+| 8.1 | Admin UI Consistency Audit | 1/3 | In progress | - |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |
 
@@ -39,10 +40,24 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 - [x] 08-01: Search reports page — range bar, KPI tiles with deltas, trend chart, latency
 - [x] 08-02: Query tables (4 sorts, paging, (other)) + row actions (query tester / create rule / add synonym prefill)
 
+### Phase 8.1: Admin UI Consistency Audit (inserted)
+**Focus:** Enterprise design audit of every Suite admin screen against the Kentico admin design system (31.9.1 runtime): query tester (search bar and filter chips sit outside a card, look unlike native screens), compare mode, rules editors (conditions, boosts, pins/hides picker), synonyms terms editor, search reports. Findings ranked; non-uniform parts fixed so all screens share one layout/card/spacing/chip vocabulary before Phase 9 adds more admin UI.
+**Admin UI:** /xbyk-admin-ui:design-screen + admin UI design validation (SPECIAL-FLOWS)
+**Depends on:** Phase 8
+**Plans:**
+- [x] 08.1-01: Design audit (read-only) — captures vs native Kentico + kit, ranked findings, Suite admin UI conventions, user-chosen fix split
+- [ ] 08.1-02: Action bar + applied-filter chips (native listing layout), side-panel focus return, Row-in-Stack spacing (M3, M4, M5, S1)
+- [ ] 08.1-03: Query table one-line rows + actions menu, headers at 669 px, heading scale, validation pattern/timing, Could items (M1, M2, S2, S3, S4, C1–C3)
+
 ### Phase 9: Suggestions
 **Focus:** Query suggestions from surfaced queries; a rate-limited suggest endpoint in the Widgets package returning strings only (untracked); a progressive-enhancement search box script (accessible combobox); a per-index blocked-suggestions list with admin editor (blocks suggestions only, not reports).
-**Depends on:** Phase 7 (surfaced queries); Widgets package
-**Plans:** TBD
+**Depends on:** Phase 7 (surfaced queries); Widgets package; Phase 8.1 (admin UI conventions)
+**Decisions (2026-10-12):** suggest surfaced queries (90 days) by searches, skip ≥ 50% no-result and placeholder texts; block per entry by exact query or contained word; native blocklist listing + report "Block suggestion" action
+
+**Plans:**
+- [ ] 09-01: Blocklist model (installer v6) + cached suggestion source + rate-limited GET suggest endpoint (strings only, untracked)
+- [ ] 09-02: Accessible combobox script (progressive enhancement) wired into the search box
+- [ ] 09-03: Blocked-suggestions admin (listing/create/edit) + report row action
 
 ### Phase 10: Custom Activities
 **Focus:** Kentico custom activity types — search performed (one per logical search, scrubbed text), result clicked, no results — logged only with a current contact and Kentico consent/cookie level allowing it.
@@ -76,4 +91,4 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 8 complete)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 8.1 inserted)*
