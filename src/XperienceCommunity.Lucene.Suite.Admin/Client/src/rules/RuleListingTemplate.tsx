@@ -285,7 +285,9 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
       observer.current.observe(box);
     }
   }, []);
-  const columns = useMemo(() => COLUMNS.map((c) => (DATE_COLUMNS.has(c.name) ? { ...c, visible: showDates } : c)), [showDates]);
+  // npm 31.9.1 Table ignores TableColumn.visible, so hidden columns (and their cells) are left out.
+  const shown = useCallback((name: string) => showDates || !DATE_COLUMNS.has(name), [showDates]);
+  const columns = useMemo(() => COLUMNS.filter((c) => shown(c.name)), [shown]);
 
   const handlers = useRef<RowHandlers>({ remove: () => undefined, edit: () => undefined });
   const navigate = useNavigate();
@@ -334,9 +336,9 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
             columnName: "rowActions",
             component: () => <RowActions row={row} canManage={canManage} handlers={handlers} />,
           } satisfies ComponentCell,
-        ],
+        ].filter((cell) => shown(cell.columnName ?? "")),
       })),
-    [result, canManage],
+    [result, canManage, shown],
   );
 
   const closeDialog = () => {
