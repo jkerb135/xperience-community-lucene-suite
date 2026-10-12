@@ -13,7 +13,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 7 | Report Data | 0/2 | Planning | - |
+| 7 | Report Data | 1/2 | Planning | - |
 | 8 | Reports Admin | TBD | Not started | - |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |

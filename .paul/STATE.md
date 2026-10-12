@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 7 of 10 (Report Data) — In progress (1 of 2 plans)
-Plan: 07-01 complete
-Status: Ready for next PLAN (07-02 seed generator)
-Last activity: 2026-10-12 — Unified 07-01 (07-01-SUMMARY.md)
+Phase: 7 of 10 (Report Data) — Planning
+Plan: 07-02 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-12 — Audited .paul/phases/07-report-data/07-02-PLAN.md (07-02-AUDIT.md)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Enterprise audit on 07-02-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 7 | LUCENESUITE_SEED_CONFIRM = target DB name; seeder holds RollupLock and re-reads limits in the write transaction; clicks bounded by ResultCount; docs warn seeded history affects real queries' surfacing |
+| 2026-10-12: 07-02 planned: seeder writes via SqlBulkCopy without initializing Kentico against the target (no web-farm/cache side effects on the running host); range = N days before min(first daily day, watermark+1, earliest raw day, today); clear by explicit range; host range 2026-08-12..2026-10-10 (host: no daily rows, no watermark, raw from 2026-10-11) | Phase 7 | 07-02 |
 | 2026-10-12: 07-01 applied: "(other)" = range totals − named totals (NOT IN over the nullable QueryText timed out at 30 s on 200k rows; subtraction is exact because named + other partition the range, surfaced membership still decided by SQL); sums via Kentico AggregatedColumn; percentiles with decimal rank; volume 400 days × 500 queries: overview 104 ms, trend 105 ms, queries 119 ms, latency 86 ms | Phase 7 | Phase 8 renders from SearchReportService |
 | 2026-10-12: Enterprise audit on 07-01-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 7 | Surfaced membership decided in SQL (collation), CompleteThrough/IsComplete for unrolled days, PreviousIsPartial nulls deltas, future To rejected, Phase 8 owns authorization |
 | 2026-10-12: Phase 7 planning (user choices): seed generator = opt-in test runner (LUCENESUITE_SEED_CONNECTIONSTRING, nothing packaged); vocabulary + clicked items from the index (built-in list for the test DB); seed the host with ~60 removable days for DancingGoatSample; overview compares with the previous period. Seeder runs the real RollupEngine in memory and writes SearchDaily only for days before the job start (watermark or earliest raw day) and only into empty ranges (DailyRollupStore.Replace would move the watermark). Two plans: 07-01 report service, 07-02 seed generator + host seeding | Phase 7 | 07-01 created |
@@ -161,16 +163,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: b4fd37f feat(07-01): search report query service over SearchDaily
+Last commit: c71391d docs(paul): unify 07-01 report query service
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 07-01 unified
-Next action: /paul:plan (07-02 seed generator + host seeding)
-Resume file: .paul/phases/07-report-data/07-01-SUMMARY.md
+Stopped at: Plan 07-02 audited
+Next action: /paul:apply .paul/phases/07-report-data/07-02-PLAN.md
+Resume file: .paul/phases/07-report-data/07-02-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
