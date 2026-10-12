@@ -7,6 +7,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 1 | 06-01 | Public API + endpoint shape | Approved 2026-10-11 (before this process) |
 | 2 | 06-02 | Search component markup, parameters and URL names | Approved 2026-10-12 (heading labels resolved by 06-03) |
 | 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | Approved 2026-10-12 with one follow-up: host index stores readable facet values |
+| 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 
 ---
 
@@ -111,3 +112,30 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
 | #3 widgets, 4 host edits (incl. AreaRestrictionHelper allow-list), search box disabled in all Kentico preview, /site-search page (XpSearch page untouched) | Approved |
 | #3 facet values show raw code names | Follow-up: the CommunityProjects indexing strategy stores readable content-type facet values (host-only change + index rebuild; no Suite change; the host has no rules referencing facet values) |
 | Test traffic in comm_projects | Keep |
+
+---
+
+## 4. 07-02: Seeded demo history on the host (v0.2)
+
+1. **What was written:**
+   - `comm_projects`, table `LuceneSuite_SearchDaily`, index `DancingGoatSample`, days **2026-08-12..2026-10-10** (60 days, UTC), 3,477 rows. Nothing else was touched.
+   - Generated from the host index (39 documents, 114 texts) with 150 searches per weekday, random seed 2026, and rolled by the real rollup engine.
+   - Totals: 7,725 searches, 1,031 with no results (13 %), 2,335 clicked (30 %), 203 conversions.
+2. **Verified by SQL after the run:**
+   - No rows outside the range.
+   - The watermark is still empty.
+   - Raw searches are still 17, all real traffic from 2026-10-11/12.
+   - The rollup job starts at 2026-10-11, so it never rolls a seeded day.
+3. **What you can look at:**
+   - SQL for now, e.g. `SELECT QueryText, SUM(Searches) FROM LuceneSuite_SearchDaily GROUP BY QueryText ORDER BY 2 DESC`.
+   - The Phase 8 report screens once they exist.
+4. **To remove the seeded days** (run from the Suite repo root, in one shell):
+
+   ```bash
+   export LUCENESUITE_SEED_CONNECTIONSTRING="Data Source=localhost;Initial Catalog=comm_projects;Integrated Security=True;Encrypt=False" LUCENESUITE_SEED_CONFIRM=comm_projects LUCENESUITE_SEED_INDEX=DancingGoatSample LUCENESUITE_SEED_CLEAR=2026-08-12..2026-10-10
+   dotnet test tests/XperienceCommunity.Lucene.Suite.Tests --filter SeedRunner --logger "console;verbosity=detailed"
+   ```
+
+5. **Your decisions to confirm:**
+   - Keep the seeded history on the host (yes/no).
+   - Seeded texts count toward surfacing. Real queries that match a seeded text (e.g. "burr", "bleached") are named in reports and will seed Phase 9 suggestions after fewer real searches.

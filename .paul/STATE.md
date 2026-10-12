@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 7 of 10 (Report Data) — Planning
-Plan: 07-02 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-12 — Audited .paul/phases/07-report-data/07-02-PLAN.md (07-02-AUDIT.md)
+Phase: 7 of 10 (Report Data) — Applying
+Plan: 07-02 applied
+Status: APPLY complete, ready for UNIFY
+Last activity: 2026-10-12 — Applied 07-02 (seed runner; host seeded 2026-08-12..2026-10-10)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ○     [Applied, ready for UNIFY]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 07-02 applied: seed runner in tests/Seeding (generator → RollupEngine → SqlBulkCopy, RollupLock + serializable range re-read, DB-name confirm); texts normalized (lowercase/trim) because the SearchDaily unique index is case-insensitive and ignores trailing spaces; host comm_projects seeded DancingGoatSample 2026-08-12..2026-10-10 (3,477 rows, 7,725 searches; APPROVAL-CHECKS #4 with clear command) | Phase 7 | Phase 8 has 60 days of host history |
 | 2026-10-12: Enterprise audit on 07-02-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 7 | LUCENESUITE_SEED_CONFIRM = target DB name; seeder holds RollupLock and re-reads limits in the write transaction; clicks bounded by ResultCount; docs warn seeded history affects real queries' surfacing |
 | 2026-10-12: 07-02 planned: seeder writes via SqlBulkCopy without initializing Kentico against the target (no web-farm/cache side effects on the running host); range = N days before min(first daily day, watermark+1, earliest raw day, today); clear by explicit range; host range 2026-08-12..2026-10-10 (host: no daily rows, no watermark, raw from 2026-10-11) | Phase 7 | 07-02 |
 | 2026-10-12: 07-01 applied: "(other)" = range totals − named totals (NOT IN over the nullable QueryText timed out at 30 s on 200k rows; subtraction is exact because named + other partition the range, surfaced membership still decided by SQL); sums via Kentico AggregatedColumn; percentiles with decimal rank; volume 400 days × 500 queries: overview 104 ms, trend 105 ms, queries 119 ms, latency 86 ms | Phase 7 | Phase 8 renders from SearchReportService |
@@ -123,7 +124,7 @@ See PROJECT.md Key Decisions.
 | 04-01 audit deferrals: accent folding of synonym inputs; orphan synonyms after index rename/deletion; query-parser custom factories reading synonym syntax characters | 04-01 audit | S | KNOWN-LIMITATIONS |
 | Leftover XpSearch scheduled tasks (XpSearch.QueryLogRetention, XpSearch.PopularitySignal) fail on every CommunityProjects host start | 04-01 checkpoint | S | Part of the pending XpSearch DB-objects decision |
 | 04-02 audit deferrals: same term in several synonyms (no warning); Kind change without confirmation | 04-02 audit | S | KNOWN-LIMITATIONS |
-| Rules-overhead perf test (p95 < 10 ms) flaked once when the suite ran alongside the host and dev server; 7.4–8.8 ms alone | 05-01 APPLY | S | Watch; consider a CI-specific budget if it recurs |
+| Rules-overhead perf test (p95 < 10 ms) flaked once when the suite ran alongside the host and dev server; 7.4–8.8 ms alone. 07-02 APPLY (no src change, host + admin dev server running): 9.75 / 10.19 (fail) / 8.92 ms alone | 05-01 APPLY | S | Recurring: decide on a CI-specific budget or a quieter measurement |
 | 03-07 custom-data `<pre>` in the normal query tester uses the brand-purple token | 05-01 APPLY | S | KNOWN-LIMITATIONS; next change to the normal tester view |
 | Widgets: per-process rate limit, forgeable events, unfingerprinted JS asset; no NuGet metadata on either package | 06-01 audit / APPLY | S–M | KNOWN-LIMITATIONS; 06-02 asset versioning; release phase |
 | Widget strings English-only; search not usable inside Kentico preview (signed URLs); host facet values are display names (old code-name filter URLs no longer match) | v0.1 review / 06-04 | S | KNOWN-LIMITATIONS |
@@ -170,8 +171,8 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 07-02 audited
-Next action: /paul:apply .paul/phases/07-report-data/07-02-PLAN.md
+Stopped at: Plan 07-02 applied
+Next action: /paul:unify .paul/phases/07-report-data/07-02-PLAN.md
 Resume file: .paul/phases/07-report-data/07-02-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 

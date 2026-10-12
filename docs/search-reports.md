@@ -68,3 +68,45 @@ Each search's latency is stored in a fixed histogram:
 - **Overflow:** a percentile that lands in bucket 9 is shown as "over 5 s".
 - **Empty histogram:** no percentile is reported.
 - **Resolution:** results are limited to the bucket edges.
+
+## Seeding demo history
+
+The test project contains a dev-only seed runner that fills `LuceneSuite_SearchDaily` with plausible history, so reports can be built and demonstrated before real traffic exists. Nothing from it ships in a package.
+
+**How it builds the data:**
+
+- It generates raw searches the way the client contract describes them: as-you-type rows, paging, sessions, clicks weighted toward the top results, conversions, typos, off-topic queries and log-normal latency.
+- It rolls each day with the real rollup engine, so the stored numbers are what the same traffic would have produced live.
+- Search texts and clicked items come from the stored titles of a Lucene index, or from a built-in coffee-shop list when no index path is given.
+
+**What it writes:**
+
+- Only `SearchDaily` rows for the given index, and only on days that are empty and that the rollup job will never roll. The range is the N days ending before the earliest of: today (UTC), watermark + 1, the earliest raw search day, and the index's first `SearchDaily` day.
+- It never touches the watermark, the raw tables or other indexes.
+- It holds the rollup lock while it runs and writes in one serializable transaction.
+- It does not initialize Kentico against the target database; it uses plain SQL.
+
+| Variable | Meaning |
+|---|---|
+| `LUCENESUITE_SEED_CONNECTIONSTRING` | Target database (the runner is skipped without it) |
+| `LUCENESUITE_SEED_CONFIRM` | Must equal the target's database name, for seed and clear alike |
+| `LUCENESUITE_SEED_INDEX` | Index name the rows are written for |
+| `LUCENESUITE_SEED_INDEXPATH` | Optional: the index folder (e.g. `App_Data/LuceneSearch/<index>`); the newest `i-g*` generation is read, read-only |
+| `LUCENESUITE_SEED_TITLEFIELD` | Stored title field (default `Title`) |
+| `LUCENESUITE_SEED_DAYS` / `_PERDAY` / `_RANDOM` | Days (60, max 400), searches per weekday (150; weekends half), random seed (2026) |
+| `LUCENESUITE_SEED_CLEAR` | `yyyy-MM-dd..yyyy-MM-dd`: delete the index's rows in that range instead of seeding |
+
+Run it with:
+
+```bash
+dotnet test tests/XperienceCommunity.Lucene.Suite.Tests --filter SeedRunner --logger "console;verbosity=detailed"
+```
+
+The output names the seeded range and the exact `LUCENESUITE_SEED_CLEAR` value.
+
+**Use it on development and demo databases only:**
+
+- Seeded rows carry no marker. Clear deletes everything in the range you give it, including "(other)" rows that retention later folds into those days.
+- Seeded history counts toward the surfacing threshold of real queries with the same text, so real queries can surface, and later feed suggestions, on less real evidence.
+
+Never seed a production database.
