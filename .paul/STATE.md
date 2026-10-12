@@ -218,7 +218,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: d0f6c1c feat(08-02): query table and row actions (phase 8 unify commit follows)
+Last commit: 7a87e0c feat(09-03): blocked suggestions admin, one-click report block (Phase 9 complete)
 Branch: main (not pushed)
 Feature branches merged: none
 
