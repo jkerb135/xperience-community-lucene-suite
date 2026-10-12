@@ -88,6 +88,8 @@ export interface SavedReportState {
   readonly preset: string;
   readonly sort: string;
   readonly page: number;
+  /** Selected dashboard metric id; the caller validates it (metricById). */
+  readonly metric?: string;
 }
 
 const stateKey = (index: string) => `lucene-suite:reports:${index}`;

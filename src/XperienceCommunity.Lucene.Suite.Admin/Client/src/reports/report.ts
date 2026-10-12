@@ -172,3 +172,218 @@ export const niceTicks = (max: number): number[] => {
 
 /** Label every n-th category so at most maxLabels appear. */
 export const labelEvery = (count: number, maxLabels = 8): number => Math.max(1, Math.ceil(count / maxLabels));
+
+/** One report day with every daily KPI count (mirrors the server's SearchReportsDay). */
+export interface KpiDay {
+  readonly day: Day;
+  readonly searches: number;
+  readonly zeroResultSearches: number;
+  readonly clickedSearches: number;
+  readonly convertedSearches: number;
+  readonly clicks: number;
+  readonly clickPositionSum: number;
+  readonly sessionDays: number;
+  readonly isComplete: boolean;
+}
+
+/** Range totals of the same counts (the overview's current or previous period). */
+export type KpiTotals = Omit<KpiDay, "day" | "isComplete">;
+
+export type MetricKind = "count" | "rate" | "position";
+
+export interface Metric {
+  readonly id: string;
+  readonly caption: string;
+  readonly definition: string;
+  readonly kind: MetricKind;
+  /** Whether a higher value is the good direction. */
+  readonly higherIsBetter: boolean;
+  readonly numerator: (t: KpiTotals) => number;
+  /** Absent for counts; a rate is null when its denominator is 0. */
+  readonly denominator?: (t: KpiTotals) => number;
+}
+
+export const METRICS: readonly Metric[] = [
+  { id: "searches", caption: "Searches", definition: "Logical searches in the period.", kind: "count", higherIsBetter: true, numerator: (t) => t.searches },
+  {
+    id: "noResultRate",
+    caption: "No-result rate",
+    definition: "Share of searches that returned nothing.",
+    kind: "rate",
+    higherIsBetter: false,
+    numerator: (t) => t.zeroResultSearches,
+    denominator: (t) => t.searches,
+  },
+  {
+    id: "ctr",
+    caption: "Click-through rate",
+    definition: "Share of searches with at least one result click.",
+    kind: "rate",
+    higherIsBetter: true,
+    numerator: (t) => t.clickedSearches,
+    denominator: (t) => t.searches,
+  },
+  {
+    id: "conversionRate",
+    caption: "Conversion rate",
+    definition: "Share of searches followed by a conversion.",
+    kind: "rate",
+    higherIsBetter: true,
+    numerator: (t) => t.convertedSearches,
+    denominator: (t) => t.searches,
+  },
+  {
+    id: "avgClickPosition",
+    caption: "Avg. click position",
+    definition: "Average position of clicked results (1 is first).",
+    kind: "position",
+    higherIsBetter: false,
+    numerator: (t) => t.clickPositionSum,
+    denominator: (t) => t.clicks,
+  },
+  { id: "sessionDays", caption: "Session-days", definition: "Distinct search sessions per day, summed.", kind: "count", higherIsBetter: true, numerator: (t) => t.sessionDays },
+];
+
+export const DEFAULT_METRIC = METRICS[0];
+
+/** The metric with this id, else Searches (stored state may be stale or tampered with). */
+export const metricById = (id: string | null | undefined): Metric => METRICS.find((m) => m.id === id) ?? DEFAULT_METRIC;
+
+/** The metric's value for a day or a range; null when a rate's denominator is 0. */
+export const valueOf = (metric: Metric, totals: KpiTotals): number | null => {
+  if (!metric.denominator) {
+    return metric.numerator(totals);
+  }
+  const denominator = metric.denominator(totals);
+  return denominator === 0 ? null : metric.numerator(totals) / denominator;
+};
+
+export const series = (days: readonly KpiDay[], metric: Metric): (number | null)[] => days.map((day) => valueOf(metric, day));
+
+/** Trailing average over up to `window` values, skipping nulls; null until a value exists in the window. */
+export const rollingAverage = (values: readonly (number | null)[], window = 7): (number | null)[] =>
+  values.map((_, i) => {
+    const present = values.slice(Math.max(0, i - window + 1), i + 1).filter((v): v is number => v != null);
+    return present.length === 0 ? null : present.reduce((a, b) => a + b, 0) / present.length;
+  });
+
+/** Change from previous to current: relative for counts, absolute for rates and positions; null without a comparison. */
+export const deltaOf = (metric: Metric, current: number | null, previous: number | null, partial: boolean): number | null => {
+  if (partial || current == null || previous == null) {
+    return null;
+  }
+  if (metric.kind === "count") {
+    return previous === 0 ? null : (current - previous) / previous;
+  }
+  return current - previous;
+};
+
+export type Tone = "good" | "bad" | "neutral";
+
+/** Good/bad by the metric's direction, not by sign: a falling no-result rate is good. A change that rounds to 0 is neutral. */
+export const deltaTone = (metric: Metric, delta: number | null): Tone => {
+  if (delta == null || round1(delta * (metric.kind === "position" ? 1 : 100)) === 0) {
+    return "neutral";
+  }
+  return delta > 0 === metric.higherIsBetter ? "good" : "bad";
+};
+
+/** The metric's value formatted for display. */
+export const formatMetric = (metric: Metric, value: number | null, locale?: string): string =>
+  value == null
+    ? DASH
+    : metric.kind === "count"
+      ? formatCount(Math.round(value), locale)
+      : metric.kind === "rate"
+        ? formatRate(value, locale)
+        : formatPosition(value, locale);
+
+/** The delta text in the metric's units: relative % for counts, pp for rates, positions for position. */
+export const formatMetricDelta = (metric: Metric, current: number | null, previous: number | null, partial: boolean, delta: number | null, locale?: string): string =>
+  metric.kind === "count"
+    ? countDelta(delta, partial, locale)
+    : metric.kind === "rate"
+      ? rateDelta(current, previous, partial, locale)
+      : positionDelta(current, previous, partial, locale);
+
+export interface DayValue {
+  readonly day: Day;
+  readonly value: number;
+}
+
+export interface Insights {
+  readonly value: number | null;
+  readonly previous: number | null;
+  readonly delta: number | null;
+  readonly tone: Tone;
+  readonly dailyAverage: number | null;
+  /** Complete days only; null when no complete day has a value. */
+  readonly peak: DayValue | null;
+  readonly lowest: DayValue | null;
+  readonly activeDays: number;
+  readonly totalDays: number;
+  /** The latest complete day against the 7-day rolling average ending on it. */
+  readonly latest: (DayValue & { readonly average: number }) | null;
+  readonly noResultShare: number | null;
+}
+
+export const insights = (days: readonly KpiDay[], metric: Metric, current: KpiTotals, previous: KpiTotals, partial: boolean): Insights => {
+  const values = series(days, metric);
+  const rolling = rollingAverage(values);
+  const value = valueOf(metric, current);
+  const before = valueOf(metric, previous);
+  const delta = deltaOf(metric, value, before, partial);
+  const present = values.filter((v): v is number => v != null);
+  const sum = present.reduce((a, b) => a + b, 0);
+  const complete = days.flatMap((day, i) => (day.isComplete && values[i] != null ? [{ day: day.day, value: values[i] as number, i }] : []));
+  const pick = (better: (a: number, b: number) => boolean) =>
+    complete.reduce<(typeof complete)[number] | null>((best, x) => (best === null || better(x.value, best.value) ? x : best), null);
+  const peak = pick((a, b) => a > b);
+  const lowest = pick((a, b) => a < b);
+  const last = complete.length > 0 ? complete[complete.length - 1] : null;
+  const lastAverage = last ? rolling[last.i] : null;
+  return {
+    value,
+    previous: before,
+    delta,
+    tone: deltaTone(metric, delta),
+    // Counts average over every day of the range; rates over the days that have a value.
+    dailyAverage: metric.kind === "count" ? (days.length > 0 ? sum / days.length : null) : present.length > 0 ? sum / present.length : null,
+    peak: peak && { day: peak.day, value: peak.value },
+    lowest: lowest && { day: lowest.day, value: lowest.value },
+    activeDays: days.filter((day) => day.searches > 0).length,
+    totalDays: days.length,
+    latest: last && lastAverage != null ? { day: last.day, value: last.value, average: lastAverage } : null,
+    noResultShare: current.searches === 0 ? null : current.zeroResultSearches / current.searches,
+  };
+};
+
+/** 3–5 evenly spaced ticks from 0 that cover max, allowing fractional steps (rates, positions). */
+export const fractionTicks = (max: number): number[] => {
+  if (!(max > 0)) {
+    return [0, 1];
+  }
+  const rough = max / 4;
+  const magnitude = 10 ** Math.floor(Math.log10(rough));
+  const normalized = rough / magnitude;
+  const step = (normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10) * magnitude;
+  const count = Math.ceil(max / step - 1e-9);
+  // toPrecision drops float noise such as 0.15000000000000002.
+  return Array.from({ length: count + 1 }, (_, i) => Number((i * step).toPrecision(12)));
+};
+
+/**
+ * The same-length range one period earlier (-1) or later (+1), or null when it would leave what the server keeps
+ * (after today, or starting before the oldest retained day today − maxDays + 1).
+ */
+export const shiftRange = (range: DayRange, direction: -1 | 1, today: Day, maxDays: number): DayRange | null => {
+  const days = lengthOf(range) * direction;
+  const shifted = { from: addDays(range.from, days), to: addDays(range.to, days) };
+  return isAllowed(shifted, today, maxDays) && shifted.from >= addDays(today, 1 - maxDays) ? shifted : null;
+};
+
+/** The preset a stepped range still belongs to: its length matches the preset's (stepping keeps "7 days" selected). */
+export const presetForLength = (range: DayRange, preset: string | undefined, maxDays: number): string | null => {
+  const match = PRESETS.find((p) => p.id === preset);
+  return match && Math.min(match.days, maxDays) === lengthOf(range) ? match.id : null;
+};

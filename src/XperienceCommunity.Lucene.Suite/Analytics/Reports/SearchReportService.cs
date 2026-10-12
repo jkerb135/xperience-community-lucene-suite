@@ -57,7 +57,17 @@ internal sealed class SearchReportService(
         {
             var day = range.From.AddDays(offset);
             var totals = byDay.GetValueOrDefault(day);
-            return new ReportDay(day, totals?.Searches ?? 0, totals?.ZeroResultSearches ?? 0, totals?.ClickedSearches ?? 0, totals?.Ctr, day <= watermark);
+            return new ReportDay(
+                day,
+                totals?.Searches ?? 0,
+                totals?.ZeroResultSearches ?? 0,
+                totals?.ClickedSearches ?? 0,
+                totals?.ConvertedSearches ?? 0,
+                totals?.Clicks ?? 0,
+                totals?.ClickPositionSum ?? 0,
+                totals?.SessionDays ?? 0,
+                totals?.Ctr,
+                day <= watermark);
         }).ToList();
         return new ReportTrend(days, watermark);
     }

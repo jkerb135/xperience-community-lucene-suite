@@ -172,6 +172,10 @@ public sealed class SearchReportsPage(
                     Searches = day.Searches,
                     ZeroResultSearches = day.ZeroResultSearches,
                     ClickedSearches = day.ClickedSearches,
+                    ConvertedSearches = day.ConvertedSearches,
+                    Clicks = day.Clicks,
+                    ClickPositionSum = day.ClickPositionSum,
+                    SessionDays = day.SessionDays,
                     Ctr = day.Ctr,
                     IsComplete = day.IsComplete,
                 }).ToList(),
@@ -198,6 +202,7 @@ public sealed class SearchReportsPage(
         SubmittedSearches = totals.SubmittedSearches,
         ClickedSearches = totals.ClickedSearches,
         Clicks = totals.Clicks,
+        ClickPositionSum = totals.ClickPositionSum,
         ConvertedSearches = totals.ConvertedSearches,
         Conversions = totals.Conversions,
         SessionDays = totals.SessionDays,
@@ -384,6 +389,9 @@ public sealed class SearchReportsTotals
     /// <summary>Attributed clicks.</summary>
     public long Clicks { get; set; }
 
+    /// <summary>Sum of clicked result positions (1-based); ÷ clicks = average click position.</summary>
+    public long ClickPositionSum { get; set; }
+
     /// <summary>Searches with at least one conversion.</summary>
     public long ConvertedSearches { get; set; }
 
@@ -442,6 +450,18 @@ public sealed class SearchReportsDay
 
     /// <summary>Searches with at least one click.</summary>
     public long ClickedSearches { get; set; }
+
+    /// <summary>Searches with at least one conversion.</summary>
+    public long ConvertedSearches { get; set; }
+
+    /// <summary>Result clicks.</summary>
+    public long Clicks { get; set; }
+
+    /// <summary>Sum of clicked result positions (1-based); ÷ clicks = average click position.</summary>
+    public long ClickPositionSum { get; set; }
+
+    /// <summary>Distinct sessions of the day.</summary>
+    public long SessionDays { get; set; }
 
     /// <summary>Clicked searches ÷ searches; null without searches.</summary>
     public double? Ctr { get; set; }

@@ -342,7 +342,7 @@ export const QueryTesterTemplate = ({
                             fontFamily: "monospace",
                             color: "var(--color-text-high-emphasis)",
                             background: "var(--color-background-shelf-solid)",
-                            border: `${Spacing.Micro}px solid var(--color-border-default)`,
+                            border: `${Spacing.Micro} solid var(--color-border-default)`,
                           }}
                         >
                           {rule.userData}

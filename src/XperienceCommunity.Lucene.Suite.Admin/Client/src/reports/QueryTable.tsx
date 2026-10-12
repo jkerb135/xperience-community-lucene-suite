@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageCommandProvider } from "@kentico/xperience-admin-base";
 import {
   Button,
@@ -22,16 +22,17 @@ import {
 } from "@kentico/xperience-admin-components";
 import { adminHref, latestRequest } from "../query-tester/state.ts";
 import { give, type HandoffTarget } from "./handoff.ts";
+import { cardHeadline, visuallyHidden } from "./dashboard.tsx";
 import { DASH, formatCount, formatPosition, formatRate, percentileLabel, type DayRange, type Percentile } from "./report.ts";
 
 export const SORTS = [
-  { id: "Searches", label: "Top" },
-  { id: "NoResults", label: "No results" },
-  { id: "LowestCtr", label: "Lowest CTR" },
-  { id: "Slowest", label: "Slowest" },
+  { id: "Searches", label: "Top", title: "Most searched queries" },
+  { id: "NoResults", label: "No results", title: "Queries without results" },
+  { id: "LowestCtr", label: "Lowest CTR", title: "Queries with the lowest click-through" },
+  { id: "Slowest", label: "Slowest", title: "Slowest queries" },
 ] as const;
 
-interface QueryRow {
+export interface QueryRow {
   readonly queryText: string | null;
   readonly isBrowse: boolean;
   readonly hasPlaceholder: boolean;
@@ -42,7 +43,7 @@ interface QueryRow {
   readonly latencyP95: Percentile | null;
 }
 
-interface QueriesResult {
+export interface QueriesResult {
   readonly error?: string | null;
   readonly rows: QueryRow[];
   readonly other: QueryRow | null;
@@ -80,16 +81,87 @@ const cell = (value: string, columnName: string): StringCell => ({ type: CellTyp
 const COLUMNS = [
   column("query", "Query", 40),
   column("searches", "Searches"),
-  column("noResults", "No-result rate"),
+  column("noResults", "No results"),
   column("ctr", "CTR"),
-  column("position", "Avg. position"),
-  column("p95", "p95 latency"),
-  // Wide enough for the widest labelled button; the three are stacked.
-  column("actions", "Actions", 18, 18),
+  column("position", "Avg. pos."),
+  column("p95", "p95"),
+  // Three icon buttons in one line, as in native listings.
+  column("actions", "Actions", 11, 11),
 ];
 
-const BROWSE = "(browse – no query text)";
+export const BROWSE = "(browse – no query text)";
 const PLACEHOLDER = "Contains a removed value; a rule or synonym would never match";
+
+/** Why Create rule / Add synonym are unavailable for this row, or null. */
+export const blockedReason = (row: QueryRow): string | null =>
+  row.isBrowse ? "The browse row has no query text" : row.hasPlaceholder ? PLACEHOLDER : null;
+
+/** Hands the query to the target page (one-time sessionStorage handoff) and navigates there. */
+export const openTarget = (target: HandoffTarget, path: string, query: string) => {
+  give(target, path, query);
+  window.location.assign(adminHref(path, window.location.pathname));
+};
+
+export interface RowActionsProps {
+  readonly row: QueryRow;
+  readonly canManageRules: boolean;
+  readonly canManageSynonyms: boolean;
+  readonly queryTesterPath?: string;
+  readonly ruleCreatePath: string;
+  readonly synonymCreatePath: string;
+}
+
+/**
+ * Listing-style row actions: icon-only buttons in one line. Each has a full accessible name (the npm 31.9.1 ActionCell
+ * announces every icon as "button"). A disabled button cannot take focus, so its reason is also given as hidden text.
+ */
+export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTesterPath, ruleCreatePath, synonymCreatePath }: RowActionsProps) => {
+  const query = row.queryText ?? "";
+  const blocked = blockedReason(row);
+  const ruleReason = blocked ?? (canManageRules ? null : "Requires Site Search → Manage rules");
+  const synonymReason = blocked ?? (canManageSynonyms ? null : "Requires Site Search → Manage synonyms");
+  const name = row.isBrowse ? "the browse row" : `"${query}"`;
+  return (
+    <div style={{ display: "flex", flexWrap: "nowrap", alignItems: "center", gap: Spacing.XXS }}>
+      {queryTesterPath !== undefined && (
+        <Button
+          icon="xp-magnifier"
+          size={ButtonSize.S}
+          color={ButtonColor.Quinary}
+          borderless
+          aria-label={`Open ${name} in the query tester`}
+          title="Open in query tester"
+          onClick={() => openTarget("queryTester", queryTesterPath, query)}
+        />
+      )}
+      <Button
+        icon="xp-plus-circle"
+        size={ButtonSize.S}
+        color={ButtonColor.Quinary}
+        borderless
+        aria-label={`Create rule for ${name}`}
+        title={ruleReason ?? "Create rule"}
+        disabled={ruleReason !== null}
+        onClick={() => openTarget("ruleCreate", ruleCreatePath, query)}
+      />
+      <Button
+        icon="xp-arrows-h"
+        size={ButtonSize.S}
+        color={ButtonColor.Quinary}
+        borderless
+        aria-label={`Add synonym for ${name}`}
+        title={synonymReason ?? "Add synonym"}
+        disabled={synonymReason !== null}
+        onClick={() => openTarget("synonymCreate", synonymCreatePath, query)}
+      />
+      {(ruleReason || synonymReason) && (
+        <span style={visuallyHidden}>
+          {[ruleReason && `Create rule unavailable: ${ruleReason}.`, synonymReason && `Add synonym unavailable: ${synonymReason}.`].filter(Boolean).join(" ")}
+        </span>
+      )}
+    </div>
+  );
+};
 
 export const QueryTable = (props: QueryTableProps) => {
   const { range, sort, page, onSortChange, onPageChange, bucketBounds } = props;
@@ -120,51 +192,21 @@ export const QueryTable = (props: QueryTableProps) => {
     void load();
   }, [load]);
 
-  const open = (target: HandoffTarget, path: string, query: string) => {
-    give(target, path, query);
-    window.location.assign(adminHref(path, window.location.pathname));
-  };
-
-  // Labelled buttons rather than the npm ActionCell: in 31.9.1 its icon-only buttons are all announced as "button".
   // The 31.9.1 ComponentCell renders `component` as a component type, not an element.
-  const actionsFor = (row: QueryRow): ComponentCell => {
-    const query = row.queryText ?? "";
-    const blocked = row.isBrowse ? "The browse row has no query text" : row.hasPlaceholder ? PLACEHOLDER : null;
-    return {
-      type: CellType.Component,
-      columnName: "actions",
-      component: () => (
-        <Stack spacing={Spacing.XS}>
-          <Button
-            label="Query tester"
-            icon="xp-magnifier"
-            size={ButtonSize.S}
-            color={ButtonColor.Tertiary}
-            title="Open this query in the query tester"
-            onClick={() => open("queryTester", props.queryTesterPath, query)}
-          />
-          <Button
-            label="Create rule"
-            icon="xp-plus-circle"
-            size={ButtonSize.S}
-            color={ButtonColor.Tertiary}
-            disabled={blocked !== null || !props.canManageRules}
-            title={blocked ?? (props.canManageRules ? "Create a rule for this query" : "Requires Site Search → Manage rules")}
-            onClick={() => open("ruleCreate", props.ruleCreatePath, query)}
-          />
-          <Button
-            label="Add synonym"
-            icon="xp-arrows-h"
-            size={ButtonSize.S}
-            color={ButtonColor.Tertiary}
-            disabled={blocked !== null || !props.canManageSynonyms}
-            title={blocked ?? (props.canManageSynonyms ? "Add a synonym starting with this query" : "Requires Site Search → Manage synonyms")}
-            onClick={() => open("synonymCreate", props.synonymCreatePath, query)}
-          />
-        </Stack>
-      ),
-    };
-  };
+  const actionsFor = (row: QueryRow): ComponentCell => ({
+    type: CellType.Component,
+    columnName: "actions",
+    component: () => (
+      <RowActions
+        row={row}
+        canManageRules={props.canManageRules}
+        canManageSynonyms={props.canManageSynonyms}
+        queryTesterPath={props.queryTesterPath}
+        ruleCreatePath={props.ruleCreatePath}
+        synonymCreatePath={props.synonymCreatePath}
+      />
+    ),
+  });
 
   const rows: TableRow[] | undefined = useMemo(() => result?.rows.map((row, i) => ({
     identifier: i,
@@ -184,7 +226,7 @@ export const QueryTable = (props: QueryTableProps) => {
   const totalPages = result ? Math.max(1, Math.ceil(result.totalCount / result.pageSize)) : 1;
 
   return (
-    <Card headline={heading("Queries")}>
+    <Card headline={cardHeadline("Search terms", SORTS.find((s) => s.id === sort)?.title ?? SORTS[0].title)}>
       <Stack spacing={Spacing.M}>
         <NameToggleButtons selectedItemId={sort} items={SORTS.map((s) => ({ id: s.id, label: s.label }))} onChange={onSortChange} />
         {failed && <NotificationBarAlert>The queries could not be loaded. The last loaded table is shown; change the sort or period to retry.</NotificationBarAlert>}
@@ -208,9 +250,3 @@ export const QueryTable = (props: QueryTableProps) => {
     </Card>
   );
 };
-
-const heading = (children: ReactNode) => (
-  <span role="heading" aria-level={2}>
-    {children}
-  </span>
-);

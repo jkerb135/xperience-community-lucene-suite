@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Spacing } from "@kentico/xperience-admin-components";
-import { labelEvery, niceTicks } from "./report.ts";
+import { fractionTicks, labelEvery, niceTicks } from "./report.ts";
 
 export interface Bar {
   readonly label: string;
@@ -19,6 +19,11 @@ interface BarChartProps {
   readonly overlayLabel?: string;
   readonly mutedLabel?: string;
   readonly formatValue: (value: number) => string;
+  /** A line over the bars (e.g. a rolling average); null breaks the line. */
+  readonly line?: readonly (number | null)[];
+  readonly lineLabel?: string;
+  /** Fractional axis steps for rates and positions (counts use whole numbers). */
+  readonly fractional?: boolean;
 }
 
 const HEIGHT = 220;
@@ -30,10 +35,11 @@ const RIGHT = 8;
 // Only tokens the 31.9.1 admin runtime defines (the kit repo has newer ones, e.g. --color-background-primary, that resolve to nothing here).
 const BAR = "var(--color-icon-highlighted)";
 const MUTED = "var(--color-background-selected)";
+const LINE = "var(--color-info-text)";
 const text = { fill: "var(--color-text-low-emphasis)", fontSize: "smaller" };
 
 /** Column chart in kit tokens only; pair it with a table view for exact values. */
-export const BarChart = ({ bars, summary, valueLabel, overlayLabel, mutedLabel, formatValue }: BarChartProps) => {
+export const BarChart = ({ bars, summary, valueLabel, overlayLabel, mutedLabel, formatValue, line, lineLabel, fractional }: BarChartProps) => {
   const container = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(640);
   const hatch = `hatch-${useId().replace(/:/g, "")}`;
@@ -48,7 +54,8 @@ export const BarChart = ({ bars, summary, valueLabel, overlayLabel, mutedLabel, 
     return () => observer.disconnect();
   }, []);
 
-  const ticks = niceTicks(Math.max(0, ...bars.map((bar) => bar.value)));
+  const max = Math.max(0, ...bars.map((bar) => bar.value), ...(line ?? []).map((value) => value ?? 0));
+  const ticks = fractional ? fractionTicks(max) : niceTicks(max);
   const top = ticks[ticks.length - 1];
   const plotWidth = width - LEFT - RIGHT;
   const plotHeight = HEIGHT - TOP - BOTTOM;
@@ -97,11 +104,21 @@ export const BarChart = ({ bars, summary, valueLabel, overlayLabel, mutedLabel, 
             </g>
           );
         })}
+        {line && (
+          <path
+            d={line
+              .map((value, i) => (value == null ? null : `${i === 0 || line[i - 1] == null ? "M" : "L"}${LEFT + i * band + band / 2},${y(value)}`))
+              .filter(Boolean)
+              .join(" ")}
+            style={{ fill: "none", stroke: LINE, strokeWidth: 2 }}
+          />
+        )}
       </svg>
       <ul aria-hidden="true" style={{ display: "flex", gap: Spacing.L, listStyle: "none", margin: 0, padding: 0, color: "var(--color-text-default-on-light)", fontSize: "smaller" }}>
         <LegendItem fill={BAR} label={valueLabel} />
         {overlayLabel && <LegendItem fill="var(--color-alert-icon)" label={overlayLabel} />}
         {hasMuted && mutedLabel && <LegendItem fill={`url(#${hatch})`} label={mutedLabel} hatched />}
+        {line && lineLabel && <LegendItem fill={LINE} label={lineLabel} />}
       </ul>
     </div>
   );

@@ -56,7 +56,17 @@ internal sealed record ReportOverview(
     DateOnly? CompleteThrough);
 
 /// <summary>One trend day; <see cref="IsComplete"/> is false for days after the rollup watermark.</summary>
-internal sealed record ReportDay(DateOnly Day, long Searches, long ZeroResultSearches, long ClickedSearches, double? Ctr, bool IsComplete);
+internal sealed record ReportDay(
+    DateOnly Day,
+    long Searches,
+    long ZeroResultSearches,
+    long ClickedSearches,
+    long ConvertedSearches,
+    long Clicks,
+    long ClickPositionSum,
+    long SessionDays,
+    double? Ctr,
+    bool IsComplete);
 
 internal sealed record ReportTrend(IReadOnlyList<ReportDay> Days, DateOnly? CompleteThrough);
 

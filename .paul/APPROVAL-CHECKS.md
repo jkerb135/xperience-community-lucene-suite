@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 8 | 08.1-03 | Search reports dashboard redesign, range stepping, listing-style query row actions | Pending |
 | 7 | 08.1-02 | Query tester native action bar + chips row, side-panel focus return, 24 px region gaps | Pending |
 
 ---
@@ -230,3 +231,33 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **The visible "Query" label and explanation are gone** (native listing style). The hint "leave empty to list all documents" now lives in the placeholder and disappears while typing.
    - **The rule editors got the spacing fix as well,** although the plan listed them as off-limits. Their rows were collapsed to 0 px gaps by the same Row-in-Stack cause, and the change is spacing only.
    - **New finding for 08.1-03 (M6):** at 669 px, the Remove buttons of facet, context and boost rows overflow the rule form card by 31–47 px (`after-rule-rows-1100-remove-overflow.jpg`). This is not caused by this plan: the wrapper doesn't change the Row's width.
+
+---
+
+## 8. 08.1-03: Search reports dashboard (v0.2)
+
+1. **Where:** Site search → DancingGoatSample → Search reports.
+2. **Captures** (project-sidecar/docs/ui-audit/): `after3-reports-top-1700.jpg`, `after3-querytable-1700.jpg`, `after3-reports-7days-stepped-1100.jpg`. Reference: the Community Portal reporting screenshot in the kit README.
+3. **What I verified in the browser pane** (669 and 1269 px content width):
+   - **Layout** (from your choices):
+     - Period toolbar with ‹ › stepping: 7 days shows Oct 5–11 with Next disabled; Previous moves to Sep 28–Oct 4. "7 days" stays selected, and the stepped week is restored after a reload.
+     - KPI strip with Volume and Quality tiles (wraps 2+2+2 at 669 px). Selecting a tile charts its metric and restores after a reload.
+     - Trend card with "Show breakdown" (side panel) next to Needs attention (top 5 no-result queries, browse row excluded) and Response time ("Response-time details" side panel).
+     - Query table with a sort-driven title.
+     - The trend "Show as table" view is paginated by week (7 days per page), newest first: 30 days gives 5 pages, page 1 Oct 11–5, page 2 Oct 4–Sep 28. It resets when the range or metric changes.
+   - **Numbers, 30 days vs SQL on SearchDaily:** searches 3,681 = 3,681; session-days 1,480 = 1,480; CTR 30.7 % = 30.7 %.
+   - **Query table:**
+     - 25 rows, content 48 px inside a 50 px row (was 104 px, overlapping). No header clipped.
+     - Actions are three icon buttons on one line, named `Open "q" in the query tester` / `Create rule for "q"` / `Add synonym for "q"`.
+     - The browse row's rule and synonym buttons are disabled, with the reason as a tooltip and as hidden text.
+   - **Focus:** the breakdown panel (Escape) and the response-time panel (Escape, X) return to their buttons.
+   - **Contrast:**
+     - White on accent: 8.0–11.5:1.
+     - Good delta `--color-success-text`: 5.03:1. Bad delta `--color-alert-text`: 4.99:1.
+     - Deltas also carry hidden "better"/"worse" text.
+   - **Host data:** SearchEvent 19 / 19, Rule 0 / 0, Synonym 0 / 0, Interaction 2 / 2. Nothing saved.
+4. **Your decisions to confirm:**
+   - **Layout changes:** the insight notes moved into the "Show breakdown" side panel (you asked for side-panel insights; the tile only selects the metric). The latency histogram moved into a side panel.
+   - **Row actions** are icon-only buttons like native listings. Hovering gives a tooltip; screen readers hear the full name.
+   - **Needs attention** costs one extra Queries request per range change.
+   - **Not observed:** View-only users (disabled-by-permission icons); the empty "No searches" state; a range with no final day.

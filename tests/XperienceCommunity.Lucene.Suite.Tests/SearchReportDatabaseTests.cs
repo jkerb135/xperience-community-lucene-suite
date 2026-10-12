@@ -74,6 +74,20 @@ public sealed class SearchReportDatabaseTests(ITestOutputHelper output)
     }
 
     [DatabaseFact]
+    public void Trend_DaysSumToTheOverviewTotals_ForEveryKpi()
+    {
+        Seed();
+
+        var days = Service().Trend(Index, From, To).Days;
+        var c = Service().Overview(Index, From, To).Current;
+
+        Assert.Equal(
+            (c.Searches, c.ZeroResultSearches, c.ClickedSearches, c.ConvertedSearches, c.Clicks, c.ClickPositionSum, c.SessionDays),
+            (days.Sum(d => d.Searches), days.Sum(d => d.ZeroResultSearches), days.Sum(d => d.ClickedSearches), days.Sum(d => d.ConvertedSearches),
+                days.Sum(d => d.Clicks), days.Sum(d => d.ClickPositionSum), days.Sum(d => d.SessionDays)));
+    }
+
+    [DatabaseFact]
     public void Trend_BeforeAnyRollup_HasNoCompleteDays()
     {
         Seed(watermark: null);

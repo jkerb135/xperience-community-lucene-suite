@@ -41,6 +41,9 @@ public sealed class SearchReportsPageDatabaseTests
         Assert.Null(result.CompleteThrough);
         Assert.Equal(30, result.Days.Count);
         Assert.Equal(overview.Current.Searches, result.Days.Sum(day => day.Searches));
+        Assert.Equal(
+            (overview.Current.ConvertedSearches, overview.Current.Clicks, overview.Current.ClickPositionSum, overview.Current.SessionDays),
+            (result.Days.Sum(day => day.ConvertedSearches), result.Days.Sum(day => day.Clicks), result.Days.Sum(day => day.ClickPositionSum), result.Days.Sum(day => day.SessionDays)));
         Assert.DoesNotContain(result.Days, day => day.IsComplete);
         Assert.Equal(overview.Current.Searches, result.Latency!.Buckets.Sum());
         Assert.Equal(9, result.Latency.BucketUpperBoundsMs.Count);
