@@ -107,7 +107,8 @@ const COLUMNS = [
   column("validUntil", "Valid until (UTC)", 18, 12),
   column("conditions", "Conditions", 30, 12),
   column("actions", "Actions", 22, 10),
-  column("rowActions", "", 9, 9, false, true),
+  // npm Table shows the column name for an empty caption; native listings leave the row-action header blank.
+  column("rowActions", " ", 9, 9, false, true),
 ];
 
 const text = (value: string, columnName: string): StringCell => ({ type: CellType.String, value, columnName, tooltipText: value || undefined });
