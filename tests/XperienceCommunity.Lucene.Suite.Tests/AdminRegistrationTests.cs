@@ -60,7 +60,8 @@ public class AdminRegistrationTests
         Assert.Equal(typeof(SearchTuningSectionPage), parents[typeof(SynonymListingPage)]);
         Assert.Equal(typeof(SynonymListingPage), parents[typeof(SynonymCreatePage)]);
         Assert.Equal(typeof(SynonymListingPage), parents[typeof(SynonymEditPage)]);
-        Assert.Equal(9, parents.Count);
+        Assert.Equal(typeof(SearchTuningSectionPage), parents[typeof(SearchReportsPage)]);
+        Assert.Equal(10, parents.Count);
     }
 
     [Fact]
@@ -76,6 +77,16 @@ public class AdminRegistrationTests
     {
         Assert.All(Pages.Where(p => p.Type != typeof(RuleCreatePage) && p.Type != typeof(SynonymCreatePage)), p => Assert.Equal(SystemPermissions.VIEW, p.Type.GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission));
         Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.Search))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
+        Assert.Equal(SystemPermissions.VIEW, typeof(SearchReportsPage).GetMethod(nameof(SearchReportsPage.Report))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
+    }
+
+    [Fact]
+    public void ReportsPage_IsTheFirstSectionPage_WithItsClientTemplate()
+    {
+        var reports = Assert.Single(Pages, p => p.Type == typeof(SearchReportsPage));
+
+        Assert.Equal(("reports", "@xperience-community/lucene-suite/SearchReports", Icons.Graph), (reports.Slug, reports.TemplateName, reports.Icon));
+        Assert.True(reports.Order < Assert.Single(Pages, p => p.Type == typeof(QueryTesterPage)).Order);
     }
 
     [Fact]

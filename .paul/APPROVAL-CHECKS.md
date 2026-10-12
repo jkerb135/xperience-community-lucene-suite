@@ -8,6 +8,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 2 | 06-02 | Search component markup, parameters and URL names | Approved 2026-10-12 (heading labels resolved by 06-03) |
 | 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | Approved 2026-10-12 with one follow-up: host index stores readable facet values |
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
+| 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 
 ---
 
@@ -139,3 +140,28 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
 5. **Your decisions to confirm:**
    - Keep the seeded history on the host (yes/no).
    - Seeded texts count toward surfacing. Real queries that match a seeded text (e.g. "burr", "bleached") are named in reports and will seed Phase 9 suggestions after fewer real searches.
+
+---
+
+## 5. 08-01: Search reports page (v0.2)
+
+1. **Where:** Site search → Indexes → DancingGoatSample → **Search reports** (`/admin/site-search/indexes/4/reports`). It is the first page in the index's section menu.
+2. **What I verified in the browser pane** (America/New_York browser, UTC−4):
+   - **30 days:** Sep 12–Oct 11 vs Aug 13–Sep 11.
+     - 3,681 searches, the same as SQL `SUM(Searches)`; 1,480 session-days, the same as SQL.
+     - −5.6 %, which is (3,681 − 3,900) ÷ 3,900.
+     - Rates show percentage points, e.g. "+0.9 pp".
+   - **90 days:** the previous period starts before 2026-08-12, so "No comparison" shows on every tile plus a notice. 7,731 = 7,725 seeded + 6 real.
+   - **Custom range:** Aug 13 → Aug 20 picked in a UTC−4 browser reports "Aug 13, 2026 – Aug 20, 2026" (no off-by-one). 1,050 searches, the same as SQL.
+   - **Empty range** (May 4–10): the "No searches" card shows.
+   - **"Not final" notice:** shown while the watermark was empty. It went away once the job rolled 2026-10-11 during the check.
+   - **Views and layout:** table view for each day; latency histogram + table.
+     - Headings: h1 → h2 × 3.
+     - No horizontal overflow at a 1100 px viewport (~650 px content) or 1700 px (~1,220 px content).
+     - KPIs show 2 per row below 1366 px and 3 per row from 1366 px.
+     - Tab order: presets → Custom → switches.
+3. **Your decisions to confirm:**
+   - **The selected range is not kept in the URL.** Writing `?from&to` raced Kentico's admin router (the URL became `/admin/?from=...` and a reload went to the admin home), so it was dropped as the audited plan prescribed. A reload returns to the last 30 days.
+   - **Kentico's date-range picker brings its own shortcuts** ("Last 48 hours", "Last 7 days" ... "Last 60 days") next to our presets. The npm typings cannot hide them. They work (any range is converted to days), but they overlap our presets.
+   - **Chart colours** come from the tokens the 31.9.1 runtime defines: bars `--color-icon-highlighted` (brand purple), no results `--color-alert-icon` (red), not-final days hatched with `--color-background-selected`. The kit repo's newer tokens (`--color-background-primary`, spacing and font-size variables) resolve to nothing in 31.9.1 and first rendered the bars black.
+   - **Average click position** shows 1.0 on the seeded data. Seeded queries mostly match one or two documents, so this comes from the seed data, not from the page.

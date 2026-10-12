@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 8 of 10 (Reports Admin) — Planning
-Plan: 08-01 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-12 — Audited .paul/phases/08-reports-admin/08-01-PLAN.md (08-01-AUDIT.md)
+Phase: 8 of 10 (Reports Admin) — Applying
+Plan: 08-01 applied
+Status: APPLY complete, ready for UNIFY
+Last activity: 2026-10-12 — Applied 08-01 (Search reports page; host verified; APPROVAL-CHECKS #5)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ○     [Applied, ready for UNIFY]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 08-01 applied: SearchReportsPage resolves the internal SearchReportService via IServiceProvider (public page ctor cannot take internal types); URL range persistence dropped (replaceState raced Kentico's admin router → /admin/?from=…); admin 31.9.1 runtime lacks the kit repo's newer CSS variables (--color-background-primary, --spacing-*, --font-size-*) → chart uses runtime tokens (--color-icon-highlighted etc.), npm Spacing enum, relative font size; no CSS loader in the client → inline token styles (no reports.css); DateTimeRangeInput ships its own non-removable shortcuts | Phase 8 | 08-02 reuses the page and the runtime-token rule |
 | 2026-10-12: Enterprise audit on 08-01-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8 | UTC-day strings end to end (no toISOString / Date parsing; TZ-tested); rate deltas in percentage points; command failures shown with last result kept; host watermark checked first; URL persistence dropped if it conflicts with the admin router |
 | 2026-10-12: Phase 8 planning (user choices): trend = token-styled SVG chart + "Show as table" (npm 31.9.1 exports no ColumnChart; amCharts not externalized → own unlicensed ~1 MB bundle); range = presets (7/30/90 days, 12 months) + custom DateTimeRangeInput; row actions = open in query tester, create rule for query, add synonym; two plans (08-01 page/range/KPIs/trend/latency, 08-02 query tables + row actions). Design-screen in PLAN: composed Stack/Row/Card layout, InfoCard KPIs (strings only → delta in details), NameToggleButtons presets | Phase 8 | 08-01 created |
 | 2026-10-12: 07-02 applied: seed runner in tests/Seeding (generator → RollupEngine → SqlBulkCopy, RollupLock + serializable range re-read, DB-name confirm); texts normalized (lowercase/trim) because the SearchDaily unique index is case-insensitive and ignores trailing spaces; host comm_projects seeded DancingGoatSample 2026-08-12..2026-10-10 (3,477 rows, 7,725 searches; APPROVAL-CHECKS #4 with clear command) | Phase 7 | Phase 8 has 60 days of host history |
@@ -126,7 +127,7 @@ See PROJECT.md Key Decisions.
 | 04-01 audit deferrals: accent folding of synonym inputs; orphan synonyms after index rename/deletion; query-parser custom factories reading synonym syntax characters | 04-01 audit | S | KNOWN-LIMITATIONS |
 | Leftover XpSearch scheduled tasks (XpSearch.QueryLogRetention, XpSearch.PopularitySignal) fail on every CommunityProjects host start | 04-01 checkpoint | S | Part of the pending XpSearch DB-objects decision |
 | 04-02 audit deferrals: same term in several synonyms (no warning); Kind change without confirmation | 04-02 audit | S | KNOWN-LIMITATIONS |
-| Rules-overhead perf test (p95 < 10 ms) flaked once when the suite ran alongside the host and dev server; 7.4–8.8 ms alone. 07-02 APPLY (no src change, host + admin dev server running): 9.75 / 10.19 (fail) / 8.92 ms alone | 05-01 APPLY | S | Recurring: decide on a CI-specific budget or a quieter measurement |
+| Rules-overhead perf test (p95 < 10 ms) flaked once when the suite ran alongside the host and dev server; 7.4–8.8 ms alone. 07-02 APPLY (no src change, host + admin dev server running): 9.75 / 10.19 (fail) / 8.92 ms alone; passed in the 08-01 full run | 05-01 APPLY | S | Recurring: decide on a CI-specific budget or a quieter measurement |
 | 03-07 custom-data `<pre>` in the normal query tester uses the brand-purple token | 05-01 APPLY | S | KNOWN-LIMITATIONS; next change to the normal tester view |
 | Widgets: per-process rate limit, forgeable events, unfingerprinted JS asset; no NuGet metadata on either package | 06-01 audit / APPLY | S–M | KNOWN-LIMITATIONS; 06-02 asset versioning; release phase |
 | Widget strings English-only; search not usable inside Kentico preview (signed URLs); host facet values are display names (old code-name filter URLs no longer match) | v0.1 review / 06-04 | S | KNOWN-LIMITATIONS |
@@ -164,7 +165,6 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
 | Phase 7: APPROVAL-CHECKS #4 pending — keep or clear seeded host history (2026-08-12..2026-10-10) and accept its effect on real-query surfacing | Phase 8 demos use it | Milestone review |
-| Phase 7: host rollup job had not rolled any day yet at 07-02 (watermark empty; real raw from 2026-10-11) | Real days missing from reports until it runs | Confirm watermark advances during Phase 8 |
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
@@ -175,8 +175,8 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 08-01 audited
-Next action: /paul:apply .paul/phases/08-reports-admin/08-01-PLAN.md
+Stopped at: Plan 08-01 applied
+Next action: /paul:unify .paul/phases/08-reports-admin/08-01-PLAN.md
 Resume file: .paul/phases/08-reports-admin/08-01-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
