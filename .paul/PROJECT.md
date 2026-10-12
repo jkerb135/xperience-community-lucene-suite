@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.1.0 |
-| Status | v0.2 Measure in progress (created 2026-10-12): Phase 7 Report Data next |
+| Status | v0.2 Measure in progress: Phase 7 Report Data complete, Phase 8 Reports Admin next |
 | Last Updated | 2026-10-12 |
 
 ## Requirements
@@ -60,9 +60,11 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Server-rendered search box, results and facets view components sharing one URL-driven search per request (sid/seq continuation, Sec-Fetch-Site gating, safe tracked result links, toggle-link facets, no-store, contact-group contexts) — Phase 6 (06-02)
 - ✓ Page Builder widgets (search box with results-page selector, results, filters with dimension labels); preview/edit mode never tracked; contact-group query DB-proven; CommunityProjects Site search page producing real Suite traffic — Phase 6 (06-03)
 
+- ✓ Report query service over SearchDaily (internal): overview with previous-period deltas (partial periods → no deltas), daily trend with completeness from the watermark, surfaced query tables (4 sorts, paging) with one "(other)" row decided by SQL collation, histogram latency percentiles; ~100 ms per section at 400 days × 500 queries — Phase 7 (07-01)
+- ✓ Dev-only seed runner (test project): contract-faithful synthetic traffic from index titles rolled by the real engine into never-rolled empty days (rollup lock, DB-name confirm, range clear); CommunityProjects seeded with 60 days — Phase 7 (07-02)
+
 ### Active (In Progress)
-- [ ] Analytics reports per index (CTR, no-results, top, slowest; date range; recompute on condition change) — v0.2 Phases 7–8
-- [ ] Dev-only seed generator producing contract-faithful history through the real rollup — v0.2 Phase 7
+- [ ] Analytics report screens per index (CTR, no-results, top, slowest; date range; recompute on condition change) — v0.2 Phase 8 (data layer shipped in Phase 7)
 - [ ] Query suggestions from surfaced queries via a strings-only, rate-limited suggest endpoint + progressive-enhancement search box script — v0.2 Phase 9
 - [ ] Blocked suggestions per index (suggestions only, reports unaffected) — v0.2 Phase 9
 - [ ] Kentico custom activities: search performed, result clicked, no results (contact + consent required) — v0.2 Phase 10
@@ -148,6 +150,8 @@ Marketers tune, test and measure site search without a developer.
 | Package endpoints never reconfigure the host (own rate limiter; no AddRateLimiter/UseRateLimiter) | A library must not change host-wide middleware behaviour | 2026-10-11 | Active |
 | Human-verify checkpoints are deferred to .paul/APPROVAL-CHECKS.md and reviewed at milestone end | User decision | 2026-10-11 | Active |
 | v0.2 scope: reports + seed generator + suggestions (suggest endpoint returns strings only — extends v0.1's "no public search API") + blocklist (suggestions only) + custom activities (search/click/no results); settings stay in appsettings | User decisions (discuss-milestone) | 2026-10-12 | Active |
+| Reports read SearchDaily only; "(other)" = range totals − named totals (surfaced membership decided by SQL, never C# string matching); the report service performs no authorization (admin pages gate on View + index exists) | 07-01 (NOT IN over nullable QueryText timed out at volume; collation defines text equality) | 2026-10-12 | Active |
+| Demo history is seeded only by a dev runner in the test project, written without Kentico into empty days no real process can own, behind a DB-name confirmation and the rollup lock | 07-02 / audit (running host, operator error) | 2026-10-12 | Active |
 | Test host content changes stay minimal and recorded: host files backed up before edits (byte-preserving), new pages rather than reusing existing ones, temporary data cleaned unless the user keeps it | User decisions across v0.1 | 2026-10-12 | Active |
 
 ## Success Metrics
@@ -181,4 +185,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-12 after v0.1 Tune & Capture*
+*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 7*

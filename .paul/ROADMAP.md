@@ -6,14 +6,14 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 0 of 4 complete
+Phases: 1 of 4 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 7 | Report Data | 1/2 | Planning | - |
+| 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
 | 8 | Reports Admin | TBD | Not started | - |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |
@@ -27,7 +27,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 
 **Plans:**
 - [x] 07-01: Report query service (overview + previous period, trend, surfaced query tables + (other), latency percentiles)
-- [ ] 07-02: Seed generator (contract-faithful synthetic sessions → RollupEngine → SearchDaily before the job start, --clear) + host seeding
+- [x] 07-02: Seed generator (contract-faithful synthetic sessions → RollupEngine → SearchDaily before the job start, --clear) + host seeding
 
 ### Phase 8: Reports Admin
 **Focus:** Report pages per index in the Site Search app, recomputed on condition change; links into rules and synonyms (e.g. create a rule for a no-results query).

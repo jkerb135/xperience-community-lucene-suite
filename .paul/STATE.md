@@ -5,26 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 7 Report Data (report queries + seed generator)
+**Current focus:** v0.2 Measure — Phase 8 Reports Admin
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 7 of 10 (Report Data) — Applying
-Plan: 07-02 applied
-Status: APPLY complete, ready for UNIFY
-Last activity: 2026-10-12 — Applied 07-02 (seed runner; host seeded 2026-08-12..2026-10-10)
+Phase: 8 of 10 (Reports Admin) — Not started
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-12 — Phase 7 complete (07-02 unified), transitioned to Phase 8
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [░░░░░░░░░░] 0% (0 of 4 phases; Phase 7: 1 of 2 plans)
+- v0.2 Measure: [██░░░░░░░░] 25% (1 of 4 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Applied, ready for UNIFY]
+  ○        ○        ○     [Ready for first PLAN of Phase 8]
 ```
 
 ## Accumulated Context
@@ -150,7 +150,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02: all required skills invoked.
 
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
@@ -161,19 +161,21 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
-| None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
+| Phase 7: APPROVAL-CHECKS #4 pending — keep or clear seeded host history (2026-08-12..2026-10-10) and accept its effect on real-query surfacing | Phase 8 demos use it | Milestone review |
+| Phase 7: host rollup job had not rolled any day yet at 07-02 (watermark empty; real raw from 2026-10-11) | Real days missing from reports until it runs | Confirm watermark advances during Phase 8 |
+| Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: c71391d docs(paul): unify 07-01 report query service
+Last commit: d3c2661 feat(07-02): dev-only search history seed runner; host seeded
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 07-02 applied
-Next action: /paul:unify .paul/phases/07-report-data/07-02-PLAN.md
-Resume file: .paul/phases/07-report-data/07-02-PLAN.md
+Stopped at: Phase 7 complete, ready to plan Phase 8
+Next action: /paul:plan for Phase 8 (Reports Admin; /xbyk-admin-ui:design-screen required)
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
