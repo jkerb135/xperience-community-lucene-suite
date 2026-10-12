@@ -100,9 +100,9 @@ const column = (name: string, caption: string, maxWidth: number, minWidth: numbe
 });
 
 const COLUMNS = [
-  column("name", "Name", 40, 16, true, true),
+  column("name", "Name", 40, 14, true, true),
   column("priority", "Priority", 12, 11, true),
-  column("status", "Status", 14, 13, false, true),
+  column("status", "Status", 14, 12, false, true),
   column("validFrom", "Valid from (UTC)", 18, 17),
   column("validUntil", "Valid until (UTC)", 18, 17),
   column("conditions", "Conditions", 30, 12),
