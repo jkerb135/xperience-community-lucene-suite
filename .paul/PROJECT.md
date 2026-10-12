@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.1.0 |
-| Status | v0.2 Measure in progress: Phase 7 Report Data complete, Phase 8 Reports Admin next |
+| Status | v0.2 Measure in progress: Phases 7–8 complete, Phase 9 Suggestions next |
 | Last Updated | 2026-10-12 |
 
 ## Requirements
@@ -63,8 +63,10 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Report query service over SearchDaily (internal): overview with previous-period deltas (partial periods → no deltas), daily trend with completeness from the watermark, surfaced query tables (4 sorts, paging) with one "(other)" row decided by SQL collation, histogram latency percentiles; ~100 ms per section at 400 days × 500 queries — Phase 7 (07-01)
 - ✓ Dev-only seed runner (test project): contract-faithful synthetic traffic from index titles rolled by the real engine into never-rolled empty days (rollup lock, DB-name confirm, range clear); CommunityProjects seeded with 60 days — Phase 7 (07-02)
 
+- ✓ Search reports admin page per index: preset/custom UTC day ranges, KPI tiles with previous-period deltas, token SVG trend + latency charts with table views — Phase 8 (08-01)
+- ✓ Query table (Top / No results / Lowest CTR / Slowest, paged, (other)) with row actions that prefill the query tester, Create rule or Add synonym via a one-time path-bound sessionStorage handoff — Phase 8 (08-02)
+
 ### Active (In Progress)
-- [ ] Analytics report screens per index (CTR, no-results, top, slowest; date range; recompute on condition change) — v0.2 Phase 8 (data layer shipped in Phase 7)
 - [ ] Query suggestions from surfaced queries via a strings-only, rate-limited suggest endpoint + progressive-enhancement search box script — v0.2 Phase 9
 - [ ] Blocked suggestions per index (suggestions only, reports unaffected) — v0.2 Phase 9
 - [ ] Kentico custom activities: search performed, result clicked, no results (contact + consent required) — v0.2 Phase 10
@@ -153,6 +155,7 @@ Marketers tune, test and measure site search without a developer.
 | Reports read SearchDaily only; "(other)" = range totals − named totals (surfaced membership decided by SQL, never C# string matching); the report service performs no authorization (admin pages gate on View + index exists) | 07-01 (NOT IN over nullable QueryText timed out at volume; collation defines text equality) | 2026-10-12 | Active |
 | Demo history is seeded only by a dev runner in the test project, written without Kentico into empty days no real process can own, behind a DB-name confirmation and the rollup lock | 07-02 / audit (running host, operator error) | 2026-10-12 | Active |
 | Test host content changes stay minimal and recorded: host files backed up before edits (byte-preserving), new pages rather than reusing existing ones, temporary data cleaned unless the user keeps it | User decisions across v0.1 | 2026-10-12 | Active |
+| Admin cross-page prefill = one-time sessionStorage handoff bound to target, index, exact page path and expiry; consumers fill only empty forms; never URL query strings or server state | 08-01 (URL state raced the admin router) / 08-02 audit | 2026-10-12 | Active |
 
 ## Success Metrics
 
@@ -185,4 +188,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 7*
+*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 8*

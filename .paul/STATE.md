@@ -5,26 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 8 Reports Admin
+**Current focus:** v0.2 Measure — Phase 9 Suggestions
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 8 of 10 (Reports Admin) — Applying
-Plan: 08-02 applied
-Status: APPLY complete, ready for UNIFY
-Last activity: 2026-10-12 — Applied 08-02 (query table + row actions; host verified; APPROVAL-CHECKS #6)
+Phase: 9 of 10 (Suggestions) — Not started
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-12 — Unified 08-02; Phase 8 complete, transitioned to Phase 9
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [██░░░░░░░░] 25% (1 of 4 phases; Phase 8: 1 of 2 plans)
+- v0.2 Measure: [█████░░░░░] 50% (2 of 4 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Applied, ready for UNIFY]
+  ○        ○        ○     [Phase 8 complete — ready to plan Phase 9]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 08-02 unified, Phase 8 complete: verification re-run at UNIFY (build 0 warnings; admin + report DB tests pass on comm_projects_test; client 50/50). Skill gaps: design-screen APPLY re-invoke, csharp-refactoring, content-retrieval not evidenced (APPLY in an earlier session). Cross-page prefill handoff logged as a PROJECT key decision | Phase 8 | Phase 9 may reuse the handoff for report-row actions |
 | 2026-10-12: 08-02 applied: npm 31.9.1 ActionCell icon buttons are all aria-label="button" → labelled Buttons stacked in a ComponentCell; 31.9.1 ComponentCell needs a component type (an element crashes the page); Button title renders as a hover tooltip on its wrapper; handoff split into side-effect-free peek (render) + idempotent clear (effect) so StrictMode double calls cannot lose it; host: tester/rule/synonym prefill once each, untracked tester search, report state restored, 0 rules/synonyms saved | Phase 8 | Reports loop closed; runtime-vs-kit rule extended to components |
 | 2026-10-12: Enterprise audit on 08-02-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8 | Handoff bound to the exact target page path (never lands in an existing rule/synonym edit page); {email}/{number} placeholder texts cannot become rules/synonyms (server HasPlaceholder); prefilled tester search untracked; report range/sort/page restored per index from sessionStorage |
 | 2026-10-12: 08-02 planning (user choices): row-action prefill via one-time sessionStorage handoff {target, index, query, expiry} read by our own client pieces (query tester, rule conditions editor, synonym terms editor) — no URL query strings, no server state; one query table with sort switch, 25/page, (other) line; actions without permission shown disabled with a tooltip. Design-screen in PLAN: npm Table ActionCell (focusable icon buttons) avoids the row-focus gap | Phase 8 | 08-02 created |
@@ -158,6 +159,14 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 
 Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01: all required skills invoked.
 
+#### Skill Audit (Phase 8, plan 08-02)
+| Expected | Invoked | Notes |
+|----------|---------|-------|
+| /xbyk-admin-ui:design-screen | ✓ PLAN / ○ APPLY | APPLY re-invocation not evidenced; typings evidently checked (ActionCell finding) |
+| Admin UI design validation | ✓ | Two widths, keyboard, labels, states (APPROVAL-CHECKS #6) |
+| /dotnet:csharp-refactoring | ○ | Not evidenced; APPLY ran in an earlier session |
+| /kentico-web-development:content-retrieval | ○ | Not evidenced; no new content queries (DB test reads via SearchReportService) |
+
 #### Skill Audit (Phase 3, plan 03-02)
 | Expected | Invoked | Notes |
 |----------|---------|-------|
@@ -167,20 +176,21 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 8: APPROVAL-CHECKS #5 (reports page) and #6 (query table + row actions; permission-disabled state code/test-only; one unreproduced "7 days" restore) pending | Milestone review | Milestone review |
 | Phase 7: APPROVAL-CHECKS #4 pending — keep or clear seeded host history (2026-08-12..2026-10-10) and accept its effect on real-query surfacing | Phase 8 demos use it | Milestone review |
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 8cbe68c docs(paul): unify 08-01 search reports page
+Last commit: d0f6c1c feat(08-02): query table and row actions (phase 8 unify commit follows)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 08-02 applied
-Next action: /paul:unify .paul/phases/08-reports-admin/08-02-PLAN.md
-Resume file: .paul/phases/08-reports-admin/08-02-PLAN.md
+Stopped at: Phase 8 complete, ready to plan Phase 9
+Next action: /paul:plan for Phase 9 (Suggestions)
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

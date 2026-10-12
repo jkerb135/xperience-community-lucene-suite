@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 1 of 4 complete
+Phases: 2 of 4 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -14,7 +14,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
-| 8 | Reports Admin | 1/2 | In progress | - |
+| 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |
 
@@ -37,7 +37,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 
 **Plans:**
 - [x] 08-01: Search reports page — range bar, KPI tiles with deltas, trend chart, latency
-- [ ] 08-02: Query tables (4 sorts, paging, (other)) + row actions (query tester / create rule / add synonym prefill)
+- [x] 08-02: Query tables (4 sorts, paging, (other)) + row actions (query tester / create rule / add synonym prefill)
 
 ### Phase 9: Suggestions
 **Focus:** Query suggestions from surfaced queries; a rate-limited suggest endpoint in the Widgets package returning strings only (untracked); a progressive-enhancement search box script (accessible combobox); a per-index blocked-suggestions list with admin editor (blocks suggestions only, not reports).
@@ -76,4 +76,4 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (v0.1 complete; v0.2 Measure created)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 8 complete)*
