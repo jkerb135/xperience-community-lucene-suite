@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 8 of 10 (Reports Admin) — Planning
-Plan: 08-02 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-12 — Audited .paul/phases/08-reports-admin/08-02-PLAN.md (08-02-AUDIT.md)
+Phase: 8 of 10 (Reports Admin) — Applying
+Plan: 08-02 applied
+Status: APPLY complete, ready for UNIFY
+Last activity: 2026-10-12 — Applied 08-02 (query table + row actions; host verified; APPROVAL-CHECKS #6)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ○     [Applied, ready for UNIFY]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 08-02 applied: npm 31.9.1 ActionCell icon buttons are all aria-label="button" → labelled Buttons stacked in a ComponentCell; 31.9.1 ComponentCell needs a component type (an element crashes the page); Button title renders as a hover tooltip on its wrapper; handoff split into side-effect-free peek (render) + idempotent clear (effect) so StrictMode double calls cannot lose it; host: tester/rule/synonym prefill once each, untracked tester search, report state restored, 0 rules/synonyms saved | Phase 8 | Reports loop closed; runtime-vs-kit rule extended to components |
 | 2026-10-12: Enterprise audit on 08-02-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8 | Handoff bound to the exact target page path (never lands in an existing rule/synonym edit page); {email}/{number} placeholder texts cannot become rules/synonyms (server HasPlaceholder); prefilled tester search untracked; report range/sort/page restored per index from sessionStorage |
 | 2026-10-12: 08-02 planning (user choices): row-action prefill via one-time sessionStorage handoff {target, index, query, expiry} read by our own client pieces (query tester, rule conditions editor, synonym terms editor) — no URL query strings, no server state; one query table with sort switch, 25/page, (other) line; actions without permission shown disabled with a tooltip. Design-screen in PLAN: npm Table ActionCell (focusable icon buttons) avoids the row-focus gap | Phase 8 | 08-02 created |
 | 2026-10-12: 08-01 applied: SearchReportsPage resolves the internal SearchReportService via IServiceProvider (public page ctor cannot take internal types); URL range persistence dropped (replaceState raced Kentico's admin router → /admin/?from=…); admin 31.9.1 runtime lacks the kit repo's newer CSS variables (--color-background-primary, --spacing-*, --font-size-*) → chart uses runtime tokens (--color-icon-highlighted etc.), npm Spacing enum, relative font size; no CSS loader in the client → inline token styles (no reports.css); DateTimeRangeInput ships its own non-removable shortcuts | Phase 8 | 08-02 reuses the page and the runtime-token rule |
@@ -177,8 +178,8 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 08-02 audited
-Next action: /paul:apply .paul/phases/08-reports-admin/08-02-PLAN.md
+Stopped at: Plan 08-02 applied
+Next action: /paul:unify .paul/phases/08-reports-admin/08-02-PLAN.md
 Resume file: .paul/phases/08-reports-admin/08-02-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 

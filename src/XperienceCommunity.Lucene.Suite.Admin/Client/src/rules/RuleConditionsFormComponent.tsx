@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Button,
   ButtonColor,
@@ -17,6 +17,7 @@ import {
   Spacing,
   Stack,
 } from "@kentico/xperience-admin-components";
+import { clear, peek } from "../reports/handoff";
 import { isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
 import {
   anchoringOptions,
@@ -45,6 +46,15 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
   const buttonRef = (key: string) => ref(key) as React.RefObject<HTMLButtonElement>;
 
   const update = (next: readonly ConditionRow[]) => props.onChange?.(serializeConditions(next));
+  // A query handed over by a Search reports row action becomes an "Is" condition; only an empty editor on Create rule takes it.
+  const [handedQuery] = useState(() => (editable && rows.length === 0 ? peek("ruleCreate", window.location.pathname) : null));
+  useEffect(() => {
+    clear("ruleCreate", window.location.pathname);
+    if (handedQuery !== null) {
+      update([{ ...emptyCondition, anchoring: "is", pattern: handedQuery }]);
+    }
+    // Runs once on mount: the handoff is a one-time prefill.
+  }, []);
   const set = (index: number, change: Partial<ConditionRow>) => update(replaceAt(rows, index, { ...rows[index], ...change }));
   const error = (path: string) => {
     const shown = visible(path) && byPath.has(path);

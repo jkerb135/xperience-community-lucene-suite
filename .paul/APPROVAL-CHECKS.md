@@ -9,6 +9,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | Approved 2026-10-12 with one follow-up: host index stores readable facet values |
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
+| 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
 
 ---
 
@@ -165,3 +166,28 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **Kentico's date-range picker brings its own shortcuts** ("Last 48 hours", "Last 7 days" ... "Last 60 days") next to our presets. The npm typings cannot hide them. They work (any range is converted to days), but they overlap our presets.
    - **Chart colours** come from the tokens the 31.9.1 runtime defines: bars `--color-icon-highlighted` (brand purple), no results `--color-alert-icon` (red), not-final days hatched with `--color-background-selected`. The kit repo's newer tokens (`--color-background-primary`, spacing and font-size variables) resolve to nothing in 31.9.1 and first rendered the bars black.
    - **Average click position** shows 1.0 on the seeded data. Seeded queries mostly match one or two documents, so this comes from the seed data, not from the page.
+
+---
+
+## 6. 08-02: Query table and row actions (v0.2)
+
+1. **Where:** Site search → DancingGoatSample → Search reports → card **Queries** (under Latency).
+2. **What I verified in the browser pane:**
+   - **Top, 30 days:** the first rows match SQL over surfaced texts (bleached 612, which brewing fits you? 285, anfim super caimano 212, burr 183, colombia carlos imbachi 115, injerto 92).
+   - **Table layout:**
+     - The browse row reads "(browse – no query text)", and its Create rule / Add synonym are disabled.
+     - "(other): 195 searches …" shows with an explanation tooltip.
+     - Paging works (25 per page).
+   - **Query tester:** opened with "bleached" and ran it (2 hits). No raw analytics row was written (untracked). Reloading the tester opens it empty (single use).
+   - **Create rule:** opened with condition 1 = "Is" + "bleached", name empty. Reloading Create rule opens it empty. **Nothing was saved.**
+   - **Add synonym** (from Slowest, page 2): opened with "ethiopia yirgacheffe (decaf)" as the first term. Leaving and coming back restored the report exactly (30 days, Slowest, page 2, same first row).
+   - **The host still has 0 rules and 0 synonyms.**
+   - **Layout and keyboard:**
+     - At 1700 px the table fits.
+     - At 1100 px it scrolls horizontally inside its own frame (as Kentico listings do); no cell overflows.
+     - Tab order runs sort toggles → row buttons; each button is announced by its label.
+3. **Your decisions to confirm:**
+   - **Labelled buttons instead of Kentico's row-action icons.** The npm 31.9.1 `ActionCell` announces every icon button as just "button", so each row has three small labelled buttons stacked in the Actions column. They are taller rows than an icon strip.
+   - **The reason a button is disabled** (missing permission, browse row, `{email}`/`{number}` text) shows as a hover tooltip. A disabled button can't take keyboard focus, so keyboard users don't hear the reason.
+   - **The permission-disabled state** is verified in code and tests only. The host has no user without Manage rules / Manage synonyms, and the editors of existing rules and synonyms couldn't be exercised because the host has none. The guard against filling them is covered by a node test (sibling edit path).
+   - **Unexplained, not reproduced:** once during testing the saved report state showed "7 days" without that preset being clicked. Three deliberate repeats restored and saved correctly. Watch for it.

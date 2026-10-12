@@ -4,3 +4,4 @@ obj/
 .vs/
 node_modules/
 src/XperienceCommunity.Lucene.Suite.Admin/Client/dist/
+project-sidecar/

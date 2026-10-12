@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Reports;
+using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 using XperienceCommunity.Lucene.Suite.Search;
 using XperienceCommunity.Lucene.Suite.Tests.Seeding;
 
@@ -57,6 +58,62 @@ public sealed class SearchReportsPageDatabaseTests
         Assert.NotNull(SearchReportsPage.Build(service, Index, new SearchReportsArguments { From = "1/2/2030", To = "2030-02-01" }).Error);
         Assert.Null(SearchReportsPage.Build(service, Index, new SearchReportsArguments { From = "2030-02-01", To = "2030-02-01" }).Error);
     }
+
+    [DatabaseFact]
+    public void Queries_MapEverySortAndPage_OfTheService()
+    {
+        var (from, to) = Seed(days: 30);
+        var service = Service();
+
+        foreach (var sort in Enum.GetValues<QuerySort>())
+        {
+            var expected = service.Queries(Index, from, to, sort, 0, SearchReportsPage.QueryPageSize);
+            var result = SearchReportsPage.BuildQueries(service, Index, Queries(from, to, sort.ToString().ToLowerInvariant(), 1));
+
+            Assert.Null(result.Error);
+            Assert.Equal(expected.Rows.Select(row => (row.QueryText, row.Searches)), result.Rows.Select(row => (row.QueryText, row.Searches)));
+            Assert.Equal(expected.TotalCount, result.TotalCount);
+            Assert.Equal(expected.Other?.Searches, result.Other?.Searches);
+            Assert.Equal(SearchReportsPage.QueryPageSize, result.PageSize);
+        }
+
+        var second = SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 2));
+        var expectedSecond = service.Queries(Index, from, to, QuerySort.Searches, SearchReportsPage.QueryPageSize, SearchReportsPage.QueryPageSize);
+        Assert.Equal(expectedSecond.Rows.Select(row => row.QueryText), second.Rows.Select(row => row.QueryText));
+
+        var beyond = SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 1000));
+        Assert.Null(beyond.Error);
+        Assert.Empty(beyond.Rows);
+        Assert.Equal(expectedSecond.TotalCount, beyond.TotalCount);
+    }
+
+    [DatabaseFact]
+    public void Queries_InvalidInput_ReturnsAnError_AndPlaceholderTextsAreFlagged()
+    {
+        var (from, to) = Seed(days: 30);
+        var service = Service();
+
+        Assert.NotNull(SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "popular", 1)).Error);
+        Assert.NotNull(SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "0", 1)).Error);
+        Assert.NotNull(SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 0)).Error);
+        Assert.NotNull(SearchReportsPage.BuildQueries(service, Index, Queries(to, from, "Searches", 1)).Error);
+
+        // Surfaced (2 days, top of the Searches sort) and containing the scrubber's number placeholder.
+        KenticoServices.Value.GetRequiredService<IInfoProvider<SearchDailyInfo>>().BulkInsert(
+            new[] { from, from.AddDays(1) }.Select(day => DailyRollupStore.ToInfo(new DailyKpi(day, Index, "order {number}", 50, 0, 0, 0, 0, 0, 0, 0, 1, new int[SearchDailyInfo.LatencyBucketCount]))));
+
+        var rows = SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 1)).Rows;
+        Assert.True(Assert.Single(rows, row => row.QueryText == "order {number}").HasPlaceholder);
+        Assert.DoesNotContain(rows, row => row.QueryText != "order {number}" && row.HasPlaceholder);
+    }
+
+    private static SearchReportsQueriesArguments Queries(DateOnly from, DateOnly to, string sort, int page) => new()
+    {
+        From = from.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        To = to.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        Sort = sort,
+        Page = page,
+    };
 
     private static (DateOnly From, DateOnly To) Seed(int days)
     {

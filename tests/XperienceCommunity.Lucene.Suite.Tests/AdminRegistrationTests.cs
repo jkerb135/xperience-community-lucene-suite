@@ -78,6 +78,7 @@ public class AdminRegistrationTests
         Assert.All(Pages.Where(p => p.Type != typeof(RuleCreatePage) && p.Type != typeof(SynonymCreatePage)), p => Assert.Equal(SystemPermissions.VIEW, p.Type.GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission));
         Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.Search))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
         Assert.Equal(SystemPermissions.VIEW, typeof(SearchReportsPage).GetMethod(nameof(SearchReportsPage.Report))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
+        Assert.Equal(SystemPermissions.VIEW, typeof(SearchReportsPage).GetMethod(nameof(SearchReportsPage.Queries))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
     }
 
     [Fact]

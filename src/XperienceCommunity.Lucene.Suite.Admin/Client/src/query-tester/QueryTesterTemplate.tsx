@@ -49,6 +49,7 @@ import {
 } from "./state";
 import type { Hit, SearchResult } from "./compare";
 import { CompareView } from "./CompareView";
+import { clear, peek } from "../reports/handoff";
 
 interface QueryTesterProps {
   readonly isFaceted: boolean;
@@ -100,8 +101,10 @@ export const QueryTesterTemplate = ({
 }: QueryTesterProps) => {
   const { executeCommand } = usePageCommandProvider();
   const [request] = useState(latestRequest);
-  const [query, setQuery] = useState("");
-  const [submittedQuery, setSubmittedQuery] = useState("");
+  // A query handed over by a Search reports row action is searched on arrival (untracked like every tester search).
+  const [handedQuery] = useState(() => peek("queryTester", window.location.pathname));
+  const [query, setQuery] = useState(handedQuery ?? "");
+  const [submittedQuery, setSubmittedQuery] = useState(handedQuery ?? "");
   const [page, setPage] = useState(1);
   const [selection, setSelection] = useState<FacetSelection>({});
   const [result, setResult] = useState<SearchResult>();
@@ -144,8 +147,9 @@ export const QueryTesterTemplate = ({
   );
 
   useEffect(() => {
-    void search("", 1, {});
-  }, [search]);
+    clear("queryTester", window.location.pathname);
+    void search(handedQuery ?? "", 1, {});
+  }, [search, handedQuery]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();

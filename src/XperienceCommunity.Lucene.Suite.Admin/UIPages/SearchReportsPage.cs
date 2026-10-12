@@ -8,7 +8,9 @@ using Kentico.Xperience.Lucene.Core.Indexing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+using XperienceCommunity.Lucene.Suite.Admin;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
+using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Reports;
 using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 using XperienceCommunity.Lucene.Suite.Search;
@@ -30,8 +32,13 @@ public sealed class SearchReportsPage(
     ILuceneIndexManager indexManager,
     IServiceProvider serviceProvider,
     IOptions<SuiteSearchOptions> options,
-    TimeProvider clock) : Page<SearchReportsClientProperties>
+    TimeProvider clock,
+    IUIPermissionEvaluator permissionEvaluator,
+    IPageLinkGenerator pageLinkGenerator) : Page<SearchReportsClientProperties>
 {
+    /// <summary>Rows per page of the query table.</summary>
+    internal const int QueryPageSize = 25;
+
     private const string DayFormat = "yyyy-MM-dd";
 
     /// <summary>Identifier of the reported Lucene index, bound from the parent section.</summary>
@@ -43,11 +50,17 @@ public sealed class SearchReportsPage(
         Task.FromResult(SearchTuningSectionPage.Validate(indexManager, IndexIdentifier));
 
     /// <inheritdoc />
-    public override Task<SearchReportsClientProperties> ConfigureTemplateProperties(SearchReportsClientProperties properties)
+    public override async Task<SearchReportsClientProperties> ConfigureTemplateProperties(SearchReportsClientProperties properties)
     {
+        var section = new PageParameterValues { { typeof(SearchTuningSectionPage), IndexIdentifier } };
         properties.Today = Day(DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime));
         properties.MaxDays = (int)options.Value.Analytics.Retention.DailyRetention.TotalDays;
-        return Task.FromResult(properties);
+        properties.CanManageRules = (await permissionEvaluator.Evaluate(SiteSearchPermissions.MANAGE_RULES)).Succeeded;
+        properties.CanManageSynonyms = (await permissionEvaluator.Evaluate(SiteSearchPermissions.MANAGE_SYNONYMS)).Succeeded;
+        properties.QueryTesterPath = pageLinkGenerator.GetPath<QueryTesterPage>(section);
+        properties.RuleCreatePath = pageLinkGenerator.GetPath<RuleCreatePage>(section);
+        properties.SynonymCreatePath = pageLinkGenerator.GetPath<SynonymCreatePage>(section);
+        return properties;
     }
 
     /// <summary>Overview, trend and latency of the page's index; invalid ranges come back as <see cref="SearchReportsResult.Error"/>.</summary>
@@ -57,6 +70,67 @@ public sealed class SearchReportsPage(
         string indexName = (indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.")).IndexName;
         return Task.FromResult(ResponseFrom(Build(serviceProvider.GetRequiredService<SearchReportService>(), indexName, arguments)));
     }
+
+    /// <summary>One page of surfaced queries plus the (other) total; invalid input comes back as <see cref="SearchReportsQueriesResult.Error"/>.</summary>
+    [PageCommand(Permission = SystemPermissions.VIEW)]
+    public Task<ICommandResponse<SearchReportsQueriesResult>> Queries(SearchReportsQueriesArguments arguments)
+    {
+        string indexName = (indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.")).IndexName;
+        return Task.FromResult(ResponseFrom(BuildQueries(serviceProvider.GetRequiredService<SearchReportService>(), indexName, arguments)));
+    }
+
+    /// <summary>Maps one page of <see cref="SearchReportService.Queries"/> to the client shape.</summary>
+    internal static SearchReportsQueriesResult BuildQueries(SearchReportService reports, string indexName, SearchReportsQueriesArguments arguments)
+    {
+        if (!TryDay(arguments.From, out var from) || !TryDay(arguments.To, out var to))
+        {
+            return new SearchReportsQueriesResult { Error = "From and To must be dates in the yyyy-MM-dd format." };
+        }
+
+        // Enum.TryParse also accepts numbers; only the names are part of the contract.
+        if (int.TryParse(arguments.Sort, out _) || !Enum.TryParse<QuerySort>(arguments.Sort, ignoreCase: true, out var sort) || !Enum.IsDefined(sort))
+        {
+            return new SearchReportsQueriesResult { Error = $"Unknown sort '{arguments.Sort}'." };
+        }
+
+        if (arguments.Page < 1)
+        {
+            return new SearchReportsQueriesResult { Error = "Page must be 1 or higher." };
+        }
+
+        try
+        {
+            long skip = (long)(arguments.Page - 1) * QueryPageSize;
+            var page = reports.Queries(indexName, from, to, sort, (int)Math.Min(skip, int.MaxValue), QueryPageSize);
+            return new SearchReportsQueriesResult
+            {
+                Rows = page.Rows.Select(Row).ToList(),
+                Other = page.Other is { } other ? Row(other) : null,
+                TotalCount = page.TotalCount,
+                PageSize = QueryPageSize,
+            };
+        }
+        catch (ArgumentException exception)
+        {
+            return new SearchReportsQueriesResult { Error = QueryTesterPage.ValidationMessage(exception) };
+        }
+    }
+
+    private static SearchReportsQueryRow Row(ReportQueryRow row) => new()
+    {
+        QueryText = row.QueryText,
+        IsBrowse = row.IsBrowse,
+        HasPlaceholder = row.QueryText is { } text
+            && (text.Contains(QueryScrubber.EmailPlaceholder, StringComparison.Ordinal) || text.Contains(QueryScrubber.NumberPlaceholder, StringComparison.Ordinal)),
+        Searches = row.Searches,
+        ZeroResultSearches = row.ZeroResultSearches,
+        ClickedSearches = row.ClickedSearches,
+        Ctr = row.Ctr,
+        NoResultRate = row.NoResultRate,
+        AvgClickPosition = row.AvgClickPosition,
+        LatencyP50 = Percentile(row.LatencyP50),
+        LatencyP95 = Percentile(row.LatencyP95),
+    };
 
     /// <summary>Runs the three report sections and maps them to the client shape.</summary>
     internal static SearchReportsResult Build(SearchReportService reports, string indexName, SearchReportsArguments arguments)
@@ -150,6 +224,93 @@ public sealed class SearchReportsClientProperties : TemplateClientProperties
 
     /// <summary>Longest selectable range in days (Retention:DailyRetention).</summary>
     public int MaxDays { get; set; }
+
+    /// <summary>Whether the user may create rules (Site Search → Manage rules); only enables the row action, the target page enforces it.</summary>
+    public bool CanManageRules { get; set; }
+
+    /// <summary>Whether the user may create synonyms (Site Search → Manage synonyms); only enables the row action.</summary>
+    public bool CanManageSynonyms { get; set; }
+
+    /// <summary>Admin-root-relative path of this index's query tester.</summary>
+    public string QueryTesterPath { get; set; } = string.Empty;
+
+    /// <summary>Admin-root-relative path of this index's Create rule page.</summary>
+    public string RuleCreatePath { get; set; } = string.Empty;
+
+    /// <summary>Admin-root-relative path of this index's Create synonym page.</summary>
+    public string SynonymCreatePath { get; set; } = string.Empty;
+}
+
+/// <summary>Requested query-table page.</summary>
+public sealed class SearchReportsQueriesArguments
+{
+    /// <summary>First day (yyyy-MM-dd, UTC).</summary>
+    public string? From { get; set; }
+
+    /// <summary>Last day (yyyy-MM-dd, UTC), inclusive.</summary>
+    public string? To { get; set; }
+
+    /// <summary>Searches, NoResults, LowestCtr or Slowest.</summary>
+    public string? Sort { get; set; }
+
+    /// <summary>1-based page number.</summary>
+    public int Page { get; set; } = 1;
+}
+
+/// <summary>One page of surfaced queries; only <see cref="Error"/> is set when the request is invalid.</summary>
+public sealed class SearchReportsQueriesResult
+{
+    /// <summary>Validation message for an invalid request; nothing else is set.</summary>
+    public string? Error { get; set; }
+
+    /// <summary>The page's rows (surfaced query texts only).</summary>
+    public IReadOnlyList<SearchReportsQueryRow> Rows { get; set; } = [];
+
+    /// <summary>Everything in range that is not a named row; null when empty.</summary>
+    public SearchReportsQueryRow? Other { get; set; }
+
+    /// <summary>Named rows before paging.</summary>
+    public int TotalCount { get; set; }
+
+    /// <summary>Rows per page.</summary>
+    public int PageSize { get; set; }
+}
+
+/// <summary>One query table row.</summary>
+public sealed class SearchReportsQueryRow
+{
+    /// <summary>Surfaced query text; null for the (other) row.</summary>
+    public string? QueryText { get; set; }
+
+    /// <summary>The empty-text browse row.</summary>
+    public bool IsBrowse { get; set; }
+
+    /// <summary>The text contains an analytics placeholder ({email}, {number}); a rule or synonym from it would never match.</summary>
+    public bool HasPlaceholder { get; set; }
+
+    /// <summary>Logical searches.</summary>
+    public long Searches { get; set; }
+
+    /// <summary>Searches without results.</summary>
+    public long ZeroResultSearches { get; set; }
+
+    /// <summary>Searches with at least one click.</summary>
+    public long ClickedSearches { get; set; }
+
+    /// <summary>Clicked searches ÷ searches.</summary>
+    public double? Ctr { get; set; }
+
+    /// <summary>Zero-result searches ÷ searches.</summary>
+    public double? NoResultRate { get; set; }
+
+    /// <summary>Sum of click positions ÷ clicks.</summary>
+    public double? AvgClickPosition { get; set; }
+
+    /// <summary>Median latency bucket.</summary>
+    public SearchReportsPercentile? LatencyP50 { get; set; }
+
+    /// <summary>95th-percentile latency bucket.</summary>
+    public SearchReportsPercentile? LatencyP95 { get; set; }
 }
 
 /// <summary>Requested inclusive UTC day range (yyyy-MM-dd).</summary>

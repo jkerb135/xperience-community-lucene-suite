@@ -54,10 +54,17 @@ import {
   type Percentile,
 } from "./report.ts";
 import { BarChart } from "./TrendChart.tsx";
+import { indexFromPath, loadReportState, saveReportState } from "./handoff.ts";
+import { QueryTable, SORTS } from "./QueryTable.tsx";
 
 interface SearchReportsProps {
   readonly today: string;
   readonly maxDays: number;
+  readonly canManageRules: boolean;
+  readonly canManageSynonyms: boolean;
+  readonly queryTesterPath: string;
+  readonly ruleCreatePath: string;
+  readonly synonymCreatePath: string;
 }
 
 interface Totals {
@@ -127,11 +134,20 @@ const heading = (level: 2 | 3, children: ReactNode) => (
   </span>
 );
 
-export const SearchReportsTemplate = ({ today, maxDays }: SearchReportsProps) => {
+export const SearchReportsTemplate = (props: SearchReportsProps) => {
+  const { today, maxDays } = props;
+  const [index] = useState(() => indexFromPath(window.location.pathname));
+  // The page restores its last state for this index (e.g. after a row action), never from the URL.
+  const [saved] = useState(() => {
+    const state = loadReportState(index);
+    return state && isAllowed(state, today, maxDays) && SORTS.some((s) => s.id === state.sort) ? state : null;
+  });
   const { executeCommand } = usePageCommandProvider();
   const [request] = useState(latestRequest);
-  const [range, setRange] = useState<DayRange>(() => defaultRange(today, maxDays));
-  const [preset, setPreset] = useState(() => presetOf(range, today, maxDays));
+  const [range, setRange] = useState<DayRange>(() => (saved ? { from: saved.from, to: saved.to } : defaultRange(today, maxDays)));
+  const [preset, setPreset] = useState(() => (saved?.preset === CUSTOM ? CUSTOM : presetOf(range, today, maxDays)));
+  const [sort, setSort] = useState<string>(() => saved?.sort ?? SORTS[0].id);
+  const [page, setPage] = useState(() => saved?.page ?? 1);
   const [result, setResult] = useState<ReportResult>();
   const [error, setError] = useState<string>();
   const [failed, setFailed] = useState(false);
@@ -160,6 +176,10 @@ export const SearchReportsTemplate = ({ today, maxDays }: SearchReportsProps) =>
   );
 
   useEffect(() => {
+    saveReportState(index, { from: range.from, to: range.to, preset, sort, page });
+  }, [index, range, preset, sort, page]);
+
+  useEffect(() => {
     void load(range);
   }, [load, range]);
 
@@ -168,6 +188,7 @@ export const SearchReportsTemplate = ({ today, maxDays }: SearchReportsProps) =>
     const match = PRESETS.find((p) => p.id === id);
     if (match) {
       setRange(presetRange(match.days, today, maxDays));
+      setPage(1);
     }
   };
 
@@ -178,6 +199,7 @@ export const SearchReportsTemplate = ({ today, maxDays }: SearchReportsProps) =>
     const picked = { from: toDay(value.from), to: toDay(value.to) };
     if (isAllowed(picked, today, maxDays)) {
       setRange(picked);
+      setPage(1);
     }
   };
 
@@ -326,6 +348,22 @@ export const SearchReportsTemplate = ({ today, maxDays }: SearchReportsProps) =>
                   )}
                 </Stack>
               </Card>
+              <QueryTable
+                range={range}
+                sort={sort}
+                page={page}
+                onSortChange={(next) => {
+                  setSort(next);
+                  setPage(1);
+                }}
+                onPageChange={setPage}
+                bucketBounds={bounds}
+                canManageRules={props.canManageRules}
+                canManageSynonyms={props.canManageSynonyms}
+                queryTesterPath={props.queryTesterPath}
+                ruleCreatePath={props.ruleCreatePath}
+                synonymCreatePath={props.synonymCreatePath}
+              />
             </>
           )}
         </>

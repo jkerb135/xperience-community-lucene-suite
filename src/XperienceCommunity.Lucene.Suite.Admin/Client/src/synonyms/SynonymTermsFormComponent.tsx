@@ -14,6 +14,7 @@ import { latestRequest } from "../query-tester/state";
 import { isEditable, useFocusTargets, useTouched } from "../rules/shared";
 import { debounce, fieldValue, removeAt, type RuleError } from "../rules/state";
 import { commitPending, focusAfterRemove, parseTerms, serializeTerms, termErrors } from "./state";
+import { clear, peek } from "../reports/handoff";
 
 /** Props the server sends to the terms component (SynonymTermsClientProperties). */
 export interface SynonymTermsFormComponentProps extends FormComponentProps<string> {
@@ -57,6 +58,15 @@ export const SynonymTermsFormComponent = (props: SynonymTermsFormComponentProps)
   const values = props.fieldValues as Record<string, unknown>;
   const editable = isEditable(props);
   const errors = useTermErrors(props, json, fieldValue(values, "Kind"), fieldValue(values, "Input"));
+  // A query handed over by a Search reports row action becomes the first term; only an empty editor on Create synonym takes it.
+  const [handedQuery] = useState(() => (editable && terms.length === 0 ? peek("synonymCreate", window.location.pathname) : null));
+  useEffect(() => {
+    clear("synonymCreate", window.location.pathname);
+    if (handedQuery !== null) {
+      props.onChange?.(serializeTerms([handedQuery]));
+    }
+    // Runs once on mount: the handoff is a one-time prefill.
+  }, []);
   const { byIndex, unmatched } = termErrors(errors);
   const { ref, focus } = useFocusTargets();
   const { touch, visible } = useTouched(props);
