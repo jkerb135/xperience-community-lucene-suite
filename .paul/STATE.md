@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 13 of 13 (Enterprise Screens) — In progress
-Plan: 13-01 complete; 13-02 created (audit next)
-Status: Ready for 13-02 audit / APPLY
-Last activity: 2026-10-12 — 13-01 unified (.paul/phases/13-enterprise-screens/13-01-SUMMARY.md)
+Plan: 13-01 complete; 13-02 created + audited, awaiting approval
+Status: Ready for 13-02 APPLY
+Last activity: 2026-10-12 — Audited .paul/phases/13-enterprise-screens/13-02-PLAN.md
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Enterprise audit on 13-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 13 | Blocking checkpoint → Task 3 host checks recorded in APPROVAL-CHECKS (project decision 2026-10-11; autonomous true); FacetValues also synonyms/contexts off; no onChange on mount + stored-value round-trip tests; UTC status under a non-UTC TZ; labels for revealed inputs |
 | 2026-10-12: 13-01 unified: custom rules listing shipped (all 10 ACs pass; host: 501 rules, List ≈ 14 ms, RULES_BULK_* event-log entries written at Information). Checkpoint fixes: custom templates with child pages need RoutingContentPlaceholder; in-admin navigation via react-router-dom useNavigate (external in Kentico webpack; devDependency 7.18.4 for types); bulk bar takes the toolbar slot (no shift); npm Table ignores TableColumn.visible and selectRowLabel. User chose fast-forwarding main to verify on the host (main now carries 13-01, not pushed) | Phase 13 | 13-02 reuses RuleListing.Of; 13-03/13-04 should switch full-page-load links to useNavigate |
 | 2026-10-12: Enterprise audit on 13-01-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 13 | Filter-mode bulk commands refused when the match count changed (ExpectedCount); event log records per-rule before → after; bulk concurrency reuses the 03-06 version token; seed cleanup by recorded ids |
 | 2026-10-12: User: new Phase 13 Enterprise Screens = implement project-sidecar/design/design_handoff_lucene_suite_enterprise/README.md with @kentico/xperience-admin-components (replaces the stale 03-08/03-09 rule-builder plans, never applied). Choices: rules listing → custom client template (reverses 'native listing' for that page only); rule edit stays native ModelEditPage (no sticky save bar); condition editor gains contact-group/custom context Selects (bare code names, matching the shipped Widgets resolver) + facet dimension/value Selects; 4 plans (listing, edit, reports, query tester). Handoff deviations per npm 31.9.1/enterprise.md: no SearchInput/SimpleStatus/Snackbar/ConfirmationDialog, Spinner not skeletons, Headline M | Phase 13 | 13-01 created |
@@ -251,7 +252,7 @@ Feature branches merged: none
 
 Last session: 2026-10-12
 Stopped at: 13-01 unified
-Next action: /paul:audit .paul/phases/13-enterprise-screens/13-02-PLAN.md, then /paul:apply
+Next action: /paul:apply .paul/phases/13-enterprise-screens/13-02-PLAN.md
 Resume file: .paul/phases/13-enterprise-screens/13-01-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
