@@ -94,10 +94,10 @@ public class AdminRegistrationTests
     }
 
     [Fact]
-    public void RulePages_AreRegisteredWithNativeTemplates()
+    public void RulePages_AreRegistered_TheListingWithItsClientTemplate()
     {
         var listing = Assert.Single(Pages, p => p.Type == typeof(RuleListingPage));
-        Assert.Equal(("rules", TemplateNames.LISTING, Icons.ListBullets), (listing.Slug, listing.TemplateName, listing.Icon));
+        Assert.Equal(("rules", "@xperience-community/lucene-suite/RuleListing", Icons.ListBullets), (listing.Slug, listing.TemplateName, listing.Icon));
         Assert.True(listing.Order > Assert.Single(Pages, p => p.Type == typeof(QueryTesterPage)).Order);
 
         var create = Assert.Single(Pages, p => p.Type == typeof(RuleCreatePage));
@@ -114,7 +114,12 @@ public class AdminRegistrationTests
         const string manageRules = "LuceneSuite.ManageRules";
 
         Assert.Equal(manageRules, typeof(RuleCreatePage).GetCustomAttribute<UIEvaluatePermissionAttribute>()?.Permission);
-        Assert.Equal(manageRules, Command(typeof(RuleListingPage), nameof(RuleListingPage.Delete)));
+        foreach (string bulk in new[] { nameof(RuleListingPage.Enable), nameof(RuleListingPage.Disable), nameof(RuleListingPage.ChangePriority), nameof(RuleListingPage.Delete) })
+        {
+            Assert.Equal(manageRules, Command(typeof(RuleListingPage), bulk));
+        }
+
+        Assert.Equal(SystemPermissions.VIEW, Command(typeof(RuleListingPage), nameof(RuleListingPage.List)));
         foreach (var page in new[] { typeof(RuleCreatePage), typeof(RuleEditPage) })
         {
             Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.Submit)));

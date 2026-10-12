@@ -67,8 +67,7 @@ override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.Model.ge
 override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.ProcessFormData(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleEditModel! model, System.Collections.Generic.ICollection<Kentico.Xperience.Admin.Base.Forms.IFormItem!>! formItems) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse!>!
 override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.Submit(Kentico.Xperience.Admin.Base.FormSubmissionCommandArguments! args) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse!>!
 override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.ValidatePage() -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.PageValidationResult!>!
-override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.ConfigurePage() -> System.Threading.Tasks.Task!
-override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.Delete(int id) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<Kentico.Xperience.Admin.Base.RowActionResult!>!>!
+override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.ConfigureTemplateProperties(XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties! properties) -> System.Threading.Tasks.Task<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties!>!
 override XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.ValidatePage() -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.PageValidationResult!>!
 override XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsPage.ConfigureTemplateProperties(XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsClientProperties! properties) -> System.Threading.Tasks.Task<XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsClientProperties!>!
 override XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsPage.ValidatePage() -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.PageValidationResult!>!
@@ -419,6 +418,42 @@ XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterResult.SynonymsFailed.g
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterResult.SynonymsFailed.init -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterResult.TotalHits.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterResult.TotalHits.init -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure.Id.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure.Id.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure.Name.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure.Name.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure.Reason.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure.Reason.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure.RuleBulkFailure() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter.ExpectedCount.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter.ExpectedCount.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter.Query.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter.Query.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter.RuleBulkFilter() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter.Status.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter.Status.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkItem
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkItem.Id.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkItem.Id.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkItem.RuleBulkItem() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkItem.Version.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkItem.Version.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult.Error.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult.Error.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult.Failed.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFailure!>!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult.Failed.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult.RuleBulkResult() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult.Succeeded.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult.Succeeded.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget.Filter.get -> XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkFilter?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget.Filter.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget.Items.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkItem!>?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget.Items.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget.RuleBulkTarget() -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleCreatePage
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleCreatePage.RuleCreatePage(Kentico.Xperience.Admin.Base.Forms.Internal.IFormItemCollectionProvider! formItemCollectionProvider, Kentico.Xperience.Admin.Base.Forms.IFormDataBinder! formDataBinder, Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexManager, CMS.DataEngine.IInfoProvider<XperienceCommunity.Lucene.Suite.Rules.RuleInfo!>! rules, Kentico.Xperience.Admin.Base.IUIPermissionEvaluator! permissionEvaluator, Kentico.Xperience.Admin.Base.IPageLinkGenerator! pageLinkGenerator) -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPage
@@ -429,10 +464,91 @@ XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.IndexIdentifier.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.IndexIdentifier.set -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.RuleEditPageBase(Kentico.Xperience.Admin.Base.Forms.Internal.IFormItemCollectionProvider! formItemCollectionProvider, Kentico.Xperience.Admin.Base.Forms.IFormDataBinder! formDataBinder, Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexManager, CMS.DataEngine.IInfoProvider<XperienceCommunity.Lucene.Suite.Rules.RuleInfo!>! rules, Kentico.Xperience.Admin.Base.IUIPermissionEvaluator! permissionEvaluator, Kentico.Xperience.Admin.Base.IPageLinkGenerator! pageLinkGenerator) -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Descending.get -> bool
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Descending.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Page.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Page.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.PageSize.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.PageSize.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Query.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Query.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.RuleListArguments() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Sort.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Sort.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Status.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Status.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties.CanManage.get -> bool
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties.CanManage.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties.CreatePath.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties.CreatePath.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties.IndexName.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties.IndexName.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingClientProperties.RuleListingClientProperties() -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.ChangePriority(XperienceCommunity.Lucene.Suite.Admin.UIPages.RulePriorityArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult!>!>!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.Delete(XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget! target) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult!>!>!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.Disable(XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget! target) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult!>!>!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.Enable(XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkTarget! target) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleBulkResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.IndexIdentifier.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.IndexIdentifier.set -> void
-XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.RuleListingPage(Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexManager, CMS.DataEngine.IInfoProvider<XperienceCommunity.Lucene.Suite.Rules.RuleInfo!>! rules, Kentico.Xperience.Admin.Base.IUIPermissionEvaluator! permissionEvaluator) -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.List(XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult!>!>!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListingPage.RuleListingPage(Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexManager, CMS.DataEngine.IInfoProvider<XperienceCommunity.Lucene.Suite.Rules.RuleInfo!>! rules, Kentico.Xperience.Admin.Base.IUIPermissionEvaluator! permissionEvaluator, Kentico.Xperience.Admin.Base.IPageLinkGenerator! pageLinkGenerator, CMS.Core.IEventLogService! eventLog, System.TimeProvider! clock) -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Actions.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Actions.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Conditions.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Conditions.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.EditPath.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.EditPath.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Id.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Id.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Name.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Name.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Priority.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Priority.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.RuleListItem() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Status.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Status.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.ValidFromUtc.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.ValidFromUtc.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.ValidUntilUtc.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.ValidUntilUtc.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Version.get -> string!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem.Version.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Counts.get -> XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Counts.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Error.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Error.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Page.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Page.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.PageSize.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.PageSize.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Rows.get -> System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListItem!>!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Rows.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.RuleListResult() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Total.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListResult.Total.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RulePriorityArguments
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RulePriorityArguments.Mode.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RulePriorityArguments.Mode.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RulePriorityArguments.RulePriorityArguments() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RulePriorityArguments.Value.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RulePriorityArguments.Value.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Active.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Active.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.All.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.All.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Disabled.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Disabled.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Expired.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Expired.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.RuleStatusCounts() -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Scheduled.get -> int
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleStatusCounts.Scheduled.set -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchInsightRow
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchInsightRow.Affected.get -> long
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchInsightRow.Affected.set -> void

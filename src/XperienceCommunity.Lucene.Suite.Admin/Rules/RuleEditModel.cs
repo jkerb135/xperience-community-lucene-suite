@@ -114,7 +114,10 @@ internal static class RuleEditMapping
     private static readonly JsonSerializerOptions Indented = new() { WriteIndented = true };
 
     /// <summary>Version token compared at save (round-trip format of LastModified).</summary>
-    public static string VersionOf(StoredRule rule) => rule.LastModified.ToString("O", CultureInfo.InvariantCulture);
+    public static string VersionOf(StoredRule rule) => VersionOf(rule.LastModified);
+
+    /// <inheritdoc cref="VersionOf(StoredRule)"/>
+    public static string VersionOf(DateTime lastModified) => lastModified.ToString("O", CultureInfo.InvariantCulture);
 
     /// <summary>True when the row changed after the form loaded it (or the form carries no version).</summary>
     public static bool IsStale(string? loadedVersion, StoredRule stored) => loadedVersion != VersionOf(stored);
