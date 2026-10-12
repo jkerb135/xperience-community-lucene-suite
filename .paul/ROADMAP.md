@@ -14,7 +14,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
-| 8 | Reports Admin | 0/2 | Planning | - |
+| 8 | Reports Admin | 1/2 | In progress | - |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |
 
@@ -36,7 +36,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Decisions (2026-10-12):** token SVG trend chart + table view; presets + custom range; row actions: query tester, create rule, add synonym
 
 **Plans:**
-- [ ] 08-01: Search reports page — range bar, KPI tiles with deltas, trend chart, latency
+- [x] 08-01: Search reports page — range bar, KPI tiles with deltas, trend chart, latency
 - [ ] 08-02: Query tables (4 sorts, paging, (other)) + row actions (query tester / create rule / add synonym prefill)
 
 ### Phase 9: Suggestions
