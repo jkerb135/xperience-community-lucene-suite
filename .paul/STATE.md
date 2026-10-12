@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 7 of 10 (Report Data) — Not started (v0.2 phases 7–10)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-12 — Milestone v0.2 Measure created
+Phase: 7 of 10 (Report Data) — Planning
+Plan: 07-01 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-10-12 — Audited .paul/phases/07-report-data/07-01-PLAN.md (07-01-AUDIT.md)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Ready for first PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Enterprise audit on 07-01-PLAN.md. Applied 1 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 7 | Surfaced membership decided in SQL (collation), CompleteThrough/IsComplete for unrolled days, PreviousIsPartial nulls deltas, future To rejected, Phase 8 owns authorization |
+| 2026-10-12: Phase 7 planning (user choices): seed generator = opt-in test runner (LUCENESUITE_SEED_CONNECTIONSTRING, nothing packaged); vocabulary + clicked items from the index (built-in list for the test DB); seed the host with ~60 removable days for DancingGoatSample; overview compares with the previous period. Seeder runs the real RollupEngine in memory and writes SearchDaily only for days before the job start (watermark or earliest raw day) and only into empty ranges (DailyRollupStore.Replace would move the watermark). Two plans: 07-01 report service, 07-02 seed generator + host seeding | Phase 7 | 07-01 created |
 | 2026-10-12: Milestone v0.2 Measure created (user, discuss-milestone): 4 phases — 7 Report Data (report queries + dev-only seed generator through the real rollup), 8 Reports Admin, 9 Suggestions (strings-only rate-limited suggest endpoint + progressive-enhancement script; blocklist hides suggestions only), 10 Custom Activities (search performed / result clicked / no results via Kentico consent); no admin settings page | Milestone | Next: /paul:plan Phase 7 |
 | 2026-10-12: Milestone v0.1 Tune & Capture completed: MILESTONES.md entry, archive .paul/milestones/v0.1.0-ROADMAP.md, version aligned to 0.1.0 (PROJECT, config, paul.json), tag v0.1.0 | Milestone | Next: /paul:discuss-milestone for v0.2 Measure |
 | 2026-10-12: 06-04 applied: host ContentType facet = DataClassInfo display name (fallback code name); index rebuilt via Lucene admin rotate button; counts unchanged | Phase 6 | v0.1 follow-up closed |
@@ -158,16 +160,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03: all 
 | None open. Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 98cc68e docs(paul): v0.2 Measure milestone context (v0.1.0 tagged at 6acf358)
+Last commit: aa168b7 docs(paul): create milestone v0.2 Measure
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Milestone v0.2 Measure created, ready to plan
-Next action: /paul:plan for Phase 7 (Report Data)
-Resume file: .paul/ROADMAP.md
+Stopped at: Plan 07-01 audited
+Next action: /paul:apply .paul/phases/07-report-data/07-01-PLAN.md
+Resume file: .paul/phases/07-report-data/07-01-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

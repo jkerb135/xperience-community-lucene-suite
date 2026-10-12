@@ -13,7 +13,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 7 | Report Data | TBD | Not started | - |
+| 7 | Report Data | 0/2 | Planning | - |
 | 8 | Reports Admin | TBD | Not started | - |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |
@@ -23,7 +23,11 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 ### Phase 7: Report Data
 **Focus:** Report query service over `SearchDaily` (KPIs, top queries, no-results, CTR, slowest from the latency histogram; date range; `(other)` handling) and a dev-only seed generator that writes contract-faithful synthetic events across many days and runs the real rollup.
 **Depends on:** v0.1 (capture, rollup, retention)
-**Plans:** TBD (defined during /paul:plan)
+**Decisions (2026-10-12):** seed generator = opt-in test runner; vocabulary from the index; seed the host (~60 removable days); overview compares with the previous period
+
+**Plans:**
+- [ ] 07-01: Report query service (overview + previous period, trend, surfaced query tables + (other), latency percentiles)
+- [ ] 07-02: Seed generator (contract-faithful synthetic sessions → RollupEngine → SearchDaily before the job start, --clear) + host seeding
 
 ### Phase 8: Reports Admin
 **Focus:** Report pages per index in the Site Search app, recomputed on condition change; links into rules and synonyms (e.g. create a rule for a no-results query).
