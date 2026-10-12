@@ -104,6 +104,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Plans:**
 - [x] 13-01 (complete 2026-10-12): Rules listing — custom template, derived status + counts, search/sort/paging, bulk enable/disable/priority/delete with partial-failure results
 - [x] 13-02 (complete 2026-10-12): Rule edit — native form regrouped per handoff, header status, conflict Reload, condition pickers (contexts + facets)
+- [ ] 13-02.1 (inserted): Quick fix — second Save without reload no longer a false conflict (rules + synonyms); rule conflict alert with Reload
 - [ ] 13-03: Search reports — sparklines, data bars, range footer, loading/empty/error states
 - [ ] 13-04: Query tester — result summary strip, score bars, rank movement in Compare, range footer, states
 
