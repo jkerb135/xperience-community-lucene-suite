@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type MutableRefObject, type ReactNode, type RefObject } from "react";
 import { usePageCommandProvider } from "@kentico/xperience-admin-base";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BorderRadius,
   Button,
@@ -124,7 +125,11 @@ const editHref = (row: RuleListItem) => adminHref(row.editPath, window.location.
 
 interface RowHandlers {
   readonly remove: (row: RuleListItem) => void;
+  readonly edit: (row: RuleListItem) => void;
 }
+
+// Plain left clicks navigate inside the admin router; modified clicks keep the browser's own link behaviour.
+const isPlainClick = (event: React.MouseEvent) => event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
 const RowActions = ({ row, canManage, handlers }: { readonly row: RuleListItem; readonly canManage: boolean; readonly handlers: MutableRefObject<RowHandlers> }) => (
   <div style={{ display: "flex", flexWrap: "nowrap", alignItems: "center", gap: Spacing.XXS }}>
@@ -135,7 +140,7 @@ const RowActions = ({ row, canManage, handlers }: { readonly row: RuleListItem; 
       borderless
       aria-label={`Edit rule "${row.name}"`}
       title="Edit"
-      onClick={() => window.location.assign(editHref(row))}
+      onClick={() => handlers.current.edit(row)}
     />
     {canManage && (
       <Button
@@ -266,8 +271,12 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
   };
 
   // Read by the row action cells through a ref, so the cells never depend on changing state.
-  const handlers = useRef<RowHandlers>({ remove: () => undefined });
+  const handlers = useRef<RowHandlers>({ remove: () => undefined, edit: () => undefined });
+  const navigate = useNavigate();
+  const location = useLocation();
   handlers.current = {
+    // The router's pathname is relative to its basename, so adminHref yields a path the router can resolve.
+    edit: (row) => navigate(adminHref(row.editPath, location.pathname)),
     remove: (row) => {
       dispatch({ type: "select", selected: [{ id: row.id, name: row.name, version: row.version }] });
       openDialog("Delete");
@@ -285,7 +294,16 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
             columnName: "name",
             component: () => (
               <div title={row.name} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                <Link href={editHref(row)} text={row.name} />
+                <span
+                  onClickCapture={(event) => {
+                    if (isPlainClick(event)) {
+                      event.preventDefault();
+                      handlers.current.edit(row);
+                    }
+                  }}
+                >
+                  <Link href={editHref(row)} text={row.name} />
+                </span>
               </div>
             ),
           } satisfies ComponentCell,
@@ -358,7 +376,18 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
   const { from, to } = pageRange(result?.page ?? page, result?.pageSize ?? pageSize, total);
   const totalPages = Math.max(1, Math.ceil(total / (result?.pageSize ?? pageSize)));
   const filtered = query !== "" || status !== "All";
-  const createButton = (color: ButtonColor) => <LinkButton label="Create rule" icon="xp-plus" color={color} href={adminHref(createPath, window.location.pathname)} />;
+  const createButton = (color: ButtonColor) => (
+    <span
+      onClickCapture={(event) => {
+        if (isPlainClick(event)) {
+          event.preventDefault();
+          navigate(adminHref(createPath, location.pathname));
+        }
+      }}
+    >
+      <LinkButton label="Create rule" icon="xp-plus" color={color} href={adminHref(createPath, window.location.pathname)} />
+    </span>
+  );
 
   return (
     <div style={pageStyle}>
