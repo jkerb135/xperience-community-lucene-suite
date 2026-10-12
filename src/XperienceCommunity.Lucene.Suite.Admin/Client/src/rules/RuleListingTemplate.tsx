@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type MutableRefObject, type ReactNode, type RefObject } from "react";
-import { usePageCommandProvider } from "@kentico/xperience-admin-base";
+import { RoutingContentPlaceholder, usePageCommandProvider } from "@kentico/xperience-admin-base";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   BorderRadius,
@@ -389,218 +389,221 @@ export const RuleListingTemplate = ({ canManage, createPath }: RuleListingTempla
     </span>
   );
 
+  // Child pages (rule edit, create) render in place of the listing through the placeholder's routes.
   return (
-    <div style={pageStyle}>
-      <Stack spacing={Spacing.XL}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: Spacing.L }}>
-          <div role="heading" aria-level={1}>
-            <Headline size={HeadlineSize.M}>Rules</Headline>
+    <RoutingContentPlaceholder>
+      <div style={pageStyle}>
+        <Stack spacing={Spacing.XL}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: Spacing.L }}>
+            <div role="heading" aria-level={1}>
+              <Headline size={HeadlineSize.M}>Rules</Headline>
+            </div>
+            {canManage && createButton(ButtonColor.Primary)}
           </div>
-          {canManage && createButton(ButtonColor.Primary)}
-        </div>
-        {loadError && (
-          <NotificationBarAlert actions={<Button label="Retry" size={ButtonSize.S} color={ButtonColor.Secondary} onClick={() => setReload((n) => n + 1)} />}>
-            {loadError}
-          </NotificationBarAlert>
-        )}
-        {notice?.kind === "warning" && <NotificationBarWarning onDismiss={() => setNotice(undefined)}>{notice.text}</NotificationBarWarning>}
-        {notice?.kind === "alert" && <NotificationBarAlert onDismiss={() => setNotice(undefined)}>{notice.text}</NotificationBarAlert>}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: Spacing.L }}>
-          <div role="search" style={{ width: "320px" }}>
-            <Input
-              inputRef={searchRef}
-              placeholder="Search by name"
-              actionElement={<Icon name="xp-magnifier" />}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <NameToggleButtons
-            selectedItemId={status}
-            items={STATUSES.map((s) => ({ id: s, label: statusLabel(s, counts?.[s]) }))}
-            onChange={(id) => dispatch({ type: "status", status: id as StatusFilter })}
-          />
-          {loading && result !== undefined && <Spinner />}
-        </div>
-        <div aria-live="polite" style={visuallyHidden}>
-          {announcement || (canManage && count > 0 ? `${rulesText(count)} selected` : "")}
-        </div>
-        {canManage && count > 0 && (
-          <div
-            role="region"
-            aria-label="Bulk actions"
-            style={{
-              position: "sticky",
-              top: Spacing.S,
-              zIndex: 5,
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: Spacing.M,
-              padding: `${Spacing.S} ${Spacing.S} ${Spacing.S} ${Spacing.L}`,
-              borderRadius: BorderRadius.RadiusM,
-              background: "var(--color-background-selected)",
-            }}
-          >
-            <span style={{ fontWeight: 700, color: TEXT }}>{`${rulesText(count)} selected`}</span>
-            {view.allMatching ? (
-              <span style={{ color: LOW }}>All matching rules are selected.</span>
-            ) : (
-              pageAllSelected &&
-              total > pageRows.length && (
-                <Button
-                  size={ButtonSize.S}
-                  color={ButtonColor.Tertiary}
-                  label={`Select all ${total.toLocaleString("en-US")} matching`}
-                  onClick={() => {
-                    setAnnouncement("");
-                    dispatch({ type: "selectAllMatching" });
-                  }}
-                />
-              )
-            )}
-            <div style={{ marginLeft: "auto", display: "flex", flexWrap: "wrap", gap: Spacing.S }}>
-              <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-check-circle" label="Enable" inProgress={busy && !dialog} disabled={busy} onClick={() => void run("Enable")} />
-              <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-minus-circle" label="Disable" disabled={busy} onClick={() => openDialog("Disable")} />
-              <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-arrows-v" label="Change priority" disabled={busy} onClick={() => openDialog("ChangePriority")} />
-              <Button size={ButtonSize.S} color={ButtonColor.Secondary} destructive icon="xp-bin" label="Delete" disabled={busy} onClick={() => openDialog("Delete")} />
-              <Button
-                size={ButtonSize.S}
-                color={ButtonColor.Quinary}
-                icon="xp-times"
-                aria-label="Clear selection"
-                title="Clear selection"
-                onClick={() => dispatch({ type: "clearSelection" })}
+          {loadError && (
+            <NotificationBarAlert actions={<Button label="Retry" size={ButtonSize.S} color={ButtonColor.Secondary} onClick={() => setReload((n) => n + 1)} />}>
+              {loadError}
+            </NotificationBarAlert>
+          )}
+          {notice?.kind === "warning" && <NotificationBarWarning onDismiss={() => setNotice(undefined)}>{notice.text}</NotificationBarWarning>}
+          {notice?.kind === "alert" && <NotificationBarAlert onDismiss={() => setNotice(undefined)}>{notice.text}</NotificationBarAlert>}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: Spacing.L }}>
+            <div role="search" style={{ width: "320px" }}>
+              <Input
+                inputRef={searchRef}
+                placeholder="Search by name"
+                actionElement={<Icon name="xp-magnifier" />}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-          </div>
-        )}
-        {result === undefined ? (
-          loading ? (
-            <Spinner />
-          ) : null
-        ) : total === 0 ? (
-          filtered ? (
-            <Callout
-              type={CalloutType.QuickTip}
-              placement={CalloutPlacementType.OnDesk}
-              headline="No rules match"
-              actionButton={<Button label="Clear filters" color={ButtonColor.Secondary} onClick={clearFilters} />}
-            >
-              Try a different search or status.
-            </Callout>
-          ) : (
-            <Callout
-              type={CalloutType.QuickTip}
-              placement={CalloutPlacementType.OnDesk}
-              headline="No rules yet"
-              actionButton={canManage ? createButton(ButtonColor.Secondary) : undefined}
-            >
-              Rules pin, boost or hide results for matching searches. Start from a query in Search reports{canManage ? ", or create one here." : "."}
-            </Callout>
-          )
-        ) : (
-          <div>
-            <Table
-              columns={COLUMNS}
-              rows={rows}
-              selectable={canManage}
-              preselectedRows={selectedIds}
-              onSelectedItemsChange={(ids) => {
-                setAnnouncement("");
-                dispatch({ type: "select", selected: selectionFrom(ids, pageRows, view.selected) });
-              }}
-              sortModel={{ sortBy: sort, sortType: descending ? SortType.Desc : SortType.Asc }}
-              onSortChange={(model: SortModel) =>
-                dispatch({ type: "sort", sort: (model.sortBy === "name" ? "name" : "priority") as RuleSort, descending: model.sortType === SortType.Desc })
-              }
+            <NameToggleButtons
+              selectedItemId={status}
+              items={STATUSES.map((s) => ({ id: s, label: statusLabel(s, counts?.[s]) }))}
+              onChange={(id) => dispatch({ type: "status", status: id as StatusFilter })}
             />
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: Spacing.L, marginTop: Spacing.L }}>
-              <span style={{ color: TEXT, fontVariantNumeric: "tabular-nums" }}>{rangeText(from, to, total, "rules")}</span>
-              <div style={{ display: "flex", alignItems: "center", gap: Spacing.L }}>
-                <div style={{ width: "140px" }}>
-                  <Select inputRef={pageSizeRef} value={String(pageSize)} onChange={(value) => dispatch({ type: "pageSize", pageSize: Number(value) })}>
-                    {PAGE_SIZES.map((size) => (
-                      <MenuItem key={size} primaryLabel={`${size} per page`} value={String(size)} selected={size === pageSize} />
-                    ))}
-                  </Select>
-                </div>
-                {totalPages > 1 && <Pagination selectedPage={result.page} totalPages={totalPages} onPageChange={(next) => dispatch({ type: "page", page: next })} />}
+            {loading && result !== undefined && <Spinner />}
+          </div>
+          <div aria-live="polite" style={visuallyHidden}>
+            {announcement || (canManage && count > 0 ? `${rulesText(count)} selected` : "")}
+          </div>
+          {canManage && count > 0 && (
+            <div
+              role="region"
+              aria-label="Bulk actions"
+              style={{
+                position: "sticky",
+                top: Spacing.S,
+                zIndex: 5,
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: Spacing.M,
+                padding: `${Spacing.S} ${Spacing.S} ${Spacing.S} ${Spacing.L}`,
+                borderRadius: BorderRadius.RadiusM,
+                background: "var(--color-background-selected)",
+              }}
+            >
+              <span style={{ fontWeight: 700, color: TEXT }}>{`${rulesText(count)} selected`}</span>
+              {view.allMatching ? (
+                <span style={{ color: LOW }}>All matching rules are selected.</span>
+              ) : (
+                pageAllSelected &&
+                total > pageRows.length && (
+                  <Button
+                    size={ButtonSize.S}
+                    color={ButtonColor.Tertiary}
+                    label={`Select all ${total.toLocaleString("en-US")} matching`}
+                    onClick={() => {
+                      setAnnouncement("");
+                      dispatch({ type: "selectAllMatching" });
+                    }}
+                  />
+                )
+              )}
+              <div style={{ marginLeft: "auto", display: "flex", flexWrap: "wrap", gap: Spacing.S }}>
+                <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-check-circle" label="Enable" inProgress={busy && !dialog} disabled={busy} onClick={() => void run("Enable")} />
+                <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-minus-circle" label="Disable" disabled={busy} onClick={() => openDialog("Disable")} />
+                <Button size={ButtonSize.S} color={ButtonColor.Secondary} icon="xp-arrows-v" label="Change priority" disabled={busy} onClick={() => openDialog("ChangePriority")} />
+                <Button size={ButtonSize.S} color={ButtonColor.Secondary} destructive icon="xp-bin" label="Delete" disabled={busy} onClick={() => openDialog("Delete")} />
+                <Button
+                  size={ButtonSize.S}
+                  color={ButtonColor.Quinary}
+                  icon="xp-times"
+                  aria-label="Clear selection"
+                  title="Clear selection"
+                  onClick={() => dispatch({ type: "clearSelection" })}
+                />
               </div>
             </div>
-          </div>
-        )}
-      </Stack>
-      <ConfirmDialog
-        isOpen={dialog === "Delete"}
-        headline={`Delete ${rulesText(count)}?`}
-        confirmLabel="Delete"
-        destructive
-        busy={busy}
-        error={dialogError}
-        returnFocus={returnToOpener}
-        onConfirm={() => void run("Delete")}
-        onClose={closeDialog}
-      >
-        <Stack spacing={Spacing.M}>
-          <span>
-            {count === 1 ? "The rule will be permanently deleted. Searches stop using it immediately." : "These rules will be permanently deleted. Searches stop using them immediately."}
-          </span>
-          <ul style={{ margin: 0, paddingLeft: Spacing.L, color: LOW }}>
-            {deleteNames.map((name, i) => (
-              <li key={i}>{name}</li>
-            ))}
-          </ul>
+          )}
+          {result === undefined ? (
+            loading ? (
+              <Spinner />
+            ) : null
+          ) : total === 0 ? (
+            filtered ? (
+              <Callout
+                type={CalloutType.QuickTip}
+                placement={CalloutPlacementType.OnDesk}
+                headline="No rules match"
+                actionButton={<Button label="Clear filters" color={ButtonColor.Secondary} onClick={clearFilters} />}
+              >
+                Try a different search or status.
+              </Callout>
+            ) : (
+              <Callout
+                type={CalloutType.QuickTip}
+                placement={CalloutPlacementType.OnDesk}
+                headline="No rules yet"
+                actionButton={canManage ? createButton(ButtonColor.Secondary) : undefined}
+              >
+                Rules pin, boost or hide results for matching searches. Start from a query in Search reports{canManage ? ", or create one here." : "."}
+              </Callout>
+            )
+          ) : (
+            <div>
+              <Table
+                columns={COLUMNS}
+                rows={rows}
+                selectable={canManage}
+                preselectedRows={selectedIds}
+                onSelectedItemsChange={(ids) => {
+                  setAnnouncement("");
+                  dispatch({ type: "select", selected: selectionFrom(ids, pageRows, view.selected) });
+                }}
+                sortModel={{ sortBy: sort, sortType: descending ? SortType.Desc : SortType.Asc }}
+                onSortChange={(model: SortModel) =>
+                  dispatch({ type: "sort", sort: (model.sortBy === "name" ? "name" : "priority") as RuleSort, descending: model.sortType === SortType.Desc })
+                }
+              />
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: Spacing.L, marginTop: Spacing.L }}>
+                <span style={{ color: TEXT, fontVariantNumeric: "tabular-nums" }}>{rangeText(from, to, total, "rules")}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: Spacing.L }}>
+                  <div style={{ width: "140px" }}>
+                    <Select inputRef={pageSizeRef} value={String(pageSize)} onChange={(value) => dispatch({ type: "pageSize", pageSize: Number(value) })}>
+                      {PAGE_SIZES.map((size) => (
+                        <MenuItem key={size} primaryLabel={`${size} per page`} value={String(size)} selected={size === pageSize} />
+                      ))}
+                    </Select>
+                  </div>
+                  {totalPages > 1 && <Pagination selectedPage={result.page} totalPages={totalPages} onPageChange={(next) => dispatch({ type: "page", page: next })} />}
+                </div>
+              </div>
+            </div>
+          )}
         </Stack>
-      </ConfirmDialog>
-      <ConfirmDialog
-        isOpen={dialog === "Disable"}
-        headline={`Disable ${rulesText(count)}?`}
-        confirmLabel="Disable"
-        busy={busy}
-        error={dialogError}
-        returnFocus={returnToOpener}
-        onConfirm={() => void run("Disable")}
-        onClose={closeDialog}
-      >
-        Disabled rules stay in the list but stop affecting searches. You can enable them again at any time.
-      </ConfirmDialog>
-      <ConfirmDialog
-        isOpen={dialog === "ChangePriority"}
-        headline={`Change priority of ${rulesText(count)}`}
-        confirmLabel="Apply"
-        disabled={priorityValue === null}
-        busy={busy}
-        error={dialogError}
-        returnFocus={returnToOpener}
-        onAfterOpen={() => firstRadioRef.current?.focus()}
-        onConfirm={() => void run("ChangePriority")}
-        onClose={closeDialog}
-      >
-        <Stack spacing={Spacing.L}>
-          <RadioGroup name="rule-priority-mode" label="Change" value={priorityMode} onChange={(value) => setPriorityMode(value as PriorityMode)}>
-            <RadioButton value="shift" inputRef={firstRadioRef} caption="Adds the value to each rule's priority. Use a negative number to move rules earlier.">
-              Shift by
-            </RadioButton>
-            <RadioButton value="set" caption="Gives every selected rule the same priority.">
-              Set to
-            </RadioButton>
-          </RadioGroup>
-          <div style={{ maxWidth: "200px" }}>
-            <Input
-              type="number"
-              label={priorityMode === "set" ? "Priority" : "Shift by"}
-              value={priorityText}
-              explanationText="Lower numbers run first."
-              invalid={priorityText !== "" && priorityValue === null}
-              validationMessage={
-                priorityText !== "" && priorityValue === null ? (priorityMode === "set" ? "Enter a whole number of 1 or more." : "Enter a whole number.") : undefined
-              }
-              onChange={(e) => setPriorityText(e.target.value)}
-            />
-          </div>
-        </Stack>
-      </ConfirmDialog>
-    </div>
+        <ConfirmDialog
+          isOpen={dialog === "Delete"}
+          headline={`Delete ${rulesText(count)}?`}
+          confirmLabel="Delete"
+          destructive
+          busy={busy}
+          error={dialogError}
+          returnFocus={returnToOpener}
+          onConfirm={() => void run("Delete")}
+          onClose={closeDialog}
+        >
+          <Stack spacing={Spacing.M}>
+            <span>
+              {count === 1 ? "The rule will be permanently deleted. Searches stop using it immediately." : "These rules will be permanently deleted. Searches stop using them immediately."}
+            </span>
+            <ul style={{ margin: 0, paddingLeft: Spacing.L, color: LOW }}>
+              {deleteNames.map((name, i) => (
+                <li key={i}>{name}</li>
+              ))}
+            </ul>
+          </Stack>
+        </ConfirmDialog>
+        <ConfirmDialog
+          isOpen={dialog === "Disable"}
+          headline={`Disable ${rulesText(count)}?`}
+          confirmLabel="Disable"
+          busy={busy}
+          error={dialogError}
+          returnFocus={returnToOpener}
+          onConfirm={() => void run("Disable")}
+          onClose={closeDialog}
+        >
+          Disabled rules stay in the list but stop affecting searches. You can enable them again at any time.
+        </ConfirmDialog>
+        <ConfirmDialog
+          isOpen={dialog === "ChangePriority"}
+          headline={`Change priority of ${rulesText(count)}`}
+          confirmLabel="Apply"
+          disabled={priorityValue === null}
+          busy={busy}
+          error={dialogError}
+          returnFocus={returnToOpener}
+          onAfterOpen={() => firstRadioRef.current?.focus()}
+          onConfirm={() => void run("ChangePriority")}
+          onClose={closeDialog}
+        >
+          <Stack spacing={Spacing.L}>
+            <RadioGroup name="rule-priority-mode" label="Change" value={priorityMode} onChange={(value) => setPriorityMode(value as PriorityMode)}>
+              <RadioButton value="shift" inputRef={firstRadioRef} caption="Adds the value to each rule's priority. Use a negative number to move rules earlier.">
+                Shift by
+              </RadioButton>
+              <RadioButton value="set" caption="Gives every selected rule the same priority.">
+                Set to
+              </RadioButton>
+            </RadioGroup>
+            <div style={{ maxWidth: "200px" }}>
+              <Input
+                type="number"
+                label={priorityMode === "set" ? "Priority" : "Shift by"}
+                value={priorityText}
+                explanationText="Lower numbers run first."
+                invalid={priorityText !== "" && priorityValue === null}
+                validationMessage={
+                  priorityText !== "" && priorityValue === null ? (priorityMode === "set" ? "Enter a whole number of 1 or more." : "Enter a whole number.") : undefined
+                }
+                onChange={(e) => setPriorityText(e.target.value)}
+              />
+            </div>
+          </Stack>
+        </ConfirmDialog>
+      </div>
+    </RoutingContentPlaceholder>
   );
 };
