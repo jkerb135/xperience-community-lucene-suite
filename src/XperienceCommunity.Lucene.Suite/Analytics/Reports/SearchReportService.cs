@@ -34,7 +34,14 @@ internal sealed class SearchReportService(
         var days = Summed(range with { From = previous.From }, nameof(SearchDailyInfo.Day)).GetEnumerableTypedResult().ToList();
         var current = ToTotals(days.Where(row => DateOnly.FromDateTime(row.Day) >= range.From));
         var before = ToTotals(days.Where(row => DateOnly.FromDateTime(row.Day) < range.From));
+        var (firstDataDay, partial) = PreviousPeriod(range);
 
+        return new ReportOverview(current, before, Deltas(current, before, partial), firstDataDay, partial, store.ReadWatermark());
+    }
+
+    /// <summary>The first day with data for the index, and whether <see cref="ReportRange.Previous"/> starts before it (or there is no data).</summary>
+    internal (DateOnly? FirstDataDay, bool PreviousIsPartial) PreviousPeriod(ReportRange range)
+    {
         var first = daily.Get()
             .TopN(1)
             .Column(nameof(SearchDailyInfo.Day))
@@ -42,9 +49,7 @@ internal sealed class SearchReportService(
             .OrderBy(nameof(SearchDailyInfo.Day))
             .GetScalarResult(DateTime.MinValue);
         DateOnly? firstDataDay = first == DateTime.MinValue ? null : DateOnly.FromDateTime(first);
-        bool partial = firstDataDay is not DateOnly firstDay || previous.From < firstDay;
-
-        return new ReportOverview(current, before, Deltas(current, before, partial), firstDataDay, partial, store.ReadWatermark());
+        return (firstDataDay, firstDataDay is not DateOnly firstDay || range.Previous.From < firstDay);
     }
 
     public ReportTrend Trend(string indexName, DateOnly from, DateOnly to)

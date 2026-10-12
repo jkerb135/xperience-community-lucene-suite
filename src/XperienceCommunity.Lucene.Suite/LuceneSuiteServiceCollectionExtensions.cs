@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using XperienceCommunity.Lucene.Suite.Activities;
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Reports;
+using XperienceCommunity.Lucene.Suite.Analytics.Reports.Insights;
 using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Search;
@@ -44,6 +45,7 @@ public static class LuceneSuiteServiceCollectionExtensions
         services.TryAddSingleton<DailyRollupStore>();
         services.TryAddSingleton<AnalyticsRetention>();
         services.TryAddSingleton<SearchReportService>();
+        services.TryAddSingleton<SearchInsightService>();
         services.AddHostedService<AnalyticsRollupJob>();
         services.Configure<CookieLevelOptions>(cookies =>
             cookies.CookieConfigurations[SearchSessionCookie.Name] = new CookieLevel(CookieLevelConstants.VISITOR));

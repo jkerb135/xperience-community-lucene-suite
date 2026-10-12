@@ -22,6 +22,7 @@ import {
 } from "@kentico/xperience-admin-components";
 import { adminHref, latestRequest } from "../query-tester/state.ts";
 import { give, type HandoffTarget } from "./handoff.ts";
+import type { RowAction } from "./insights.ts";
 import { cardHeadline, visuallyHidden } from "./dashboard.tsx";
 import { DASH, blockSuggestionReason, formatCount, formatPosition, formatRate, percentileLabel, type DayRange, type Percentile } from "./report.ts";
 
@@ -94,7 +95,7 @@ export const BROWSE = "(browse – no query text)";
 const PLACEHOLDER = "Contains a removed value; a rule or synonym would never match";
 
 /** Why Create rule / Add synonym are unavailable for this row, or null. */
-export const blockedReason = (row: QueryRow): string | null =>
+export const blockedReason = (row: ActionRow): string | null =>
   row.isBrowse ? "The browse row has no query text" : row.hasPlaceholder ? PLACEHOLDER : null;
 
 /** Hands the query to the target page (one-time sessionStorage handoff) and navigates there. */
@@ -103,8 +104,11 @@ export const openTarget = (target: HandoffTarget, path: string, query: string) =
   window.location.assign(adminHref(path, window.location.pathname));
 };
 
+/** What the row actions read of a row. */
+export type ActionRow = Pick<QueryRow, "queryText" | "isBrowse" | "hasPlaceholder">;
+
 export interface RowActionsProps {
-  readonly row: QueryRow;
+  readonly row: ActionRow;
   readonly canManageRules: boolean;
   readonly canManageSynonyms: boolean;
   readonly queryTesterPath?: string;
@@ -112,22 +116,26 @@ export interface RowActionsProps {
   readonly synonymCreatePath: string;
   /** Shows the Block suggestion button (query table only). */
   readonly onBlock?: (query: string) => void;
+  /** The actions to show, always in the table's order; all of them by default. Never derive it from request state. */
+  readonly actions?: readonly RowAction[];
 }
 
 /**
  * Listing-style row actions: icon-only buttons in one line. Each has a full accessible name (the npm 31.9.1 ActionCell
  * announces every icon as "button"). A disabled button cannot take focus, so its reason is also given as hidden text.
  */
-export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTesterPath, ruleCreatePath, synonymCreatePath, onBlock }: RowActionsProps) => {
+export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTesterPath, ruleCreatePath, synonymCreatePath, onBlock, actions }: RowActionsProps) => {
   const query = row.queryText ?? "";
+  const shows = (action: RowAction) => actions === undefined || actions.includes(action);
   const blocked = blockedReason(row);
-  const ruleReason = blocked ?? (canManageRules ? null : "Requires Site Search → Manage rules");
-  const synonymReason = blocked ?? (canManageSynonyms ? null : "Requires Site Search → Manage synonyms");
-  const blockReason = onBlock ? blockSuggestionReason(row, canManageSynonyms) : null;
+  const ruleReason = shows("rule") ? (blocked ?? (canManageRules ? null : "Requires Site Search → Manage rules")) : null;
+  const synonymReason = shows("synonym") ? (blocked ?? (canManageSynonyms ? null : "Requires Site Search → Manage synonyms")) : null;
+  const showBlock = onBlock !== undefined && shows("block");
+  const blockReason = showBlock ? blockSuggestionReason(row, canManageSynonyms) : null;
   const name = row.isBrowse ? "the browse row" : `"${query}"`;
   return (
     <div style={{ display: "flex", flexWrap: "nowrap", alignItems: "center", gap: Spacing.XXS }}>
-      {queryTesterPath !== undefined && (
+      {queryTesterPath !== undefined && shows("tester") && (
         <Button
           icon="xp-magnifier"
           size={ButtonSize.S}
@@ -138,27 +146,31 @@ export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTester
           onClick={() => openTarget("queryTester", queryTesterPath, query)}
         />
       )}
-      <Button
-        icon="xp-plus-circle"
-        size={ButtonSize.S}
-        color={ButtonColor.Quinary}
-        borderless
-        aria-label={`Create rule for ${name}`}
-        title={ruleReason ?? "Create rule"}
-        disabled={ruleReason !== null}
-        onClick={() => openTarget("ruleCreate", ruleCreatePath, query)}
-      />
-      <Button
-        icon="xp-arrows-h"
-        size={ButtonSize.S}
-        color={ButtonColor.Quinary}
-        borderless
-        aria-label={`Add synonym for ${name}`}
-        title={synonymReason ?? "Add synonym"}
-        disabled={synonymReason !== null}
-        onClick={() => openTarget("synonymCreate", synonymCreatePath, query)}
-      />
-      {onBlock && (
+      {shows("rule") && (
+        <Button
+          icon="xp-plus-circle"
+          size={ButtonSize.S}
+          color={ButtonColor.Quinary}
+          borderless
+          aria-label={`Create rule for ${name}`}
+          title={ruleReason ?? "Create rule"}
+          disabled={ruleReason !== null}
+          onClick={() => openTarget("ruleCreate", ruleCreatePath, query)}
+        />
+      )}
+      {shows("synonym") && (
+        <Button
+          icon="xp-arrows-h"
+          size={ButtonSize.S}
+          color={ButtonColor.Quinary}
+          borderless
+          aria-label={`Add synonym for ${name}`}
+          title={synonymReason ?? "Add synonym"}
+          disabled={synonymReason !== null}
+          onClick={() => openTarget("synonymCreate", synonymCreatePath, query)}
+        />
+      )}
+      {showBlock && (
         <Button
           icon="xp-ban-sign"
           size={ButtonSize.S}
@@ -167,7 +179,7 @@ export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTester
           aria-label={`Block ${name} from suggestions`}
           title={blockReason ?? "Block suggestion"}
           disabled={blockReason !== null}
-          onClick={() => onBlock(query)}
+          onClick={() => onBlock?.(query)}
         />
       )}
       {(ruleReason || synonymReason || blockReason) && (

@@ -72,6 +72,39 @@ internal sealed class SuiteSearchOptionsValidator : IValidateOptions<SuiteSearch
         AtLeastOne(a.Surfacing.MinSearches, "Surfacing:" + nameof(a.Surfacing.MinSearches));
         AtLeastOne(a.Surfacing.MinDistinctDays, "Surfacing:" + nameof(a.Surfacing.MinDistinctDays));
 
+        var i = a.Insights;
+        void Share(double value, string key)
+        {
+            // Negated so NaN fails too.
+            if (!(value >= 0 && value <= 1))
+            {
+                failures.Add($"{Prefix}Insights:{key} must be between 0 and 1 (was {value}).");
+            }
+        }
+
+        void Between(int value, int min, int max, string key)
+        {
+            if (value < min || value > max)
+            {
+                failures.Add($"{Prefix}Insights:{key} must be between {min} and {max} (was {value}).");
+            }
+        }
+
+        AtLeastOne(i.MinSearches, "Insights:" + nameof(i.MinSearches));
+        Share(i.ContentGapMinNoResultRate, nameof(i.ContentGapMinNoResultRate));
+        Share(i.RelevanceMissMaxCtr, nameof(i.RelevanceMissMaxCtr));
+        AtLeastOne(i.BuriedMinClickedSearches, "Insights:" + nameof(i.BuriedMinClickedSearches));
+        if (!(i.BuriedMinAvgPosition > 1))
+        {
+            failures.Add($"{Prefix}Insights:{nameof(i.BuriedMinAvgPosition)} must be greater than 1 (was {i.BuriedMinAvgPosition}).");
+        }
+
+        AtLeastOne(i.SlowMinP95Ms, "Insights:" + nameof(i.SlowMinP95Ms));
+        Share(i.RegressionMinPoints, nameof(i.RegressionMinPoints));
+        AtLeastOne(i.MinAffected, "Insights:" + nameof(i.MinAffected));
+        Between(i.MaxQueries, 1, 10_000, nameof(i.MaxQueries));
+        Between(i.MaxFindings, 1, 1_000, nameof(i.MaxFindings));
+
         const string rules = SuiteSearchOptions.SectionName + ":Rules:";
         if (!(options.Rules.MaxBoostFactor > 1 && options.Rules.MaxBoostFactor <= 1000))
         {

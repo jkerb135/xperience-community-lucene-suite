@@ -106,6 +106,23 @@ public sealed class AnalyticsOptionsTests
     [InlineData("Job:RollupInterval", "00:00:00")]
     [InlineData("Job:MaxDaysPerRun", "0")]
     [InlineData("Retention:RawHardLimit", "1.23:59:59")]
+    [InlineData("Insights:MinSearches", "0")]
+    [InlineData("Insights:ContentGapMinNoResultRate", "-0.01")]
+    [InlineData("Insights:ContentGapMinNoResultRate", "1.01")]
+    [InlineData("Insights:ContentGapMinNoResultRate", "NaN")]
+    [InlineData("Insights:RelevanceMissMaxCtr", "-0.01")]
+    [InlineData("Insights:RelevanceMissMaxCtr", "1.01")]
+    [InlineData("Insights:BuriedMinClickedSearches", "0")]
+    [InlineData("Insights:BuriedMinAvgPosition", "1")]
+    [InlineData("Insights:BuriedMinAvgPosition", "NaN")]
+    [InlineData("Insights:SlowMinP95Ms", "0")]
+    [InlineData("Insights:RegressionMinPoints", "-0.01")]
+    [InlineData("Insights:RegressionMinPoints", "1.01")]
+    [InlineData("Insights:MinAffected", "0")]
+    [InlineData("Insights:MaxQueries", "0")]
+    [InlineData("Insights:MaxQueries", "10001")]
+    [InlineData("Insights:MaxFindings", "0")]
+    [InlineData("Insights:MaxFindings", "1001")]
     public void InvalidSetting_FailsNamingTheSetting(string key, string value)
     {
         var error = Assert.Throws<OptionsValidationException>(() => Resolve(new() { ["LuceneSuite:Analytics:" + key] = value }));
@@ -125,6 +142,33 @@ public sealed class AnalyticsOptionsTests
         var error = Assert.Throws<OptionsValidationException>(() => Resolve(new() { ["LuceneSuite:Rules:" + key] = value }));
 
         Assert.Contains(error.Failures, failure => failure.StartsWith("LuceneSuite:Rules:" + key + " ", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void InsightDefaults_AreValid_AndASiteCanOverrideThem()
+    {
+        var i = Resolve([]).Analytics.Insights;
+        Assert.Equal(
+            (20, 0.3, 0.1, 5, 5.0, 1000, 0.10, 5, 1000, 200),
+            (i.MinSearches, i.ContentGapMinNoResultRate, i.RelevanceMissMaxCtr, i.BuriedMinClickedSearches, i.BuriedMinAvgPosition, i.SlowMinP95Ms, i.RegressionMinPoints, i.MinAffected, i.MaxQueries, i.MaxFindings));
+
+        Assert.Equal(5, Resolve(new() { ["LuceneSuite:Analytics:Insights:MinSearches"] = "5" }).Analytics.Insights.MinSearches);
+        i = Resolve(new()
+        {
+            ["LuceneSuite:Analytics:Insights:MinSearches"] = "200",
+            ["LuceneSuite:Analytics:Insights:ContentGapMinNoResultRate"] = "1",
+            ["LuceneSuite:Analytics:Insights:RelevanceMissMaxCtr"] = "0",
+            ["LuceneSuite:Analytics:Insights:BuriedMinClickedSearches"] = "20",
+            ["LuceneSuite:Analytics:Insights:BuriedMinAvgPosition"] = "1.5",
+            ["LuceneSuite:Analytics:Insights:SlowMinP95Ms"] = "1",
+            ["LuceneSuite:Analytics:Insights:RegressionMinPoints"] = "0",
+            ["LuceneSuite:Analytics:Insights:MinAffected"] = "25",
+            ["LuceneSuite:Analytics:Insights:MaxQueries"] = "10000",
+            ["LuceneSuite:Analytics:Insights:MaxFindings"] = "1000",
+        }).Analytics.Insights;
+        Assert.Equal(
+            (200, 1.0, 0.0, 20, 1.5, 1, 0.0, 25, 10_000, 1_000),
+            (i.MinSearches, i.ContentGapMinNoResultRate, i.RelevanceMissMaxCtr, i.BuriedMinClickedSearches, i.BuriedMinAvgPosition, i.SlowMinP95Ms, i.RegressionMinPoints, i.MinAffected, i.MaxQueries, i.MaxFindings));
     }
 
     [Fact]

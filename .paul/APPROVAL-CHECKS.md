@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 14 | 11-01/11-02 | Search insights: Fix these first card, All insights panel, actions per kind, ranking by searches affected | Pending |
 | 13 | 10-01 | Search activities (3 custom types, installed disabled) + click contract v2 (optional query/title) | Pending |
 | 12 | 09-03 | Blocked suggestions admin (listing/create/delete) + one-click report Block suggestion | Pending |
 | 11 | 09-02 | Search box autocomplete (ARIA combobox script, opt-in, stylesheet) + admin right gutter (Convention 2b) | Pending |
@@ -416,4 +417,38 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **Not observed:**
      - a visitor without consent (Kentico's own check; the pane was already a tracked contact);
      - a real web farm.
+
+---
+
+## 14. 11-01 + 11-02: Search insights (v0.2)
+
+1. **Where:** Site search → DancingGoatSample → Search reports, in the **Fix these first** card and the **Show all insights** panel.
+2. **What I verified on the host** (seeded 60 days, 30-day range):
+   - **Findings:**
+     - 7 findings out of 36 queries checked; the top 5 are the 100%-no-result queries ("returns policy" 26/26, "wifi password", "job openings", "parking", "pizza delivery");
+     - the panel groups "No results (6)" and "Got worse (1)" as h3 headings with explanations.
+   - **Ranking fix during APPLY** (your call to confirm):
+     - The first run ranked four "Got worse" findings and one "Slow" finding above the 100%-no-result queries. A regression counted *every* search of the query as affected. "Slow" fired for a p95 range of 500 ms–1 s at a 1 s setting, because it compared the range's upper edge.
+     - Now a regression's affected count = searches × the change. A query is slow only when its whole p95 range is at or above the setting, and its affected count = the searches in ranges at or above it.
+     - Tests and docs/insights.md were updated.
+   - **Actions:**
+     - "Add synonym" on "returns policy" opened Create synonym with the term filled in;
+     - a temporary synonym (returns policy ↔ refund policy) then showed as "Already applies: Synonym" linking to its edit page;
+     - the synonym was deleted afterwards.
+   - **Fallback:** with the 7-day preset, no query reached the thresholds and the card showed "No findings at your thresholds. Top queries without results:" with the old list. Changing the range reloads.
+   - **Layout and data:**
+     - at 1100 and 1700 px viewports, no overflow, action icons on one line (5 card items, 7 panel items), and a correct heading outline (h1 page, h2 card, h3 kinds);
+     - each finding is an `li` labelled by its query;
+     - host counts unchanged (SearchEvent 28, SearchDaily 3 389, Rule 1, Synonym 0, BlockedSuggestion 0).
+     - The 1 rule ("Boost items for test") existed before this check; it isn't mine.
+3. **Automated checks:** .NET 798 passed, 6 skipped; client 77/77; tsc clean; build 0 warnings.
+4. **Your decisions to confirm:**
+   - **Ranking:** "searches affected" as now defined (the fix above).
+   - **Card title** "Fix these first"; kind labels (No results / Results not clicked / Answer buried / Slow / Got worse); the buttons per kind.
+   - **Fallback** to the old no-result list (audit must-have).
+   - **11-01 latency:** 47 ms warm, but 284 ms on the first call after a restart.
+   - **Not observed:**
+     - focus return on panel close: animation frames don't run in the hidden browser pane, and the existing response-time panel behaves the same way there;
+     - Create rule / Query tester / Block suggestion from a finding: they share the query-table handoff and command; no Relevance-miss finding existed for the Block button;
+     - a View-only role.
 

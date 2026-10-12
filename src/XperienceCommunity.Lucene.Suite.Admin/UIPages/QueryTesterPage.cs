@@ -201,9 +201,12 @@ public sealed class QueryTesterPage(
                 .Columns(nameof(SynonymInfo.SynonymID))
                 .Select(synonym => synonym.SynonymID)];
 
-    private string SynonymEditUrl(int synonymId) => pageLinkGenerator.GetPath<SynonymEditPage>(new PageParameterValues
+    private string SynonymEditUrl(int synonymId) => SynonymEditUrl(pageLinkGenerator, IndexIdentifier, synonymId);
+
+    /// <summary>Admin path of a synonym's edit page under the index's Search tuning section.</summary>
+    internal static string SynonymEditUrl(IPageLinkGenerator links, int indexIdentifier, int synonymId) => links.GetPath<SynonymEditPage>(new PageParameterValues
     {
-        { typeof(SearchTuningSectionPage), IndexIdentifier },
+        { typeof(SearchTuningSectionPage), indexIdentifier },
         { typeof(SynonymEditPage), synonymId },
     });
 
@@ -216,9 +219,12 @@ public sealed class QueryTesterPage(
                 .Columns(nameof(RuleInfo.RuleID), nameof(RuleInfo.DisplayName))
                 .ToDictionary(rule => rule.RuleID, rule => rule.DisplayName);
 
-    private string EditUrl(int ruleId) => pageLinkGenerator.GetPath<RuleEditPage>(new PageParameterValues
+    private string EditUrl(int ruleId) => RuleEditUrl(pageLinkGenerator, IndexIdentifier, ruleId);
+
+    /// <summary>Admin path of a rule's edit page under the index's Search tuning section.</summary>
+    internal static string RuleEditUrl(IPageLinkGenerator links, int indexIdentifier, int ruleId) => links.GetPath<RuleEditPage>(new PageParameterValues
     {
-        { typeof(SearchTuningSectionPage), IndexIdentifier },
+        { typeof(SearchTuningSectionPage), indexIdentifier },
         { typeof(RuleEditPage), ruleId },
     });
 

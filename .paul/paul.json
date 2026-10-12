@@ -8,8 +8,8 @@
     "phases": 7
   },
   "phase": {
-    "number": 11,
-    "name": "Search Insights",
+    "number": 12,
+    "name": "Public API Audit",
     "status": "not_started",
     "plans_completed": 0
   },

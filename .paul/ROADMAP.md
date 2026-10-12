@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 5 of 7 complete
+Phases: 6 of 7 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -18,7 +18,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 8.1 | Admin UI Consistency Audit | 5/5 | ✅ Complete | 2026-10-12 |
 | 9 | Suggestions | 3/3 | ✅ Complete | 2026-10-12 |
 | 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
-| 11 | Search Insights | TBD | Not started | - |
+| 11 | Search Insights | 2/2 | ✅ Complete | 2026-10-12 |
 | 12 | Public API Audit | TBD | Not started | - |
 
 ## Phase Details
@@ -76,7 +76,11 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Admin UI:** /xbyk-admin-ui:design-screen (SPECIAL-FLOWS), Conventions 1–10 from Phase 8.1
 **Depends on:** Phase 7 (report service), Phase 8 / 8.1 (reports page, row actions), Phase 9 (block suggestion)
 **Decisions (2026-10-12, user):** every threshold is configurable per site in appsettings (`LuceneSuite:Analytics:Insights` — minimum searches, rate cutoffs, click-position cutoff, latency cutoff, regression %) with sensible defaults, so small and large sites can tune it (no admin settings page, per milestone constraint); every finding links directly to its fix, pre-filled. Not in scope: LLM/AIRA analysis (no public bring-your-own-agent API in Xperience as of 2026-10-12), typo-pair detection, stored findings.
-**Plans:** TBD
+**Decisions (planning):** Needs attention card (top 5) + "Show all insights" side panel; findings annotated with existing synonyms/rules
+
+**Plans:**
+- [x] 11-01: Insights core — options, one SQL aggregation (current + previous), pure engine, existing-fix annotations
+- [x] 11-02: Reports UI — Needs attention findings + all-insights panel, pre-filled fix actions, host check
 
 ### Phase 12: Public API Audit
 **Focus:** Make Core + Admin alone sufficient to build a custom search UI, and Widgets extensible: inventory every public type in Core/Admin/Widgets, close gaps (e.g. rule/synonym/report/insight services usable outside the admin), XML docs everywhere, a public-API baseline (shipped/unshipped list) so later changes are deliberate, and a "build your own UI / author your own widget" guide.

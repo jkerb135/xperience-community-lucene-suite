@@ -14,6 +14,7 @@ using XperienceCommunity.Lucene.Suite.Admin.Suggestions;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Reports;
+using XperienceCommunity.Lucene.Suite.Analytics.Reports.Insights;
 using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 using XperienceCommunity.Lucene.Suite.Search;
 using XperienceCommunity.Lucene.Suite.Suggestions;
@@ -80,6 +81,19 @@ public sealed class SearchReportsPage(
     {
         string indexName = (indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.")).IndexName;
         return Task.FromResult(ResponseFrom(BuildQueries(serviceProvider.GetRequiredService<SearchReportService>(), indexName, arguments)));
+    }
+
+    /// <summary>Ranked insight findings of the page's index with links to the fixes that already apply; invalid ranges come back as <see cref="SearchInsightsResult.Error"/>.</summary>
+    [PageCommand(Permission = SystemPermissions.VIEW)]
+    public Task<ICommandResponse<SearchInsightsResult>> Insights(SearchReportsArguments arguments)
+    {
+        string indexName = (indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.")).IndexName;
+        return Task.FromResult(ResponseFrom(BuildInsights(
+            serviceProvider.GetRequiredService<SearchInsightService>(),
+            id => QueryTesterPage.RuleEditUrl(pageLinkGenerator, IndexIdentifier, id),
+            id => QueryTesterPage.SynonymEditUrl(pageLinkGenerator, IndexIdentifier, id),
+            indexName,
+            arguments)));
     }
 
     /// <summary>Keeps a reported query out of this index's suggestions (exact match); the text is re-validated, the index never comes from the client.</summary>
@@ -156,12 +170,59 @@ public sealed class SearchReportsPage(
         }
     }
 
+    /// <summary>Maps <see cref="SearchInsightService.Insights"/> to the client shape; edit URLs come from the page's link generator.</summary>
+    internal static SearchInsightsResult BuildInsights(
+        SearchInsightService insights, Func<int, string> ruleEditUrl, Func<int, string> synonymEditUrl, string indexName, SearchReportsArguments arguments)
+    {
+        if (!TryDay(arguments.From, out var from) || !TryDay(arguments.To, out var to))
+        {
+            return new SearchInsightsResult { Error = "From and To must be dates in the yyyy-MM-dd format." };
+        }
+
+        try
+        {
+            var report = insights.Insights(indexName, from, to);
+            return new SearchInsightsResult
+            {
+                Findings = report.Findings.Select(finding => new SearchInsightRow
+                {
+                    Kind = finding.Kind.ToString(),
+                    QueryText = finding.QueryText,
+                    HasPlaceholder = HasPlaceholder(finding.QueryText),
+                    Searches = finding.Searches,
+                    Affected = finding.Affected,
+                    NoResultRate = finding.NoResultRate,
+                    Ctr = finding.Ctr,
+                    AvgClickPosition = finding.AvgClickPosition,
+                    LatencyP95 = Percentile(finding.LatencyP95),
+                    PreviousSearches = finding.PreviousSearches,
+                    PreviousNoResultRate = finding.PreviousNoResultRate,
+                    PreviousCtr = finding.PreviousCtr,
+                    AppliedSynonyms = finding.AppliedSynonymIds.Select(id => new SearchInsightSynonym { Id = id, EditUrl = synonymEditUrl(id) }).ToList(),
+                    FiredRules = finding.FiredRules.Select(rule => new SearchInsightRule { Id = rule.Id, Name = rule.Name, EditUrl = ruleEditUrl(rule.Id) }).ToList(),
+                }).ToList(),
+                Omitted = report.Omitted,
+                Considered = report.Considered,
+                Truncated = report.Truncated,
+                PreviousIsPartial = report.PreviousIsPartial,
+                AnnotationsFailed = report.AnnotationsFailed,
+            };
+        }
+        catch (ArgumentException exception)
+        {
+            return new SearchInsightsResult { Error = QueryTesterPage.ValidationMessage(exception) };
+        }
+    }
+
+    private static bool HasPlaceholder(string? text) =>
+        text is not null
+        && (text.Contains(QueryScrubber.EmailPlaceholder, StringComparison.Ordinal) || text.Contains(QueryScrubber.NumberPlaceholder, StringComparison.Ordinal));
+
     private static SearchReportsQueryRow Row(ReportQueryRow row) => new()
     {
         QueryText = row.QueryText,
         IsBrowse = row.IsBrowse,
-        HasPlaceholder = row.QueryText is { } text
-            && (text.Contains(QueryScrubber.EmailPlaceholder, StringComparison.Ordinal) || text.Contains(QueryScrubber.NumberPlaceholder, StringComparison.Ordinal)),
+        HasPlaceholder = HasPlaceholder(row.QueryText),
         Searches = row.Searches,
         ZeroResultSearches = row.ZeroResultSearches,
         ClickedSearches = row.ClickedSearches,
@@ -379,6 +440,100 @@ public sealed class SearchReportsQueryRow
 
     /// <summary>95th-percentile latency bucket.</summary>
     public SearchReportsPercentile? LatencyP95 { get; set; }
+}
+
+/// <summary>Insight findings of one range; only <see cref="Error"/> is set when the request is invalid.</summary>
+public sealed class SearchInsightsResult
+{
+    /// <summary>Validation message for an invalid range; nothing else is set.</summary>
+    public string? Error { get; set; }
+
+    /// <summary>Findings, most affected searches first.</summary>
+    public IReadOnlyList<SearchInsightRow> Findings { get; set; } = [];
+
+    /// <summary>Findings left out by the MaxFindings cap.</summary>
+    public int Omitted { get; set; }
+
+    /// <summary>Queries evaluated.</summary>
+    public int Considered { get; set; }
+
+    /// <summary>More queries qualified than were evaluated (MaxQueries).</summary>
+    public bool Truncated { get; set; }
+
+    /// <summary>The previous period starts before the first data; no regression is reported.</summary>
+    public bool PreviousIsPartial { get; set; }
+
+    /// <summary>Rules or synonyms could not be checked; the existing-fix links are empty.</summary>
+    public bool AnnotationsFailed { get; set; }
+}
+
+/// <summary>One finding: a problem of one query with its evidence.</summary>
+public sealed class SearchInsightRow
+{
+    /// <summary>ContentGap, RelevanceMiss, BuriedAnswer, SlowQuery or Regression.</summary>
+    public string Kind { get; set; } = string.Empty;
+
+    /// <summary>Surfaced query text.</summary>
+    public string QueryText { get; set; } = string.Empty;
+
+    /// <summary>The text contains an analytics placeholder; a rule or synonym from it would never match.</summary>
+    public bool HasPlaceholder { get; set; }
+
+    /// <summary>Logical searches in the range.</summary>
+    public long Searches { get; set; }
+
+    /// <summary>Searches the problem affected (the ranking key).</summary>
+    public long Affected { get; set; }
+
+    /// <summary>Zero-result searches ÷ searches.</summary>
+    public double? NoResultRate { get; set; }
+
+    /// <summary>Clicked searches ÷ searches.</summary>
+    public double? Ctr { get; set; }
+
+    /// <summary>Sum of click positions ÷ clicks.</summary>
+    public double? AvgClickPosition { get; set; }
+
+    /// <summary>95th-percentile latency bucket.</summary>
+    public SearchReportsPercentile? LatencyP95 { get; set; }
+
+    /// <summary>Searches in the previous period.</summary>
+    public long PreviousSearches { get; set; }
+
+    /// <summary>No-result rate of the previous period.</summary>
+    public double? PreviousNoResultRate { get; set; }
+
+    /// <summary>CTR of the previous period.</summary>
+    public double? PreviousCtr { get; set; }
+
+    /// <summary>Synonyms that already apply to the query.</summary>
+    public IReadOnlyList<SearchInsightSynonym> AppliedSynonyms { get; set; } = [];
+
+    /// <summary>Rules that already fire for the query.</summary>
+    public IReadOnlyList<SearchInsightRule> FiredRules { get; set; } = [];
+}
+
+/// <summary>A synonym that already applies to a finding's query.</summary>
+public sealed class SearchInsightSynonym
+{
+    /// <summary>Synonym identifier.</summary>
+    public int Id { get; set; }
+
+    /// <summary>Admin path of the synonym's edit page.</summary>
+    public string EditUrl { get; set; } = string.Empty;
+}
+
+/// <summary>A rule that already fires for a finding's query.</summary>
+public sealed class SearchInsightRule
+{
+    /// <summary>Rule identifier.</summary>
+    public int Id { get; set; }
+
+    /// <summary>Display name.</summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>Admin path of the rule's edit page.</summary>
+    public string EditUrl { get; set; } = string.Empty;
 }
 
 /// <summary>Requested inclusive UTC day range (yyyy-MM-dd).</summary>

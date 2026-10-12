@@ -102,6 +102,9 @@ public sealed class SuiteAnalyticsOptions
 
     /// <summary>Background rollup job settings.</summary>
     public SuiteJobOptions Job { get; } = new();
+
+    /// <summary>Thresholds of the search insights.</summary>
+    public SuiteInsightsOptions Insights { get; } = new();
 }
 
 /// <summary>Merge settings (<c>LuceneSuite:Analytics:Merge</c>).</summary>
@@ -161,4 +164,38 @@ public sealed class SuiteJobOptions
 
     /// <summary>Most UTC days one run rolls up, so a catch-up after downtime spreads over several runs. Default 7.</summary>
     public int MaxDaysPerRun { get; set; } = 7;
+}
+
+/// <summary>Search insight thresholds (<c>LuceneSuite:Analytics:Insights</c>); they apply to every index of the site.</summary>
+public sealed class SuiteInsightsOptions
+{
+    /// <summary>Fewest searches in the range a query needs to be considered. Default 20, at least 1.</summary>
+    public int MinSearches { get; set; } = 20;
+
+    /// <summary>A query whose no-result rate is at least this is a content gap. Default 0.3, range 0–1.</summary>
+    public double ContentGapMinNoResultRate { get; set; } = 0.3;
+
+    /// <summary>A query that is not a content gap and whose click-through rate is at most this is a relevance miss. Default 0.1, range 0–1.</summary>
+    public double RelevanceMissMaxCtr { get; set; } = 0.1;
+
+    /// <summary>Fewest clicked searches before a buried answer is reported. Default 5, at least 1.</summary>
+    public int BuriedMinClickedSearches { get; set; } = 5;
+
+    /// <summary>A query whose average click position is at least this has a buried answer. Default 5, greater than 1.</summary>
+    public double BuriedMinAvgPosition { get; set; } = 5.0;
+
+    /// <summary>A query whose 95th percentile latency is at least this (ms) is slow. Default 1000, at least 1.</summary>
+    public int SlowMinP95Ms { get; set; } = 1000;
+
+    /// <summary>A rise of the no-result rate, or a fall of the click-through rate, of at least this (absolute) against the previous period is a regression. Default 0.10, range 0–1.</summary>
+    public double RegressionMinPoints { get; set; } = 0.10;
+
+    /// <summary>Fewest affected searches a finding needs, against small-sample noise. Default 5, at least 1.</summary>
+    public int MinAffected { get; set; } = 5;
+
+    /// <summary>Most queries evaluated per call, the most searched first. Default 1 000, range 1–10 000.</summary>
+    public int MaxQueries { get; set; } = 1_000;
+
+    /// <summary>Most findings returned per call, the most searches affected first. Default 200, range 1–1 000.</summary>
+    public int MaxFindings { get; set; } = 200;
 }

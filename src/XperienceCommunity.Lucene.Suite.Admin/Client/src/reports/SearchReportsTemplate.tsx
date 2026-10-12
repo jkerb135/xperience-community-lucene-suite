@@ -79,7 +79,8 @@ import {
 import { ACCENT, BORDER, DeltaText, Eyebrow, SectionHeading, cardHeadline, focusOnMount, panelStyle, visuallyHidden } from "./dashboard.tsx";
 import { BarChart } from "./TrendChart.tsx";
 import { indexFromPath, loadReportState, saveReportState } from "./handoff.ts";
-import { NeedsAttention } from "./NeedsAttention.tsx";
+import { AllInsights, NeedsAttention, type ActionProps } from "./NeedsAttention.tsx";
+import type { InsightsResult } from "./insights.ts";
 import { QueryTable, SORTS } from "./QueryTable.tsx";
 import { pageStyle } from "../layout.ts";
 
@@ -211,12 +212,14 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
   const [trendTable, setTrendTable] = useState(false);
   const [trendPage, setTrendPage] = useState(1);
   const [latencyTable, setLatencyTable] = useState(false);
-  const [panel, setPanel] = useState<"breakdown" | "latency">();
+  const [panel, setPanel] = useState<"breakdown" | "latency" | "insights">();
+  const [insightResult, setInsightResult] = useState<InsightsResult>();
   // A ref, not state: re-rendering the table while a request runs would remount the pressed button and drop focus.
   const blocking = useRef(false);
   const [blockError, setBlockError] = useState<string>();
   const breakdownButton = useRef<HTMLButtonElement>(null);
   const latencyButton = useRef<HTMLButtonElement>(null);
+  const insightsButton = useRef<HTMLButtonElement>(null);
 
   const load = useCallback(
     async (target: DayRange) => {
@@ -297,7 +300,7 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
   };
 
   const closePanel = () => {
-    const opener = panel === "latency" ? latencyButton : breakdownButton;
+    const opener = panel === "latency" ? latencyButton : panel === "insights" ? insightsButton : breakdownButton;
     setPanel(undefined);
     returnFocus(() => opener.current);
   };
@@ -312,6 +315,14 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
   const rolling = rollingAverage(values);
   const facts = result && insights(result.days, metric, result.current, result.previous, partial);
   const format = (value: number | null) => formatMetric(metric, value);
+  const actions: ActionProps = {
+    canManageRules: props.canManageRules,
+    canManageSynonyms: props.canManageSynonyms,
+    queryTesterPath: props.queryTesterPath,
+    ruleCreatePath: props.ruleCreatePath,
+    synonymCreatePath: props.synonymCreatePath,
+    onBlock: block,
+  };
   const tile = (m: Metric) =>
     result && <MetricTile key={m.id} metric={m} selected={m.id === metric.id} result={result} onSelect={() => setMetric(m)} />;
 
@@ -474,14 +485,15 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
                       <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL} fullHeight>
                         <div style={panelStyle}>
                           <Stack spacing={Spacing.M}>
-                            <SectionHeading eyebrow="Needs attention" title="Queries without results" />
+                            <SectionHeading eyebrow="Needs attention" title="Fix these first" />
                             <NeedsAttention
                               range={range}
-                              canManageRules={props.canManageRules}
-                              canManageSynonyms={props.canManageSynonyms}
-                              queryTesterPath={props.queryTesterPath}
-                              ruleCreatePath={props.ruleCreatePath}
-                              synonymCreatePath={props.synonymCreatePath}
+                              bucketBounds={bounds}
+                              insights={insightResult}
+                              onInsights={setInsightResult}
+                              onShowAll={() => setPanel("insights")}
+                              showAllButton={insightsButton}
+                              {...actions}
                             />
                             <Divider orientation={DividerOrientation.Horizontal} />
                             <SectionHeading eyebrow="Performance" title="Response time" level={3} size={HeadlineSize.S} />
@@ -606,6 +618,19 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
                           />
                         )}
                       </Stack>
+                    </div>
+                  )}
+                </SidePanel>
+                <SidePanel
+                  headline="All insights"
+                  size={SidePanelSize.Stackable}
+                  isVisible={panel === "insights"}
+                  tooltips={{ close: "Close" }}
+                  onClose={closePanel}
+                >
+                  {panel === "insights" && insightResult && (
+                    <div ref={focusOnMount} tabIndex={-1} style={{ outline: "none" }}>
+                      <AllInsights result={insightResult} bounds={bounds} actions={actions} />
                     </div>
                   )}
                 </SidePanel>

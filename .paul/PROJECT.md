@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.1.0 |
-| Status | v0.2 Measure in progress: Phases 7–10 and 8.1 complete, Phase 11 Public API Audit next |
+| Status | v0.2 Measure in progress: Phases 7–11 and 8.1 complete, Phase 12 Public API Audit next |
 | Last Updated | 2026-10-12 |
 
 ## Requirements
@@ -74,6 +74,8 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Blocked suggestions per index (exact / contains words): native listing + create + delete and one-click "Block suggestion" from the report query table, immediate on the endpoint, reports unaffected — Phase 9 (09-03)
 
 - ✓ Kentico custom activities for tracked contacts: Search performed, Search without results, Search result clicked (installer v7, types disabled until a marketer enables them; consent and cookie level by Kentico; scrubbed text, query-free activity URLs; events contract v2 adds optional click query/title, activity-only) — Phase 10 (10-01)
+
+- ✓ Search insights: five rule-based finding kinds (content gap, relevance miss, buried answer, slow query, regression) over one SQL aggregation of the range and previous period, thresholds in `LuceneSuite:Analytics:Insights`, ranked by searches actually affected, annotated with the synonyms/rules already in place; shown in the Search reports "Fix these first" card + "All insights" panel with pre-filled fixes and a fallback to the no-result list — Phase 11 (11-01, 11-02)
 
 ### Active (In Progress)
 
@@ -168,6 +170,7 @@ Marketers tune, test and measure site search without a developer.
 | Admin UI follows Suite Conventions 1–10 (08.1-01-FINDINGS.md): reference precedence native 31.9.1 runtime > npm exports > kit repo; listing pages on the desk, dashboards in Papers, editors in native forms; errors only after leave/save; side panels return focus; tokens verified at runtime; npm Spacing values are strings. Rules mirrored into the design-screen skill (enterprise.md) | Earlier per-screen validation let cross-screen drift through (08.1 audit, user) | 2026-10-12 | Active |
 | Report row actions that only write one record run as a page command on the report page (success toast, errors in the page's NotificationBar), not a handoff; blocklist has no edit page (delete + re-add) | User decisions 09-03 | 2026-10-12 | Active |
 | Search activities: Suite activity types are installed disabled and never updated (marketer opt-in in Kentico); logged in Core for submitted searches only; Suite-written activities always set ActivityURL/Referrer without query strings (Kentico MVC defaults to the raw Referer); click query/title are browser-supplied, activity-only | User decisions + 10-01 audit/APPLY | 2026-10-12 | Active |
+| Insights: computed on read (no storage); "searches affected" = searches actually lost to the problem (regression = searches × rate change; slow = searches in latency buckets wholly at or above the cutoff); latency thresholds hold only when the whole bucket is at or above them | Phase 11 (user + host finding in 11-02) | 2026-10-12 | Active |
 | Admin cross-page prefill = one-time sessionStorage handoff bound to target, index, exact page path and expiry; consumers fill only empty forms; never URL query strings or server state | 08-01 (URL state raced the admin router) / 08-02 audit | 2026-10-12 | Active |
 
 ## Success Metrics
@@ -201,4 +204,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 10*
+*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 11*

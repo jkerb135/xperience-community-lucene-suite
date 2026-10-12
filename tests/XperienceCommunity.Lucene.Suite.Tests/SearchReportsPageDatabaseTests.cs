@@ -8,7 +8,9 @@ using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Reports;
 using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
+using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Search;
+using XperienceCommunity.Lucene.Suite.Synonyms;
 using XperienceCommunity.Lucene.Suite.Tests.Seeding;
 
 using static XperienceCommunity.Lucene.Suite.Tests.DatabaseTestHost;
@@ -108,6 +110,63 @@ public sealed class SearchReportsPageDatabaseTests
         var rows = SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 1)).Rows;
         Assert.True(Assert.Single(rows, row => row.QueryText == "order {number}").HasPlaceholder);
         Assert.DoesNotContain(rows, row => row.QueryText != "order {number}" && row.HasPlaceholder);
+    }
+
+    [DatabaseFact]
+    public void Insights_MapTheFindings_WithEditUrlsOfTheFixesThatApply_AndWriteNothing()
+    {
+        SearchInsightDatabaseTests.Seed();
+        var services = KenticoServices.Value;
+        SearchInsightDatabaseTests.CleanupFixes();
+        try
+        {
+            var synonym = new SynonymInfo { IndexName = SearchInsightDatabaseTests.Index, Kind = SynonymSerializer.TwoWay, Input = string.Empty, Terms = """["alpha","alfa"]""", Enabled = true };
+            services.GetRequiredService<IInfoProvider<SynonymInfo>>().Set(synonym);
+            var rule = SearchInsightDatabaseTests.Rule("Alpha fix", """[{"anchoring":"contains","pattern":"alpha"}]""");
+            services.GetRequiredService<IInfoProvider<RuleInfo>>().Set(rule);
+            const string counts =
+                """
+                SELECT (SELECT COUNT(*) FROM LuceneSuite_SearchDaily) + (SELECT COUNT(*) FROM LuceneSuite_SearchEvent) + (SELECT COUNT(*) FROM LuceneSuite_SearchInteraction)
+                    + (SELECT COUNT(*) FROM LuceneSuite_Rule) + (SELECT COUNT(*) FROM LuceneSuite_Synonym)
+                """;
+            int before = Scalar(counts);
+            string checksum = SearchInsightDatabaseTests.Checksum();
+
+            var result = SearchReportsPage.BuildInsights(
+                SearchInsightDatabaseTests.Service(), id => $"rule/{id}", id => $"synonym/{id}", SearchInsightDatabaseTests.Index, Arguments(SearchInsightDatabaseTests.From, SearchInsightDatabaseTests.To));
+
+            Assert.Equal((before, checksum), (Scalar(counts), SearchInsightDatabaseTests.Checksum()));
+            Assert.Null(result.Error);
+            Assert.Equal(
+                ["BuriedAnswer delta 11", "ContentGap alpha 10", "SlowQuery beta 10", "Regression alpha 10", "RelevanceMiss beta 9"],
+                result.Findings.Select(f => $"{f.Kind} {f.QueryText.ToLowerInvariant()} {f.Affected}"));
+            Assert.Equal((0, 3, false, false, false), (result.Omitted, result.Considered, result.Truncated, result.PreviousIsPartial, result.AnnotationsFailed));
+            Assert.True(result.Findings.Single(f => f.Kind == "SlowQuery").LatencyP95!.IsOverflow);
+            foreach (var finding in result.Findings)
+            {
+                bool alpha = finding.QueryText.Equals("alpha", StringComparison.OrdinalIgnoreCase);
+                Assert.Equal(alpha ? [(synonym.SynonymID, $"synonym/{synonym.SynonymID}")] : [], finding.AppliedSynonyms.Select(s => (s.Id, s.EditUrl)));
+                Assert.Equal(alpha ? [(rule.RuleID, "Alpha fix", $"rule/{rule.RuleID}")] : [], finding.FiredRules.Select(r => (r.Id, r.Name, r.EditUrl)));
+                Assert.False(finding.HasPlaceholder);
+            }
+        }
+        finally
+        {
+            SearchInsightDatabaseTests.CleanupFixes();
+        }
+    }
+
+    [DatabaseFact]
+    public void Insights_InvalidRanges_ReturnAnErrorInsteadOfThrowing()
+    {
+        var service = SearchInsightDatabaseTests.Service();
+        string Error(string? from, string? to) =>
+            SearchReportsPage.BuildInsights(service, id => "", id => "", SearchInsightDatabaseTests.Index, new SearchReportsArguments { From = from, To = to }).Error!;
+
+        Assert.Equal("From and To must be dates in the yyyy-MM-dd format.", Error("1/2/2030", "2030-01-30"));
+        Assert.Equal("From and To must be dates in the yyyy-MM-dd format.", Error("2030-01-01", null));
+        Assert.NotNull(Error("2030-01-30", "2030-01-01"));
+        Assert.NotNull(Error("2020-01-01", "2030-01-30"));
     }
 
     private static SearchReportsQueriesArguments Queries(DateOnly from, DateOnly to, string sort, int page) => new()

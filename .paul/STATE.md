@@ -5,26 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 11 Public API Audit
+**Current focus:** v0.2 Measure — Phase 12 Public API Audit
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 11 of 12 (Search Insights) — Not started
+Phase: 12 of 12 (Public API Audit) — Not started
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-10-12 — Phase 10 complete (10-01 unified), transitioned to Phase 11
+Last activity: 2026-10-12 — Phase 11 complete (11-02 unified), transitioned to Phase 12
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [███████░░░] 71% (5 of 7 phases)
+- v0.2 Measure: [█████████░] 86% (6 of 7 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready to plan Phase 11]
+  ✓        ✓        ✓     [Loop complete — ready to plan Phase 12]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,14 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 11-02 unified, Phase 11 complete: insights card + panel shipped; ranking defect from 11-01 fixed during APPLY (affected = searches actually lost/slow; whole-bucket latency); docs updated by the update-docs flow (insights.md, configuration.md → d703b7c, not pushed); Phase 12 input: SuiteInsightsOptions + reports page DTOs (SearchInsights*, BlockSuggestion*) join the 10-01 list | Phase 11 | Next: /paul:plan Phase 12 |
+| 2026-10-12: 11-02 applied: Insights page command + insights.ts + Fix these first card + All insights panel + RowActions subset + no-findings fallback; host found a ranking defect in 11-01 → fixed in Core (Regression affected = searches × change; Slow only when the whole p95 bucket ≥ cutoff, affected = searches in buckets ≥ cutoff); host verified ranking, synonym prefill, existing-fix link (temp synonym, deleted), fallback, both widths, counts unchanged. Focus return not observable (rAF paused in hidden pane). Other session committed docs incl. insights.md (0b84e9f) and configuration Insights rows (40f3c64); insights.md updated for the fix + 'Where you see them' | Phase 11 | UNIFY next (update-docs flow) |
+| 2026-10-12: Enterprise audit on 11-02-PLAN.md. Applied 1 must-have, 1 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 11 | No-findings fallback to the pre-11-02 "queries without results" list (no lost capability for small sites); li aria-labelledby per finding |
+| 2026-10-12: 11-02 planned: Insights page command (index from page, edit URLs for existing-fix links via the 03-07 pattern) + pure insights.ts (labels/evidence/actions per kind, node-tested) + NeedsAttention "Fix these first" top 5 + Stackable "All insights" side panel grouped by kind (returnFocus) + RowActions action subset (query table unchanged); design-screen in PLAN; update-docs at UNIFY (phase end); APPROVAL-CHECKS #14 | Phase 11 | 11-02 created |
+| 2026-10-12: 11-01 unified: insights core shipped (AC-1–4 pass; AC-5 pass with note: 47 ms warm, 284 ms cold first call — for milestone review); 11-02 next (reports UI) | Phase 11 | Next: /paul:plan 11-02 |
+| 2026-10-12: 11-01 applied: SuiteInsightsOptions + pure InsightEngine + SearchInsightService (one aggregation, conditional sums with @InsightFrom parameter — no date or client text in SQL, stricter than the plan's literal fallback); annotations only for capped findings (rule names via one WhereIn on RuleInfo); PreviousPeriod extracted from Overview (behaviour-preserving, report tests unchanged); 795 passed / 6 skipped (re-run by me). Deviations: Regression needs a strict worsening (>0) besides RegressionMinPoints; volume 47 ms warm but 284 ms cold first call (provider caches cold). A concurrent session is building the docs site (uncommitted docs/* pages not ours — only docs/insights.md) | Phase 11 | UNIFY next |
+| 2026-10-12: Enterprise audit on 11-01-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 11 | SQL literals only validated ints + invariant DateOnly (no client text); MinAffected 5 against small-sample noise (2-of-20 regression test); annotations only for capped findings, 500 rules + 200 synonyms inside the 200 ms budget; thresholds documented as site-wide |
+| 2026-10-12: Phase 11 planning (user choices): findings in the existing Needs attention card (top 5, all kinds, ranked by affected searches) + "Show all insights" side panel grouped by kind; findings annotated with synonyms/rules that already match (pure engines, no storage); two plans — 11-01 Core (options LuceneSuite:Analytics:Insights, one SQL aggregation with current/previous conditional sums so text identity stays in SQL, pure InsightEngine, annotations), 11-02 admin UI + actions + host check | Phase 11 | 11-01 created |
 | 2026-10-12: User: new v0.2 Phase 11 Search Insights (rules-based findings over report data: content gap, relevance miss, buried answer, slow query, regression; computed on read, no new tables). Choices: thresholds configurable per site in appsettings `LuceneSuite:Analytics:Insights` (sized for small vs large sites); every finding links to its pre-filled fix (synonym / rule / query tester / block suggestion). AIRA bring-your-own-agent not available in Xperience docs → no LLM analysis. Public API Audit renumbered to Phase 12 (the 10-01 "Phase 11 input list" now belongs to Phase 12); next: /paul:plan Phase 11 Search Insights | Milestone | v0.2 now 7 phases |
 | 2026-10-12: 10-01 unified, Phase 10 complete: search activities shipped (all ACs pass); Phase 11 input list: SuiteActivityTypes, LogClick optional params (request record?), BlockSuggestion DTOs, MapLuceneSuite* namespaces, ISuiteSuggestions review, WebPageItemInfo internal use | Phase 10 | Next: /paul:plan Phase 11 |
 | 2026-10-12: 10-01 applied: installer v7 (3 custom activity types, disabled), Core search/no-results/click activities, click contract v2; implementer decompiled 31.9.1: MVC ActivityURL defaults to the raw Referer (audit leak confirmed) → Suite sets URL explicitly; changed in APPLY: click ActivityURL = results page (scrubbed Referer) instead of the beacon endpoint. Host E2E: disabled → none; enabled → exact titles/values, page link, no 'jane' anywhere; continuation none; admin toggle without restart; restored + 4 test activities deleted; no consent action needed (pane already tracked) | Phase 10 | UNIFY next |
@@ -194,7 +202,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01, 09-02, 09-03, 10-01: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01, 09-02, 09-03, 10-01, 11-01, 11-02: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -213,6 +221,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 11: APPROVAL-CHECKS #14 (search insights; ranking fix, cold latency) pending | Milestone review | Milestone review |
 | Phase 10: APPROVAL-CHECKS #13 (search activities + click contract v2) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #12 (blocklist admin + report action; audit-trail decision: no event log for Suite admin changes) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #11 (autocomplete + gutter; real keyboard and widget dropdown clearing not observed) pending | Milestone review | Milestone review |
@@ -225,17 +234,17 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: c2fac0c feat(10-01): search activities for Kentico contacts (Phase 10 complete)
+Last commit: 72e9489 docs(paul): phase 10 transition state
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Phase 10 complete, ready to plan Phase 11
-Next action: /paul:plan for Phase 11 (Public API Audit); APPROVAL-CHECKS #12 (audit trail) and #13 (click text) open for milestone review
+Stopped at: Phase 11 complete, ready to plan Phase 12
+Next action: /paul:plan for Phase 12 (Public API Audit); APPROVAL-CHECKS #12–#14 open for milestone review
 Resume file: .paul/ROADMAP.md
-Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
+Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
 *STATE.md — Updated after every significant action*
