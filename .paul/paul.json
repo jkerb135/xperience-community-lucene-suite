@@ -8,15 +8,13 @@
     "phases": 6
   },
   "phase": {
-    "number": 10,
-    "name": "Custom Activities",
-    "status": "in_progress",
+    "number": 11,
+    "name": "Public API Audit",
+    "status": "not_started",
     "plans_completed": 0
   },
   "loop": {
-    "position": "APPLY",
-    "plan": "10-01",
-    "plan_path": "phases/10-custom-activities/10-01-PLAN.md"
+    "position": "IDLE"
   },
   "timestamps": {
     "created_at": "2026-10-08T00:00:00Z",

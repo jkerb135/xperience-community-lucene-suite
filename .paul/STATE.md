@@ -5,26 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 10 Custom Activities
+**Current focus:** v0.2 Measure — Phase 11 Public API Audit
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 10 of 11 (Custom Activities) — Planning
-Plan: 10-01 applied
-Status: APPLY complete, ready for UNIFY
-Last activity: 2026-10-12 — Applied 10-01 (3/3 tasks)
+Phase: 11 of 11 (Public API Audit) — Not started
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-12 — Phase 10 complete (10-01 unified), transitioned to Phase 11
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [██████░░░░] 67% (4 of 6 phases)
+- v0.2 Measure: [████████░░] 83% (5 of 6 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Applied, ready for UNIFY]
+  ✓        ✓        ✓     [Loop complete — ready to plan Phase 11]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 10-01 unified, Phase 10 complete: search activities shipped (all ACs pass); Phase 11 input list: SuiteActivityTypes, LogClick optional params (request record?), BlockSuggestion DTOs, MapLuceneSuite* namespaces, ISuiteSuggestions review, WebPageItemInfo internal use | Phase 10 | Next: /paul:plan Phase 11 |
 | 2026-10-12: 10-01 applied: installer v7 (3 custom activity types, disabled), Core search/no-results/click activities, click contract v2; implementer decompiled 31.9.1: MVC ActivityURL defaults to the raw Referer (audit leak confirmed) → Suite sets URL explicitly; changed in APPLY: click ActivityURL = results page (scrubbed Referer) instead of the beacon endpoint. Host E2E: disabled → none; enabled → exact titles/values, page link, no 'jane' anywhere; continuation none; admin toggle without restart; restored + 4 test activities deleted; no consent action needed (pane already tracked) | Phase 10 | UNIFY next |
 | 2026-10-12: Enterprise audit on 10-01-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 10 | Suite sets ActivityURL/Referrer without query string (raw q incl. emails would leak via Kentico auto-fill); no HttpContext → nothing logged; control chars stripped; provider cache for type enabled + toggle without restart; docs note Kentico page-visit URL keeps raw q |
 | 2026-10-12: 10-01 planned (user choices): installer v7 creates custom activity types lucenesuite_search / _search_noresults / _resultclick **disabled** (marketer enables in Contact management; never updated after creation); no-results logged in addition to search performed; click contract v2 adds optional query/title (user chose over item-link-only recommendation) — activity-only, never stored in analytics; logged in Core for submitted searches only (no continuations/browse); consent/cookie level stay Kentico's; host consent in the pane only with user OK; APPROVAL-CHECKS #13 | Phase 10 | 10-01 created |
@@ -168,6 +169,7 @@ See PROJECT.md Key Decisions.
 | 03-07 custom-data `<pre>` in the normal query tester uses the brand-purple token | 05-01 APPLY | S | KNOWN-LIMITATIONS; next change to the normal tester view |
 | Widgets: per-process rate limit, forgeable events, unfingerprinted JS asset; no NuGet metadata on either package | 06-01 audit / APPLY | S–M | KNOWN-LIMITATIONS; 06-02 asset versioning; release phase |
 | Widget strings English-only; search not usable inside Kentico preview (signed URLs); host facet values are display names (old code-name filter URLs no longer match) | v0.1 review / 06-04 | S | KNOWN-LIMITATIONS |
+| 10-01 audit deferrals: forgeable click text (own contact only); activity volume once enabled. Kentico page-visit URL keeps raw q (outside Suite, documented) | 10-01 | S | KNOWN-LIMITATIONS; APPROVAL-CHECKS #13 |
 | No audit trail for Suite admin changes (rules, synonyms, blocklist): Kentico LogEvents writes no event-log rows for Suite module classes in 31.9.1; host log capped at 1000 rows | 09-03 APPLY | S | APPROVAL-CHECKS #12 decision; KNOWN-LIMITATIONS |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
@@ -191,7 +193,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01, 09-02, 09-03: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01, 09-02, 09-03, 10-01: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -229,9 +231,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 10-01 applied
-Next action: /paul:unify .paul/phases/10-custom-activities/10-01-PLAN.md; APPROVAL-CHECKS #12 audit-trail question still open
-Resume file: .paul/phases/10-custom-activities/10-01-PLAN.md
+Stopped at: Phase 10 complete, ready to plan Phase 11
+Next action: /paul:plan for Phase 11 (Public API Audit); APPROVAL-CHECKS #12 (audit trail) and #13 (click text) open for milestone review
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
