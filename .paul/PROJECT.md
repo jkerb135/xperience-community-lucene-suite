@@ -82,10 +82,9 @@ Marketers tune, test and measure site search without a developer.
 ### Active (In Progress)
 
 ### Planned (Next)
-- [ ] Search insights: rules-based report findings (configurable per-site thresholds in appsettings), each linking to its pre-filled fix — v0.2 Phase 11
-- [ ] Public API audit: Core + Admin alone are enough to build a custom UI; documented, baselined public surface — v0.2 Phase 12
-- v0.3 Test: A/B testing of rule sets + comparison reports
-- v0.4 Instant Search: public, opt-in search endpoint (index + field allow-list, rate limit, searchId analytics) and an Algolia-InstantSearch-style JS widget library
+- v0.3 Relevance: per-item popularity data (14), query-time stopwords (15), field-weights editor (16), typo tolerance (17), "Did you mean" + curated suggestions (18), popularity boost (19)
+- v0.4 Test: A/B testing of rule sets + comparison reports
+- v0.5 Instant Search: public, opt-in search endpoint (index + field allow-list, rate limit, searchId analytics) and an Algolia-InstantSearch-style JS widget library
 
 ### Out of Scope
 - PDF export of reports — parked; cheapest route if revived is browser print stylesheet
@@ -174,6 +173,7 @@ Marketers tune, test and measure site search without a developer.
 | Search activities: Suite activity types are installed disabled and never updated (marketer opt-in in Kentico); logged in Core for submitted searches only; Suite-written activities always set ActivityURL/Referrer without query strings (Kentico MVC defaults to the raw Referer); click query/title are browser-supplied, activity-only | User decisions + 10-01 audit/APPLY | 2026-10-12 | Active |
 | Insights: computed on read (no storage); "searches affected" = searches actually lost to the problem (regression = searches × rate change; slow = searches in latency buckets wholly at or above the cutoff); latency thresholds hold only when the whole bucket is at or above them | Phase 11 (user + host finding in 11-02) | 2026-10-12 | Active |
 | Public API: PublicApiAnalyzers baseline in the three packages (every change is a PublicAPI.Unshipped.txt diff; move to Shipped at release); admin services (reports, insights, rule/synonym/blocklist management) stay internal by design; supported boundary in docs/public-api.md | Phase 12 (user) | 2026-10-12 | Active |
+| v0.3 Relevance milestone added before Test (Test → v0.4, Instant Search → v0.5): query-time admin-managed stopwords, field-weights editor (appsettings as defaults), fuzzy typo variants below exact, Did-you-mean + curated suggestions, popularity boost with per-item click data collected first; rewrite order stopwords → synonyms → typos → field weights → rules | User decisions | 2026-10-12 | Active |
 | Admin cross-page prefill = one-time sessionStorage handoff bound to target, index, exact page path and expiry; consumers fill only empty forms; never URL query strings or server state | 08-01 (URL state raced the admin router) / 08-02 audit | 2026-10-12 | Active |
 
 ## Success Metrics
