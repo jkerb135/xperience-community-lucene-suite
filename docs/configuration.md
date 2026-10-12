@@ -101,6 +101,23 @@ The client-facing settings (`Merge`, `Attribution`) must match what your search 
 | `LuceneSuite:Analytics:Job:RollupInterval` | `00:15:00` | > 0 | How often the rollup job runs. The first run is one minute after start. |
 | `LuceneSuite:Analytics:Job:MaxDaysPerRun` | 7 | ≥ 1 | Most UTC days one run rolls up, so a catch-up after downtime spreads over several runs |
 
+### Insights
+
+Thresholds for [Search insights](insights); they apply to every index of the site.
+
+| Key | Default | Range | Meaning |
+|---|---|---|---|
+| `LuceneSuite:Analytics:Insights:MinSearches` | 20 | ≥ 1 | Fewest searches in the range a query needs to be considered |
+| `LuceneSuite:Analytics:Insights:ContentGapMinNoResultRate` | 0.3 | 0 – 1 | A query whose no-result rate is at least this is a content gap |
+| `LuceneSuite:Analytics:Insights:RelevanceMissMaxCtr` | 0.1 | 0 – 1 | A query that is not a content gap and whose click-through rate is at most this is a relevance miss |
+| `LuceneSuite:Analytics:Insights:BuriedMinClickedSearches` | 5 | ≥ 1 | Fewest clicked searches before a buried answer is reported |
+| `LuceneSuite:Analytics:Insights:BuriedMinAvgPosition` | 5 | > 1 | A query whose average click position is at least this has a buried answer |
+| `LuceneSuite:Analytics:Insights:SlowMinP95Ms` | 1000 | ≥ 1 | A query whose 95th percentile latency (ms) is at least this is slow |
+| `LuceneSuite:Analytics:Insights:RegressionMinPoints` | 0.10 | 0 – 1 | A rise of the no-result rate, or a fall of the click-through rate, of at least this (absolute) against the previous period is a regression |
+| `LuceneSuite:Analytics:Insights:MinAffected` | 5 | ≥ 1 | Fewest affected searches a finding needs, against small-sample noise |
+| `LuceneSuite:Analytics:Insights:MaxQueries` | 1000 | 1 – 10 000 | Most queries evaluated per call, the most searched first |
+| `LuceneSuite:Analytics:Insights:MaxFindings` | 200 | 1 – 1 000 | Most findings returned per call, the most searches affected first |
+
 What the report numbers mean is described in [Search reports](search-reports).
 
 ## Widgets (`SuiteWidgetsOptions`)
