@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 13 of 13 (Enterprise Screens) — In progress
-Plan: 13-01 complete; 13-02 created + audited, awaiting approval
-Status: Ready for 13-02 APPLY
-Last activity: 2026-10-12 — Audited .paul/phases/13-enterprise-screens/13-02-PLAN.md
+Plan: 13-02 applied
+Status: APPLY complete, ready for UNIFY
+Last activity: 2026-10-12 — Applied 13-02 (3/3 tasks)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 13-02 applied: rule edit per handoff (FormCategory sections, server-computed live status via RuleListing.Of, contact-group/custom context and facet dimension/value pickers with counts, pins/hides layouts); host verified (unedited save byte-identical, bare code name stored, facet counts = index, labelled reveal inputs, error on the right control, Kentico unsaved prompt exists, no overflow 1100/1700). Found pre-existing: second Save without reload → false concurrency conflict on rule AND synonym edit (LoadedVersion not refreshed in returned form items); '(UTC)' date labels misleading (DateTimeInput is browser-local). Admin dev server had to be restarted after the node_modules incident. APPROVAL-CHECKS #16 | Phase 13 | UNIFY next |
 | 2026-10-12: Enterprise audit on 13-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 13 | Blocking checkpoint → Task 3 host checks recorded in APPROVAL-CHECKS (project decision 2026-10-11; autonomous true); FacetValues also synonyms/contexts off; no onChange on mount + stored-value round-trip tests; UTC status under a non-UTC TZ; labels for revealed inputs |
 | 2026-10-12: 13-01 unified: custom rules listing shipped (all 10 ACs pass; host: 501 rules, List ≈ 14 ms, RULES_BULK_* event-log entries written at Information). Checkpoint fixes: custom templates with child pages need RoutingContentPlaceholder; in-admin navigation via react-router-dom useNavigate (external in Kentico webpack; devDependency 7.18.4 for types); bulk bar takes the toolbar slot (no shift); npm Table ignores TableColumn.visible and selectRowLabel. User chose fast-forwarding main to verify on the host (main now carries 13-01, not pushed) | Phase 13 | 13-02 reuses RuleListing.Of; 13-03/13-04 should switch full-page-load links to useNavigate |
 | 2026-10-12: Enterprise audit on 13-01-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 13 | Filter-mode bulk commands refused when the match count changed (ExpectedCount); event log records per-rule before → after; bulk concurrency reuses the 03-06 version token; seed cleanup by recorded ids |
@@ -188,6 +189,8 @@ See PROJECT.md Key Decisions.
 | Widgets: per-process rate limit, forgeable events, unfingerprinted JS asset; no NuGet metadata on either package | 06-01 audit / APPLY | S–M | KNOWN-LIMITATIONS; 06-02 asset versioning; release phase |
 | Widget strings English-only; search not usable inside Kentico preview (signed URLs); host facet values are display names (old code-name filter URLs no longer match) | v0.1 review / 06-04 | S | KNOWN-LIMITATIONS |
 | 10-01 audit deferrals: forgeable click text (own contact only); activity volume once enabled. Kentico page-visit URL keeps raw q (outside Suite, documented) | 10-01 | S | KNOWN-LIMITATIONS; APPROVAL-CHECKS #13 |
+| Second Save without reload is rejected as a concurrent edit on rule and synonym edit pages (since 03-06/04-02): save handler sets model.LoadedVersion but returned form items keep the old token | 13-02 host check | S | Quick fix: update the LoadedVersion item before GetClientProperties; APPROVAL-CHECKS |
+| Rule edit 'Valid from/until (UTC)' labels: Kentico DateTimeInput works in browser-local time (shows EDT), status converts correctly; label misleading (since 03-06) | 13-02 host check | S | Relabel or explain local time |
 | No audit trail for Suite admin changes (rules, synonyms, blocklist): Kentico LogEvents writes no event-log rows for Suite module classes in 31.9.1; host log capped at 1000 rows | 09-03 APPLY | S | APPROVAL-CHECKS #12 decision; KNOWN-LIMITATIONS |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
@@ -251,8 +254,8 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 13-01 unified
-Next action: /paul:apply .paul/phases/13-enterprise-screens/13-02-PLAN.md
+Stopped at: 13-02 applied (host verified; APPROVAL-CHECKS #16)
+Next action: /paul:unify .paul/phases/13-enterprise-screens/13-02-PLAN.md
 Resume file: .paul/phases/13-enterprise-screens/13-01-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 

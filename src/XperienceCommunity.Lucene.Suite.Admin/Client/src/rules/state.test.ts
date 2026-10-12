@@ -27,6 +27,17 @@ import {
   serializeHides,
   serializePins,
   toggleItem,
+  TYPED,
+  contextChoice,
+  contextFromSelect,
+  contextOptions,
+  contextSelectValue,
+  dimensionOptions,
+  facetChoice,
+  facetFromSelect,
+  facetSelectValue,
+  facetValueOptions,
+  statusArguments,
 } from "./state.ts";
 
 test("conditions round-trip, with Any query omitting anchoring and pattern", () => {
@@ -164,4 +175,87 @@ test("errors stay hidden until the control or its group was left, or a save fail
   assert.equal(isShown("conditions[10].pattern", new Set(["conditions[1]"]), false), false);
   assert.equal(isShown("anything", new Set([""]), false), true);
   assert.equal(isShown("anything", none, true), true);
+});
+
+const groups = [
+  { name: "VIPs", displayName: "VIP customers" },
+  { name: "Gold", displayName: "Gold members" },
+];
+const facets = [{ dimension: "ContentType", values: [{ label: "Article", count: 12 }, { label: "Cafe", count: 3 }] }];
+
+test("stored contexts show as their group or as a custom context, and map back to the identical string", () => {
+  assert.equal(contextChoice("VIPs", groups, false), "group");
+  assert.equal(contextChoice("mobile", groups, false), "custom");
+  assert.equal(contextChoice("", groups, false), "none");
+  assert.equal(contextChoice("", groups, true), "custom");
+  assert.equal(contextChoice("vips", groups, false), "custom", "code names match exactly, as at runtime");
+
+  for (const stored of ["VIPs", "mobile", "Gold"]) {
+    const shown = contextSelectValue(stored, groups, false);
+    assert.deepEqual(contextFromSelect(shown, stored, groups).value, stored, stored);
+  }
+  // Before the groups arrive every stored value is custom, and still maps back unchanged.
+  assert.equal(contextFromSelect(contextSelectValue("VIPs", [], false), "VIPs", []).value, "VIPs");
+});
+
+test("choosing a context: a group stores its code name, Custom context keeps a typed value and starts empty from a group", () => {
+  assert.deepEqual(contextFromSelect("Gold", "VIPs", groups), { value: "Gold", typed: false });
+  assert.deepEqual(contextFromSelect(TYPED, "VIPs", groups), { value: "", typed: true });
+  assert.deepEqual(contextFromSelect(TYPED, "mobile", groups), { value: "mobile", typed: true });
+  assert.deepEqual(
+    contextOptions(groups).map((o) => [o.value, o.primary, o.secondary]),
+    [
+      ["VIPs", "VIP customers", "Contact group"],
+      ["Gold", "Gold members", "Contact group"],
+      [TYPED, "Custom context…", undefined],
+    ],
+  );
+});
+
+test("stored facet values show as listed or stale, and map back to the identical string", () => {
+  assert.equal(facetChoice("ContentType", "Article", facets, false), "listed");
+  assert.equal(facetChoice("ContentType", "Podcast", facets, false), "stale");
+  assert.equal(facetChoice("Gone", "Article", facets, false), "stale");
+  assert.equal(facetChoice("ContentType", "", facets, false), "none");
+  assert.equal(facetChoice("ContentType", "Article", facets, true), "other");
+
+  for (const [dimension, value] of [["ContentType", "Article"], ["ContentType", "Podcast"], ["Gone", "x"]]) {
+    const shown = facetSelectValue(dimension, value, facets, false);
+    assert.equal(facetFromSelect(shown, dimension, value, facets).value, value, `${dimension}=${value}`);
+  }
+});
+
+test("facet options: values with counts, a stale value labelled, Other value last; nothing is stale while loading", () => {
+  assert.deepEqual(
+    facetValueOptions("ContentType", "Podcast", facets, false).map((o) => [o.value, o.secondary]),
+    [
+      ["Article", "12"],
+      ["Cafe", "3"],
+      ["Podcast", "not in the index"],
+      [TYPED, undefined],
+    ],
+  );
+  assert.deepEqual(facetValueOptions("ContentType", "Article", facets, false).map((o) => o.value), ["Article", "Cafe", TYPED]);
+  assert.deepEqual(facetValueOptions("ContentType", "Podcast", undefined, false).map((o) => [o.value, o.secondary]), [["Podcast", undefined], [TYPED, undefined]]);
+  assert.deepEqual(dimensionOptions("Gone", facets).map((o) => [o.value, o.secondary]), [["ContentType", undefined], ["Gone", "not in the index"]]);
+  assert.deepEqual(dimensionOptions("Gone", undefined).map((o) => [o.value, o.secondary]), [["Gone", undefined]]);
+  assert.deepEqual(facetFromSelect(TYPED, "ContentType", "Article", facets), { value: "", typed: true });
+  assert.deepEqual(facetFromSelect(TYPED, "ContentType", "Podcast", facets), { value: "Podcast", typed: true });
+});
+
+test("the option sentinel can never be a stored context or facet value (the server rejects whitespace-only)", () => {
+  assert.equal(TYPED.trim(), "");
+});
+
+test("status arguments carry picked dates as UTC instants and server strings untouched, whatever the time zone", () => {
+  // Run under TZ=America/New_York too: neither value may shift by the browser's offset.
+  const picked = new Date(Date.UTC(2026, 9, 13, 0, 0));
+  assert.deepEqual(statusArguments({ enabled: true, validFromUtc: picked, ValidUntilUtc: "2026-10-20T00:00:00" }), {
+    enabled: true,
+    validFromUtc: "2026-10-13T00:00:00.000Z",
+    validUntilUtc: "2026-10-20T00:00:00",
+  });
+  assert.deepEqual(statusArguments({ Enabled: false, ValidFromUtc: "", ValidUntilUtc: null }), { enabled: false, validFromUtc: null, validUntilUtc: null });
+  assert.deepEqual(statusArguments(undefined), { enabled: false, validFromUtc: null, validUntilUtc: null });
+  assert.equal(statusArguments({ validFromUtc: new Date(NaN) }).validFromUtc, null);
 });

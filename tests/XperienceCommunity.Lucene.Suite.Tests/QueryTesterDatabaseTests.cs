@@ -3,6 +3,7 @@ using CMS.DataEngine;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using XperienceCommunity.Lucene.Suite.Admin.Rules;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 
 using static XperienceCommunity.Lucene.Suite.Tests.DatabaseTestHost;
@@ -25,7 +26,7 @@ public sealed class QueryTesterDatabaseTests
             groups.Set(Group("Alpha", "Alpha buyers", recipientList: false));
             groups.Set(Group("News", "Alpha newsletter", recipientList: true));
 
-            var ours = QueryTesterPage.LoadContactGroups(groups).Where(group => group.Name.StartsWith(Prefix, StringComparison.Ordinal)).ToList();
+            var ours = ContactGroupAccess.Load(groups).Where(group => group.Name.StartsWith(Prefix, StringComparison.Ordinal)).ToList();
 
             Assert.Equal(
                 [new QueryTesterContactGroup($"{Prefix}Alpha", "Alpha buyers"), new QueryTesterContactGroup($"{Prefix}Zeta", "Zeta buyers")],

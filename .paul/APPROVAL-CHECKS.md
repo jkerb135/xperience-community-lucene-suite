@@ -4,6 +4,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
+| 16 | 13-02 | Rule edit per handoff: sections, live status, contact-group and facet pickers, pins/hides layouts | Pending |
 | 1 | 06-01 | Public API + endpoint shape | Approved 2026-10-11 (before this process) |
 | 2 | 06-02 | Search component markup, parameters and URL names | Approved 2026-10-12 (heading labels resolved by 06-03) |
 | 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | Approved 2026-10-12 with one follow-up: host index stores readable facet values |
@@ -488,4 +489,52 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - `SiteSearchPermissions` classed Supported.
    - SuiteResultReference stays in `Widgets.Events`.
    - docs/public-api.md wording (incl. the "Other public surfaces" list).
+
+---
+
+## 16. 13-02: Rule edit (enterprise handoff Screen 4, v0.2)
+
+1. **Where:** Site search → DancingGoatSample → Rules → any rule, or Create rule.
+2. **What I verified on the host** (host rebuilt on 13-02; admin dev server restarted, see note):
+   - **Sections** in this order: General / Conditions / Actions / Custom data. The status line is at the top, with the handoff copy (priority, dates, custom data).
+   - **Unedited save of rule 4:** every stored field (conditions, actions, name, description, enabled, priority, dates) byte-identical by SQL; only LastModified changed.
+   - **Live status:**
+     - Active → Disabled → Active as Enabled toggles, unsaved, in a `role="status"` region;
+     - Valid from 2026-10-13 10:00 in a New York browser → "Scheduled · starts 2026-10-13 14:00 UTC".
+   - **Contexts:**
+     - the picker lists "Grinder shoppers" (Contact group) and "Custom context…"; the recipient list "Dancing goat recipient list" is absent;
+     - a saved rule stores the bare code name `["CoffeeGrinders"]` and reopens as "Grinder shoppers".
+   - **Facets:**
+     - Facet lists `ContentType`; Value lists "Product page 32", "Article page 7" and "Other value…";
+     - 32 + 7 = 39 index documents, so no synonym inflation;
+     - the stored value is `{"dimension":"ContentType","value":"Product page"}`.
+   - **Reveal inputs:** "Other value…" and "Custom context…" show inputs labelled "Facet value" / "Custom context", and focus moves into them.
+   - **Errors:**
+     - a 201-character text gives "At most 200 characters." on the Text input (aria-invalid);
+     - a rule without actions gives "actions: At least one pin, hide, boost or userData is required."
+   - **Unsaved changes:** Kentico's native "You have unsaved changes… DISCARD" prompt exists in 31.9.1.
+   - **Layout:** the condition box has no overflow at 1100 / 1700 px (box 501 / 903 px) and the page has no horizontal overflow.
+   - **Cleanup:**
+     - temporary rule 505 deleted through the listing dialog;
+     - temporary synonym #6 deleted;
+     - rule 4 content restored (identical);
+     - counts: Rule 1, Synonym 0, Blocked 0.
+     - SearchEvent rows 31–32 (22:09, "coffee") are not from these checks.
+3. **Automated checks:**
+   - .NET 835 passed, 6 skipped;
+   - client 92/92, also under TZ=America/New_York;
+   - tsc clean; Debug and Release builds 0 warnings (Release embeds the bundle).
+4. **Your decisions to confirm:**
+   - **Pre-existing defect found (not 13-02):** a second Save without reloading is rejected as "changed by someone else" on rule **and** synonym edit pages. Reproduced on the untouched Synonym page.
+     - Cause: the save handler sets `LoadedVersion` on the model, but the form items sent back still carry the old token.
+     - Fix proposal: set the hidden LoadedVersion item's value before `GetClientProperties` (a small quick fix for rules and synonyms).
+   - **"Valid from (UTC)" labels are misleading (since 03-06):** Kentico's DateTimeInput works in browser-local time and shows "10:00 AM EDT". The status line converts correctly (14:00 UTC), but the label says UTC. Proposal: drop "(UTC)" from the labels, or explain "your local time".
+   - **Status line:** asks the server (`RuleListing.Of`, same as the listing) instead of a client copy of the rule.
+   - **Cosmetic:** "Conditions" and "Custom data" appear twice (category title + field label).
+   - **Handoff deviations:** no sticky save bar (native Save); stacked fields; CheckBox not Switch; category subtext shown as a tooltip (FormCategory has no subtext in 31.9.1); facet dimension has no "Other…" option.
+   - **Not observed:**
+     - a role without Contact groups → View (server test only);
+     - the stale facet label ("not in the index") on the host, covered by node tests;
+     - FacetValues / ContactGroups failure bars.
+   - **Environment note:** the 13-02 Release build's `npm ci` hit a locked folder (my shell's working directory), and node_modules was restored by the implementer. The long-running admin dev server had cached the broken state and crashed the admin until restarted. If the Suite admin shows "Something went wrong" in Debug, restart `npm start`.
 

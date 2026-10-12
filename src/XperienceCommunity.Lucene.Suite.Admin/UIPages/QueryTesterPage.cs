@@ -7,12 +7,12 @@ using CMS.Membership.Internal;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.Authentication;
-using Kentico.Xperience.Admin.DigitalMarketing.UIPages;
 using Kentico.Xperience.Lucene.Core.Indexing;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+using XperienceCommunity.Lucene.Suite.Admin.Rules;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Search;
@@ -46,7 +46,6 @@ public sealed class QueryTesterPage(
     // Mirror SearchExecutor's limits so the pager never requests a rejected window.
     private const int PageSize = 10;
     internal const int MaxPageSize = 50;
-    internal const int MaxContactGroups = 500;
 
     private const int MaxResultWindow = 1000;
 
@@ -102,25 +101,8 @@ public sealed class QueryTesterPage(
 
     /// <summary>Contact groups the compare mode can simulate; empty unless the user may view Kentico's Contact groups application.</summary>
     [PageCommand(Permission = SystemPermissions.VIEW)]
-    public async Task<ICommandResponse<QueryTesterContactGroups>> ContactGroups()
-    {
-        if (!await CanViewContactGroups())
-        {
-            return ResponseFrom(ContactGroupsResult(allowed: false, []));
-        }
-
-        return ResponseFrom(ContactGroupsResult(allowed: true, LoadContactGroups(contactGroups)));
-    }
-
-    /// <summary>Contact groups that are not recipient lists, by display name, one more than shown so truncation is detectable.</summary>
-    internal static List<QueryTesterContactGroup> LoadContactGroups(IInfoProvider<ContactGroupInfo> contactGroups) =>
-        contactGroups.Get()
-            .WhereFalse(nameof(ContactGroupInfo.ContactGroupIsRecipientList))
-            .Columns(nameof(ContactGroupInfo.ContactGroupName), nameof(ContactGroupInfo.ContactGroupDisplayName))
-            .OrderBy(nameof(ContactGroupInfo.ContactGroupDisplayName))
-            .TopN(MaxContactGroups + 1)
-            .Select(group => new QueryTesterContactGroup(group.ContactGroupName, group.ContactGroupDisplayName))
-            .ToList();
+    public async Task<ICommandResponse<QueryTesterContactGroups>> ContactGroups() =>
+        ResponseFrom(await ContactGroupAccess.Get(userAccessor, applicationPermissionEvaluator, contactGroups));
 
     /// <summary>Builds the suite request; the tester never records analytics.</summary>
     /// <exception cref="ArgumentOutOfRangeException">PageSize is outside 1–<see cref="MaxPageSize"/>.</exception>
@@ -143,21 +125,6 @@ public sealed class QueryTesterPage(
             ApplySynonyms = arguments.ApplySynonyms,
             Contexts = arguments.Contexts ?? [],
         };
-    }
-
-    /// <summary>At most <see cref="MaxContactGroups"/> groups; <paramref name="fetched"/> holds one more when there are more.</summary>
-    internal static QueryTesterContactGroups ContactGroupsResult(bool allowed, IReadOnlyList<QueryTesterContactGroup> fetched) =>
-        new(allowed, fetched.Count > MaxContactGroups, [.. fetched.Take(MaxContactGroups)]);
-
-    private async Task<bool> CanViewContactGroups()
-    {
-        var user = await userAccessor.Get();
-        return user is not null && (user.IsAdministrator() || applicationPermissionEvaluator.Evaluate(new ApplicationPermissionEvaluationContext
-        {
-            ApplicationName = ContactGroupsApplication.IDENTIFIER,
-            PermissionName = SystemPermissions.VIEW,
-            User = user,
-        }));
     }
 
     /// <summary>The exception's own message, without the runtime-appended parameter name and actual value.</summary>

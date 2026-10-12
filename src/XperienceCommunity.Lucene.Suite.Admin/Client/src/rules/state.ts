@@ -1,3 +1,6 @@
+import { contextLabel, type ContactGroup } from "../query-tester/compare.ts";
+import type { Facet } from "../query-tester/state.ts";
+
 export type Anchoring = "any" | "is" | "startsWith" | "endsWith" | "contains";
 
 export interface FacetRow {
@@ -238,3 +241,71 @@ export const fieldValue = (values: Readonly<Record<string, unknown>> | undefined
  */
 export const isShown = (path: string, touched: ReadonlySet<string>, invalid: boolean): boolean =>
   invalid || [...touched].some((t) => t === "" || path === t || path.startsWith(`${t}.`) || path.startsWith(`${t}[`));
+
+/**
+ * Select value of the "Custom context…" / "Other value…" options. Whitespace only, which the server never stores as a context
+ * or a facet value, so it can never be mistaken for a stored one.
+ */
+export const TYPED = " ";
+
+/** How a context row shows: a contact group, a typed context (Input revealed), or nothing chosen yet. */
+export const contextChoice = (value: string, groups: readonly ContactGroup[], typed: boolean): "group" | "custom" | "none" =>
+  !typed && groups.some((group) => group.name === value) ? "group" : typed || value !== "" ? "custom" : "none";
+
+export const contextSelectValue = (value: string, groups: readonly ContactGroup[], typed: boolean) => {
+  const choice = contextChoice(value, groups, typed);
+  return choice === "group" ? value : choice === "custom" ? TYPED : "";
+};
+
+/** The stored context after the user picks `selected`: "Custom context…" keeps a typed value and starts empty from a group. */
+export const contextFromSelect = (selected: string | undefined, current: string, groups: readonly ContactGroup[]) =>
+  selected === TYPED
+    ? { value: groups.some((group) => group.name === current) ? "" : current, typed: true }
+    : { value: selected ?? "", typed: false };
+
+export const contextOptions = (groups: readonly ContactGroup[]) => [
+  ...groups.map((group) => ({ value: group.name, primary: contextLabel(group.name, groups), secondary: "Contact group" })),
+  { value: TYPED, primary: "Custom context…", secondary: undefined },
+];
+
+const listed = (dimension: string, value: string, facets: readonly Facet[] | undefined) =>
+  facets?.find((facet) => facet.dimension === dimension)?.values.some((v) => v.label === value) ?? false;
+
+/** How a facet value shows: one the index reports, a stored one it no longer reports, a typed one (Input revealed), or none. */
+export const facetChoice = (dimension: string, value: string, facets: readonly Facet[], typed: boolean): "listed" | "stale" | "other" | "none" =>
+  typed ? "other" : value === "" ? "none" : listed(dimension, value, facets) ? "listed" : "stale";
+
+export const facetSelectValue = (dimension: string, value: string, facets: readonly Facet[], typed: boolean) =>
+  facetChoice(dimension, value, facets, typed) === "other" ? TYPED : value;
+
+/** The stored facet value after the user picks `selected`: "Other value…" keeps a value the index doesn't list and starts empty from a listed one. */
+export const facetFromSelect = (selected: string | undefined, dimension: string, current: string, facets: readonly Facet[]) =>
+  selected === TYPED ? { value: listed(dimension, current, facets) ? "" : current, typed: true } : { value: selected ?? "", typed: false };
+
+const STALE = "not in the index";
+
+/** The index's dimensions, plus a stored one it no longer reports. `facets` undefined (still loading) labels nothing as stale. */
+export const dimensionOptions = (dimension: string, facets: readonly Facet[] | undefined) => [
+  ...(facets ?? []).map((facet) => ({ value: facet.dimension, primary: facet.dimension, secondary: undefined as string | undefined })),
+  ...(dimension !== "" && !facets?.some((facet) => facet.dimension === dimension)
+    ? [{ value: dimension, primary: dimension, secondary: facets ? STALE : undefined }]
+    : []),
+];
+
+/** The dimension's values with counts, a stored value the index no longer reports, then "Other value…". */
+export const facetValueOptions = (dimension: string, value: string, facets: readonly Facet[] | undefined, typed: boolean) => [
+  ...(facets?.find((facet) => facet.dimension === dimension)?.values ?? []).map((v) => ({
+    value: v.label,
+    primary: v.label,
+    secondary: v.count.toLocaleString("en-US") as string | undefined,
+  })),
+  ...(!typed && value !== "" && !listed(dimension, value, facets) ? [{ value, primary: value, secondary: facets ? STALE : undefined }] : []),
+  { value: TYPED, primary: "Other value…", secondary: undefined },
+];
+
+/** The Status command's arguments from the form's values: a picked Date as its instant, a server string untouched (the server reads it as UTC). */
+export const statusArguments = (values: Readonly<Record<string, unknown>> | undefined) => {
+  const raw = (name: string) => values?.[Object.keys(values).find((k) => k.toLowerCase() === name.toLowerCase()) ?? ""];
+  const date = (value: unknown) => (value instanceof Date ? (isNaN(value.getTime()) ? null : value.toISOString()) : typeof value === "string" && value !== "" ? value : null);
+  return { enabled: raw("Enabled") === true, validFromUtc: date(raw("ValidFromUtc")), validUntilUtc: date(raw("ValidUntilUtc")) };
+};

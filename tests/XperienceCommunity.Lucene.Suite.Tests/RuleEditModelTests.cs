@@ -1,7 +1,17 @@
+using System.Globalization;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
+
+using CMS.Core;
+
+using Kentico.Xperience.Admin.Base.Authentication;
+using Kentico.Membership;
+using Kentico.Xperience.Lucene.Core.Indexing;
 
 using XperienceCommunity.Lucene.Suite.Admin.Rules;
 using XperienceCommunity.Lucene.Suite.Rules;
+using XperienceCommunity.Lucene.Suite.Search;
 
 namespace XperienceCommunity.Lucene.Suite.Tests;
 
@@ -166,5 +176,169 @@ public sealed class RuleEditModelTests
 
         Assert.Equal("Fix the 2 highlighted problems.", RuleJsonValidationRule.Message(RuleJsonSection.Conditions, two));
         Assert.Equal("Must be a JSON object.", RuleJsonValidationRule.Message(RuleJsonSection.UserData, [new("actions.userData", "Must be a JSON object.")]));
+    }
+
+    [Fact]
+    public void Status_IsNeverMappedToOrFromTheStoredRule()
+    {
+        var stored = Stored($$$"""{"pins":[{{{Pin}}}],"userData":{"a":1}}""");
+        var model = RuleEditMapping.FromRule(stored);
+        var plain = RuleEditMapping.FromRule(stored);
+        model.Status = "Expired";
+
+        Assert.Null(plain.Status);
+        Assert.Equal(RuleEditMapping.ActionsJson(plain), RuleEditMapping.ActionsJson(model));
+        Assert.Equal(
+            RuleEditMapping.Apply(plain, RuleEditMapping.Validate(plain, stored, "articles").Definition!, stored),
+            RuleEditMapping.Apply(model, RuleEditMapping.Validate(model, stored, "articles").Definition!, stored));
+        Assert.DoesNotContain(typeof(StoredRule).GetProperties(), property => property.Name == nameof(RuleEditModel.Status));
+    }
+
+    [Fact]
+    public void OpenAndSave_StoresIdenticalJson()
+    {
+        string conditions = """[{"anchoring":"contains","pattern":"coffee","facets":[{"dimension":"ContentType","value":"Article"}],"contexts":["VIPs","mobile"]}]""";
+        string actions = $$"""{"pins":[{{Pin}}],"hides":["{{Hide}}"],"boosts":[{"field":"Type","value":"Article","strength":40}],"userData":{"banner":"x"},"pinsRespectFilters":false}""";
+        var first = Save(Stored(actions) with { Conditions = conditions });
+        var second = Save(first);
+
+        Assert.Equal(conditions, first.Conditions);
+        Assert.Equal((first.Conditions, first.Actions), (second.Conditions, second.Actions));
+
+        static StoredRule Save(StoredRule stored)
+        {
+            var model = RuleEditMapping.FromRule(stored);
+            return RuleEditMapping.Apply(model, RuleEditMapping.Validate(model, stored, "articles").Definition!, stored);
+        }
+    }
+
+    [Theory]
+    [InlineData(true, null, null, "Active", "fires on matching searches")]
+    [InlineData(true, "2026-10-13T00:00:00", null, "Scheduled", "starts 2026-10-13 00:00 UTC")]
+    [InlineData(true, null, "2026-10-12T09:00:00Z", "Expired", "ended 2026-10-12 09:00 UTC")]
+    [InlineData(true, null, "2026-10-12T05:00:00-04:00", "Expired", "ended 2026-10-12 09:00 UTC")]
+    [InlineData(true, "2026-10-12T09:00:00", "2026-10-12T09:00:01", "Active", "fires on matching searches")]
+    [InlineData(false, "2026-10-13T00:00:00", null, "Disabled", null)]
+    public void StatusCommand_UsesTheListingRule_OnUtcInstants(bool enabled, string? from, string? until, string status, string? detail)
+    {
+        var now = new DateTime(2026, 10, 12, 9, 0, 0, DateTimeKind.Utc);
+        var fromUtc = RuleStatusFormComponent.ParseUtc(from);
+        var untilUtc = RuleStatusFormComponent.ParseUtc(until);
+
+        var result = RuleStatusFormComponent.Describe(enabled, fromUtc, untilUtc, now);
+
+        Assert.Equal((status, detail), (result.Status, result.Detail));
+        Assert.Equal(RuleListing.Of(enabled, fromUtc, untilUtc, now).ToString(), result.Status);
+    }
+
+    [Theory]
+    [InlineData("2026-10-13T00:00:00", "2026-10-13T00:00:00.0000000Z")]
+    [InlineData("2026-10-13T04:00:00.000Z", "2026-10-13T04:00:00.0000000Z")]
+    [InlineData("2026-10-13T00:00:00-04:00", "2026-10-13T04:00:00.0000000Z")]
+    [InlineData("", null)]
+    [InlineData("not a date", null)]
+    [InlineData(null, null)]
+    public void StatusCommand_ReadsDatesAsUtc(string? value, string? expected) =>
+        Assert.Equal(expected, RuleStatusFormComponent.ParseUtc(value)?.ToString("O", CultureInfo.InvariantCulture));
+
+    [Fact]
+    public void FacetValuesRequest_SearchesTheIndexAlone_WithoutRulesSynonymsContextsOrAnalytics()
+    {
+        var request = RuleConditionsFormComponent.FacetValuesRequest("articles");
+
+        Assert.Equal(("articles", "", 1, false, false, false), (request.IndexName, request.Query, request.PageSize, request.ApplyRules, request.ApplySynonyms, request.TrackAnalytics));
+        Assert.Empty(request.Contexts);
+        Assert.Empty(request.Facets);
+    }
+
+    [Fact]
+    public async Task FacetValues_UseThePagesIndex_AndFailClosed()
+    {
+        var search = new RecordingSearch(null);
+        var log = new RecordingEventLog();
+
+        var facets = (await Conditions(search, log, indexIdentifier: 7).FacetValues()).Result;
+        Assert.Null(facets.Error);
+        Assert.Equal("ContentType", Assert.Single(facets.Facets).Dimension);
+        Assert.Equal("articles", Assert.Single(search.Requests).IndexName);
+
+        Assert.Equal(RuleItemsFormComponent.IndexMissingMessage, (await Conditions(search, log, indexIdentifier: 8).FacetValues()).Result.Error);
+        Assert.Equal(RuleItemsFormComponent.IndexMissingMessage, (await Conditions(search, log, indexIdentifier: 0).FacetValues()).Result.Error);
+        Assert.Single(search.Requests);
+
+        var failed = (await Conditions(new RecordingSearch(new InvalidOperationException("boom")), log, indexIdentifier: 7).FacetValues()).Result;
+        Assert.Equal((RuleConditionsFormComponent.FacetValuesError, 0), (failed.Error, failed.Facets.Count));
+        Assert.Single(log.Events);
+    }
+
+    [Fact]
+    public async Task ContactGroups_ReturnNothing_WithoutASignedInUserWithContactGroupsView()
+    {
+        // A null user short-circuits before the permission evaluator and the contact group provider (both null here).
+        var result = (await Conditions(new RecordingSearch(null), new RecordingEventLog(), indexIdentifier: 7).ContactGroups()).Result;
+
+        Assert.False(result.Allowed);
+        Assert.Empty(result.Groups);
+    }
+
+    private static RuleConditionsFormComponent Conditions(ISuiteSearchService search, IEventLogService log, int indexIdentifier) =>
+        new(new NoLocalization(), new OneIndexManager(), search, null!, new NoUser(), null!, log) { IndexIdentifier = indexIdentifier };
+
+    private sealed class OneIndexManager : ILuceneIndexManager
+    {
+        public LuceneIndex? GetIndex(int identifier)
+        {
+            if (identifier != 7)
+            {
+                return null;
+            }
+
+            // LuceneIndex has only an internal constructor; the command reads nothing but the name.
+            var index = (LuceneIndex)RuntimeHelpers.GetUninitializedObject(typeof(LuceneIndex));
+            typeof(LuceneIndex).GetField("<IndexName>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(index, "articles");
+            return index;
+        }
+
+        public IEnumerable<LuceneIndex> GetAllIndices() => throw new NotSupportedException();
+
+        public LuceneIndex? GetIndex(string indexName) => throw new NotSupportedException();
+
+        public LuceneIndex GetRequiredIndex(string indexName) => throw new NotSupportedException();
+
+        public void AddIndex(LuceneIndexModel indexConfiguration) => throw new NotSupportedException();
+    }
+
+    private sealed class RecordingSearch(Exception? failure) : ISuiteSearchService
+    {
+        public List<SuiteSearchRequest> Requests { get; } = [];
+
+        public SuiteSearchResponse Search(SuiteSearchRequest request)
+        {
+            Requests.Add(request);
+            return failure is not null
+                ? throw failure
+                : new SuiteSearchResponse([], 15, [new SuiteFacet("ContentType", [new SuiteFacetValue("Article", 12), new SuiteFacetValue("Cafe", 3)])], TimeSpan.Zero);
+        }
+    }
+
+    private sealed class RecordingEventLog : IEventLogService
+    {
+        public List<EventLogData> Events { get; } = [];
+
+        public void LogEvent(EventLogData eventLogData) => Events.Add(eventLogData);
+    }
+
+    private sealed class NoLocalization : ILocalizationService
+    {
+        public string GetString(string resourceKey, string? culture = null, bool useDefaultCulture = true) => resourceKey;
+
+        public string LocalizeExpression(string expression, string? culture = null, bool encode = false, Func<string, string, bool, string>? getStringMethod = null, bool useDefaultCulture = true) => expression;
+
+        public string LocalizeString(string inputText, string? culture = null, bool encode = false, bool useDefaultCulture = true) => inputText;
+    }
+
+    private sealed class NoUser : IAuthenticatedUserAccessor
+    {
+        public Task<AdminApplicationUser> Get() => Task.FromResult<AdminApplicationUser>(null!);
     }
 }

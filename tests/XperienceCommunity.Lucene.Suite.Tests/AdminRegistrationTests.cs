@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 using CMS.Membership;
 
@@ -7,6 +8,7 @@ using Kentico.Xperience.Admin.Base.UIPages;
 using Kentico.Xperience.Lucene.Admin;
 
 using XperienceCommunity.Lucene.Suite.Admin;
+using XperienceCommunity.Lucene.Suite.Admin.Rules;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 
 namespace XperienceCommunity.Lucene.Suite.Tests;
@@ -128,6 +130,16 @@ public class AdminRegistrationTests
 
         static string? Command(Type page, string method) =>
             page.GetMethods().Single(m => m.Name == method && m.GetCustomAttribute<PageCommandAttribute>() is not null).GetCustomAttribute<PageCommandAttribute>()!.Permission;
+    }
+
+    [Fact]
+    public void RuleFormComponents_HaveTheirClientNames()
+    {
+        // The names must match the exports registered in Client/src/entry.tsx; the components need no state to answer.
+        Assert.Equal("@xperience-community/lucene-suite/RuleConditions", Uninitialized<RuleConditionsFormComponent>().ClientComponentName);
+        Assert.Equal("@xperience-community/lucene-suite/RuleStatus", Uninitialized<RuleStatusFormComponent>().ClientComponentName);
+
+        static T Uninitialized<T>() => (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
     }
 
     [Fact]

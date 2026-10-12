@@ -1,15 +1,5 @@
 import { useMemo } from "react";
-import {
-  Button,
-  ButtonColor,
-  Cols,
-  Column,
-  FormItemWrapper,
-  Input,
-  Row,
-  Spacing,
-  Stack,
-} from "@kentico/xperience-admin-components";
+import { Button, ButtonColor, FormItemWrapper, Input, Spacing, Stack } from "@kentico/xperience-admin-components";
 import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
 import { boostAlias, boostControlPaths, canAdd, emptyBoost, parseBoosts, partitionErrors, removeAt, replaceAt, serializeBoosts, type BoostRow } from "./state";
 
@@ -61,17 +51,15 @@ export const RuleBoostsFormComponent = (props: RuleJsonFormComponentProps) => {
         <Stack spacing={Spacing.M}>
           <InlineError id={`${props.name}-errors`}>{visible("") ? unmatched.map((e) => e.message).join(" ") : ""}</InlineError>
           {rows.map((_, index) => (
-            <div key={index}>
-              <Row spacingX={Spacing.M}>
-                <Column cols={Cols.Col4}>{field(index, "field", "Field")}</Column>
-                <Column cols={Cols.Col4}>{field(index, "value", "Value")}</Column>
-                <Column cols={Cols.Col2}>{field(index, "strength", "Strength", { type: "number", min: -100, max: 100 })}</Column>
-                {editable && (
-                  <Column cols={Cols.Col2}>
-                    <RemoveButton label={`Remove boost ${index + 1}`} buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>} onClick={() => remove(index)} />
-                  </Column>
-                )}
-              </Row>
+            <div key={index} style={{ display: "grid", gridTemplateColumns: "minmax(0,4fr) minmax(0,4fr) minmax(0,2fr) auto", gap: Spacing.L, alignItems: "end" }}>
+              {field(index, "field", "Field")}
+              {field(index, "value", "Value")}
+              {field(index, "strength", "Strength", { type: "number", min: -100, max: 100 })}
+              {editable ? (
+                <RemoveButton label={`Remove boost ${index + 1}`} buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>} onClick={() => remove(index)} />
+              ) : (
+                <span />
+              )}
             </div>
           ))}
           {editable && (

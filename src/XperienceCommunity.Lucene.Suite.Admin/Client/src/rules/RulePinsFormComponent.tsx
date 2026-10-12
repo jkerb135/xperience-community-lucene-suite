@@ -1,18 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormComponentProps } from "@kentico/xperience-admin-base";
 import {
+  BorderRadius,
   Button,
   ButtonColor,
-  Cols,
-  Column,
   FormItemWrapper,
+  Icon,
   Input,
   NotificationBarAlert,
-  Row,
   Spacing,
   Stack,
   Tag,
-  TextWithLabel,
 } from "@kentico/xperience-admin-components";
 import { ItemPicker, useItemTitles } from "./ItemPicker";
 import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched } from "./shared";
@@ -39,17 +37,10 @@ export interface RuleItemsFormComponentProps extends FormComponentProps<string> 
   readonly maxHides: number;
 }
 
-/** One stored item: its title (or "Not in this index") above its ItemGuid. */
-export const ItemSummary = ({ guid, item }: { readonly guid: string; readonly item: { readonly title: string } | null | undefined }) => (
-  <Stack spacing={Spacing.XS}>
-    <TextWithLabel label={item?.title ?? (item === null ? "Unknown item" : "Loading…")} value={guid} />
-    {item === null && (
-      <div>
-        <Tag label="Not in this index" />
-      </div>
-    )}
-  </Stack>
-);
+/** A stored item's title; null is an item no longer in this index, undefined one still loading. */
+export const itemLabel = (item: { readonly title: string } | null | undefined) => item?.title ?? (item === null ? "Unknown item" : "Loading…");
+
+export const ITEM_ERROR_STYLE = { color: "var(--color-alert-text)" } as const;
 
 export const RulePinsFormComponent = (props: RuleItemsFormComponentProps) => {
   const rows = useMemo(() => parsePins(props.value), [props.value]);
@@ -68,6 +59,10 @@ export const RulePinsFormComponent = (props: RuleItemsFormComponentProps) => {
     update(removeAt(rows, index));
     focus(index > 0 ? `remove-${index - 1}` : "add");
   };
+  // npm Input takes no aria-label; the row's position input is named after its item.
+  useEffect(() => {
+    rows.forEach((row, index) => (ref(`position-${index}`).current as HTMLInputElement | null)?.setAttribute("aria-label", `Position of ${itemLabel(title(row.itemGuid))}`));
+  });
   const closePicker = () => {
     setPicking(false);
     // Deferred so it runs after the SidePanel has finished moving focus itself.
@@ -89,46 +84,61 @@ export const RulePinsFormComponent = (props: RuleItemsFormComponentProps) => {
           {rows.map((row, index) => {
             const positionPath = `actions.pins[${index}].position`;
             const itemPath = `actions.pins[${index}].itemGuid`;
+            const item = title(row.itemGuid);
+            const rowErrors = [positionPath, itemPath].filter((path) => visible(path) && byPath.has(path)).map((path) => byPath.get(path));
             return (
               <div key={`${row.itemGuid}-${index}`}>
-                <Row spacingX={Spacing.M}>
-                  <Column cols={Cols.Col4} colsLg={Cols.Col2}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: Spacing.M,
+                    border: `${Spacing.Micro} solid var(--color-paper-border)`,
+                    borderRadius: BorderRadius.RadiusM,
+                    padding: `${Spacing.S} ${Spacing.S} ${Spacing.S} ${Spacing.L}`,
+                  }}
+                >
+                  <span aria-hidden="true" style={{ display: "inline-flex", color: "var(--color-text-default-on-light)" }}>
+                    <Icon name="xp-pin" />
+                  </span>
+                  <span
+                    title={row.itemGuid}
+                    style={{ flex: 1, minWidth: 0, fontWeight: 600, color: "var(--color-text-default-on-light)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                  >
+                    {itemLabel(item)}
+                  </span>
+                  {item === null ? <Tag label="Not in this index" /> : item?.contentType && <Tag label={item.contentType} />}
+                  <div style={{ width: "96px", flexShrink: 0 }}>
                     <Input
                       id={`${props.name}-pin-${index}-position`}
-                      label="Position"
                       type="number"
                       min={1}
                       max={props.maxPosition}
                       value={row.position}
                       readOnly={!editable}
                       invalid={visible(positionPath) && byPath.has(positionPath)}
-                      validationMessage={visible(positionPath) ? byPath.get(positionPath) : undefined}
+                      inputRef={ref(`position-${index}`) as React.RefObject<HTMLInputElement>}
                       onBlur={() => touch(positionPath)}
                       onChange={(event) => update(replaceAt(rows, index, { ...row, position: event.target.value }))}
                     />
-                  </Column>
-                  <Column cols={Cols.Col8} colsLg={editable ? Cols.Col7 : Cols.Col10}>
-                    <ItemSummary guid={row.itemGuid} item={title(row.itemGuid)} />
-                    {visible(itemPath) && byPath.has(itemPath) && (
-                      <span role="alert" style={{ color: "var(--color-alert-text)" }}>
-                        {byPath.get(itemPath)}
-                      </span>
-                    )}
-                  </Column>
+                  </div>
                   {editable && (
-                    <Column cols={Cols.Col12} colsLg={Cols.Col3}>
-                      <RemoveButton label={`Remove pin ${index + 1}`} buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>} onClick={() => remove(index)} />
-                    </Column>
+                    <RemoveButton label={`Remove pin ${index + 1}`} buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>} onClick={() => remove(index)} />
                   )}
-                </Row>
+                </div>
+                {rowErrors.length > 0 && (
+                  <span role="alert" style={ITEM_ERROR_STYLE}>
+                    {rowErrors.join(" ")}
+                  </span>
+                )}
               </div>
             );
           })}
           {editable && (
             <div>
               <Button
-                label="Add pins"
-                icon="xp-pin"
+                label="Pin items"
+                icon="xp-plus"
                 color={ButtonColor.Secondary}
                 disabled={!canAdd(rows.length, props.maxPins)}
                 buttonRef={ref("add") as React.RefObject<HTMLButtonElement>}

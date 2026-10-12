@@ -117,7 +117,8 @@ const DATE_COLUMNS = new Set(["validFrom", "validUntil"]);
 
 const text = (value: string, columnName: string): StringCell => ({ type: CellType.String, value, columnName, tooltipText: value || undefined });
 
-const StatusText = ({ status }: { readonly status: RuleStatus }) => (
+/** Icon and coloured status name, shared with the rule edit page's status. */
+export const StatusText = ({ status }: { readonly status: RuleStatus }) => (
   <span style={{ display: "inline-flex", alignItems: "center", gap: Spacing.XS, whiteSpace: "nowrap", color: STATUS_DISPLAY[status].color }}>
     <span aria-hidden="true" style={{ display: "inline-flex" }}>
       <Icon name={STATUS_DISPLAY[status].icon} />

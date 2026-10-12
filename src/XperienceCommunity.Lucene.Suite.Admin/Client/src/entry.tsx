@@ -5,5 +5,6 @@ export { RuleListingTemplate } from "./rules/RuleListingTemplate";
 export * from "./rules/RuleBoostsFormComponent";
 export { RulePinsFormComponent } from "./rules/RulePinsFormComponent";
 export * from "./rules/RuleHidesFormComponent";
+export { RuleStatusFormComponent } from "./rules/RuleStatusFormComponent";
 export * from "./synonyms/SynonymTermsFormComponent";
 export { RuleHiddenFormComponent, ServerValidatedValidationRule } from "./rules/shared";

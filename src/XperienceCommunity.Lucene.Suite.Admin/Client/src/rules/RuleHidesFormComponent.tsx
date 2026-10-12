@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { Button, ButtonColor, Cols, Column, FormItemWrapper, NotificationBarAlert, Row, Spacing, Stack } from "@kentico/xperience-admin-components";
+import { Button, ButtonColor, FormItemWrapper, NotificationBarAlert, Spacing, Stack, Tag } from "@kentico/xperience-admin-components";
 import { ItemPicker, useItemTitles } from "./ItemPicker";
-import { ItemSummary, type RuleItemsFormComponentProps } from "./RulePinsFormComponent";
-import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched } from "./shared";
+import { ITEM_ERROR_STYLE, itemLabel, type RuleItemsFormComponentProps } from "./RulePinsFormComponent";
+import { InlineError, isEditable, useFocusTargets, useServerErrors, useTouched } from "./shared";
 import { addHides, canAdd, fieldValue, hideControlPaths, parseHides, parsePins, partitionErrors, removeAt, sameGuid, serializeHides } from "./state";
 
 export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
@@ -18,9 +18,10 @@ export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
 
   const pinned = new Set(parsePins(fieldValue(props.fieldValues as Record<string, unknown>, "Pins")).map((pin) => sameGuid(pin.itemGuid)));
   const update = (next: readonly string[]) => props.onChange?.(serializeHides(next));
+  // The tags' own remove buttons take no ref, so focus goes to the button that adds items.
   const remove = (index: number) => {
     update(removeAt(hides, index));
-    focus(index > 0 ? `remove-${index - 1}` : "add");
+    focus("add");
   };
   const closePicker = () => {
     setPicking(false);
@@ -40,33 +41,38 @@ export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
         <Stack spacing={Spacing.M}>
           {error && <NotificationBarAlert>{error}</NotificationBarAlert>}
           <InlineError id={`${props.name}-errors`}>{visible("") ? unmatched.map((e) => e.message).join(" ") : ""}</InlineError>
+          {hides.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: Spacing.S }}>
+              {hides.map((guid, index) => {
+                const item = title(guid);
+                return (
+                  <Tag
+                    key={`${guid}-${index}`}
+                    label={item === null ? `${itemLabel(item)} (not in this index)` : itemLabel(item)}
+                    tooltipText={guid}
+                    readOnly={!editable}
+                    onRemoveClick={editable ? () => remove(index) : undefined}
+                  />
+                );
+              })}
+            </div>
+          )}
           {hides.map((guid, index) => {
             const path = `actions.hides[${index}]`;
             return (
-              <div key={`${guid}-${index}`}>
-                <Row spacingX={Spacing.M}>
-                  <Column cols={editable ? Cols.Col9 : Cols.Col12}>
-                    <ItemSummary guid={guid} item={title(guid)} />
-                    {visible(path) && byPath.has(path) && (
-                      <span role="alert" style={{ color: "var(--color-alert-text)" }}>
-                        {byPath.get(path)}
-                      </span>
-                    )}
-                  </Column>
-                  {editable && (
-                    <Column cols={Cols.Col3}>
-                      <RemoveButton label={`Remove hidden item ${index + 1}`} buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>} onClick={() => remove(index)} />
-                    </Column>
-                  )}
-                </Row>
-              </div>
+              visible(path) &&
+              byPath.has(path) && (
+                <span key={`error-${guid}-${index}`} role="alert" style={ITEM_ERROR_STYLE}>
+                  {`${itemLabel(title(guid))}: ${byPath.get(path)}`}
+                </span>
+              )
             );
           })}
           {editable && (
             <div>
               <Button
-                label="Add hidden items"
-                icon="xp-eye-slash"
+                label="Hide items"
+                icon="xp-plus"
                 color={ButtonColor.Secondary}
                 disabled={!canAdd(hides.length, props.maxHides)}
                 buttonRef={ref("add") as React.RefObject<HTMLButtonElement>}

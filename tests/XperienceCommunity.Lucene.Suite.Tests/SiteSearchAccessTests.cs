@@ -7,6 +7,7 @@ using CMS.Membership;
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Lucene.Core.Indexing;
 
+using XperienceCommunity.Lucene.Suite.Admin.Rules;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Search;
 
@@ -120,12 +121,12 @@ public class SiteSearchAccessTests
     {
         Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.ContactGroups))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
 
-        var many = Enumerable.Range(0, QueryTesterPage.MaxContactGroups + 1).Select(i => new QueryTesterContactGroup($"g{i}", $"Group {i}")).ToList();
-        var truncated = QueryTesterPage.ContactGroupsResult(allowed: true, many);
+        var many = Enumerable.Range(0, ContactGroupAccess.MaxGroups + 1).Select(i => new QueryTesterContactGroup($"g{i}", $"Group {i}")).ToList();
+        var truncated = ContactGroupAccess.Result(allowed: true, many);
         Assert.True(truncated.Truncated);
-        Assert.Equal(QueryTesterPage.MaxContactGroups, truncated.Groups.Count);
-        Assert.False(QueryTesterPage.ContactGroupsResult(allowed: true, [.. many.Take(3)]).Truncated);
-        var none = QueryTesterPage.ContactGroupsResult(allowed: false, []);
+        Assert.Equal(ContactGroupAccess.MaxGroups, truncated.Groups.Count);
+        Assert.False(ContactGroupAccess.Result(allowed: true, [.. many.Take(3)]).Truncated);
+        var none = ContactGroupAccess.Result(allowed: false, []);
         Assert.False(none.Allowed);
         Assert.Empty(none.Groups);
     }

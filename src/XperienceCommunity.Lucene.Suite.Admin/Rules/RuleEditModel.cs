@@ -9,69 +9,82 @@ using XperienceCommunity.Lucene.Suite.Rules;
 namespace XperienceCommunity.Lucene.Suite.Admin.Rules;
 
 /// <summary>The rule editor form: native fields for the metadata, custom components for conditions and actions.</summary>
+[FormCategory(Label = "General", Order = 1)]
+[FormCategory(Label = "Conditions", Order = 10)]
+[FormCategory(Label = "Actions", Tooltip = "What happens to the results when the rule fires.", Order = 20)]
+[FormCategory(Label = "Custom data", Order = 30)]
 public sealed class RuleEditModel
 {
+    /// <summary>Display only: the live status shown above the form. Never mapped to or from the stored rule.</summary>
+    [RuleStatusComponent(Label = "Status", Order = 0)]
+    public string? Status { get; set; }
+
     /// <summary>Name shown to marketers.</summary>
-    [RequiredValidationRule]
+    [RequiredValidationRule(ErrorMessage = "Enter a name.")]
     [MaxLengthValidationRule(RuleInfo.DisplayNameMaxLength)]
-    [TextInputComponent(Label = "Name", Order = 1)]
+    [TextInputComponent(Label = "Name", Order = 2)]
     public string DisplayName { get; set; } = string.Empty;
 
     /// <summary>Optional notes.</summary>
-    [TextAreaComponent(Label = "Description", Order = 2)]
+    [TextAreaComponent(Label = "Description", Order = 3)]
     public string? Description { get; set; }
 
     /// <summary>Whether the rule can fire.</summary>
-    [CheckBoxComponent(Label = "Enabled", Order = 3)]
+    [CheckBoxComponent(Label = "Enabled", Order = 4)]
     public bool Enabled { get; set; } = true;
 
     /// <summary>1 runs first.</summary>
     [RequiredValidationRule]
     [MinimumIntegerValueValidationRule(1)]
-    [NumberInputComponent(Label = "Priority", ExplanationText = "1 runs first. When two rules pin to the same position, the earlier rule wins.", Order = 4)]
+    [NumberInputComponent(Label = "Priority", ExplanationText = "Lower numbers run first. When two rules pin to the same position, the earlier rule wins.", Order = 5)]
     public int Priority { get; set; } = 10;
 
     /// <summary>Inclusive UTC start; empty is unbounded.</summary>
-    [DateTimeInputComponent(Label = "Valid from (UTC)", Order = 5)]
+    [DateTimeInputComponent(Label = "Valid from (UTC)", ExplanationText = "Leave empty to start immediately.", Order = 6)]
     public DateTime? ValidFromUtc { get; set; }
 
     /// <summary>Exclusive UTC end; empty is unbounded.</summary>
     [RuleValidityValidationRule]
-    [DateTimeInputComponent(Label = "Valid until (UTC)", ExplanationText = "The rule stops firing at this time. Leave empty for no end.", Order = 6)]
+    [DateTimeInputComponent(Label = "Valid until (UTC)", ExplanationText = "Leave empty to run indefinitely.", Order = 7)]
     public DateTime? ValidUntilUtc { get; set; }
 
     /// <summary>Conditions JSON (array).</summary>
     [RuleJsonValidationRule(RuleJsonSection.Conditions)]
-    [RuleConditionsComponent(Label = "Conditions", Order = 7)]
+    [RuleConditionsComponent(Label = "Conditions", Order = 11)]
     public string Conditions { get; set; } = "[]";
 
     /// <summary>Boosts JSON (array).</summary>
     [RuleJsonValidationRule(RuleJsonSection.Boosts)]
-    [RuleBoostsComponent(Label = "Boosts and buries", Order = 8)]
+    [RuleBoostsComponent(Label = "Boosts and buries", Order = 21)]
     public string Boosts { get; set; } = "[]";
 
     /// <summary>Pins JSON (array of itemGuid and position).</summary>
     [RuleJsonValidationRule(RuleJsonSection.Pins)]
-    [RulePinsComponent(Label = "Pinned items", Order = 9)]
+    [RulePinsComponent(Label = "Pinned items", Order = 22)]
     public string Pins { get; set; } = "[]";
 
     /// <summary>Whether pinned items must still match the applied facets.</summary>
-    [CheckBoxComponent(Label = "Pinned items must match the applied filters", Order = 10)]
+    [CheckBoxComponent(Label = "Pinned items must match the applied filters", Order = 23)]
     public bool PinsRespectFilters { get; set; } = true;
 
     /// <summary>Hides JSON (array of item GUIDs).</summary>
     [RuleJsonValidationRule(RuleJsonSection.Hides)]
     [RuleHidesConflictValidationRule]
-    [RuleHidesComponent(Label = "Hidden items", Order = 11)]
+    [RuleHidesComponent(Label = "Hidden items", Order = 24)]
     public string Hides { get; set; } = "[]";
 
     /// <summary>Custom data returned with fired results (JSON object).</summary>
     [RuleJsonValidationRule(RuleJsonSection.UserData)]
-    [CodeEditorComponent(Label = "Custom data", Language = "json", ExplanationText = "Optional JSON object (at most 1 KB) returned to the site with the results when the rule fires.", Order = 12)]
+    [TextAreaComponent(
+        Label = "Custom data",
+        ExplanationText = "Returned with the search results when the rule fires, for example to show a banner. A JSON object of at most 1 KB.",
+        WatermarkText = """{ "banner": "autumn-sale" }""",
+        MinRowsNumber = 4,
+        Order = 31)]
     public string? UserData { get; set; }
 
     /// <summary>The stored row's LastModified when the form was loaded; a mismatch at save means someone else changed the rule.</summary>
-    [RuleHiddenComponent(Order = 13)]
+    [RuleHiddenComponent(Order = 32)]
     public string? LoadedVersion { get; set; }
 }
 

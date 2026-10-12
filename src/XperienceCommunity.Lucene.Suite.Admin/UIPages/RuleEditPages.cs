@@ -113,11 +113,16 @@ public abstract class RuleEditPageBase(
         await base.ConfigurePage();
     }
 
-    /// <summary>Gives the pins and hides components this page's index; Kentico also builds the items this way for component commands.</summary>
+    /// <summary>Gives the conditions, pins and hides components this page's index; Kentico also builds the items this way for component commands.</summary>
     protected override async Task<ICollection<IFormItem>> GetFormItems()
     {
         var items = await base.GetFormItems();
         foreach (var component in items.OfType<RuleItemsFormComponent>())
+        {
+            component.IndexIdentifier = IndexIdentifier;
+        }
+
+        foreach (var component in items.OfType<RuleConditionsFormComponent>())
         {
             component.IndexIdentifier = IndexIdentifier;
         }
