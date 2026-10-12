@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 2 of 5 complete
+Phases: 3 of 5 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -15,7 +15,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 |-------|------|-------|--------|-----------|
 | 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
 | 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
-| 8.1 | Admin UI Consistency Audit | 4/5 | In progress | - |
+| 8.1 | Admin UI Consistency Audit | 5/5 | ✅ Complete | 2026-10-12 |
 | 9 | Suggestions | TBD | Not started | - |
 | 10 | Custom Activities | TBD | Not started | - |
 
@@ -49,7 +49,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 - [x] 08.1-02: Action bar + applied-filter chips (native listing layout), side-panel focus return, Row-in-Stack spacing (M3, M4, M5, S1)
 - [x] 08.1-03: Reports dashboard redesign after the Kentico Community Portal reporting screen (period toolbar, focus panel with six selectable KPI tiles + 7-day rolling line, insight notes; daily series for every KPI) + query table headers and scroll (M2, S2)
 - [x] 08.1-04: (merged into 08.1-03 at user request: listing-style icon row actions, M1)
-- [ ] 08.1-05: Editors and polish — rule-row overflow (M6), heading scale (S3), validation pattern/timing (S4), C1–C3
+- [x] 08.1-05: Editors and polish — rule-row overflow (M6), heading scale (S3), validation pattern/timing (S4), C1–C3
 
 ### Phase 9: Suggestions
 **Focus:** Query suggestions from surfaced queries; a rate-limited suggest endpoint in the Widgets package returning strings only (untracked); a progressive-enhancement search box script (accessible combobox); a per-index blocked-suggestions list with admin editor (blocks suggestions only, not reports).
@@ -93,4 +93,4 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 | v0.3 Test | A/B testing of rule sets on one index + comparison reports |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 8.1 inserted)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 8.1 complete)*

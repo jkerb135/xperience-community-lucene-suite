@@ -5,13 +5,12 @@ import {
   ButtonColor,
   FormItemWrapper,
   Input,
-  NotificationBarAlert,
   Spacing,
   Stack,
   Tag,
 } from "@kentico/xperience-admin-components";
 import { latestRequest } from "../query-tester/state";
-import { isEditable, useFocusTargets, useTouched } from "../rules/shared";
+import { InlineError, isEditable, useFocusTargets, useTouched } from "../rules/shared";
 import { debounce, fieldValue, removeAt, type RuleError } from "../rules/state";
 import { commitPending, focusAfterRemove, parseTerms, serializeTerms, termErrors } from "./state";
 import { clear, peek } from "../reports/handoff";
@@ -69,7 +68,7 @@ export const SynonymTermsFormComponent = (props: SynonymTermsFormComponentProps)
   }, []);
   const { byIndex, unmatched } = termErrors(errors);
   const { ref, focus } = useFocusTargets();
-  const { touch, visible } = useTouched(props);
+  const { visible, leaveGroup } = useTouched(props);
   const [text, setText] = useState("");
   const [inputError, setInputError] = useState<string>();
   const addInput = ref("input") as React.RefObject<HTMLInputElement>;
@@ -80,10 +79,8 @@ export const SynonymTermsFormComponent = (props: SynonymTermsFormComponentProps)
     }
   }, [addInput, props.maxTermLength]);
 
-  const update = (next: readonly string[]) => {
-    touch("terms");
-    props.onChange?.(serializeTerms(next));
-  };
+  // Errors wait until focus leaves the terms group (or a save failed): adding a term never flags it on its own.
+  const update = (next: readonly string[]) => props.onChange?.(serializeTerms(next));
 
   const commit = () => {
     const result = commitPending(terms, text, props.maxTerms, props.maxTermLength);
@@ -114,62 +111,62 @@ export const SynonymTermsFormComponent = (props: SynonymTermsFormComponentProps)
       validationMessage={props.validationMessage}
       editMode={props.editMode}
     >
-      <Stack spacing={Spacing.M}>
-        {/* When the field is invalid, its own message already says this. */}
-        {unmatched.length > 0 && visible("terms") && !props.invalid && (
-          <NotificationBarAlert>{unmatched.map((error) => error.message).join(" ")}</NotificationBarAlert>
-        )}
-        {terms.length > 0 ? (
-          <ul aria-label="Terms" style={{ display: "flex", flexWrap: "wrap", gap: Spacing.S, listStyle: "none", margin: 0, padding: 0 }}>
-            {terms.map((term, index) => (
-              <li key={`${term}-${index}`} ref={chipRef(index)}>
-                <Tag label={term} readOnly={!editable} onRemoveClick={editable ? () => remove(index) : undefined} />
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <span style={{ color: "var(--color-text-low-emphasis)" }}>No terms yet.</span>
-        )}
-        {[...byIndex]
-          .filter(() => visible("terms"))
-          .map(([index, message]) => (
-            <span key={index} role="alert" style={{ color: "var(--color-alert-text)" }}>
-              {`"${terms[index] ?? ""}": ${message}`}
-            </span>
-          ))}
-        {editable && (
-          <Stack spacing={Spacing.S}>
-            <Input
-              id={`${props.name}-add-term`}
-              label="Add a term"
-              value={text}
-              inputRef={addInput}
-              invalid={inputError !== undefined}
-              validationMessage={inputError}
-              onChange={(event) => {
-                setText(event.target.value);
-                setInputError(undefined);
-              }}
-              onKeyPress={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  commit();
-                }
-              }}
-              onBlur={commit}
-            />
-            <div>
-              <Button
-                label="Add"
-                icon="xp-plus"
-                color={ButtonColor.Secondary}
-                disabled={!text.trim() || terms.length >= props.maxTerms}
-                onClick={commit}
+      <div onBlur={leaveGroup("terms")} aria-describedby={`${props.name}-term-errors`}>
+        <Stack spacing={Spacing.M}>
+          {terms.length > 0 ? (
+            <ul aria-label="Terms" style={{ display: "flex", flexWrap: "wrap", gap: Spacing.S, listStyle: "none", margin: 0, padding: 0 }}>
+              {terms.map((term, index) => (
+                <li key={`${term}-${index}`} ref={chipRef(index)}>
+                  <Tag label={term} readOnly={!editable} onRemoveClick={editable ? () => remove(index) : undefined} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span style={{ color: "var(--color-text-low-emphasis)" }}>No terms yet.</span>
+          )}
+          <InlineError id={`${props.name}-term-errors`}>
+            {visible("terms")
+              ? [
+                  // When the field itself is invalid, its own message already says what the unmatched errors say.
+                  ...(props.invalid ? [] : unmatched.map((error) => error.message)),
+                  ...[...byIndex].map(([index, message]) => `"${terms[index] ?? ""}": ${message}`),
+                ].join(" ")
+              : ""}
+          </InlineError>
+          {editable && (
+            <Stack spacing={Spacing.S}>
+              <Input
+                id={`${props.name}-add-term`}
+                label="Add a term"
+                value={text}
+                inputRef={addInput}
+                invalid={inputError !== undefined}
+                validationMessage={inputError}
+                onChange={(event) => {
+                  setText(event.target.value);
+                  setInputError(undefined);
+                }}
+                onKeyPress={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    commit();
+                  }
+                }}
+                onBlur={commit}
               />
-            </div>
-          </Stack>
-        )}
-      </Stack>
+              <div>
+                <Button
+                  label="Add"
+                  icon="xp-plus"
+                  color={ButtonColor.Secondary}
+                  disabled={!text.trim() || terms.length >= props.maxTerms}
+                  onClick={commit}
+                />
+              </div>
+            </Stack>
+          )}
+        </Stack>
+      </div>
     </FormItemWrapper>
   );
 };

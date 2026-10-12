@@ -6,6 +6,7 @@ import {
   canAdd,
   conditionControlPaths,
   debounce,
+  isShown,
   parseBoosts,
   parseConditions,
   partitionErrors,
@@ -152,4 +153,15 @@ test("fieldValue reads another field regardless of key casing", () => {
   assert.equal(fieldValue({ pins: "[]" }, "Pins"), "[]");
   assert.equal(fieldValue({ Pins: 1 }, "Pins"), undefined);
   assert.equal(fieldValue(undefined, "Pins"), undefined);
+});
+
+test("errors stay hidden until the control or its group was left, or a save failed", () => {
+  const none = new Set<string>();
+  assert.equal(isShown("conditions[0].pattern", none, false), false);
+  assert.equal(isShown("conditions[0].pattern", new Set(["conditions[0].pattern"]), false), true);
+  assert.equal(isShown("conditions[0].facets", new Set(["conditions[0]"]), false), true);
+  assert.equal(isShown("conditions[1].facets", new Set(["conditions[0]"]), false), false);
+  assert.equal(isShown("conditions[10].pattern", new Set(["conditions[1]"]), false), false);
+  assert.equal(isShown("anything", new Set([""]), false), true);
+  assert.equal(isShown("anything", none, true), true);
 });

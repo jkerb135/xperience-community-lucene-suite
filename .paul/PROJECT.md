@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.1.0 |
-| Status | v0.2 Measure in progress: Phases 7–8 complete, Phase 9 Suggestions next |
+| Status | v0.2 Measure in progress: Phases 7, 8 and 8.1 complete, Phase 9 Suggestions next |
 | Last Updated | 2026-10-12 |
 
 ## Requirements
@@ -65,6 +65,9 @@ Marketers tune, test and measure site search without a developer.
 
 - ✓ Search reports admin page per index: preset/custom UTC day ranges, KPI tiles with previous-period deltas, token SVG trend + latency charts with table views — Phase 8 (08-01)
 - ✓ Query table (Top / No results / Lowest CTR / Slowest, paged, (other)) with row actions that prefill the query tester, Create rule or Add synonym via a one-time path-bound sessionStorage handoff — Phase 8 (08-02)
+
+- ✓ Admin UI consistency: every Suite admin screen audited against native Kentico 31.9.1 and fixed — native listing action bar + chips in the query tester, side-panel focus return, 24 px region rhythm, one-line listing-style row actions, editor error timing (after leaving a field/group or a failed save, inline and polite), bordered condition blocks; Suite admin UI Conventions 1–10 — Phase 8.1
+- ✓ Search reports dashboard: period stepping, grouped selectable KPI tiles with a rolling-average trend, period breakdown and response-time side panels, Needs attention (top no-result queries with actions), daily series for every KPI — Phase 8.1 (08.1-03)
 
 ### Active (In Progress)
 - [ ] Query suggestions from surfaced queries via a strings-only, rate-limited suggest endpoint + progressive-enhancement search box script — v0.2 Phase 9
@@ -155,6 +158,7 @@ Marketers tune, test and measure site search without a developer.
 | Reports read SearchDaily only; "(other)" = range totals − named totals (surfaced membership decided by SQL, never C# string matching); the report service performs no authorization (admin pages gate on View + index exists) | 07-01 (NOT IN over nullable QueryText timed out at volume; collation defines text equality) | 2026-10-12 | Active |
 | Demo history is seeded only by a dev runner in the test project, written without Kentico into empty days no real process can own, behind a DB-name confirmation and the rollup lock | 07-02 / audit (running host, operator error) | 2026-10-12 | Active |
 | Test host content changes stay minimal and recorded: host files backed up before edits (byte-preserving), new pages rather than reusing existing ones, temporary data cleaned unless the user keeps it | User decisions across v0.1 | 2026-10-12 | Active |
+| Admin UI follows Suite Conventions 1–10 (08.1-01-FINDINGS.md): reference precedence native 31.9.1 runtime > npm exports > kit repo; listing pages on the desk, dashboards in Papers, editors in native forms; errors only after leave/save; side panels return focus; tokens verified at runtime; npm Spacing values are strings. Rules mirrored into the design-screen skill (enterprise.md) | Earlier per-screen validation let cross-screen drift through (08.1 audit, user) | 2026-10-12 | Active |
 | Admin cross-page prefill = one-time sessionStorage handoff bound to target, index, exact page path and expiry; consumers fill only empty forms; never URL query strings or server state | 08-01 (URL state raced the admin router) / 08-02 audit | 2026-10-12 | Active |
 
 ## Success Metrics
@@ -188,4 +192,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 8*
+*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 8.1*

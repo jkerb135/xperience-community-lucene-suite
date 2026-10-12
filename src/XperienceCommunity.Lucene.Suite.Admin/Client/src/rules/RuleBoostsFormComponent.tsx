@@ -6,12 +6,11 @@ import {
   Column,
   FormItemWrapper,
   Input,
-  NotificationBarAlert,
   Row,
   Spacing,
   Stack,
 } from "@kentico/xperience-admin-components";
-import { isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
+import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
 import { boostAlias, boostControlPaths, canAdd, emptyBoost, parseBoosts, partitionErrors, removeAt, replaceAt, serializeBoosts, type BoostRow } from "./state";
 
 export const RuleBoostsFormComponent = (props: RuleJsonFormComponentProps) => {
@@ -21,7 +20,7 @@ export const RuleBoostsFormComponent = (props: RuleJsonFormComponentProps) => {
   const errors = useServerErrors(props, json);
   const { byPath, unmatched } = partitionErrors(errors, boostControlPaths(rows), boostAlias);
   const { ref, focus } = useFocusTargets();
-  const { touch, visible } = useTouched(props);
+  const { touch, visible, leaveGroup } = useTouched(props);
 
   const update = (next: readonly BoostRow[]) => props.onChange?.(serializeBoosts(next));
   const add = () => {
@@ -58,44 +57,37 @@ export const RuleBoostsFormComponent = (props: RuleJsonFormComponentProps) => {
       validationMessage={props.validationMessage}
       editMode={props.editMode}
     >
-      <Stack spacing={Spacing.M}>
-        {unmatched.length > 0 && (
-          <NotificationBarAlert>{unmatched.map((error) => error.message).join(" ")}</NotificationBarAlert>
-        )}
-        {rows.map((_, index) => (
-          <div key={index}>
-            <Row spacingX={Spacing.M}>
-              <Column cols={Cols.Col4}>{field(index, "field", "Field")}</Column>
-              <Column cols={Cols.Col4}>{field(index, "value", "Value")}</Column>
-              <Column cols={Cols.Col2}>{field(index, "strength", "Strength", { type: "number", min: -100, max: 100 })}</Column>
-              {editable && (
-                <Column cols={Cols.Col2}>
-                  <Button
-                    label="Remove"
-                    title={`Remove boost ${index + 1}`}
-                    icon="xp-bin"
-                    color={ButtonColor.Tertiary}
-                    buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
-                    onClick={() => remove(index)}
-                  />
-                </Column>
-              )}
-            </Row>
-          </div>
-        ))}
-        {editable && (
-          <div>
-            <Button
-              label="Add boost"
-              icon="xp-plus"
-              color={ButtonColor.Secondary}
-              disabled={!canAdd(rows.length, props.maxBoosts)}
-              buttonRef={ref("add") as React.RefObject<HTMLButtonElement>}
-              onClick={add}
-            />
-          </div>
-        )}
-      </Stack>
+      <div onBlur={leaveGroup("")} aria-describedby={`${props.name}-errors`}>
+        <Stack spacing={Spacing.M}>
+          <InlineError id={`${props.name}-errors`}>{visible("") ? unmatched.map((e) => e.message).join(" ") : ""}</InlineError>
+          {rows.map((_, index) => (
+            <div key={index}>
+              <Row spacingX={Spacing.M}>
+                <Column cols={Cols.Col4}>{field(index, "field", "Field")}</Column>
+                <Column cols={Cols.Col4}>{field(index, "value", "Value")}</Column>
+                <Column cols={Cols.Col2}>{field(index, "strength", "Strength", { type: "number", min: -100, max: 100 })}</Column>
+                {editable && (
+                  <Column cols={Cols.Col2}>
+                    <RemoveButton label={`Remove boost ${index + 1}`} buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>} onClick={() => remove(index)} />
+                  </Column>
+                )}
+              </Row>
+            </div>
+          ))}
+          {editable && (
+            <div>
+              <Button
+                label="Add boost"
+                icon="xp-plus"
+                color={ButtonColor.Secondary}
+                disabled={!canAdd(rows.length, props.maxBoosts)}
+                buttonRef={ref("add") as React.RefObject<HTMLButtonElement>}
+                onClick={add}
+              />
+            </div>
+          )}
+        </Stack>
+      </div>
     </FormItemWrapper>
   );
 };

@@ -197,9 +197,11 @@ export const QueryTesterTemplate = ({
   const firstField = keyFields[0];
   const firedRules = result?.firedRules ?? [];
   const showPinned = hits.some((hit) => hit.pinnedByRuleId != null);
+  // A key field no hit on this page has a value for (e.g. Body without a summary field) gets no empty column.
+  const shownFields = hits.length === 0 ? keyFields : keyFields.filter((f) => hits.some((hit) => fieldText(hit, f) !== ""));
   const columns = [
     ...(showPinned ? [column("pinned", "Pinned")] : []),
-    ...keyFields.map((f) => column(f, humanizeFieldName(f))),
+    ...shownFields.map((f) => column(f, humanizeFieldName(f))),
     column("score", "Score"),
     column("itemGuid", "Item GUID"),
   ];
@@ -208,7 +210,7 @@ export const QueryTesterTemplate = ({
     disabled: false,
     cells: [
       ...(showPinned ? [cell(pinnedLabel(hit, firedRules), "pinned")] : []),
-      ...keyFields.map((f) => cell(fieldText(hit, f), f)),
+      ...shownFields.map((f) => cell(fieldText(hit, f), f)),
       cell(hit.score.toFixed(4), "score"),
       cell(hit.itemGuid ?? "(none)", "itemGuid"),
     ],

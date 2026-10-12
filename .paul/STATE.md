@@ -5,26 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 8.1 Admin UI Consistency Audit
+**Current focus:** v0.2 Measure — Phase 9 Suggestions
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 8.1 (Admin UI Consistency Audit, inserted) — Applying
-Plan: 08.1-03 complete (08.1-04 merged); next 08.1-05
-Status: Ready to plan 08.1-05
-Last activity: 2026-10-12 — Unified 08.1-03
+Phase: 9 of 10 (Suggestions) — Not started
+Plan: Not started (3 plans decided: 09-01 core + endpoint, 09-02 combobox script, 09-03 blocklist admin)
+Status: Ready to plan
+Last activity: 2026-10-12 — Phase 8.1 complete (08.1-05 unified), transitioned to Phase 9
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [████░░░░░░] 40% (2 of 5 phases)
+- v0.2 Measure: [██████░░░░] 60% (3 of 5 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready to plan 08.1-05]
+  ○        ○        ○     [Phase 8.1 complete — ready to plan Phase 9]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,9 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Phase 8.1 complete (5 plans; 08.1-04 merged into 08.1-03): every 08.1-01 Must/Should resolved (M1–M6, S1–S4, C1–C3); Conventions 1–10 bind Phase 9 admin UI (blocklist editor reuses RemoveButton, InlineError, isShown, RowActions); APPROVAL-CHECKS #7–#9 pending milestone review | Phase 8.1 | Next: /paul:plan Phase 9 |
+| 2026-10-12: Enterprise audit on 08.1-05-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 8.1 | Inline errors aria-live polite + aria-describedby (no role=alert re-announcing during 400 ms re-validation); group blur incl. null relatedTarget; read-only unchanged; buttonRefs kept |
+| 2026-10-12: 08.1-05 planned: root cause of S4 = group/unmatched errors bypass the visible() blur gate and render as NotificationBarAlert; fix = shared node-tested isShown (path or group touched, or props.invalid) + InlineError (role=alert, alert-text token); icon-only row removes (M6); condition block = bordered panel with Headline S level 3 + header remove (S3, C2); synonym spacing (C3); hide empty key-field columns in the query tester (C1); APPROVAL-CHECKS #9 | Phase 8.1 | Last 08.1 plan |
 | 2026-10-12: 08.1-03 APPLY changes (user, mid-apply): layout v2 — KPI strip (Volume/Quality compact tiles) + Trend card with "Show breakdown" side panel + Needs attention (top 5 no-result queries) & Response time (histogram side panel) + full-width query table; wording reworked (Trend / period breakdown / At a glance / Patterns; sort-driven query card title under "Search terms"); listing-style icon row actions (08.1-04 merged); ‹ › range stepping by range length (preset kept). Found: npm 31.9.1 Spacing values are strings → `${Spacing.Micro}px` was invalid CSS (fixed in reports + query tester) | Phase 8.1 | 08.1-04 merged into 08.1-03 |
 | 2026-10-12: User: query table row actions should be buttons like the native listing UI → new plan 08.1-04 (labelled icon-only Buttons in one line, native look, fixes M1); 08.1-03 drops the DropDownActionMenu and keeps headers/scroll; editors/polish renumbered 08.1-05 | Phase 8.1 | Phase 8.1 = 5 plans |
 | 2026-10-12: Enterprise audit on 08.1-03-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 8.1 | Deltas never colour-only (hidden better/worse); accent + delta contrast ≥ 4.5:1 from runtime colours; tile group "Metric" + chart summary names metric; no-complete-day and partial-previous edge states; inverted-tone tests |
@@ -172,7 +175,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -191,6 +194,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 8.1: APPROVAL-CHECKS #9 (editors: error timing, 14 px condition headings, icon removes; read-only/failed-save not observed) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #8 (reports dashboard v2, icon row actions, range stepping, paged trend table) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #7 (query tester action bar/focus/spacing; confirm removed visible label + rule-editor scope addition; one unreproduced Contact-groups focus landing) pending | Milestone review | Milestone review |
 | Phase 8: APPROVAL-CHECKS #5 (reports page) and #6 (query table + row actions; permission-disabled state code/test-only; one unreproduced "7 days" restore) pending | Milestone review | Milestone review |
@@ -205,9 +209,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 08.1-03 unified
-Next action: /paul:plan for 08.1-05 (rule-row overflow M6, heading scale S3, validation S4, C1–C3)
-Resume file: .paul/phases/08.1-admin-ui-consistency-audit/08.1-03-SUMMARY.md
+Stopped at: Phase 8.1 complete, ready to plan Phase 9
+Next action: /paul:plan for Phase 9 (Suggestions) — decisions already recorded
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

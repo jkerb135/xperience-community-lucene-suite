@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Button, ButtonColor, Cols, Column, FormItemWrapper, NotificationBarAlert, Row, Spacing, Stack } from "@kentico/xperience-admin-components";
 import { ItemPicker, useItemTitles } from "./ItemPicker";
 import { ItemSummary, type RuleItemsFormComponentProps } from "./RulePinsFormComponent";
-import { isEditable, useFocusTargets, useServerErrors } from "./shared";
+import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched } from "./shared";
 import { addHides, canAdd, fieldValue, hideControlPaths, parseHides, parsePins, partitionErrors, removeAt, sameGuid, serializeHides } from "./state";
 
 export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
@@ -10,6 +10,7 @@ export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
   const json = useMemo(() => serializeHides(hides), [hides]);
   const editable = isEditable(props);
   const errors = useServerErrors(props, json);
+  const { visible, leaveGroup } = useTouched(props);
   const { byPath, unmatched } = partitionErrors(errors, hideControlPaths(hides));
   const { ref, focus } = useFocusTargets();
   const { title, error, remember } = useItemTitles(props, hides);
@@ -35,52 +36,46 @@ export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
       validationMessage={props.validationMessage}
       editMode={props.editMode}
     >
-      <Stack spacing={Spacing.M}>
-        {(unmatched.length > 0 || error) && (
-          <NotificationBarAlert>{[error, ...unmatched.map((e) => e.message)].filter(Boolean).join(" ")}</NotificationBarAlert>
-        )}
-        {hides.map((guid, index) => {
-          const path = `actions.hides[${index}]`;
-          return (
-            <div key={`${guid}-${index}`}>
-              <Row spacingX={Spacing.M}>
-                <Column cols={editable ? Cols.Col9 : Cols.Col12}>
-                  <ItemSummary guid={guid} item={title(guid)} />
-                  {byPath.has(path) && (
-                    <span role="alert" style={{ color: "var(--color-alert-text)" }}>
-                      {byPath.get(path)}
-                    </span>
-                  )}
-                </Column>
-                {editable && (
-                  <Column cols={Cols.Col3}>
-                    <Button
-                      label="Remove"
-                      title={`Remove hidden item ${index + 1}`}
-                      icon="xp-bin"
-                      color={ButtonColor.Tertiary}
-                      buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>}
-                      onClick={() => remove(index)}
-                    />
+      <div onBlur={leaveGroup("")} aria-describedby={`${props.name}-errors`}>
+        <Stack spacing={Spacing.M}>
+          {error && <NotificationBarAlert>{error}</NotificationBarAlert>}
+          <InlineError id={`${props.name}-errors`}>{visible("") ? unmatched.map((e) => e.message).join(" ") : ""}</InlineError>
+          {hides.map((guid, index) => {
+            const path = `actions.hides[${index}]`;
+            return (
+              <div key={`${guid}-${index}`}>
+                <Row spacingX={Spacing.M}>
+                  <Column cols={editable ? Cols.Col9 : Cols.Col12}>
+                    <ItemSummary guid={guid} item={title(guid)} />
+                    {visible(path) && byPath.has(path) && (
+                      <span role="alert" style={{ color: "var(--color-alert-text)" }}>
+                        {byPath.get(path)}
+                      </span>
+                    )}
                   </Column>
-                )}
-              </Row>
+                  {editable && (
+                    <Column cols={Cols.Col3}>
+                      <RemoveButton label={`Remove hidden item ${index + 1}`} buttonRef={ref(`remove-${index}`) as React.RefObject<HTMLButtonElement>} onClick={() => remove(index)} />
+                    </Column>
+                  )}
+                </Row>
+              </div>
+            );
+          })}
+          {editable && (
+            <div>
+              <Button
+                label="Add hidden items"
+                icon="xp-eye-slash"
+                color={ButtonColor.Secondary}
+                disabled={!canAdd(hides.length, props.maxHides)}
+                buttonRef={ref("add") as React.RefObject<HTMLButtonElement>}
+                onClick={() => setPicking(true)}
+              />
             </div>
-          );
-        })}
-        {editable && (
-          <div>
-            <Button
-              label="Add hidden items"
-              icon="xp-eye-slash"
-              color={ButtonColor.Secondary}
-              disabled={!canAdd(hides.length, props.maxHides)}
-              buttonRef={ref("add") as React.RefObject<HTMLButtonElement>}
-              onClick={() => setPicking(true)}
-            />
-          </div>
-        )}
-      </Stack>
+          )}
+        </Stack>
+      </div>
       {editable && (
         <ItemPicker
           componentProps={props}

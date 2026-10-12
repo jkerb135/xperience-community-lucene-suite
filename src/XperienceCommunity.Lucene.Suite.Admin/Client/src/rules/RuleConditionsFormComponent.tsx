@@ -1,24 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  BorderRadius,
   Button,
   ButtonColor,
   Callout,
   CalloutPlacementType,
   CalloutType,
   Cols,
-  Card,
   Column,
   FormItemWrapper,
+  Headline,
+  HeadlineSize,
   Input,
   MenuItem,
-  NotificationBarAlert,
   Row,
   Select,
   Spacing,
   Stack,
 } from "@kentico/xperience-admin-components";
 import { clear, peek } from "../reports/handoff";
-import { isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
+import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
 import {
   anchoringOptions,
   canAdd,
@@ -40,7 +41,7 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
   const errors = useServerErrors(props, json);
   const { byPath, unmatched } = partitionErrors(errors, conditionControlPaths(rows));
   const { ref, focus } = useFocusTargets();
-  const { touch, visible } = useTouched(props);
+  const { touch, visible, leaveGroup } = useTouched(props);
   const id = (suffix: string) => `${props.name}-${suffix}`;
   const inputRef = (key: string) => ref(key) as React.RefObject<HTMLInputElement>;
   const buttonRef = (key: string) => ref(key) as React.RefObject<HTMLButtonElement>;
@@ -73,22 +74,20 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
   const condition = (row: ConditionRow, i: number) => {
     const path = `conditions[${i}]`;
     return (
-      <Card
+      <div
         key={i}
-        headline={<span role="heading" aria-level={4}>{`Condition ${i + 1}`}</span>}
-        footer={
-          editable && (
-            <Button
-              label="Remove condition"
-              icon="xp-bin"
-              destructive
-              color={ButtonColor.Tertiary}
-              buttonRef={buttonRef(`remove-condition-${i}`)}
-              onClick={() => removeCondition(i)}
-            />
-          )
-        }
+        role="group"
+        aria-labelledby={id(`c${i}-title`)}
+        aria-describedby={id(`c${i}-errors`)}
+        onBlur={leaveGroup(path)}
+        style={{ border: `${Spacing.Micro} solid var(--color-paper-border)`, borderRadius: BorderRadius.RadiusM, padding: Spacing.L }}
       >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: Spacing.S, marginBottom: Spacing.M }}>
+          <div role="heading" aria-level={3} id={id(`c${i}-title`)}>
+            <Headline size={HeadlineSize.S}>{`Condition ${i + 1}`}</Headline>
+          </div>
+          {editable && <RemoveButton label={`Remove condition ${i + 1}`} buttonRef={buttonRef(`remove-condition-${i}`)} onClick={() => removeCondition(i)} />}
+        </div>
         <Stack spacing={Spacing.M}>
           <div>
             <Row spacingX={Spacing.M}>
@@ -152,11 +151,8 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
                 </Column>
                 {editable && (
                   <Column cols={Cols.Col2}>
-                    <Button
-                      label="Remove"
-                      title={`Remove facet ${j + 1} of condition ${i + 1}`}
-                      icon="xp-bin"
-                      color={ButtonColor.Tertiary}
+                    <RemoveButton
+                      label={`Remove facet ${j + 1} of condition ${i + 1}`}
                       buttonRef={buttonRef(`remove-facet-${i}-${j}`)}
                       onClick={() => {
                         set(i, { facets: removeAt(row.facets, j) });
@@ -186,11 +182,8 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
                 </Column>
                 {editable && (
                   <Column cols={Cols.Col2}>
-                    <Button
-                      label="Remove"
-                      title={`Remove context ${j + 1} of condition ${i + 1}`}
-                      icon="xp-bin"
-                      color={ButtonColor.Tertiary}
+                    <RemoveButton
+                      label={`Remove context ${j + 1} of condition ${i + 1}`}
                       buttonRef={buttonRef(`remove-context-${i}-${j}`)}
                       onClick={() => {
                         set(i, { contexts: removeAt(row.contexts, j) });
@@ -203,9 +196,12 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
             </div>
           ))}
 
-          {(byPath.has(`${path}.facets`) || byPath.has(`${path}.contexts`)) && (
-            <NotificationBarAlert>{[byPath.get(`${path}.facets`), byPath.get(`${path}.contexts`)].filter(Boolean).join(" ")}</NotificationBarAlert>
-          )}
+          <InlineError id={id(`c${i}-errors`)}>
+            {[`${path}.facets`, `${path}.contexts`]
+              .filter((p) => visible(p) && byPath.has(p))
+              .map((p) => byPath.get(p))
+              .join(" ")}
+          </InlineError>
 
           {editable && (
             <div>
@@ -240,32 +236,34 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
             </div>
           )}
         </Stack>
-      </Card>
+      </div>
     );
   };
 
   return (
     <FormItemWrapper label={props.label} invalid={props.invalid} validationMessage={props.validationMessage} editMode={props.editMode}>
-      <Stack spacing={Spacing.M}>
-        <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnPaper} headline="How conditions match">
-          The rule fires when any condition matches. Within one condition, the text, every facet and at least one context must match. A rule
-          without conditions fires on every search.
-        </Callout>
-        {unmatched.length > 0 && <NotificationBarAlert>{unmatched.map((e) => e.message).join(" ")}</NotificationBarAlert>}
-        {rows.map(condition)}
-        {editable && (
-          <div>
-            <Button
-              label="Add condition"
-              icon="xp-plus"
-              color={ButtonColor.Secondary}
-              disabled={!canAdd(rows.length, props.maxConditions)}
-              buttonRef={buttonRef("add-condition")}
-              onClick={addCondition}
-            />
-          </div>
-        )}
-      </Stack>
+      <div onBlur={leaveGroup("")} aria-describedby={id("errors")}>
+        <Stack spacing={Spacing.M}>
+          <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnPaper} headline="How conditions match">
+            The rule fires when any condition matches. Within one condition, the text, every facet and at least one context must match. A rule
+            without conditions fires on every search.
+          </Callout>
+          <InlineError id={id("errors")}>{visible("") ? unmatched.map((e) => e.message).join(" ") : ""}</InlineError>
+          {rows.map(condition)}
+          {editable && (
+            <div>
+              <Button
+                label="Add condition"
+                icon="xp-plus"
+                color={ButtonColor.Secondary}
+                disabled={!canAdd(rows.length, props.maxConditions)}
+                buttonRef={buttonRef("add-condition")}
+                onClick={addCondition}
+              />
+            </div>
+          )}
+        </Stack>
+      </div>
     </FormItemWrapper>
   );
 };

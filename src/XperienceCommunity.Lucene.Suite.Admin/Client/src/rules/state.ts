@@ -231,3 +231,10 @@ export const fieldValue = (values: Readonly<Record<string, unknown>> | undefined
   const value = key === undefined ? undefined : values?.[key];
   return typeof value === "string" ? value : undefined;
 };
+
+/**
+ * Whether a server error at `path` may show: after a failed save (the field is invalid), or once the user left the
+ * control or a group containing it. "" stands for the whole component; "conditions[0]" covers "conditions[0].facets".
+ */
+export const isShown = (path: string, touched: ReadonlySet<string>, invalid: boolean): boolean =>
+  invalid || [...touched].some((t) => t === "" || path === t || path.startsWith(`${t}.`) || path.startsWith(`${t}[`));

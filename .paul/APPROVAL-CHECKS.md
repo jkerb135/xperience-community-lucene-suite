@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 9 | 08.1-05 | Rule/synonym editors: icon removes, condition blocks, error timing, inline errors; query tester empty column | Pending |
 | 8 | 08.1-03 | Search reports dashboard redesign, range stepping, listing-style query row actions | Pending |
 | 7 | 08.1-02 | Query tester native action bar + chips row, side-panel focus return, 24 px region gaps | Pending |
 
@@ -261,3 +262,27 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **Row actions** are icon-only buttons like native listings. Hovering gives a tooltip; screen readers hear the full name.
    - **Needs attention** costs one extra Queries request per range change.
    - **Not observed:** View-only users (disabled-by-permission icons); the empty "No searches" state; a range with no final day.
+
+---
+
+## 9. 08.1-05: Rule and synonym editors (v0.2)
+
+1. **Where:** Rules → Create rule (conditions, boosts, pins, hides); Synonyms → Create synonym; Query tester.
+2. **Capture:** `after5-rule-condition-1100.jpg`.
+3. **What I verified in the browser pane** (669 and 1269 px content width):
+   - **Row removes:** a condition with 2 facets and 2 contexts plus 2 boosts gives 7 icon-only removes ("Remove facet 2 of condition 1" etc.), 0 past the card at either width (was 31–47 px over at 669 px).
+   - **Remove focus:** after Remove facet 2, focus is on facet 1's remove; after the last facet, on "Add facet".
+   - **Condition block:** bordered group; "Condition 1" is Headline S (14 px bold), heading level 3; the trash icon sits in its header.
+   - **Error timing:**
+     - Adding a condition, facets, contexts and boosts shows no error.
+     - After a real click into Text and then onto empty page space, the empty-pattern error appears under the field.
+     - Synonym: one term added → nothing; leaving the group → polite inline "Must have 2–20 terms."; no alert bar.
+   - **Query tester:** columns Title / Score / Item GUID; the empty Body column is gone.
+   - **Host data:** Rule 0 / 0, Synonym 0 / 0, SearchEvent 19 / 19, Interaction 2 / 2. Nothing saved.
+4. **Your decisions to confirm:**
+   - **Headline S is 14 px** (the kit maps S/M/L to 14/16/24), not the 16 px the plan said. It reads as a bold group title at label size.
+   - **Errors appear once focus leaves the whole block or editor,** not only the single field (plus the existing per-field blur, and always after a failed save).
+   - **Not observed:**
+     - read-only (View) forms (no such user);
+     - a failed Save with errors visible: Save stayed disabled for the empty Name, so no save attempt was made.
+   - **Accessibility tree:** the read_page tree showed the synonym "Add a term" input without a name. Its label uses the same id mechanism as the rule inputs, which `input.labels` confirms are labelled. Unverified.
