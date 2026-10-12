@@ -234,7 +234,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 72e9489 docs(paul): phase 10 transition state
+Last commit: a0bbbd1 feat(11): search insights (Phase 11 complete)
 Branch: main (not pushed)
 Feature branches merged: none
 
