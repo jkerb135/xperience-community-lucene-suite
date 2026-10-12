@@ -72,10 +72,29 @@ Each group is ordered by searches, then text. Texts that differ only in punctuat
 
 ## Blocklist
 
-Entries are stored per index in module class `LuceneSuite.BlockedSuggestion` (installer version 6). An admin editor follows in a later release.
+Entries are stored per index in module class `LuceneSuite.BlockedSuggestion` (installer version 6). Reports are unaffected: a blocked query still appears in Search reports.
 
 - **Exact** (`MatchMode = "exact"`): removes the query whose match key equals the entry's (`Coffee Grinder!` blocks `coffee grinder`, not `coffee grinders`).
 - **Word** (`MatchMode = "word"`): removes every query that contains the entry as whole words (`acme` blocks `acme grinder` and `grinder acme deal`, not `acmeco`).
+
+### Blocking suggestions in the admin
+
+You need Site Search → **Manage synonyms** to block or unblock a suggestion. Site Search → View can open the list read-only.
+
+- **Site Search → index → Blocked suggestions** lists the index's entries with their text, match mode and last change (UTC). From there:
+  - **Block suggestion** adds an entry. Choose **Exact query** or **Contains words**.
+  - **Delete** removes an entry, which undoes the block.
+  - The editor refuses:
+    - empty or punctuation-only text;
+    - more than 100 characters;
+    - texts with `{email}`/`{number}` (never suggested anyway);
+    - an entry that already exists with the same match mode.
+  - Letter case and punctuation are ignored, so `PLUNGER!` and `plunger` are the same entry.
+  - To change an entry, delete it and add it again.
+- **Search reports → query table → Block suggestion** (the ⃠ icon) blocks that query as an exact entry in one click.
+  - A toast confirms it; clicking again reports "already blocked".
+  - The button is disabled for the browse row and for `{email}`/`{number}` rows.
+  - The Needs attention card has no block button. Its queries mostly return no results, and suggestions already skip queries that return nothing half the time or more.
 
 ### How fast a block applies
 

@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 3 of 6 complete
+Phases: 4 of 6 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -16,7 +16,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
 | 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
 | 8.1 | Admin UI Consistency Audit | 5/5 | ✅ Complete | 2026-10-12 |
-| 9 | Suggestions | 2/3 | In progress | - |
+| 9 | Suggestions | 3/3 | ✅ Complete | 2026-10-12 |
 | 10 | Custom Activities | TBD | Not started | - |
 | 11 | Public API Audit | TBD | Not started | - |
 
@@ -60,7 +60,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 **Plans:**
 - [x] 09-01: Blocklist model (installer v6) + cached suggestion source + rate-limited GET suggest endpoint (strings only, untracked)
 - [x] 09-02: Accessible combobox script (progressive enhancement) wired into the search box
-- [ ] 09-03: Blocked-suggestions admin (listing/create/edit) + report row action
+- [x] 09-03: Blocked-suggestions admin (listing/create/delete) + one-click report "Block suggestion" action
 
 ### Phase 10: Custom Activities
 **Focus:** Kentico custom activity types — search performed (one per logical search, scrubbed text), result clicked, no results — logged only with a current contact and Kentico consent/cookie level allowing it.
@@ -101,4 +101,4 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 | v0.4 Instant Search | Public opt-in search endpoint (index + field allow-list, rate limit, searchId analytics via the JS client contract) + Algolia-InstantSearch-style JS widget library (search box, hits, refinements, pagination, stats) building on Phase 9 suggestions |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 8.1 complete)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 9 complete)*

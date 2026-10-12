@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 12 | 09-03 | Blocked suggestions admin (listing/create/delete) + one-click report Block suggestion | Pending |
 | 11 | 09-02 | Search box autocomplete (ARIA combobox script, opt-in, stylesheet) + admin right gutter (Convention 2b) | Pending |
 | 10 | 09-01 | Suggestions public API (ISuiteSuggestions, MapLuceneSuiteSuggestions, options) + endpoint behaviour; seeded history now public | Pending |
 | 9 | 08.1-05 | Rule/synonym editors: icon removes, condition blocks, error timing, inline errors; query tester empty column | Pending |
@@ -345,3 +346,38 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
      - real OS keyboard and mouse input (pane hidden);
      - whether the widget's optional "Suggestions index" dropdown can be cleared once a value is picked (needs Page Builder);
      - after closing, the status text keeps "3 suggestions available". It is not re-announced, but could be cleared.
+
+---
+
+## 12. 09-03: Blocked suggestions (v0.2)
+
+1. **Where:** http://localhost:27340/admin/site-search/indexes/4/blocked-suggestions, and Search reports → query table on the same index.
+2. **What I verified on the host** (comm_projects; host rebuilt and restarted on the new code):
+   - **Report action:** clicking Block on "colombia carlos imbachi" stored one exact entry and showed the toast "Suggestions for this index no longer include … Remove it under Blocked suggestions to undo."
+     - `/lucenesuite/suggest?q=co` dropped it at once.
+     - A second click reported "already blocked" and stored nothing.
+   - **Keyboard focus:** after Enter on the block button, focus stays on that button. This was fixed during APPLY; it first fell to `<body>`.
+   - **Listing:** a native listing with columns Text / Match / Last modified (UTC), "Block suggestion" in the header and native delete with confirmation.
+   - **Create:**
+     - "Plunger" + Contains words removed "coffee plunger" from the `co` suggestions;
+     - " !! " was refused ("Enter a text that contains at least one letter or digit");
+     - "plunger" (exact) was refused while "PLUNGER!" (exact) existed: "…already blocked in this index with the same match".
+   - **Layout:**
+     - 4 row icons on one line with 50 px rows at 1100 and 1700 px viewports, and no page overflow;
+     - at 1100 px the table scrolls inside its card, as it already did with 3 icons.
+   - **Labels:** DOM labels "Blocked text" and both match options are correct. The accessibility-tree reader shows them unnamed, as it misnamed the combobox in #11.
+   - **Cleanup:** all 3 entries were deleted through the UI and the suggestions are back to the baseline. Host counts were unchanged: SearchEvent 20, SearchDaily 3 389, Rule 0, Synonym 0, BlockedSuggestion 0.
+3. **Automated checks:**
+   - .NET 708 passed, 5 skipped. This includes DB tests for store, already-blocked, cross-index isolation, refusals, a missing index, and immediate removal from cached suggestions.
+   - Client 70/70; tsc clean.
+4. **Your decisions to confirm:**
+   - **No audit trail of who blocked what.** Kentico wrote no event-log entry for blocklist (or synonym/rule) changes despite `LogEvents = true`, so AC-5 failed and is recorded in KNOWN-LIMITATIONS. Do you want explicit event-log entries (small change: create, delete and report block log the text, index and user)? Note that the host's event log holds only 1000 rows and the leftover XpSearch macro errors fill it in about two days.
+   - **No edit page:** delete and re-add instead.
+   - **No confirmation** on the one-click report block; it is undone from the listing.
+   - **Not in Needs attention.**
+   - **No "working" state** while a block request runs (repeat clicks are ignored) — see KNOWN-LIMITATIONS.
+   - **Not observed:**
+     - an empty Save shows no "required" message when driven by a DOM click with the pane hidden (the same on the native Synonyms create page; nothing is stored);
+     - real mouse input (pane hidden);
+     - a View-only role (read-only listing, disabled report button — code and tests only).
+

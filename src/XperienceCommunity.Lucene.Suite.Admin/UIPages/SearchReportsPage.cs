@@ -1,5 +1,6 @@
 using System.Globalization;
 
+using CMS.DataEngine;
 using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
@@ -9,11 +10,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using XperienceCommunity.Lucene.Suite.Admin;
+using XperienceCommunity.Lucene.Suite.Admin.Suggestions;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Reports;
 using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 using XperienceCommunity.Lucene.Suite.Search;
+using XperienceCommunity.Lucene.Suite.Suggestions;
 
 [assembly: UIPage(
     parentType: typeof(SearchTuningSectionPage),
@@ -77,6 +80,43 @@ public sealed class SearchReportsPage(
     {
         string indexName = (indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.")).IndexName;
         return Task.FromResult(ResponseFrom(BuildQueries(serviceProvider.GetRequiredService<SearchReportService>(), indexName, arguments)));
+    }
+
+    /// <summary>Keeps a reported query out of this index's suggestions (exact match); the text is re-validated, the index never comes from the client.</summary>
+    [PageCommand(Permission = SiteSearchPermissions.MANAGE_SYNONYMS)]
+    public Task<ICommandResponse<BlockSuggestionResult>> BlockSuggestion(BlockSuggestionArguments arguments)
+    {
+        var result = Block(serviceProvider.GetRequiredService<IInfoProvider<BlockedSuggestionInfo>>(), indexManager.GetIndex(IndexIdentifier)?.IndexName, arguments.Query);
+        var response = ResponseFrom(result);
+        // Errors are shown once, in the page's alert region; success is a toast.
+        return Task.FromResult(result.Error is null ? response.AddSuccessMessage(result.Message!) : response);
+    }
+
+    /// <summary>Adds an exact blocklist entry unless one exists; a null <paramref name="indexName"/> means the index is gone.</summary>
+    internal static BlockSuggestionResult Block(IInfoProvider<BlockedSuggestionInfo> blockedSuggestions, string? indexName, string? query)
+    {
+        if (string.IsNullOrEmpty(indexName))
+        {
+            return new BlockSuggestionResult { Error = BlockedSuggestionValidation.IndexMissingMessage };
+        }
+
+        var (entry, error) = BlockedSuggestionValidation.Validate(query, BlockedSuggestionInfo.MatchModeExact);
+        if (entry is null)
+        {
+            return new BlockSuggestionResult { Error = error };
+        }
+
+        if (BlockedSuggestionValidation.Exists(blockedSuggestions, indexName, entry.MatchKey, entry.MatchMode))
+        {
+            return new BlockSuggestionResult { AlreadyBlocked = true, Message = $"\"{entry.Text}\" is already blocked." };
+        }
+
+        BlockedSuggestionValidation.Add(blockedSuggestions, indexName, entry);
+        return new BlockSuggestionResult
+        {
+            Blocked = true,
+            Message = $"Suggestions for this index no longer include \"{entry.Text}\". Remove it under Blocked suggestions to undo.",
+        };
     }
 
     /// <summary>Maps one page of <see cref="SearchReportService.Queries"/> to the client shape.</summary>
@@ -244,6 +284,29 @@ public sealed class SearchReportsClientProperties : TemplateClientProperties
 
     /// <summary>Admin-root-relative path of this index's Create synonym page.</summary>
     public string SynonymCreatePath { get; set; } = string.Empty;
+}
+
+/// <summary>Query text to keep out of the index's suggestions.</summary>
+public sealed class BlockSuggestionArguments
+{
+    /// <summary>The reported query text; validated again on the server.</summary>
+    public string? Query { get; set; }
+}
+
+/// <summary>Outcome of <see cref="SearchReportsPage.BlockSuggestion"/>; <see cref="Error"/> is set when nothing was stored for a reason other than an existing entry.</summary>
+public sealed class BlockSuggestionResult
+{
+    /// <summary>A new entry was stored.</summary>
+    public bool Blocked { get; set; }
+
+    /// <summary>An exact entry for the text already existed; nothing was stored.</summary>
+    public bool AlreadyBlocked { get; set; }
+
+    /// <summary>Why the text was not blocked (validation or a missing index).</summary>
+    public string? Error { get; set; }
+
+    /// <summary>Success message, also sent as the command's message.</summary>
+    public string? Message { get; set; }
 }
 
 /// <summary>Requested query-table page.</summary>

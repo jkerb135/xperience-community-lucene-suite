@@ -23,7 +23,7 @@ import {
 import { adminHref, latestRequest } from "../query-tester/state.ts";
 import { give, type HandoffTarget } from "./handoff.ts";
 import { cardHeadline, visuallyHidden } from "./dashboard.tsx";
-import { DASH, formatCount, formatPosition, formatRate, percentileLabel, type DayRange, type Percentile } from "./report.ts";
+import { DASH, blockSuggestionReason, formatCount, formatPosition, formatRate, percentileLabel, type DayRange, type Percentile } from "./report.ts";
 
 export const SORTS = [
   { id: "Searches", label: "Top", title: "Most searched queries" },
@@ -63,6 +63,7 @@ export interface QueryTableProps {
   readonly queryTesterPath: string;
   readonly ruleCreatePath: string;
   readonly synonymCreatePath: string;
+  readonly onBlock: (query: string) => void;
 }
 
 const column = (name: string, caption: string, maxWidth = 16, minWidth = 8): TableColumn => ({
@@ -85,8 +86,8 @@ const COLUMNS = [
   column("ctr", "CTR"),
   column("position", "Avg. pos."),
   column("p95", "p95"),
-  // Three icon buttons in one line, as in native listings.
-  column("actions", "Actions", 11, 11),
+  // Four icon buttons in one line, as in native listings.
+  column("actions", "Actions", 15, 15),
 ];
 
 export const BROWSE = "(browse – no query text)";
@@ -109,17 +110,20 @@ export interface RowActionsProps {
   readonly queryTesterPath?: string;
   readonly ruleCreatePath: string;
   readonly synonymCreatePath: string;
+  /** Shows the Block suggestion button (query table only). */
+  readonly onBlock?: (query: string) => void;
 }
 
 /**
  * Listing-style row actions: icon-only buttons in one line. Each has a full accessible name (the npm 31.9.1 ActionCell
  * announces every icon as "button"). A disabled button cannot take focus, so its reason is also given as hidden text.
  */
-export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTesterPath, ruleCreatePath, synonymCreatePath }: RowActionsProps) => {
+export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTesterPath, ruleCreatePath, synonymCreatePath, onBlock }: RowActionsProps) => {
   const query = row.queryText ?? "";
   const blocked = blockedReason(row);
   const ruleReason = blocked ?? (canManageRules ? null : "Requires Site Search → Manage rules");
   const synonymReason = blocked ?? (canManageSynonyms ? null : "Requires Site Search → Manage synonyms");
+  const blockReason = onBlock ? blockSuggestionReason(row, canManageSynonyms) : null;
   const name = row.isBrowse ? "the browse row" : `"${query}"`;
   return (
     <div style={{ display: "flex", flexWrap: "nowrap", alignItems: "center", gap: Spacing.XXS }}>
@@ -154,9 +158,27 @@ export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTester
         disabled={synonymReason !== null}
         onClick={() => openTarget("synonymCreate", synonymCreatePath, query)}
       />
-      {(ruleReason || synonymReason) && (
+      {onBlock && (
+        <Button
+          icon="xp-ban-sign"
+          size={ButtonSize.S}
+          color={ButtonColor.Quinary}
+          borderless
+          aria-label={`Block ${name} from suggestions`}
+          title={blockReason ?? "Block suggestion"}
+          disabled={blockReason !== null}
+          onClick={() => onBlock(query)}
+        />
+      )}
+      {(ruleReason || synonymReason || blockReason) && (
         <span style={visuallyHidden}>
-          {[ruleReason && `Create rule unavailable: ${ruleReason}.`, synonymReason && `Add synonym unavailable: ${synonymReason}.`].filter(Boolean).join(" ")}
+          {[
+            ruleReason && `Create rule unavailable: ${ruleReason}.`,
+            synonymReason && `Add synonym unavailable: ${synonymReason}.`,
+            blockReason && `Block suggestion unavailable: ${blockReason}.`,
+          ]
+            .filter(Boolean)
+            .join(" ")}
         </span>
       )}
     </div>
@@ -204,6 +226,7 @@ export const QueryTable = (props: QueryTableProps) => {
         queryTesterPath={props.queryTesterPath}
         ruleCreatePath={props.ruleCreatePath}
         synonymCreatePath={props.synonymCreatePath}
+        onBlock={props.onBlock}
       />
     ),
   });
@@ -222,7 +245,7 @@ export const QueryTable = (props: QueryTableProps) => {
     ],
   })),
   // actionsFor only reads the props below.
-  [result, bucketBounds, props.canManageRules, props.canManageSynonyms, props.queryTesterPath, props.ruleCreatePath, props.synonymCreatePath]);
+  [result, bucketBounds, props.canManageRules, props.canManageSynonyms, props.queryTesterPath, props.ruleCreatePath, props.synonymCreatePath, props.onBlock]);
   const totalPages = result ? Math.max(1, Math.ceil(result.totalCount / result.pageSize)) : 1;
 
   return (

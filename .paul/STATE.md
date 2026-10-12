@@ -5,26 +5,26 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 9 Suggestions
+**Current focus:** v0.2 Measure — Phase 10 Custom Activities
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 9 of 10 (Suggestions) — Planning
-Plan: 09-02 complete; next 09-03
-Status: Ready to plan 09-03
-Last activity: 2026-10-12 — Unified 09-02
+Phase: 10 of 11 (Custom Activities) — Not started
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-12 — Phase 9 complete (09-03 unified), transitioned to Phase 10
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [█████░░░░░] 50% (3 of 6 phases)
+- v0.2 Measure: [██████░░░░] 67% (4 of 6 phases)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready to plan 09-03]
+  ✓        ✓        ✓     [Loop complete — ready to plan Phase 10]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,10 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 09-03 unified, Phase 9 complete: blocklist admin + one-click report block shipped; AC-5 (audit trail) failed — Kentico LogEvents writes nothing for Suite module classes → KNOWN-LIMITATIONS, decision in APPROVAL-CHECKS #12 (applies to rules/synonyms too); focus-loss lesson: never make Table ComponentCell rows depend on request state | Phase 9 | Next: /paul:plan Phase 10 |
+| 2026-10-12: 09-03 applied: native Blocked suggestions listing/create/delete + one-click report BlockSuggestion command (toast, errors in NotificationBar only); host E2E proven (block → suggest drops → delete restores; duplicate/punctuation refused; counts unchanged). Fixed in APPLY: pressed block button lost focus to body (in-flight `blocking` state re-rendered ComponentCells) → ref guard, no disabled state. AC-5 failed: LogEvents writes no event-log rows for custom module classes in 31.9.1 → KNOWN-LIMITATIONS + APPROVAL-CHECKS #12 decision (explicit IEventLogService logging?). Implementation delegated, reviewed, re-verified | Phase 9 | UNIFY next |
+| 2026-10-12: Enterprise audit on 09-03-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 9 | Create page own index-exists ValidatePage; block command failure path (missing index → error, NotificationBar, in-flight disable); undo hint in toast; event log proves who blocked what (AC-5); MatchKey ≤ 100; DB tests clean up |
+| 2026-10-12: 09-03 planned (user choices): report "Block suggestion" = one-click page command on SearchReportsPage (Manage synonyms, exact mode, Kentico toast, no confirmation) — supersedes the Phase 9 "reuse the 08-02 handoff" choice (a native text input cannot read the handoff); blocklist admin = native listing + create + delete, no edit page; shared validator (MatchKey non-empty, ≤100, no placeholders, no duplicate per index+key+mode); button only in the query table (Needs attention rows are already excluded from suggestions); APPROVAL-CHECKS #12 | Phase 9 | 09-03 created |
 | 2026-10-12: 09-02 unified: lucene-suite-suggest.js (ARIA 1.2 combobox, CSP-safe, textContent only, 429 back-off) + opt-in search box (single-index fallback, golden-proven byte-identical off path) live on /site-search (only submitted searches tracked); Convention 2b right gutter 104 px; implementation delegated and re-verified | Phase 9 | 09-03 blocklist admin next |
 | 2026-10-12: User: page content ran into the scrollbar on custom templates → Convention 2b right gutter = native 104 px (measured: native listing and edit form, 669/932/1269 px content width); shared Client/src/layout.ts pageStyle on QueryTesterTemplate + SearchReportsTemplate (now 104 px like native at both widths); rule added to the design-screen skill enterprise.md | Phase 9 (09-02 apply) | All future custom admin pages |
 | 2026-10-12: Enterprise audit on 09-02-PLAN.md. Applied 2 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 9 | Unique ids per request (counter) + single asset emission; golden pre-change HTML for byte-identical test; CSP-safe (no inline script/style); 30 s back-off after 429; no request > 100 chars |
@@ -161,6 +165,7 @@ See PROJECT.md Key Decisions.
 | 03-07 custom-data `<pre>` in the normal query tester uses the brand-purple token | 05-01 APPLY | S | KNOWN-LIMITATIONS; next change to the normal tester view |
 | Widgets: per-process rate limit, forgeable events, unfingerprinted JS asset; no NuGet metadata on either package | 06-01 audit / APPLY | S–M | KNOWN-LIMITATIONS; 06-02 asset versioning; release phase |
 | Widget strings English-only; search not usable inside Kentico preview (signed URLs); host facet values are display names (old code-name filter URLs no longer match) | v0.1 review / 06-04 | S | KNOWN-LIMITATIONS |
+| No audit trail for Suite admin changes (rules, synonyms, blocklist): Kentico LogEvents writes no event-log rows for Suite module classes in 31.9.1; host log capped at 1000 rows | 09-03 APPLY | S | APPROVAL-CHECKS #12 decision; KNOWN-LIMITATIONS |
 | 02-04 audit deferral: query crossing the threshold after part of its history was folded into (other); rollup lock contention proven within one process only | 02-04 audit / UNIFY | S | KNOWN-LIMITATIONS; v0.2 reports / real web farm |
 
 ### Deviations
@@ -183,7 +188,7 @@ Plans 01-02, 01-03, 02-01, 02-02, 02-03 and 02-04: all required skills invoked.
 | /xbyk-admin-ui:design-screen | ✓ | PLAN and APPLY (before markup) |
 | Admin UI design validation | ✓ | ~790/1440 px, focus, tokens, states; listing-row keyboard pass not run (empty listing) |
 
-Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01, 09-02: all required skills invoked.
+Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-01, 07-02, 08-01, 08.1-01, 08.1-02, 08.1-03, 08.1-05, 09-01, 09-02, 09-03: all required skills invoked.
 
 #### Skill Audit (Phase 8, plan 08-02)
 | Expected | Invoked | Notes |
@@ -202,6 +207,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 9: APPROVAL-CHECKS #12 (blocklist admin + report action; audit-trail decision: no event log for Suite admin changes) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #11 (autocomplete + gutter; real keyboard and widget dropdown clearing not observed) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #10 (suggestions public API + endpoint; seeded history now public on host) pending | Milestone review | Milestone review |
 | Phase 8.1: APPROVAL-CHECKS #9 (editors: error timing, 14 px condition headings, icon removes; read-only/failed-save not observed) pending | Milestone review | Milestone review |
@@ -219,9 +225,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 09-02 unified
-Next action: /paul:plan 09-03 (blocked-suggestions admin + report "Block suggestion" action)
-Resume file: .paul/phases/09-suggestions/09-02-SUMMARY.md
+Stopped at: Phase 9 complete, ready to plan Phase 10
+Next action: /paul:plan for Phase 10 (Custom Activities); also answer APPROVAL-CHECKS #12 audit-trail question when convenient
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

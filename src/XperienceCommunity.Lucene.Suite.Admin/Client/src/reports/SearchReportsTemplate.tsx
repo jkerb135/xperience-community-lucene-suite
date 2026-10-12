@@ -93,6 +93,13 @@ interface SearchReportsProps {
   readonly synonymCreatePath: string;
 }
 
+interface BlockSuggestionResult {
+  readonly blocked: boolean;
+  readonly alreadyBlocked: boolean;
+  readonly error?: string | null;
+  readonly message?: string | null;
+}
+
 interface ReportResult {
   readonly error?: string | null;
   readonly current: KpiTotals;
@@ -205,6 +212,9 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
   const [trendPage, setTrendPage] = useState(1);
   const [latencyTable, setLatencyTable] = useState(false);
   const [panel, setPanel] = useState<"breakdown" | "latency">();
+  // A ref, not state: re-rendering the table while a request runs would remount the pressed button and drop focus.
+  const blocking = useRef(false);
+  const [blockError, setBlockError] = useState<string>();
   const breakdownButton = useRef<HTMLButtonElement>(null);
   const latencyButton = useRef<HTMLButtonElement>(null);
 
@@ -224,6 +234,26 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
       }
     },
     [executeCommand, request],
+  );
+
+  // Kentico shows a successful command's message as a toast; a rejected or failed command is shown in the page's alert region.
+  const block = useCallback(
+    async (query: string) => {
+      if (blocking.current) {
+        return;
+      }
+      blocking.current = true;
+      setBlockError(undefined);
+      let value: BlockSuggestionResult | undefined;
+      try {
+        value = await executeCommand<BlockSuggestionResult, { query: string }>("BlockSuggestion", { query });
+      } catch {
+        value = undefined;
+      }
+      blocking.current = false;
+      setBlockError(value === undefined ? `"${query}" could not be blocked. Try again.` : (value.error ?? undefined));
+    },
+    [executeCommand],
   );
 
   useEffect(() => {
@@ -337,6 +367,7 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
         )}
         {failed && <NotificationBarAlert>The report could not be loaded. The last loaded report is shown; choose the period again to retry.</NotificationBarAlert>}
         {error && <NotificationBarAlert>{error}</NotificationBarAlert>}
+        {blockError && <NotificationBarAlert>{blockError}</NotificationBarAlert>}
         {result === undefined && !failed && !error && <Spinner />}
         {result !== undefined && current !== undefined && facts && (
           <>
@@ -490,6 +521,7 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
                   queryTesterPath={props.queryTesterPath}
                   ruleCreatePath={props.ruleCreatePath}
                   synonymCreatePath={props.synonymCreatePath}
+                  onBlock={block}
                 />
                 <SidePanel
                   headline={`${metric.caption}: period breakdown`}

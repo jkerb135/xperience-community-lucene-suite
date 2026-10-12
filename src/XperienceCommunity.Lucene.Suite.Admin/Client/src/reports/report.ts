@@ -387,3 +387,13 @@ export const presetForLength = (range: DayRange, preset: string | undefined, max
   const match = PRESETS.find((p) => p.id === preset);
   return match && Math.min(match.days, maxDays) === lengthOf(range) ? match.id : null;
 };
+
+/** Why a query row's Block suggestion button is unavailable, or null. */
+export const blockSuggestionReason = (row: { readonly isBrowse: boolean; readonly hasPlaceholder: boolean }, canManageSynonyms: boolean): string | null =>
+  row.isBrowse
+    ? "The browse row has no query text"
+    : row.hasPlaceholder
+      ? "Contains a removed value; it is never suggested"
+      : canManageSynonyms
+        ? null
+        : "Requires Site Search → Manage synonyms";

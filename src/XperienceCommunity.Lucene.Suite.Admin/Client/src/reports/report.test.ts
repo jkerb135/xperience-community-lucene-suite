@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   addDays,
+  blockSuggestionReason,
   bucketLabels,
   countDelta,
   dayLabel,
@@ -90,4 +91,14 @@ test("ticks cover the maximum with a few round steps", () => {
   assert.deepEqual(niceTicks(1234), [0, 500, 1000, 1500]);
   assert.equal(labelEvery(365), 46);
   assert.equal(labelEvery(7), 1);
+});
+
+test("block suggestion is unavailable for the browse row, placeholder rows and without Manage synonyms", () => {
+  const row = { isBrowse: false, hasPlaceholder: false };
+  assert.equal(blockSuggestionReason(row, true), null);
+  assert.equal(blockSuggestionReason(row, false), "Requires Site Search → Manage synonyms");
+  assert.equal(blockSuggestionReason({ ...row, isBrowse: true }, true), "The browse row has no query text");
+  assert.equal(blockSuggestionReason({ ...row, hasPlaceholder: true }, true), "Contains a removed value; it is never suggested");
+  // The row's own reason wins over the permission.
+  assert.equal(blockSuggestionReason({ ...row, hasPlaceholder: true }, false), "Contains a removed value; it is never suggested");
 });
