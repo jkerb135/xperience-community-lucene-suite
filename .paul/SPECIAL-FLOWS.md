@@ -16,6 +16,7 @@
 | Page Builder widgets (search box, results) | /kentico-web-development:page-builder-widgets | optional | Live-site widgets | |
 | Custom admin page design | /xbyk-admin-ui:design-screen | required | Any new or reworked custom admin page, side panel or dialog (client template or C# page layout) | Invoke during PLAN (screen classification, template + component map recorded in the plan) and again at the start of APPLY before markup. Uses `KENTICO_ADMIN_DS` (kit clone below) |
 | Admin UI design validation | Admin design kit (asset below) + browser pane | required | Any admin UI change (client templates, C# page configuration, listings, callouts, icons) | Before markup: follow the /xbyk-admin-ui:design-screen output, then confirm the export + props in `@kentico/xperience-admin-components` `dist/entry.d.ts` (the npm package can lag the kit); copy kit source only as a recorded last resort. Tokens only (`--color-*` at runtime; no hard-coded colour, font or spacing). Kit loading / empty / error states. Accessibility: labels, programmatic headings, focus moves and returns. Visual check in the browser pane at ~790 px and 1440 px content width against `previews/*.webp`. The design-validation skill script does not apply (authenticated admin pages) |
+| Documentation (GitHub Pages) | /update-docs | required | Every phase completion: run during UNIFY, before closing the phase | Updates `docs/` for user-visible changes (or records "no doc impact"), commits docs only and pushes so the Pages workflow deploys |
 
 **Priority Legend:**
 - `required` - Gap documented if not invoked during UNIFY
@@ -57,6 +58,7 @@ During UNIFY, confirm:
 | 2026-10-08 | Initial creation | Project setup |
 | 2026-10-09 | Admin UI design validation made required | Plan 03-02: design review found state bugs and kit drift in the query tester |
 | 2026-10-10 | /xbyk-admin-ui:design-screen required for custom admin pages; kit path fixed to `KENTICO_ADMIN_DS` | User request; old RiderProjects kit path no longer exists |
+| 2026-10-12 | /update-docs required at every phase completion (UNIFY) | User request: docs updated and shipped per phase |
 
 ---
 

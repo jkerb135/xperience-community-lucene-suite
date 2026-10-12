@@ -1,0 +1,12 @@
+title: Lucene Suite for Xperience by Kentico
+description: Search tuning, analytics and ready-made widgets on top of Kentico.Xperience.Lucene
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+url: https://jkerb135.github.io
+baseurl: /xperience-community-lucene-suite
+search_enabled: true
+heading_anchors: true
+aux_links:
+  GitHub:
+    - https://github.com/jkerb135/xperience-community-lucene-suite

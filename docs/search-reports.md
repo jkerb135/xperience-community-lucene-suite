@@ -1,3 +1,8 @@
+---
+title: Search reports
+nav_order: 70
+---
+
 # Search reports
 
 How the Site Search report numbers are defined. All of them are computed from the daily rollup table `LuceneSuite_SearchDaily`, never from raw events, so a report shows only what the rollup kept.

@@ -1,3 +1,8 @@
+---
+title: Search activities
+nav_order: 60
+---
+
 # Search activities for Kentico contacts
 
 The Suite can log what tracked contacts search for and click as Kentico **custom activities**. Marketers see them in a contact's activity log and can use them in contact-group conditions and personalization.

@@ -1,3 +1,8 @@
+---
+title: Query suggestions
+nav_order: 50
+---
+
 # Query suggestions
 
 As-you-type suggestions built from what visitors already search successfully on an index. They steer visitors to queries that work. A per-index blocklist keeps unwanted texts out of the suggestions; reports are unaffected.

@@ -1,3 +1,8 @@
+---
+title: Analytics client contract
+nav_order: 80
+---
+
 # Analytics client contract
 
 How a custom search UI (or your own endpoint) feeds Lucene Suite analytics. The browser decides where one logical search ends and the next begins, by minting a `searchId`. The server stores one raw row per answered request and keeps no state between requests. The rollup then merges rows into logical searches. This works on any web farm, and nothing about the visitor is stored.
