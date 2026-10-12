@@ -112,7 +112,7 @@ Thresholds for [Search insights](insights); they apply to every index of the sit
 | `LuceneSuite:Analytics:Insights:RelevanceMissMaxCtr` | 0.1 | 0 – 1 | A query that is not a content gap and whose click-through rate is at most this is a relevance miss |
 | `LuceneSuite:Analytics:Insights:BuriedMinClickedSearches` | 5 | ≥ 1 | Fewest clicked searches before a buried answer is reported |
 | `LuceneSuite:Analytics:Insights:BuriedMinAvgPosition` | 5 | > 1 | A query whose average click position is at least this has a buried answer |
-| `LuceneSuite:Analytics:Insights:SlowMinP95Ms` | 1000 | ≥ 1 | A query whose 95th percentile latency (ms) is at least this is slow |
+| `LuceneSuite:Analytics:Insights:SlowMinP95Ms` | 1000 | ≥ 1 | A query is slow when its whole 95th-percentile latency range (latency is stored in ranges such as 500 ms–1 s) is at or above this many ms |
 | `LuceneSuite:Analytics:Insights:RegressionMinPoints` | 0.10 | 0 – 1 | A rise of the no-result rate, or a fall of the click-through rate, of at least this (absolute) against the previous period is a regression |
 | `LuceneSuite:Analytics:Insights:MinAffected` | 5 | ≥ 1 | Fewest affected searches a finding needs, against small-sample noise |
 | `LuceneSuite:Analytics:Insights:MaxQueries` | 1000 | 1 – 10 000 | Most queries evaluated per call, the most searched first |

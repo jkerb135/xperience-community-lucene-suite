@@ -9,6 +9,30 @@ Reports show what visitors searched for. Insights tell you **what to fix first**
 
 Insights use the same data and the same date range as the [search reports](search-reports), so their numbers always match the query table.
 
+## Where you see them
+
+Open **Site search → an index → Search reports**. The **Fix these first** card lists the five findings that affect the most searches. Each shows:
+
+- the kind of finding;
+- the query;
+- one line with the numbers behind it;
+- any fixes already in place;
+- buttons for the fixes that suit it.
+
+| Finding | Buttons |
+|---|---|
+| Content gap ("No results") | Add synonym · Create rule · Open in query tester |
+| Relevance miss ("Results not clicked") | Create rule · Open in query tester · Block suggestion |
+| Buried answer ("Answer buried") | Create rule · Open in query tester |
+| Slow query ("Slow") | Open in query tester |
+| Regression ("Got worse") | Open in query tester · Create rule · Add synonym |
+
+The buttons work like the ones in the query table. *Add synonym* and *Create rule* open the editor with the query already filled in; nothing is saved until you save it there. A button you lack the permission for is shown disabled, with the reason.
+
+**Show all insights** opens a side panel with every finding, grouped by kind.
+
+When no query reaches the thresholds, for example on a small site or a short date range, the card shows the queries with the most searches without results instead, as it did before insights existed.
+
 ## What insights look for
 
 A query is checked only when it is shown by name in the reports, and only when it had at least `MinSearches` searches in the selected range (default 20). Browsing without a search term and the "(other)" row are never checked.
@@ -18,8 +42,8 @@ A query is checked only when it is shown by name in the reports, and only when i
 | **Content gap** | Visitors search for something the site doesn't seem to have. | At least 30 % of the searches found nothing (`ContentGapMinNoResultRate` 0.3). | The searches that found nothing. | Add a synonym that maps the visitors' words to yours, or create the missing content. |
 | **Relevance miss** | Searches find results, but visitors don't click any of them. | Not a content gap, and 10 % or fewer of the searches got a click (`RelevanceMissMaxCtr` 0.1). | The searches with results but no click. | Pin the page visitors are looking for to the top, or boost the right content with a rule. |
 | **Buried answer** | Visitors find what they want, but only far down the list. | At least 5 searches with a click (`BuriedMinClickedSearches`), and the average clicked position is 5 or lower down (`BuriedMinAvgPosition` 5). | The searches with a click. | Pin the most-clicked result, or boost it with a rule. |
-| **Slow query** | At least 5 % of these searches take too long. | The 95th-percentile response time is 1 second or more (`SlowMinP95Ms` 1000). | All searches of the query. | Ask a developer to look at the query; very broad queries are often the cause. |
-| **Regression** | The query got worse than in the period before. | Compared with the previous period of the same length: the share of searches that found nothing rose by 10 points or more, or the share that got a click fell by 10 points or more (`RegressionMinPoints` 0.10). | All searches of the query in the range. | Check what changed: content that was removed or renamed, or a rule or synonym that was edited. |
+| **Slow query** | At least 5 % of these searches take too long. | The 95th-percentile response time is certainly 1 second or more (`SlowMinP95Ms` 1000). Response times are stored in ranges (for example 500 ms–1 s), so a query counts as slow only when its whole range is at or above the setting. | The searches that took at least that long. | Ask a developer to look at the query; very broad queries are often the cause. |
+| **Regression** | The query got worse than in the period before. | Compared with the previous period of the same length: the share of searches that found nothing rose by 10 points or more, or the share that got a click fell by 10 points or more (`RegressionMinPoints` 0.10). | The searches lost to the change: searches in the range × the change (120 searches and a 15-point drop in clicks = 18). | Check what changed: content that was removed or renamed, or a rule or synonym that was edited. |
 
 A query can have several findings at once, for example a content gap that is also slow. It is never both a content gap and a relevance miss: when many searches find nothing, that is the problem to fix first.
 
