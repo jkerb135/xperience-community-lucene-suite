@@ -16,9 +16,13 @@ public interface ISearchInteractionLogger
     /// <param name="itemGuid">Item GUID of the clicked hit.</param>
     /// <param name="position">1-based absolute position of the hit: (page − 1) × pageSize + index on the page.</param>
     /// <param name="eventId">Stable id of this event so a retried call is counted once; minted when null.</param>
+    /// <param name="queryText">Query of the result list, as the client sent it. Untrusted: scrubbed and used only for the contact's
+    /// "Search result clicked" activity, never stored in analytics.</param>
+    /// <param name="resultTitle">Title of the clicked result, as the client sent it. Untrusted: used only as display text of the
+    /// contact's "Search result clicked" activity, never stored in analytics.</param>
     /// <exception cref="ArgumentException">When <paramref name="searchId"/>, <paramref name="itemGuid"/> or <paramref name="eventId"/> is an empty GUID.</exception>
     /// <exception cref="ArgumentOutOfRangeException">When <paramref name="sequence"/> is below 1 or <paramref name="position"/> is outside 1–1000.</exception>
-    void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null);
+    void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null);
 
     /// <summary>Logs a conversion (goal completed) attributed to a search result.</summary>
     /// <param name="searchId">Search id of the result list the visitor came from.</param>

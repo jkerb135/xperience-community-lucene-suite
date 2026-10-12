@@ -17,6 +17,8 @@
  * @property {string} itemGuid
  * @property {number} [position] 1-based absolute position; required for clicks.
  * @property {string} [eventId] Resend the returned id when retrying.
+ * @property {string} [query] Clicks only: query of the result list, at most 100 characters. Untrusted; used only for the contact activity.
+ * @property {string} [title] Clicks only: text of the clicked result, at most 100 characters. Untrusted; used only for the contact activity.
  */
 
 /** @param {string} q */

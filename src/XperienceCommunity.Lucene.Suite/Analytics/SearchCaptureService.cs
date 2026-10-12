@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 
+using XperienceCommunity.Lucene.Suite.Activities;
 using XperienceCommunity.Lucene.Suite.Search;
 
 namespace XperienceCommunity.Lucene.Suite.Analytics;
@@ -10,6 +11,7 @@ internal sealed class SearchCaptureService(
     SearchEventQueue queue,
     SearchSessionCookie sessionCookie,
     AnalyticsRequestFilter requestFilter,
+    SearchActivityLogger activityLogger,
     TimeProvider timeProvider,
     ILogger<SearchCaptureService> logger) : ISuiteSearchService
 {
@@ -41,13 +43,14 @@ internal sealed class SearchCaptureService(
         }
 
         bool minted = request.SearchId is null;
+        string query = QueryScrubber.Normalize(request.Query);
         queue.Enqueue(new SearchEvent(
             response.SearchId,
             minted ? 1 : request.Sequence ?? 1,
             sessionCookie.GetSessionId(),
             timeProvider.GetUtcNow().UtcDateTime,
             Truncate(request.IndexName, SearchEventInfo.IndexNameMaxLength),
-            QueryScrubber.Normalize(request.Query),
+            query,
             request.Page,
             request.PageSize,
             request.Facets.Values.Sum(values => values.Count),
@@ -55,6 +58,10 @@ internal sealed class SearchCaptureService(
             (int)Math.Min(int.MaxValue, Math.Round(response.Elapsed.TotalMilliseconds)),
             minted || request.IsSubmit,
             minted ? SearchEventOrigin.Server : SearchEventOrigin.Client));
+        if (minted || request.IsSubmit)
+        {
+            activityLogger.LogSearch(request.IndexName, query, response.TotalHits);
+        }
     }
 
     private static string Truncate(string value, int maxLength) => value.Length > maxLength ? value[..maxLength] : value;

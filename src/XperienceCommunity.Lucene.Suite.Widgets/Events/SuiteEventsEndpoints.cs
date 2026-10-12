@@ -17,6 +17,9 @@ public static class SuiteEventsEndpoints
     /// <summary>Largest accepted event body in bytes.</summary>
     public const int MaxBodyBytes = 1024;
 
+    /// <summary>Longest click <c>query</c> or <c>title</c> passed on; longer values are dropped.</summary>
+    internal const int MaxClickTextLength = 100;
+
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
     /// <summary>
@@ -58,7 +61,7 @@ public static class SuiteEventsEndpoints
             switch (e?.Type)
             {
                 case "click" when e.Position is { } position:
-                    logger.LogClick(e.SearchId, e.Sequence, e.ItemGuid, position, e.EventId);
+                    logger.LogClick(e.SearchId, e.Sequence, e.ItemGuid, position, e.EventId, ClickText(e.Query), ClickText(e.Title));
                     break;
                 case "conversion":
                     logger.LogConversion(e.SearchId, e.Sequence, e.ItemGuid, e.Position, e.EventId);
@@ -94,9 +97,23 @@ public static class SuiteEventsEndpoints
         return buffer.AsMemory(0, length);
     }
 
+    /// <summary>The optional v2 click text: a string of at most <see cref="MaxClickTextLength"/> characters, else null (never a 400).</summary>
+    private static string? ClickText(JsonElement? value)
+    {
+        try
+        {
+            return value is { ValueKind: JsonValueKind.String } element && element.GetString() is { Length: > 0 and <= MaxClickTextLength } text ? text : null;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
     private static IResult Invalid() => Results.Text("Invalid event.", statusCode: StatusCodes.Status400BadRequest);
 
-    private sealed record SuiteEvent(string? Type, Guid SearchId, int Sequence, Guid ItemGuid, int? Position, Guid? EventId);
+    // Query and Title are JsonElements so a wrongly typed optional field is dropped instead of failing the whole event.
+    private sealed record SuiteEvent(string? Type, Guid SearchId, int Sequence, Guid ItemGuid, int? Position, Guid? EventId, JsonElement? Query, JsonElement? Title);
 }
 
 /// <summary>The path <see cref="SuiteEventsEndpoints.MapLuceneSuiteEvents"/> mapped, without PathBase; null until it is called.</summary>

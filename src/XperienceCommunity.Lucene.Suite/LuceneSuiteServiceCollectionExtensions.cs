@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
+using XperienceCommunity.Lucene.Suite.Activities;
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Analytics.Reports;
 using XperienceCommunity.Lucene.Suite.Analytics.Rollup;
@@ -34,6 +35,7 @@ public static class LuceneSuiteServiceCollectionExtensions
         services.TryAddSingleton<SearchSessionCookie>();
         services.TryAddSingleton<SearchEventQueue>();
         services.TryAddSingleton<AnalyticsRequestFilter>();
+        services.TryAddSingleton(SearchActivityLogger.Create);
         services.TryAddSingleton<ISearchInteractionLogger, SearchInteractionLogger>();
         services.TryAddSingleton<AnalyticsModuleInstaller>();
         services.TryAddSingleton<ISuiteSearchService>(provider => ActivatorUtilities.CreateInstance<SearchCaptureService>(

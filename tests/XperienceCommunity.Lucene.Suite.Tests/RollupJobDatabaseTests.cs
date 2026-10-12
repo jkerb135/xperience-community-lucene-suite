@@ -252,6 +252,7 @@ internal static class RollupDb
         new AnalyticsModuleInstaller(
             services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
             services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            services.GetRequiredService<IInfoProvider<CMS.Activities.ActivityTypeInfo>>(),
             NullLogger<AnalyticsModuleInstaller>.Instance).Install();
         Execute(
             $"""

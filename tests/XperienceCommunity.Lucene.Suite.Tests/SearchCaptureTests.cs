@@ -315,7 +315,7 @@ public sealed class SearchCaptureTests
             Queue = new SearchEventQueue(options);
             Cookie = new SearchSessionCookie(Accessor, time);
             service = new SearchCaptureService(
-                new FakeInner(indexDocumentCount, innerFailure), Queue, Cookie, new AnalyticsRequestFilter(Accessor, options), time, NullLogger<SearchCaptureService>.Instance);
+                new FakeInner(indexDocumentCount, innerFailure), Queue, Cookie, new AnalyticsRequestFilter(Accessor, options), SearchActivityLoggerTests.CreateLogger(Accessor), time, NullLogger<SearchCaptureService>.Instance);
         }
 
         public SuiteSearchOptions Options { get; }

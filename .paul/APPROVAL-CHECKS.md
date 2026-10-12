@@ -10,6 +10,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
 | 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
+| 13 | 10-01 | Search activities (3 custom types, installed disabled) + click contract v2 (optional query/title) | Pending |
 | 12 | 09-03 | Blocked suggestions admin (listing/create/delete) + one-click report Block suggestion | Pending |
 | 11 | 09-02 | Search box autocomplete (ARIA combobox script, opt-in, stylesheet) + admin right gutter (Convention 2b) | Pending |
 | 10 | 09-01 | Suggestions public API (ISuiteSuggestions, MapLuceneSuiteSuggestions, options) + endpoint behaviour; seeded history now public | Pending |
@@ -380,4 +381,39 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
      - an empty Save shows no "required" message when driven by a DOM click with the pane hidden (the same on the native Synonyms create page; nothing is stored);
      - real mouse input (pane hidden);
      - a View-only role (read-only listing, disabled report button — code and tests only).
+
+---
+
+## 13. 10-01: Search activities for Kentico contacts (v0.2)
+
+1. **Where:**
+   - Contact management → Activity types (three "Search …" types);
+   - a contact's Activities;
+   - http://localhost:27340/site-search.
+2. **What I verified on the host** (comm_projects moved to v7 on restart):
+   - **Install:** the types were created disabled and custom: Search performed, Search without results, Search result clicked.
+   - **Disabled:** a search plus a click recorded analytics (SearchEvent +1, Interaction +1) and 0 Suite activities.
+   - **Enabled** (all three switched on in the admin, no restart), for one tracked contact in the browser pane. The pane was already tracked, so no consent action was needed:
+     - `mail jane@example.com` → `Searched for "mail {email}"` and `Search without results: "mail {email}"` (value `mail {email}`, comment DancingGoatSample);
+     - `coffee` → one Search performed;
+     - the page-2 continuation → none;
+     - clicking "Hario V60" at position 11 → `Search result clicked: "Hario V60" (position 11)`, value `coffee`, linked to the Hario V60 page (WebPageItemGUID matched).
+   - **URL privacy:** every Suite activity URL is `http://localhost:27340/site-search` with no query string. For the click it is the results page, not the beacon endpoint. A SQL search for "jane" across title, value, comment, URL and referrer of the Suite activities found 0 rows.
+   - **Switching off** in the admin took effect without a restart: a new search logged no activity. All three types are disabled again.
+   - **Cleanup:** the 4 Suite verification activities were deleted. Kentico's own page-visit/landing activities from the browsing were kept, as in earlier sessions.
+   - **Kentico's own** page visit stored `/site-search?q=coffee` raw (documented in docs/activities.md).
+3. **Automated checks:**
+   - .NET 739 passed, 5 skipped. This includes v6 → v7 install, re-run preserving a marketer-enabled type, the no-HTTP-context path, the `?q=jane@example.com` URL test and endpoint v1/v2/malformed bodies.
+   - Widgets JS 45/45, including a worst-case v2 body of 825 bytes (limit 1024).
+   - Rules-overhead latency test passed when run on its own.
+4. **Your decisions to confirm:**
+   - **Disabled by default:** marketers must enable the types.
+   - **Title formats** (see docs/activities.md).
+   - **Click text is browser-supplied** (your choice). It is forgeable only for the forger's own contact, never stored in analytics, and the public events contract is extended (v2, optional fields).
+   - **Click activity URL** = the results page. During APPLY this was changed from the beacon endpoint, which would be meaningless.
+   - **`ISearchInteractionLogger.LogClick` gained two optional parameters.** Custom implementers must update; Phase 11 should review this.
+   - **Internal Kentico type `WebPageItemInfo`** is used for the page link.
+   - **Not observed:**
+     - a visitor without consent (Kentico's own check; the pane was already a tracked contact);
+     - a real web farm.
 

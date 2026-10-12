@@ -162,7 +162,14 @@ public sealed class SearchInteractionLoggerTests
     [Fact]
     public void AddLuceneSuite_RegistersLogger()
     {
-        var services = new ServiceCollection().AddLogging().AddLuceneSuite().BuildServiceProvider();
+        // Kentico registers these in a real host.
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<CMS.Activities.ICustomActivityLogger>(new SearchActivityLoggerTests.RecordingActivities())
+            .AddSingleton<CMS.DataEngine.IInfoProvider<CMS.Activities.ActivityTypeInfo>>(new NoInfos<CMS.Activities.ActivityTypeInfo>())
+            .AddSingleton<CMS.DataEngine.IInfoProvider<CMS.Websites.Internal.WebPageItemInfo>>(new NoInfos<CMS.Websites.Internal.WebPageItemInfo>())
+            .AddLuceneSuite()
+            .BuildServiceProvider();
 
         Assert.IsType<SearchInteractionLogger>(services.GetRequiredService<ISearchInteractionLogger>());
     }
@@ -198,6 +205,7 @@ public sealed class SearchInteractionLoggerTests
                 Queue,
                 new SearchSessionCookie(Accessor, time),
                 new AnalyticsRequestFilter(Accessor, options),
+                SearchActivityLoggerTests.CreateLogger(Accessor),
                 time,
                 NullLogger<SearchInteractionLogger>.Instance);
         }
@@ -240,6 +248,16 @@ public sealed class SearchInteractionLoggerTests
         public int GetDefaultCookieLevel() => throw new InvalidOperationException("cookie level unavailable");
 
         public void SetCurrentCookieLevel(int cookieLevel) => throw new NotSupportedException();
+    }
+
+    private sealed class NoInfos<TInfo> : CMS.DataEngine.IInfoProvider<TInfo>
+        where TInfo : CMS.DataEngine.AbstractInfoBase<TInfo>, new()
+    {
+        public CMS.DataEngine.ObjectQuery<TInfo> Get() => throw new NotSupportedException();
+
+        public void Set(TInfo info) => throw new NotSupportedException();
+
+        public void Delete(TInfo info) => throw new NotSupportedException();
     }
 
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider

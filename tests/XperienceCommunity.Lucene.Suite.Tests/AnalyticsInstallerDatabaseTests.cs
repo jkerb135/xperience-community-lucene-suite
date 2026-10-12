@@ -1,5 +1,6 @@
 using System.Globalization;
 
+using CMS.Activities;
 using CMS.Core;
 using CMS.DataEngine;
 using CMS.Modules;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
+using XperienceCommunity.Lucene.Suite.Activities;
 using XperienceCommunity.Lucene.Suite.Analytics;
 using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Suggestions;
@@ -219,6 +221,62 @@ public sealed class AnalyticsInstallerDatabaseTests
     }
 
     [DatabaseFact]
+    public void Version6Database_UpgradesToVersion7_CreatingDisabledActivityTypes_AndNeverChangesThemAfterwards()
+    {
+        var services = KenticoServices.Value;
+        CreateInstaller(services).Install();
+        RemoveActivityTypes();
+        SetInstalledVersion(6);
+
+        CreateInstaller(services).Install();
+
+        AssertInstalledOnce();
+        Assert.Equal(
+            [
+                (SuiteActivityTypes.ResultClick, "Search result clicked", true, false),
+                (SuiteActivityTypes.Search, "Search performed", true, false),
+                (SuiteActivityTypes.SearchNoResults, "Search without results", true, false),
+            ],
+            SuiteTypes().Select(t => (t.ActivityTypeName, t.ActivityTypeDisplayName, t.ActivityTypeIsCustom, t.ActivityTypeEnabled)));
+        Assert.All(SuiteTypes(), t => Assert.Contains("consent", t.ActivityTypeDescription, StringComparison.Ordinal));
+
+        // A marketer enables a type and renames it; neither a re-run nor a repeated v7 step changes it back.
+        var types = services.GetRequiredService<IInfoProvider<ActivityTypeInfo>>();
+        var search = types.Get(SuiteActivityTypes.Search);
+        search.ActivityTypeEnabled = true;
+        search.ActivityTypeDisplayName = "Site search";
+        types.Set(search);
+        CreateInstaller(services).Install();
+        SetInstalledVersion(6);
+        CreateInstaller(services).Install();
+
+        AssertInstalledOnce();
+        var kept = Assert.Single(SuiteTypes(), t => t.ActivityTypeName == SuiteActivityTypes.Search);
+        Assert.Equal((true, "Site search"), (kept.ActivityTypeEnabled, kept.ActivityTypeDisplayName));
+        Assert.True(SearchActivityLogger.IsEnabled(types, SuiteActivityTypes.Search));
+        RemoveActivityTypes();
+        CreateInstaller(services).Install();
+    }
+
+    [DatabaseFact]
+    public void ActivityLookups_WorkOnKenticosProviders()
+    {
+        var services = KenticoServices.Value;
+        CreateInstaller(services).Install();
+        var types = services.GetRequiredService<IInfoProvider<ActivityTypeInfo>>();
+        var pages = services.GetRequiredService<IInfoProvider<CMS.Websites.Internal.WebPageItemInfo>>();
+
+        Assert.False(SearchActivityLogger.IsEnabled(types, SuiteActivityTypes.ResultClick));
+        Assert.False(SearchActivityLogger.IsEnabled(types, "lucenesuite_missing"));
+        Assert.False(SearchActivityLogger.IsWebPage(pages, Guid.NewGuid()));
+        var existing = pages.Get().TopN(1).FirstOrDefault();
+        if (existing is not null)
+        {
+            Assert.True(SearchActivityLogger.IsWebPage(pages, existing.WebPageItemGUID));
+        }
+    }
+
+    [DatabaseFact]
     public void RuleInfo_RoundTripsThroughToDefinition()
     {
         var services = KenticoServices.Value;
@@ -316,7 +374,19 @@ public sealed class AnalyticsInstallerDatabaseTests
         new(
             services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
             services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            services.GetRequiredService<IInfoProvider<CMS.Activities.ActivityTypeInfo>>(),
             logger ?? NullLogger<AnalyticsModuleInstaller>.Instance);
+
+    private static List<ActivityTypeInfo> SuiteTypes() =>
+        [.. KenticoServices.Value.GetRequiredService<IInfoProvider<ActivityTypeInfo>>().Get()
+            .WhereStartsWith(nameof(ActivityTypeInfo.ActivityTypeName), "lucenesuite_")
+            .OrderBy(nameof(ActivityTypeInfo.ActivityTypeName))];
+
+    private static void RemoveActivityTypes()
+    {
+        Execute("DELETE FROM OM_ActivityType WHERE ActivityTypeName LIKE 'lucenesuite[_]%'");
+        ProviderHelper.ClearHashtables(ActivityTypeInfo.OBJECT_TYPE, false);
+    }
 
     // Raw SQL because Kentico refuses to delete a class whose Info type is compiled in; the caches are cleared afterwards.
     private static void RemoveSuiteObjects(string[] keep)
@@ -330,6 +400,7 @@ public sealed class AnalyticsInstallerDatabaseTests
 
         if (keep.Length == 0)
         {
+            RemoveActivityTypes();
             Execute(
                 $"""
                 DELETE FROM CMS_SettingsKey WHERE KeyName IN ('{AnalyticsModuleInstaller.VersionKeyName}', '{AnalyticsModuleInstaller.WatermarkKeyName}');
@@ -365,6 +436,10 @@ public sealed class AnalyticsInstallerDatabaseTests
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Resource WHERE ResourceName = '{AnalyticsModuleInstaller.ResourceName}'"));
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}' AND KeyValue = '{AnalyticsModuleInstaller.Version}'"));
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.WatermarkKeyName}'"));
+        foreach (string codeName in new[] { SuiteActivityTypes.Search, SuiteActivityTypes.SearchNoResults, SuiteActivityTypes.ResultClick })
+        {
+            Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM OM_ActivityType WHERE ActivityTypeName = '{codeName}' AND ActivityTypeIsCustom = 1"));
+        }
         foreach (var (className, indexName, columns, unique) in new[]
         {
             (SearchEventInfo.CLASS_NAME, AnalyticsModuleInstaller.ReceivedIndexName, 2, 0),

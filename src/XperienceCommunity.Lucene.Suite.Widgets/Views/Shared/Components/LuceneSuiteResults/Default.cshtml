@@ -2,6 +2,7 @@
 @{
     var search = Model.Search;
     var response = search.Response;
+    string scrubbedQuery = XperienceCommunity.Lucene.Suite.Analytics.QueryScrubber.Normalize(search.Url.Query);
 }
 @if (search.Status == SuitePageSearchStatus.NotSearched && search.IsEditMode)
 {
@@ -32,7 +33,7 @@
             </p>
             @if (Model.Hits.Count > 0)
             {
-                <ol class="lucene-suite-results__list" start="@Model.FirstPosition" data-lucene-suite-results data-lucene-suite-events="@Model.EventsUrl" data-lucene-suite-search="@response.SearchId" data-lucene-suite-sequence="@search.Sequence">
+                <ol class="lucene-suite-results__list" start="@Model.FirstPosition" data-lucene-suite-results data-lucene-suite-events="@Model.EventsUrl" data-lucene-suite-search="@response.SearchId" data-lucene-suite-sequence="@search.Sequence" data-lucene-suite-query="@(scrubbedQuery.Length > 0 ? scrubbedQuery : null)">
                     @foreach (var hit in Model.Hits)
                     {
                         <li class="lucene-suite-results__item">

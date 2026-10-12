@@ -6,9 +6,22 @@ const int = (/** @type {string | null} */ value, /** @type {number} */ min, /** 
   value != null && /^\d{1,10}$/.test(value) && +value >= min && +value <= max ? +value : null;
 
 /**
+ * Beacon text: whitespace collapsed, control characters and lone surrogates removed, cut to 100 UTF-16 units without
+ * splitting a pair, so a click carrying both texts stays under the 1 KB body limit.
+ * @param {string | null | undefined} value
+ */
+export function clip(value) {
+  const text = (value ?? "").replace(/\s+/g, " ").trim()
+    .replace(/[\u0000-\u001f\u007f-\u009f]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g, "")
+    .slice(0, 100);
+  return /[\ud800-\udbff]$/.test(text) ? text.slice(0, -1) : text;
+}
+
+/**
  * The click event of a tracked result link, or null when its attributes are missing or invalid.
+ * Adds the list's query and the link text when present; the server uses them only for the contact activity.
  * @param {Element} link
- * @returns {{ searchId: string, sequence: number, itemGuid: string, position: number } | null}
+ * @returns {{ searchId: string, sequence: number, itemGuid: string, position: number, query?: string, title?: string } | null}
  */
 export function clickPayload(link) {
   const list = link.closest("[data-lucene-suite-results]");
@@ -16,7 +29,11 @@ export function clickPayload(link) {
   const itemGuid = link.getAttribute("data-lucene-suite-item") ?? "";
   const sequence = int(list?.getAttribute("data-lucene-suite-sequence") ?? null, 1, 2147483647);
   const position = int(link.getAttribute("data-lucene-suite-position"), 1, 1000);
-  return guid.test(searchId) && guid.test(itemGuid) && sequence && position ? { searchId, sequence, itemGuid, position } : null;
+  const query = clip(list?.getAttribute("data-lucene-suite-query"));
+  const title = clip(link.textContent);
+  return guid.test(searchId) && guid.test(itemGuid) && sequence && position
+    ? { searchId, sequence, itemGuid, position, ...(query && { query }), ...(title && { title }) }
+    : null;
 }
 
 /** @param {MouseEvent} event */

@@ -6,7 +6,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
 Status: 🚧 In Progress
-Phases: 4 of 6 complete
+Phases: 5 of 6 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -17,7 +17,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
 | 8.1 | Admin UI Consistency Audit | 5/5 | ✅ Complete | 2026-10-12 |
 | 9 | Suggestions | 3/3 | ✅ Complete | 2026-10-12 |
-| 10 | Custom Activities | TBD | Not started | - |
+| 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
 | 11 | Public API Audit | TBD | Not started | - |
 
 ## Phase Details
@@ -65,7 +65,10 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 ### Phase 10: Custom Activities
 **Focus:** Kentico custom activity types — search performed (one per logical search, scrubbed text), result clicked, no results — logged only with a current contact and Kentico consent/cookie level allowing it.
 **Depends on:** v0.1 capture pipeline
-**Plans:** TBD
+**Decisions (2026-10-12):** types installed disabled; no-results in addition; click contract v2 (optional query/title, activity-only); Core, submitted searches only
+
+**Plans:**
+- [x] 10-01: Activity types (installer v7) + search/no-results/click activities in Core + click contract v2
 
 ### Phase 11: Public API Audit
 **Focus:** Make Core + Admin alone sufficient to build a custom search UI, and Widgets extensible: inventory every public type in Core/Admin/Widgets, close gaps (e.g. rule/synonym/report services usable outside the admin), XML docs everywhere, a public-API baseline (shipped/unshipped list) so later changes are deliberate, and a "build your own UI / author your own widget" guide.
@@ -101,4 +104,4 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 | v0.4 Instant Search | Public opt-in search endpoint (index + field allow-list, rate limit, searchId analytics via the JS client contract) + Algolia-InstantSearch-style JS widget library (search box, hits, refinements, pagination, stats) building on Phase 9 suggestions |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 9 complete)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 10 complete)*

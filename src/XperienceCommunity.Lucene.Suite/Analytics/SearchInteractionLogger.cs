@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 
+using XperienceCommunity.Lucene.Suite.Activities;
 using XperienceCommunity.Lucene.Suite.Search;
 
 namespace XperienceCommunity.Lucene.Suite.Analytics;
@@ -9,15 +10,19 @@ internal sealed class SearchInteractionLogger(
     SearchEventQueue queue,
     SearchSessionCookie sessionCookie,
     AnalyticsRequestFilter requestFilter,
+    SearchActivityLogger activityLogger,
     TimeProvider timeProvider,
     ILogger<SearchInteractionLogger> logger) : ISearchInteractionLogger
 {
     private readonly LogThrottle logThrottle = new(timeProvider, TimeSpan.FromMinutes(1));
 
-    public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null)
+    public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null)
     {
         Validate(searchId, sequence, itemGuid, position, eventId);
-        Capture(searchId, sequence, itemGuid, position, SearchInteractionType.Click, eventId);
+        if (Capture(searchId, sequence, itemGuid, position, SearchInteractionType.Click, eventId))
+        {
+            activityLogger.LogClick(itemGuid, position, queryText, resultTitle);
+        }
     }
 
     public void LogConversion(Guid searchId, int sequence, Guid itemGuid, int? position = null, Guid? eventId = null)
@@ -49,13 +54,14 @@ internal sealed class SearchInteractionLogger(
         }
     }
 
-    private void Capture(Guid searchId, int sequence, Guid itemGuid, int? position, SearchInteractionType type, Guid? eventId)
+    /// <summary>False when the request filter excluded the event.</summary>
+    private bool Capture(Guid searchId, int sequence, Guid itemGuid, int? position, SearchInteractionType type, Guid? eventId)
     {
         try
         {
             if (!requestFilter.ShouldCapture())
             {
-                return;
+                return false;
             }
 
             queue.Enqueue(new SearchInteractionEvent(
@@ -75,5 +81,7 @@ internal sealed class SearchInteractionLogger(
                 logger.LogWarning(exception, "Lucene Suite interaction capture failed; the event was discarded (further failures suppressed for a minute).");
             }
         }
+
+        return true;
     }
 }

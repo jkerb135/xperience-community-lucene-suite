@@ -35,6 +35,36 @@ public sealed class SuiteEventsEndpointTests
         Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
         Assert.Empty(await response.Content.ReadAsStringAsync());
         Assert.Equal(("click", SearchId, 3, ItemGuid, (int?)12, (Guid?)EventId), Assert.Single(host.Logger.Calls));
+        Assert.Equal((null, null), Assert.Single(host.Logger.ClickTexts));
+    }
+
+    [Fact]
+    public async Task ClickV2_PassesQueryAndTitle()
+    {
+        await using var host = await Host.Start();
+
+        var response = await host.Client.PostAsJsonAsync(Url, new { type = "click", searchId = SearchId, sequence = 3, itemGuid = ItemGuid, position = 12, query = "coffee grinder", title = "Burr grinder" });
+
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+        Assert.Equal(("coffee grinder", "Burr grinder"), Assert.Single(host.Logger.ClickTexts));
+    }
+
+    [Theory]
+    [InlineData("\"query\":123,\"title\":{\"a\":1}")]
+    [InlineData("\"query\":[\"x\"],\"title\":true")]
+    [InlineData("\"query\":null,\"title\":\"\"")]
+    [InlineData("\"query\":\"\\ud800\",\"title\":\"\\udc00x\"")]
+    [InlineData("\"query\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"title\":\"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\"")]
+    public async Task ClickV2_MalformedOrOversizedText_IsDropped_Not400(string fields)
+    {
+        await using var host = await Host.Start();
+        string body = $$"""{"type":"click","searchId":"{{SearchId}}","sequence":1,"itemGuid":"{{ItemGuid}}","position":2,{{fields}}}""";
+
+        var response = await host.Client.PostAsync(Url, new StringContent(body, Encoding.UTF8, "application/json"));
+
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+        Assert.Single(host.Logger.Calls);
+        Assert.Equal((null, null), Assert.Single(host.Logger.ClickTexts));
     }
 
     [Fact]
@@ -221,8 +251,13 @@ public sealed class SuiteEventsEndpointTests
     {
         public List<(string Type, Guid SearchId, int Sequence, Guid ItemGuid, int? Position, Guid? EventId)> Calls { get; } = [];
 
-        public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null) =>
+        public List<(string? Query, string? Title)> ClickTexts { get; } = [];
+
+        public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null)
+        {
             Record("click", searchId, sequence, itemGuid, position, eventId);
+            ClickTexts.Add((queryText, resultTitle));
+        }
 
         public void LogConversion(Guid searchId, int sequence, Guid itemGuid, int? position = null, Guid? eventId = null) =>
             Record("conversion", searchId, sequence, itemGuid, position, eventId);

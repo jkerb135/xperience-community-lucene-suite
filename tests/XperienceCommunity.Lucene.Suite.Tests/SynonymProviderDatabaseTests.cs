@@ -28,6 +28,7 @@ public sealed class SynonymProviderDatabaseTests
         new AnalyticsModuleInstaller(
             services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
             services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            services.GetRequiredService<IInfoProvider<CMS.Activities.ActivityTypeInfo>>(),
             NullLogger<AnalyticsModuleInstaller>.Instance).Install();
         var infos = services.GetRequiredService<IInfoProvider<SynonymInfo>>();
         var logger = new RecordingLogger();
@@ -79,6 +80,7 @@ public sealed class SynonymProviderDatabaseTests
         new AnalyticsModuleInstaller(
             services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
             services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            services.GetRequiredService<IInfoProvider<CMS.Activities.ActivityTypeInfo>>(),
             NullLogger<AnalyticsModuleInstaller>.Instance).Install();
         var infos = services.GetRequiredService<IInfoProvider<SynonymInfo>>();
         Cleanup();

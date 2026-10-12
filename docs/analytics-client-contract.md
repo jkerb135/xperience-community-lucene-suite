@@ -24,7 +24,7 @@ Two things are deliberately **not** configurable, because changing them would ma
 
 `XperienceCommunity.Lucene.Suite.Widgets` implements the browser side of this page:
 
-- `services.AddLuceneSuiteWidgets()` and `app.MapLuceneSuiteEvents()` map `POST /lucenesuite/events` (body `{ "type": "click" | "conversion", searchId, sequence, itemGuid, position?, eventId? }`, JSON or `text/plain`, at most 1 KB; 202, or 400/413/429) and `GET /lucenesuite/events/settings`.
+- `services.AddLuceneSuiteWidgets()` and `app.MapLuceneSuiteEvents()` map `POST /lucenesuite/events` (body `{ "type": "click" | "conversion", searchId, sequence, itemGuid, position?, eventId?, query?, title? }`, JSON or `text/plain`, at most 1 KB; 202, or 400/413/429) and `GET /lucenesuite/events/settings`.
 - `_content/XperienceCommunity.Lucene.Suite.Widgets/lucene-suite.js` is a dependency-free ES module: `createSearchTracker(settings).beforeSend(input, isSubmit, now)` implements §2, `sendClick`/`sendConversion` implement §3, and `formatResultReference`/`parseResultReference` handle the `sr` parameter (`SuiteResultReference` on the server). It is tested against the vectors.
 
 ### Server-rendered search components
@@ -126,6 +126,19 @@ logger.LogConversion(searchId, sequence, itemGuid, position, eventId);  // a goa
 - The logger skips bots, prefetch/prerender requests and disabled analytics on its own. It does **not** check whether the search or position really existed. The rollup checks that, and it only counts an interaction that arrives within the **attribution window** (1 hour) of the response it refers to, and a click only when its position was on the page that response returned.
 - Send clicks with `navigator.sendBeacon`, with a `fetch(..., { keepalive: true })` fallback, so that navigating away does not cancel them.
 - **Rate limiting is yours.** A custom endpoint must apply its own rate limit (for example ASP.NET Core's rate limiter, keyed in memory by IP, which is never stored). The optional Widgets package adds one to its endpoint (`EventsPerMinute`, default 60 per IP; 0 turns it off when a proxy or CDN limits requests).
+
+### Click text (contract v2)
+
+A click may also carry the query of the result list and the title of the clicked result, for the contact's **Search result clicked** activity (see docs/activities.md):
+
+```csharp
+logger.LogClick(searchId, sequence, itemGuid, position, eventId, queryText, resultTitle);
+```
+
+- Both are optional. v1 calls and beacon bodies without them keep working unchanged; the click is recorded exactly as before.
+- Both are **untrusted** client input. The query is scrubbed like stored query text (emails and long numbers replaced), the title only has its whitespace collapsed and control characters removed, and both are used only as the activity's value and title. Neither is ever stored in the Suite's analytics tables.
+- Widgets beacon fields: `query` (the results list's `data-lucene-suite-query`, which the results view renders already scrubbed) and `title` (the link text, trimmed, whitespace collapsed). The client cuts each to 100 UTF-16 units without splitting a surrogate pair and omits empty ones, so a click with both stays under the 1 KB body limit. The endpoint drops a field that is not a string or is longer than 100 characters instead of rejecting the event.
+- `docs/analytics-test-vectors.json` is unchanged: the vectors define when a search id is minted and whether a click is attributed, and the click text affects neither.
 
 ### Conversions on a later page
 

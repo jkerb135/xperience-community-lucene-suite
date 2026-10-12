@@ -1,6 +1,7 @@
 using System.Data;
 using System.Globalization;
 
+using CMS.Activities;
 using CMS.DataEngine;
 using CMS.FormEngine;
 using CMS.Modules;
@@ -8,6 +9,7 @@ using CMS.Modules;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
+using XperienceCommunity.Lucene.Suite.Activities;
 using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Suggestions;
 using XperienceCommunity.Lucene.Suite.Synonyms;
@@ -18,6 +20,7 @@ namespace XperienceCommunity.Lucene.Suite.Analytics;
 internal sealed class AnalyticsModuleInstaller(
     IInfoProvider<ResourceInfo> resources,
     IInfoProvider<SettingsKeyInfo> settingsKeys,
+    IInfoProvider<ActivityTypeInfo> activityTypes,
     ILogger<AnalyticsModuleInstaller> logger)
 {
     /// <summary>Code name of the Suite module (resource).</summary>
@@ -30,7 +33,7 @@ internal sealed class AnalyticsModuleInstaller(
     internal const string WatermarkKeyName = "LuceneSuiteRollupWatermark";
 
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
-    internal const int Version = 6;
+    internal const int Version = 7;
 
     internal const string ReceivedIndexName = "IX_LuceneSuite_SearchEvent_ReceivedUtc_SearchId";
 
@@ -96,6 +99,20 @@ internal sealed class AnalyticsModuleInstaller(
         // Version 6: suggestion blocklist.
         EnsureClass(resource, BlockedSuggestionInfo.TYPEINFO, "Lucene Suite blocked suggestion", BlockedSuggestionForm());
         CreateAscendingIndex(BlockedSuggestionIndexName, BlockedSuggestionInfo.CLASS_NAME, false, nameof(BlockedSuggestionInfo.IndexName));
+
+        // Version 7: custom activity types, created disabled; an existing type is never changed (a marketer owns its flag).
+        EnsureActivityType(
+            SuiteActivityTypes.Search,
+            "Search performed",
+            "A visitor submitted a site search. Value: the search text with emails and long numbers removed; comment: the index. Logged only for contacts tracked with consent.");
+        EnsureActivityType(
+            SuiteActivityTypes.SearchNoResults,
+            "Search without results",
+            "A submitted site search returned no results. Value: the search text with emails and long numbers removed; comment: the index. Logged only for contacts tracked with consent.");
+        EnsureActivityType(
+            SuiteActivityTypes.ResultClick,
+            "Search result clicked",
+            "A visitor clicked a site search result. Title: the result and its position; value: the search text with emails and long numbers removed. Logged only for contacts tracked with consent.");
 
         if (installed < Version)
         {
@@ -277,6 +294,21 @@ internal sealed class AnalyticsModuleInstaller(
         if (dataClass.HasChanged)
         {
             DataClassInfoProvider.SetDataClassInfo(dataClass);
+        }
+    }
+
+    private void EnsureActivityType(string codeName, string displayName, string description)
+    {
+        if (!activityTypes.Get().WhereEquals(nameof(ActivityTypeInfo.ActivityTypeName), codeName).Any())
+        {
+            activityTypes.Set(new ActivityTypeInfo
+            {
+                ActivityTypeName = codeName,
+                ActivityTypeDisplayName = displayName,
+                ActivityTypeDescription = description,
+                ActivityTypeIsCustom = true,
+                ActivityTypeEnabled = false,
+            });
         }
     }
 

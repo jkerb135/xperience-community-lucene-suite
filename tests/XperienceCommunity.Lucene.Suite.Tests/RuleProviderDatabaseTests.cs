@@ -28,6 +28,7 @@ public sealed class RuleProviderDatabaseTests
         new AnalyticsModuleInstaller(
             services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
             services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            services.GetRequiredService<IInfoProvider<CMS.Activities.ActivityTypeInfo>>(),
             NullLogger<AnalyticsModuleInstaller>.Instance).Install();
         var infos = services.GetRequiredService<IInfoProvider<RuleInfo>>();
         var logger = new RecordingLogger();
@@ -79,6 +80,7 @@ public sealed class RuleProviderDatabaseTests
         new AnalyticsModuleInstaller(
             services.GetRequiredService<IInfoProvider<ResourceInfo>>(),
             services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>(),
+            services.GetRequiredService<IInfoProvider<CMS.Activities.ActivityTypeInfo>>(),
             NullLogger<AnalyticsModuleInstaller>.Instance).Install();
         var infos = services.GetRequiredService<IInfoProvider<RuleInfo>>();
         Cleanup();

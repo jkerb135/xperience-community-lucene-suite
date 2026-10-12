@@ -42,7 +42,7 @@ public sealed class SuiteWidgetsRenderingTests
         string html = await Render("/test/results?q=grinder&page=2");
 
         Assert.Contains("35 results for “grinder”", html);
-        Assert.Contains($"<ol class=\"lucene-suite-results__list\" start=\"11\" data-lucene-suite-results data-lucene-suite-events=\"/lucenesuite/events\" data-lucene-suite-search=\"{SearchId}\" data-lucene-suite-sequence=\"1\">", html);
+        Assert.Contains($"<ol class=\"lucene-suite-results__list\" start=\"11\" data-lucene-suite-results data-lucene-suite-events=\"/lucenesuite/events\" data-lucene-suite-search=\"{SearchId}\" data-lucene-suite-sequence=\"1\" data-lucene-suite-query=\"grinder\">", html);
         Assert.Contains($"href=\"/coffee/grinder?x=1&amp;sr={SearchId:N}.1.11#frag\" data-lucene-suite-item=\"{Item}\" data-lucene-suite-position=\"11\">&lt;script&gt;alert(1)&lt;/script&gt; &amp; co</a>", html);
         Assert.Contains("<p class=\"lucene-suite-results__summary\">Burr &amp; blade</p>", html);
         Assert.Contains($"href=\"http://localhost/same?sr={SearchId:N}.1.16\" data-lucene-suite-item=", html);
@@ -67,6 +67,14 @@ public sealed class SuiteWidgetsRenderingTests
         Assert.Contains($"href=\"?q=grinder&amp;page=4&amp;sid={SearchId:N}&amp;seq=2\" rel=\"nofollow\">4</a>", html);
         Assert.Contains($"href=\"?q=grinder&amp;page=3&amp;sid={SearchId:N}&amp;seq=2\" rel=\"next nofollow\">Next</a>", html);
         Assert.DoesNotContain(">5</a>", html);
+    }
+
+    [Fact]
+    public async Task Results_ListCarriesTheScrubbedQuery_Encoded()
+    {
+        string html = await Render("/test/results?q=" + Uri.EscapeDataString("  Mail  Jane@Example.com \"<x>\" "));
+
+        Assert.Contains("data-lucene-suite-query=\"mail {email} &quot;&lt;x&gt;&quot;\">", html);
     }
 
     [Fact]
@@ -416,7 +424,7 @@ public sealed class SuiteWidgetsRenderingTests
 
     private sealed class NoLogger : ISearchInteractionLogger
     {
-        public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null)
+        public void LogClick(Guid searchId, int sequence, Guid itemGuid, int position, Guid? eventId = null, string? queryText = null, string? resultTitle = null)
         {
         }
 

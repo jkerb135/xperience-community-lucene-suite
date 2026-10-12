@@ -10,10 +10,10 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 10 of 11 (Custom Activities) — Not started
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-10-12 — Phase 9 complete (09-03 unified), transitioned to Phase 10
+Phase: 10 of 11 (Custom Activities) — Planning
+Plan: 10-01 applied
+Status: APPLY complete, ready for UNIFY
+Last activity: 2026-10-12 — Applied 10-01 (3/3 tasks)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -24,7 +24,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready to plan Phase 10]
+  ✓        ✓        ○     [Applied, ready for UNIFY]
 ```
 
 ## Accumulated Context
@@ -34,6 +34,9 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 10-01 applied: installer v7 (3 custom activity types, disabled), Core search/no-results/click activities, click contract v2; implementer decompiled 31.9.1: MVC ActivityURL defaults to the raw Referer (audit leak confirmed) → Suite sets URL explicitly; changed in APPLY: click ActivityURL = results page (scrubbed Referer) instead of the beacon endpoint. Host E2E: disabled → none; enabled → exact titles/values, page link, no 'jane' anywhere; continuation none; admin toggle without restart; restored + 4 test activities deleted; no consent action needed (pane already tracked) | Phase 10 | UNIFY next |
+| 2026-10-12: Enterprise audit on 10-01-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 10 | Suite sets ActivityURL/Referrer without query string (raw q incl. emails would leak via Kentico auto-fill); no HttpContext → nothing logged; control chars stripped; provider cache for type enabled + toggle without restart; docs note Kentico page-visit URL keeps raw q |
+| 2026-10-12: 10-01 planned (user choices): installer v7 creates custom activity types lucenesuite_search / _search_noresults / _resultclick **disabled** (marketer enables in Contact management; never updated after creation); no-results logged in addition to search performed; click contract v2 adds optional query/title (user chose over item-link-only recommendation) — activity-only, never stored in analytics; logged in Core for submitted searches only (no continuations/browse); consent/cookie level stay Kentico's; host consent in the pane only with user OK; APPROVAL-CHECKS #13 | Phase 10 | 10-01 created |
 | 2026-10-12: 09-03 unified, Phase 9 complete: blocklist admin + one-click report block shipped; AC-5 (audit trail) failed — Kentico LogEvents writes nothing for Suite module classes → KNOWN-LIMITATIONS, decision in APPROVAL-CHECKS #12 (applies to rules/synonyms too); focus-loss lesson: never make Table ComponentCell rows depend on request state | Phase 9 | Next: /paul:plan Phase 10 |
 | 2026-10-12: 09-03 applied: native Blocked suggestions listing/create/delete + one-click report BlockSuggestion command (toast, errors in NotificationBar only); host E2E proven (block → suggest drops → delete restores; duplicate/punctuation refused; counts unchanged). Fixed in APPLY: pressed block button lost focus to body (in-flight `blocking` state re-rendered ComponentCells) → ref guard, no disabled state. AC-5 failed: LogEvents writes no event-log rows for custom module classes in 31.9.1 → KNOWN-LIMITATIONS + APPROVAL-CHECKS #12 decision (explicit IEventLogService logging?). Implementation delegated, reviewed, re-verified | Phase 9 | UNIFY next |
 | 2026-10-12: Enterprise audit on 09-03-PLAN.md. Applied 2 must-have, 4 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 9 | Create page own index-exists ValidatePage; block command failure path (missing index → error, NotificationBar, in-flight disable); undo hint in toast; event log proves who blocked what (AC-5); MatchKey ≤ 100; DB tests clean up |
@@ -207,6 +210,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 10: APPROVAL-CHECKS #13 (search activities + click contract v2) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #12 (blocklist admin + report action; audit-trail decision: no event log for Suite admin changes) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #11 (autocomplete + gutter; real keyboard and widget dropdown clearing not observed) pending | Milestone review | Milestone review |
 | Phase 9: APPROVAL-CHECKS #10 (suggestions public API + endpoint; seeded history now public on host) pending | Milestone review | Milestone review |
@@ -225,9 +229,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Phase 9 complete, ready to plan Phase 10
-Next action: /paul:plan for Phase 10 (Custom Activities); also answer APPROVAL-CHECKS #12 audit-trail question when convenient
-Resume file: .paul/ROADMAP.md
+Stopped at: 10-01 applied
+Next action: /paul:unify .paul/phases/10-custom-activities/10-01-PLAN.md; APPROVAL-CHECKS #12 audit-trail question still open
+Resume file: .paul/phases/10-custom-activities/10-01-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v5 since 04-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v5 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
