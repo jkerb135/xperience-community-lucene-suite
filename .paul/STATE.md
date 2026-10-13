@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 13 of 13 (Enterprise Screens) — In progress
-Plan: 13-02.1 applied
-Status: APPLY complete, ready for UNIFY
-Last activity: 2026-10-12 — Applied 13-02.1 (3/3 tasks)
+Plan: 13-02.1 complete; next 13-03
+Status: Ready to plan 13-03
+Last activity: 2026-10-12 — Unified 13-02.1
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -25,7 +25,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Applied, ready for UNIFY]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 13-02.1 unified: repeated saves fixed (form reloads after successful edit save), confirmed Reload on rule conflicts; lesson: Kentico 31.9.1 applies returned form values only on failed submits — host-verify client round-trips | Phase 13 | Next: 13-03 |
 | 2026-10-12: 13-02.1 applied: false second-save conflict fixed on rule + synonym edit — Kentico 31.9.1 ignores returned form values after a successful save, so the planned token refresh could not work (host-proven); user chose: successful edit save navigates to the same page (refetchAllTemplates) for a fresh token. Rule conflict alert + Reload with confirmation dialog. Host: 3 saves ×2 pages OK, real conflict refused twice, Reload confirm/cancel/focus OK, rule 4 byte-identical. APPROVAL-CHECKS #17 | Phase 13 | UNIFY next |
 | 2026-10-12: Enterprise audit on 13-02.1-PLAN.md. Applied 2 must-have, 0 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 13 | Reload confirms in a Dialog (Kentico's unsaved prompt is a router guard, a browser reload bypasses it — corrected plan claim); only successful saves refresh the token, so a retry after a conflict stays refused |
 | 2026-10-12: 13-02.1 planned (user: yes): quick fix inserted before 13-03 — refresh the LoadedVersion form item in the save response (rules + synonyms, shared helper) and a conflict alert with Reload at the top of the rule form (the 13-02 roadmap 'conflict Reload' that was never planned) | Phase 13 | 13-02.1 created |
@@ -257,9 +258,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: 13-02.1 applied
-Next action: /paul:unify .paul/phases/13-enterprise-screens/13-02.1-PLAN.md
-Resume file: .paul/phases/13-enterprise-screens/13-02.1-PLAN.md
+Stopped at: 13-02.1 unified
+Next action: /paul:plan 13-03 (search reports per handoff)
+Resume file: .paul/phases/13-enterprise-screens/13-02.1-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
