@@ -11,9 +11,9 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 13 of 13 (Enterprise Screens) — In progress
-Plan: 13-03 created, awaiting approval
+Plan: 13-03 created + audited, awaiting approval
 Status: PLAN created, ready for APPLY
-Last activity: 2026-10-12 — Created .paul/phases/13-enterprise-screens/13-03-PLAN.md
+Last activity: 2026-10-12 — Audited .paul/phases/13-enterprise-screens/13-03-PLAN.md
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
@@ -35,6 +35,7 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: Enterprise audit on 13-03-PLAN.md. Applied 1 must-have, 2 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 13 | Stale report: 60 % opacity on graphics only, text full contrast + 'Showing the last loaded report.' (handoff deviation, WCAG 1.4.3); Retry latest-wins + disabled in flight; empty state reuses the existing No-searches condition |
 | 2026-10-12: 13-03 planned (user: keep the 11-02 insights card, apply the handoff's styling — the handoff predates Phase 11): sparklines on KPI tiles from existing series, DataBars in the query table and on findings, range footer + page size 10/25/50 (server argument), empty Callout with Open query tester, error Retry with stale report at 60 %; Spinner not skeletons (Phase 13 deviation) | Phase 13 | 13-03 created |
 | 2026-10-12: 13-02.1 unified: repeated saves fixed (form reloads after successful edit save), confirmed Reload on rule conflicts; lesson: Kentico 31.9.1 applies returned form values only on failed submits — host-verify client round-trips | Phase 13 | Next: 13-03 |
 | 2026-10-12: 13-02.1 applied: false second-save conflict fixed on rule + synonym edit — Kentico 31.9.1 ignores returned form values after a successful save, so the planned token refresh could not work (host-proven); user chose: successful edit save navigates to the same page (refetchAllTemplates) for a fresh token. Rule conflict alert + Reload with confirmation dialog. Host: 3 saves ×2 pages OK, real conflict refused twice, Reload confirm/cancel/focus OK, rule 4 byte-identical. APPROVAL-CHECKS #17 | Phase 13 | UNIFY next |
@@ -260,7 +261,7 @@ Feature branches merged: none
 
 Last session: 2026-10-12
 Stopped at: Plan 13-03 created
-Next action: /paul:audit (enabled) then /paul:apply .paul/phases/13-enterprise-screens/13-03-PLAN.md
+Next action: /paul:apply .paul/phases/13-enterprise-screens/13-03-PLAN.md
 Resume file: .paul/phases/13-enterprise-screens/13-03-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
