@@ -42,11 +42,47 @@ Open **Site search → Indexes → (index) → Rules** or **→ Synonyms**. Kent
 
 Two shortcuts from **Search reports**: in the query table, **Create rule for "…"** opens a new rule whose first condition is *Is* that query, and **Add synonym for "…"** opens a new synonym with that query as its first term.
 
-If someone else saved the same rule or synonym after you opened it, your save is refused, so their change is not lost silently.
+If someone else saved the same rule or synonym after you opened it, your save is refused, so their change is not lost silently. On a rule, the status line at the top of the form then shows **This rule was changed by someone else.** with a **Reload** button. Reload asks first, because your unsaved changes are lost, and then loads their version.
+
+After a successful save the rule form reloads with the saved rule, so you can keep editing and save again.
+
+### The rules list
+
+**Rules** lists the index's rules with their Name, Priority, Status, Valid from (UTC), Valid until (UTC), Conditions and Actions. On a narrow screen the two date columns are hidden. The status is worked out when the list loads, checked in this order:
+
+| Status | When |
+|---|---|
+| Disabled | **Enabled** is off |
+| Scheduled | Enabled, and **Valid from** is in the future |
+| Expired | Enabled, and **Valid until** has passed |
+| Active | Enabled and inside its validity window: the rule fires on matching searches |
+
+- **Search by name** keeps the rules whose name contains the text, not case-sensitive.
+- The status buttons (**All**, **Active**, **Scheduled**, **Expired**, **Disabled**) filter by status. Each shows how many of the searched rules have that status.
+- Click the **Name** or **Priority** header to sort. The default is priority, lowest first; ties are broken by rule id.
+- Show 25, 50 or 100 rules per page.
+- The search, status, sort, page and page size are kept per index for the browser tab's session, so returning from a rule shows the list as you left it. The selection is not kept.
+
+With **Manage rules**, select rules with the row checkboxes to act on them together. When every rule on the page is selected and more rules match, **Select all {n} matching** selects every rule that matches the search and status, across all pages.
+
+| Bulk action | What it does |
+|---|---|
+| **Enable** | Enables the rules at once |
+| **Disable** | Asks first, then disables the rules. Disabled rules stay in the list. |
+| **Change priority** | **Shift by** adds a whole number to each rule's priority (negative moves rules earlier). **Set to** gives every rule the same priority, 1 or more. |
+| **Delete** | Asks first, naming up to three of the rules, then deletes them permanently |
+
+Each rule is changed on its own. A rule that someone else changed since the list loaded, that is no longer in the index, or whose shifted priority would drop below 1, is left unchanged; the page then reports how many rules could not be changed, with the first reason, for example *1 rule could not be disabled: it was changed by someone else. Reload and try again.* The other rules are changed. With **Select all … matching**, nothing is changed when the number of matching rules differs from the one you saw (*The matching rules changed. Reload and try again.*). A selection without it can hold at most 1,000 rules.
+
+Every bulk action is written to the event log (source `LuceneSuite`, event codes `RULES_BULK_ENABLE`, `RULES_BULK_DISABLE`, `RULES_BULK_PRIORITY` and `RULES_BULK_DELETE`) with each rule's values before and after.
+
+Without **Manage rules**, the list has no checkboxes, no **Create rule** button and no delete action; **Edit** opens the rule read-only.
 
 ## Rules
 
 ### The rule form
+
+The form has four sections: **General** (Name to Valid until), **Conditions**, **Actions** (boosts, pins and hides) and **Custom data**. Above them, **Status** shows what the rule would do now with the values in the form, before you save: **Active** · fires on matching searches, **Scheduled** · starts *date* UTC, **Expired** · ended *date* UTC, or **Disabled**. It is worked out the same way as in the [rules list](#the-rules-list).
 
 | Field | Default | Meaning |
 |---|---|---|
@@ -88,6 +124,8 @@ How text is compared:
 
 Facet dimensions, facet values and contexts are compared exactly (case-sensitive).
 
+In the editor, **Add facet** adds a Facet and Value pair. **Facet** lists the index's facet dimensions; **Value** lists the dimension's values with their document counts, as an empty search with rules and synonyms off reports them (the top `FacetValuesPerDimension` values). Choose **Other value…** to type a value that is not listed. A stored dimension or value the index no longer reports is kept and marked *not in the index*. For an index without facets, or when the values cannot be loaded, you type the dimension and value.
+
 #### Visitor contexts
 
 A context is a string your site sends with the search, at most 50 per request and 100 characters each. In a rule it may hold 1–100 letters, digits, `_`, `.` or `-`. The Widgets components send the current contact's **contact group code names** (when `ContactGroupContexts` is on, the default), so *Visitor context* `VipCustomers` targets the contact group with that code name. Your own code can send anything:
@@ -95,6 +133,11 @@ A context is a string your site sends with the search, at most 50 per request an
 ```csharp
 Contexts = ["VipCustomers", "region.emea"]
 ```
+
+In the editor, **Add context** adds a **Visitor context**:
+
+- With Contact groups → View (administrators always have it), you pick a contact group by its display name, and the rule stores its code name. Recipient lists are not offered, and at most 500 groups are listed. Choose **Custom context…** to type any other context.
+- Without that permission, or when the contact groups cannot be loaded, you type the context.
 
 ### Actions
 
@@ -107,11 +150,11 @@ Contexts = ["VipCustomers", "region.emea"]
 - A pin is skipped when the item is not in the index, when any fired rule hides it, or, with **Pinned items must match the applied filters** on, when it does not match the request's facet filters.
 - `SuiteSearchHit.PinnedByRuleId` names the rule. A pinned hit that did not rank by itself within the fetched window has `Score` 0.
 
-In the editor, **Add pins** searches the index (rules off, no analytics) to pick items. An item that has left the index is shown as **Not in this index**.
+In the editor, **Pin items** searches the index (rules off, no analytics; the first 20 results) to pick items. New pins take the lowest free positions. An item that has left the index is shown as **Not in this index**.
 
 #### Hides
 
-Hidden items are removed from results, totals and facet counts. A hide beats any pin, from any rule.
+Hidden items are removed from results, totals and facet counts. A hide beats any pin, from any rule. In the editor, **Hide items** picks items the same way as **Pin items**.
 
 #### Boosts and buries
 
@@ -160,7 +203,7 @@ All fired rules apply together, in priority order:
 | Boost value, facet dimension, facet value | 200 characters |
 | Custom data | 1 024 bytes (UTF-8, compact JSON) |
 
-The editor checks these with the same rules the search uses. A stored rule that is no longer valid is skipped at search time, and a warning naming it is logged at most once a minute per index.
+The editor checks these with the same rules the search uses, while you type: a message appears under a control once you leave it, or after a failed save. For example, a pin position outside the range shows *Must be 1–300.* and a strength of 0 shows *Must be −100..100 and not 0.* A stored rule that is no longer valid is skipped at search time, and a warning naming it is logged at most once a minute per index.
 
 ## Synonyms
 
@@ -203,13 +246,26 @@ The Suite looks for runs of 1–5 consecutive query words that equal a synonym t
 
 ## Testing in the admin
 
-**Search tuning → Query tester** runs searches through `ISuiteSearchService` without recording analytics. It shows:
+**Search tuning → Query tester** runs searches through `ISuiteSearchService` without recording analytics. Type a query and press Enter; an empty query lists all documents. On a faceted index, **Filter** applies facet values.
 
-- the hits, with a marker on pinned ones;
-- **fired rules**, linked to their edit pages, with their custom data;
-- **applied synonyms**, as term → replacement.
+A summary card above the results shows:
 
-Use the **Apply rules** and **Apply synonyms** switches to see the untuned results. Visitor contexts can be simulated with free text or, for users who can view Kentico's Contact groups application, by picking contact groups. **Compare** shows a *Baseline* and a *Tuned* column side by side, each with its own switches and contexts.
+- **Total hits** and **Elapsed** (milliseconds);
+- **Fired rules (n)**: one chip per rule with an icon for what it mainly does (pin, boost, hide or custom data, the first that applies), its name and a summary of its actions such as `2 pins, 1 boost`. The chip opens the rule. Custom data is shown below the chips as JSON. A rule deleted since is shown as *(deleted)*, without a link.
+- **Synonyms applied (n)**: one tag per variant, `term → replacement`, that opens the synonym.
+
+The results table has the columns **#** (position), **Title**, the index's other `SearchFields` that have a value on the page, **Score** and **Item GUID**. A pinned hit has a **Pinned #n** tag before its title; its tooltip names the rule. The bar next to each score is relative to the top score on the page. Click a row to see every stored field. Show 10, 25 or 50 rows per page.
+
+If a search fails, **Search failed** offers **Try again**, which repeats the same search; the previous results stay on screen.
+
+Use the **Apply rules** and **Apply synonyms** switches to see the untuned results.
+
+**Compare** shows a **Baseline** and a **Tuned** column side by side. Both run the same query and filters and show the first 20 results. Each column keeps its own settings:
+
+- **Apply rules** and **Apply synonyms**: off in Baseline and on in Tuned when you open Compare.
+- Visitor contexts: type one in **Add a context** and press Enter, or, for users who can view Kentico's Contact groups application, pick groups with **Contact groups…**. Contexts are sent as the site would send them; contact-group membership is not checked.
+
+Tuned has a **Moved** column: an arrow and the number of places a document moved up or down compared with Baseline, **—** when unchanged, or **New** when Baseline did not return it. **Not in this column (n)** lists the Baseline documents Tuned did not return. If a column's search fails, change one of its settings to try again.
 
 ### Related pages
 

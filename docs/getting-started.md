@@ -111,7 +111,7 @@ A **Site search** application in the *Digital marketing* category:
 
 - **Indexes**: the Kentico Lucene indexes. Each opens a **Search tuning** section with:
   - **Search reports**: KPIs, trends and query tables; see [Search reports](search-reports).
-  - **Query tester**: runs searches through `ISuiteSearchService` without recording analytics. You can switch rules and synonyms on or off, simulate visitor contexts, and compare two settings side by side.
+  - **Query tester**: runs searches through `ISuiteSearchService` without recording analytics. You can switch rules and synonyms on or off, and compare two settings side by side, each with its own visitor contexts.
   - **Rules** and **Synonyms**: see [Rules and synonyms](rules-and-synonyms).
   - **Blocked suggestions**: see [Query suggestions](suggestions).
 - A **Search tuning** row action on Kentico's own Lucene index listing, shown to users who have Site search → View.

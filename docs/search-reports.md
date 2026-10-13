@@ -74,6 +74,18 @@ Each search's latency is stored in a fixed histogram:
 - **Empty histogram:** no percentile is reported.
 - **Resolution:** results are limited to the bucket edges.
 
+## On the report page
+
+**Site search → an index → Search reports** shows these numbers for the chosen period.
+
+- **Metric tiles:** each tile shows a metric, its change from the previous period and a sparkline of its daily values in the period. Select a tile to chart that metric.
+- **Search terms:** the query table. **Top**, **No results**, **Lowest CTR** and **Slowest** choose the sort order (Top is the *Searches* order above). The Searches, No results and CTR columns show a data bar next to the number: Searches is relative to the largest count on the page; No results and CTR are rates from 0 to 100 %.
+- **Rows per page:** 10, 25 (the default) or 50. The choice is kept per index, with the period, sort and page, for the browser tab's session.
+- **No searches:** when the period has no searches, the page shows **No searches in this period** with an **Open query tester** button. Searches made in the query tester are not tracked, so they never fill a report.
+- **Load failures:** when the report cannot be loaded, the last loaded report stays on screen, with its charts and bars faded and a **Retry** button. When only the query table fails, the last loaded table stays; change the sort or period to retry.
+
+The **Fix these first** card on the same page is described in [Search insights](insights).
+
 ## Seeding demo history
 
 The test project contains a dev-only seed runner that fills `LuceneSuite_SearchDaily` with plausible history, so reports can be built and demonstrated before real traffic exists. Nothing from it ships in a package.

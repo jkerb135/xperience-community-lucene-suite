@@ -14,9 +14,10 @@ Insights use the same data and the same date range as the [search reports](searc
 Open **Site search → an index → Search reports**. The **Fix these first** card lists the five findings that affect the most searches. Each shows:
 
 - the kind of finding;
-- the query;
+- the query, with its number of searches in the range ("{n} searches");
+- a bar with the figure the finding is about: the no-result rate (content gap), the CTR (relevance miss), the average click position on a scale of 10 (buried answer), the share of slow searches (slow query), or, for a regression, whichever of the no-result rate and the CTR got worse by more points;
 - one line with the numbers behind it;
-- any fixes already in place;
+- any fixes already in place, after **Already applies:**;
 - buttons for the fixes that suit it.
 
 | Finding | Buttons |
