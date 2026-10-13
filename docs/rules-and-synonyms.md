@@ -46,6 +46,8 @@ If someone else saved the same rule or synonym after you opened it, your save is
 
 After a successful save the rule form reloads with the saved rule, so you can keep editing and save again.
 
+Every create, edit and delete of a rule or synonym, from the admin or from code, is written to the Kentico event log with the signed-in user who made it, or no user outside an admin request (source `LuceneSuite`, event codes `RULE_CREATE`, `RULE_UPDATE`, `RULE_DELETE`, `SYNONYM_CREATE`, `SYNONYM_UPDATE` and `SYNONYM_DELETE`); the entry names the index, the id and the rule name or the synonym's terms. A bulk action on the rules list is one summary entry instead (see below). The trail lives only in Kentico's event log, so how long it is kept follows the site's event log size setting (`CMSLogSize`; a site keeping 1,000 rows rotates in about two days). Raise that setting if you need a longer history.
+
 ### The rules list
 
 **Rules** lists the index's rules with their Name, Priority, Status, Valid from (UTC), Valid until (UTC), Conditions and Actions. On a narrow screen the two date columns are hidden. The status is worked out when the list loads, checked in this order:
@@ -90,8 +92,8 @@ The form has four sections: **General** (Name to Valid until), **Conditions**, *
 | Description | | Notes |
 | Enabled | on | A disabled rule never fires |
 | Priority | 10 | ≥ 1. 1 runs first. When two rules pin to the same position, the earlier rule wins. Ties are broken by rule id. |
-| Valid from (UTC) | empty | The rule fires from this time on (inclusive). Empty: no start. |
-| Valid until (UTC) | empty | The rule stops firing at this time (exclusive). Must be later than Valid from. Empty: no end. |
+| Valid from | empty | The rule fires from this time on (inclusive), entered in your local time; the status line shows it in UTC. Empty: no start. |
+| Valid until | empty | The rule stops firing at this time (exclusive), entered in your local time; the status line shows it in UTC. Must be later than Valid from. Empty: no end. |
 | Conditions | none | When the rule fires; see below |
 | Boosts and buries | none | Field, Value, Strength |
 | Pinned items | none | Item and Position |

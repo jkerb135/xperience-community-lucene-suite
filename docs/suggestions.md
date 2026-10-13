@@ -101,6 +101,8 @@ You need Site Search → **Manage synonyms** to block or unblock a suggestion. S
   - The button is disabled for the browse row and for `{email}`/`{number}` rows.
   - The Needs attention card has no block button. Its queries mostly return no results, and suggestions already skip queries that return nothing half the time or more.
 
+Every block and unblock, from either page or from code, is written to the Kentico event log with the signed-in user who made it, or no user outside an admin request (source `LuceneSuite`, event codes `BLOCKED_SUGGESTION_CREATE`, `BLOCKED_SUGGESTION_UPDATE` and `BLOCKED_SUGGESTION_DELETE`), naming the index, the id, the text and the match mode. The trail lives only in Kentico's event log, so how long it is kept follows the site's event log size setting (`CMSLogSize`; a site keeping 1,000 rows rotates in about two days). Raise that setting if you need a longer history.
+
 ### How fast a block applies
 
 - **On the server: at once.** The blocklist is cached with the `lucenesuite.blockedsuggestion|all` dependency, so a change clears it on every web-farm node.
