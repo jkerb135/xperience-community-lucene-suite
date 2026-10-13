@@ -5,27 +5,27 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — review done (all checks approved); pre-release quick fix 13-05, then /paul:complete-milestone
+**Current focus:** v0.2 Measure — all phases complete, review done, follow-ups shipped; /paul:complete-milestone next
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 13 of 13 (Enterprise Screens) — Follow-ups (13-05) from the milestone review
-Plan: 13-05 not planned yet
-Status: Milestone review complete — 13-05 follow-ups next
+Phase: 13 of 13 (Enterprise Screens) — Complete
+Plan: 13-05 complete (phase complete)
+Status: v0.2 ready to complete (all checks approved)
 Last activity: 2026-10-13 — Unified 13-04; Phase 13 complete (docs updated)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [█████████░] 7 of 8 phases (Phase 13 reopened for 13-05; review done)
-- Phase 13: [████████░░] 5/6 plans (13-05 pending)
+- v0.2 Measure: [██████████] 8 of 8 phases (review done)
+- Phase 13: [██████████] 6/6 plans
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready to plan 13-05]
+  ✓        ✓        ✓     [Loop complete - milestone ready to complete]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,10 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-13: 13-05 unified, Phase 13 complete again: audit trail (SuiteChangeLog) + local-time labels shipped; all v0.2 checks approved | Phase 13 | complete-milestone next |
+| 2026-10-13: 13-05 applied: SuiteChangeLog (Core object events → one LuceneSuite event-log entry per change, user stamped by Kentico), bulk loops muted with summary kept, local-time validity labels; host: single edits + synonym (user), bulk = summary only, labels; blocklist via DB test. APPROVAL-CHECKS #21 | Phase 13 | UNIFY next |
+| 2026-10-13: Enterprise audit on 13-05-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 13 | Retention of the trail follows Kentico's CMSLogSize — documented, not overclaimed; description capped at 1,000 chars; no-user changes still logged; test fixtures muted if they write per item |
+| 2026-10-13: 13-05 planned: Core object-event change log for Rule/Synonym/BlockedSuggestion (one Kentico event-log entry per change, muted in rules bulk loops via CMSActionContext LogEvents=false), local-time validity labels; #6 dropped by user (RowActions already has hidden reason text since 08.1-03 — review statement corrected) | Phase 13 | 13-05 created |
 | 2026-10-13: v0.2 milestone review: APPROVAL-CHECKS #4–#20 approved (user). Keep seeded host history (#4). Follow-ups before release (13-05): event-log audit trail for Suite admin changes (#12), keyboard-readable disabled reasons on report row actions (#6), 'Valid from/until' as local time with UTC hint (#16) | Phase 13 | 13-05 next |
 | 2026-10-13: 13-04 unified, Phase 13 complete: four enterprise screens per handoff (rules listing, rule edit, search reports, query tester) + save-conflict quick fix + post-feedback rule-form fixes; docs updated (/update-docs) | Phase 13 | Milestone review next |
 | 2026-10-12: 13-04 applied: query tester per handoff (summary chips with action summary, score DataBars, # + Pinned tag, RangeFooter 10/25/50 committed with results, Compare tables with Moved, Try again + stale). Host fixes: page-size Select remounts after failure (resetKey); empty Callout hidden while failed. Implementer fixed pre-existing duplicate-key JSON throw in RuleSummaries. APPROVAL-CHECKS #20 | Phase 13 | UNIFY next (phase end: /update-docs) |
@@ -247,7 +251,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
-| Pre-release follow-ups from the v0.2 review (2026-10-13): event-log audit trail for Suite rule/synonym/blocklist changes (#12); keyboard-readable reasons on disabled report row actions (#6); 'Valid from/until' relabelled as local time (#16) | Blocks complete-milestone | Plan 13-05 |
+| Resolved 2026-10-13 (13-05): pre-release follow-ups from the v0.2 review: event-log audit trail for Suite rule/synonym/blocklist changes (#12); 'Valid from/until' relabelled as local time (#16); #6 dropped (screen-reader reason text exists since 08.1-03; sighted-keyboard gap → KNOWN-LIMITATIONS) | Blocks complete-milestone | Plan 13-05 |
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
@@ -259,8 +263,8 @@ Feature branches merged: none
 
 Last session: 2026-10-13
 Stopped at: Phase 13 complete (v0.2 phases complete)
-Next action: /paul:plan (13-05: audit trail, disabled-action reasons, local-time labels), then /paul:complete-milestone
-Resume file: .paul/APPROVAL-CHECKS.md
+Next action: /paul:complete-milestone (v0.2 Measure)
+Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

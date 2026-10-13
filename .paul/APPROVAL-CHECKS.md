@@ -4,6 +4,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
+| 21 | 13-05 | Audit trail for rule/synonym/blocklist changes (Kentico event log) + local-time validity labels | Approved 2026-10-13 (user ran single-edit and synonym checks; bulk and labels checked by me in the signed-in pane) |
 | 20 | 13-04 | Query tester per handoff: summary strip with rule chips, score bars, rows per page, Compare Moved column, Try again | Approved 2026-10-13 |
 | 19 | 13-03 fixes | Rule/synonym form: row alignment with errors, red delete icons, friendly type errors, no request-driven Save flashing | Approved 2026-10-13 |
 | 18 | 13-03 | Search reports per handoff: sparklines, data bars, rows per page, empty state, Retry with stale fade | Approved 2026-10-13 |
@@ -14,7 +15,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 | 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | Approved 2026-10-12 with one follow-up: host index stores readable facet values |
 | 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Approved 2026-10-13: keep (seeded texts keep counting toward surfacing/suggestions on the dev host) |
 | 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Approved 2026-10-13 |
-| 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Approved 2026-10-13 with follow-up: disabled row actions get a keyboard-readable reason (13-05); labelled buttons superseded by 08.1-03 icons |
+| 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Approved 2026-10-13: screen-reader reason text exists since 08.1-03; sighted-keyboard tooltip gap accepted → KNOWN-LIMITATIONS (13-05); labelled buttons superseded by 08.1-03 icons |
 | 15 | 12-01 | Public API: inventory + internalized types, SearchClick, one Widgets namespace, PublicApiAnalyzers baseline, docs/public-api.md | Approved 2026-10-13 |
 | 14 | 11-01/11-02 | Search insights: Fix these first card, All insights panel, actions per kind, ranking by searches affected | Approved 2026-10-13 |
 | 13 | 10-01 | Search activities (3 custom types, installed disabled) + click contract v2 (optional query/title) | Approved 2026-10-13 (LogClick change superseded by LogClick(SearchClick) in Phase 12) |
@@ -686,4 +687,40 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **A rule with no actions shows " · None";** invalid JSON shows " · Invalid — open to fix".
    - **Score bars are relative to the current page's top score.**
    - **Rows per page isn't remembered** after leaving the page.
+
+---
+
+## 21. 13-05: Review follow-ups — audit trail and local-time labels (v0.2)
+
+1. **What changed:**
+   - **Change log:** `SuiteChangeLog` (Core) writes one Kentico event-log entry per create, update and delete of a rule, synonym or blocked suggestion.
+     - Source `LuceneSuite`, codes like `RULE_UPDATE`.
+     - One-line description of at most 1,000 characters; no rule JSON.
+     - A logging failure never fails the save.
+   - **Bulk:** rules bulk actions mute the per-rule entries and keep their `RULES_BULK_*` summary.
+   - **Labels:** the rule form says "Valid from" / "Valid until", with help text that the time is local and the status line shows UTC.
+2. **Host evidence (CMS_EventLog, source LuceneSuite, after event 11301):**
+   - **Your checks:**
+     - `RULE_UPDATE` ×2: two saves of rule 4 from its edit page;
+     - `SYNONYM_CREATE` / `SYNONYM_DELETE` for temporary synonym #9;
+     - each row with UserName `administrator` and EventUrl `/admin/api/cmd`.
+   - **Mine:**
+     - bulk Disable then Enable of rule 4 → `RULES_BULK_DISABLE` and `RULES_BULK_ENABLE` only (with your user name), no per-rule rows;
+     - rule 4 is enabled again.
+   - **Labels:**
+     - "Valid from" / "Valid until" with the local-time help text;
+     - no "(UTC)" left on the form;
+     - the status line reads "Active · fires on matching searches".
+   - **Counts:** back to baseline (Rule 1, Synonym 0, Blocked 0).
+3. **Not on the host:** blocked suggestions (create, report Block, delete). Covered by the DB test (same handler, same provider writes) and by code review of the Block command.
+4. **Automated checks:**
+   - .NET 859 passed / 6 skipped. The RulesOverhead flake passed alone; it uses in-memory rules, so no fixtures needed muting.
+   - The new DB test covers 9 codes, the muted case and the 1,000-character cap.
+   - Client 103/103; Debug and Release 0 warnings.
+5. **Recorded limitations:**
+   - Retention follows the site's `CMSLogSize`; the host keeps 1,000 rows, about two days.
+   - No field-level diff.
+   - An unedited Save logs an UPDATE.
+   - #6: sighted keyboard users get no reason on disabled report row actions.
+   - All are in docs and KNOWN-LIMITATIONS.
 

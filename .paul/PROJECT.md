@@ -14,7 +14,7 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.1.0 |
-| Status | v0.2 Measure: all phases (7–13, 8.1) complete; milestone review of APPROVAL-CHECKS #4–#20 pending |
+| Status | v0.2 Measure: all phases (7–13, 8.1) complete; APPROVAL-CHECKS #4–#21 approved; ready to complete the milestone |
 | Last Updated | 2026-10-13 |
 
 ## Requirements
@@ -83,6 +83,7 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Rule editor regrouped with a live status line, contact-group/custom context and facet value pickers, conflict alert with confirmed Reload, repeated saves (form reloads after a successful save), live validation through page commands (Save no longer flashes) and field messages for wrongly typed values — Phase 13 (13-02, 13-02.1, fixes)
 - ✓ Search reports per handoff: tile sparklines, data bars, rows per page, empty-period callout, Retry with a graphics-only stale fade — Phase 13 (13-03)
 - ✓ Query tester per handoff: summary strip with fired-rule chips (action summary), score bars, positions + rows per page, Compare tables with rank movement, Try again — Phase 13 (13-04)
+- ✓ Audit trail: every create/update/delete of a rule, synonym or blocked suggestion writes one Kentico event-log entry with the user (source LuceneSuite; bulk rule actions as one summary; retention follows CMSLogSize); rule validity fields labelled as local time — Phase 13 (13-05)
 
 ### Active (In Progress)
 
@@ -181,6 +182,7 @@ Marketers tune, test and measure site search without a developer.
 | v0.3 Relevance milestone added before Test (Test → v0.4, Instant Search → v0.5): query-time admin-managed stopwords, field-weights editor (appsettings as defaults), fuzzy typo variants below exact, Did-you-mean + curated suggestions, popularity boost with per-item click data collected first; rewrite order stopwords → synonyms → typos → field weights → rules | User decisions | 2026-10-12 | Active |
 | Phase 13 handoff deviations (npm 31.9.1 / enterprise.md precedence): Spinner instead of skeletons; text never faded (stale = graphics at 60 % + a line); Compare keeps configurable Baseline/Tuned columns instead of a fixed tuned/untuned pair; pins keep typed positions (drag order would drop fixed slots) | User decisions + audits | 2026-10-13 | Active |
 | Live validation and status in Suite admin forms use page commands, not form-component commands (Kentico marks the form busy for every form-component command); successful edit saves navigate to the same page (Kentico applies returned values only on failed submits) | 13-02.1 + post-13-03 host findings | 2026-10-13 | Active |
+| Suite admin data changes are audited in Core through TYPEINFO object events (one entry per change, user stamped by Kentico); bulk operations mute per-item entries with CMSActionContext LogEvents = false and log one summary; the trail lives in Kentico's event log, so its retention is the site's CMSLogSize | v0.2 milestone review (user) + 13-05 audit | 2026-10-13 | Active |
 | Admin cross-page prefill = one-time sessionStorage handoff bound to target, index, exact page path and expiry; consumers fill only empty forms; never URL query strings or server state | 08-01 (URL state raced the admin router) / 08-02 audit | 2026-10-12 | Active |
 
 ## Success Metrics

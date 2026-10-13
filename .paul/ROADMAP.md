@@ -5,8 +5,8 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
-Status: Review complete (all checks approved) — 13-05 follow-ups, then complete-milestone
-Phases: 7 of 8 complete (Phase 13 reopened for 13-05)
+Status: All phases complete, all checks approved — ready for complete-milestone
+Phases: 8 of 8 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -20,7 +20,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
 | 11 | Search Insights | 2/2 | ✅ Complete | 2026-10-12 |
 | 12 | Public API Audit | 1/1 | ✅ Complete | 2026-10-12 |
-| 13 | Enterprise Screens | 5/6 | Follow-ups (13-05) | - |
+| 13 | Enterprise Screens | 6/6 | ✅ Complete | 2026-10-13 |
 
 ## Phase Details
 
@@ -107,7 +107,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 - [x] 13-02.1 (inserted, complete 2026-10-12): Quick fix — second Save without reload no longer a false conflict (rules + synonyms); rule conflict alert with Reload
 - [x] 13-03 (complete 2026-10-12): Search reports — sparklines, data bars, range footer, loading/empty/error states
 - [x] 13-04 (complete 2026-10-13): Query tester — result summary strip, score bars, rank movement in Compare, range footer, states
-- [ ] 13-05 (inserted from the milestone review): Pre-release follow-ups — event-log audit trail for Suite admin changes, keyboard-readable disabled reasons on report row actions, local-time validity labels
+- [x] 13-05 (inserted from the milestone review, complete 2026-10-13): Pre-release follow-ups — event-log audit trail for Suite admin changes, local-time validity labels (#6 dropped by user)
 
 ## Completed Milestones
 

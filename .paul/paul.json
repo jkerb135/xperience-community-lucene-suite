@@ -10,8 +10,8 @@
   "phase": {
     "number": 13,
     "name": "Enterprise Screens",
-    "status": "in_progress",
-    "plans_completed": 5
+    "status": "complete",
+    "plans_completed": 6
   },
   "loop": {
     "position": "IDLE"
