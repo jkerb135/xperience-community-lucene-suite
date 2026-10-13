@@ -1,3 +1,4 @@
+using CMS.Base;
 using CMS.Core;
 using CMS.DataEngine;
 using CMS.Membership;
@@ -181,15 +182,19 @@ public sealed class RuleListingPage(
 
             try
             {
-                if (change.After is null)
+                // The RULES_BULK_* summary below replaces the per-rule change-log entries.
+                using (new CMSActionContext { LogEvents = false })
                 {
-                    rules.Delete(rule);
-                }
-                else
-                {
-                    rule.Enabled = change.After.Enabled;
-                    rule.Priority = change.After.Priority;
-                    rules.Set(rule);
+                    if (change.After is null)
+                    {
+                        rules.Delete(rule);
+                    }
+                    else
+                    {
+                        rule.Enabled = change.After.Enabled;
+                        rule.Priority = change.After.Priority;
+                        rules.Set(rule);
+                    }
                 }
 
                 applied.Add(change);

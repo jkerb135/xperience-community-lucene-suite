@@ -40,12 +40,12 @@ public sealed class RuleEditModel
     public int Priority { get; set; } = 10;
 
     /// <summary>Inclusive UTC start; empty is unbounded.</summary>
-    [DateTimeInputComponent(Label = "Valid from (UTC)", ExplanationText = "Leave empty to start immediately.", Order = 6)]
+    [DateTimeInputComponent(Label = "Valid from", ExplanationText = "In your local time; the status line above shows it in UTC. Leave empty to start immediately.", Order = 6)]
     public DateTime? ValidFromUtc { get; set; }
 
     /// <summary>Exclusive UTC end; empty is unbounded.</summary>
     [RuleValidityValidationRule]
-    [DateTimeInputComponent(Label = "Valid until (UTC)", ExplanationText = "Leave empty to run indefinitely.", Order = 7)]
+    [DateTimeInputComponent(Label = "Valid until", ExplanationText = "In your local time; the status line above shows it in UTC. Leave empty to run indefinitely.", Order = 7)]
     public DateTime? ValidUntilUtc { get; set; }
 
     /// <summary>Conditions JSON (array).</summary>

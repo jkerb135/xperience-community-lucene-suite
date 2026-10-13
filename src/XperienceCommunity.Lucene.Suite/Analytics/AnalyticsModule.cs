@@ -27,6 +27,7 @@ internal sealed class AnalyticsModule : Module
     {
         base.OnInit(parameters);
         services = parameters.Services;
+        SuiteChangeLog.Register(parameters.Services);
         ApplicationEvents.Initialized.Execute += (_, _) => Install();
     }
 
