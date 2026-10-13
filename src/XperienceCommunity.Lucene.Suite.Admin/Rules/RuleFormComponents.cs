@@ -120,10 +120,20 @@ public sealed class RuleFacetValuesResult
 
 /// <summary>Display-only status of the edited rule, worked out on the server like the rules listing; never stored.</summary>
 [ComponentAttribute(typeof(RuleStatusComponentAttribute))]
-public sealed class RuleStatusFormComponent : FormComponent<RuleHiddenClientProperties, string>
+public sealed class RuleStatusFormComponent : FormComponent<RuleStatusClientProperties, string>
 {
     /// <inheritdoc />
     public override string ClientComponentName => "@xperience-community/lucene-suite/RuleStatus";
+
+    /// <summary>Set by the rule edit page when a save was refused because someone else changed the rule.</summary>
+    internal bool Conflict { get; set; }
+
+    /// <inheritdoc />
+    protected override Task ConfigureClientProperties(RuleStatusClientProperties clientProperties)
+    {
+        clientProperties.Conflict = Conflict;
+        return base.ConfigureClientProperties(clientProperties);
+    }
 
     /// <summary>The status of the form's current (unsaved) Enabled and validity values, now.</summary>
     [FormComponentCommand]
@@ -195,8 +205,15 @@ public sealed class RuleHiddenFormComponent : FormComponent<RuleHiddenClientProp
     public override string ClientComponentName => "@xperience-community/lucene-suite/RuleHidden";
 }
 
-/// <summary>Client properties of <see cref="RuleHiddenFormComponent"/> and <see cref="RuleStatusFormComponent"/>.</summary>
+/// <summary>Client properties of <see cref="RuleHiddenFormComponent"/>.</summary>
 public sealed class RuleHiddenClientProperties : FormComponentClientProperties<string>;
+
+/// <summary>Client properties of <see cref="RuleStatusFormComponent"/>.</summary>
+public sealed class RuleStatusClientProperties : FormComponentClientProperties<string>
+{
+    /// <summary>Whether the last save was refused because someone else changed the rule.</summary>
+    public bool Conflict { get; set; }
+}
 
 /// <summary>Edits the property with <see cref="RuleConditionsFormComponent"/>.</summary>
 public sealed class RuleConditionsComponentAttribute : FormComponentAttribute;

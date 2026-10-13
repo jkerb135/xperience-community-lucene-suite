@@ -153,6 +153,7 @@ public abstract class RuleEditPageBase(
         var stored = EditedRuleId is null ? StoredRule.New : StoredRule.From(rule);
         if (EditedRuleId is not null && RuleEditMapping.IsStale(model.LoadedVersion, stored))
         {
+            formItems.OfType<RuleStatusFormComponent>().Single().Conflict = true;
             return await Failure(formItems, ConcurrencyMessage);
         }
 
@@ -165,21 +166,13 @@ public abstract class RuleEditPageBase(
         RuleEditMapping.Apply(model, definition, stored).CopyTo(rule);
         rules.Set(rule);
 
-        if (EditedRuleId is null)
+        // Kentico's client ignores the items of a successful submit, so an edit reloads the page (refetched even at the same URL) to get the new version token.
+        string url = pageLinkGenerator.GetPath<RuleEditPage>(new PageParameterValues
         {
-            string url = pageLinkGenerator.GetPath<RuleEditPage>(new PageParameterValues
-            {
-                { typeof(SearchTuningSectionPage), IndexIdentifier },
-                { typeof(RuleEditPage), rule.RuleID },
-            });
-            return NavigateTo(url).AddSuccessMessage("Rule created.");
-        }
-
-        // The next save compares against the version just written.
-        model.LoadedVersion = RuleEditMapping.VersionOf(StoredRule.From(rule));
-        var items = await formItems.OnlyVisible().GetClientProperties();
-        return ResponseFrom(new FormSubmissionResult(FormSubmissionStatus.ValidationSuccess) { Items = items })
-            .AddSuccessMessage("Rule saved.");
+            { typeof(SearchTuningSectionPage), IndexIdentifier },
+            { typeof(RuleEditPage), rule.RuleID },
+        });
+        return NavigateTo(url, refetchAllTemplates: EditedRuleId is not null).AddSuccessMessage(EditedRuleId is null ? "Rule created." : "Rule saved.");
     }
 
     private RuleInfo? FindRule(int ruleId) =>

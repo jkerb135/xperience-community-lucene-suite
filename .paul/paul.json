@@ -14,7 +14,7 @@
     "plans_completed": 2
   },
   "loop": {
-    "position": "PLAN",
+    "position": "APPLY",
     "plan": "13-02.1",
     "plan_path": "phases/13-enterprise-screens/13-02.1-PLAN.md"
   },

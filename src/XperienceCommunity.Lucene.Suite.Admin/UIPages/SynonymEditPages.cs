@@ -148,21 +148,13 @@ public abstract class SynonymEditPageBase(
         SynonymEditMapping.Apply(definition, model.Enabled, stored).CopyTo(synonym);
         synonyms.Set(synonym);
 
-        if (EditedSynonymId is null)
+        // Kentico's client ignores the items of a successful submit, so an edit reloads the page (refetched even at the same URL) to get the new version token.
+        string url = pageLinkGenerator.GetPath<SynonymEditPage>(new PageParameterValues
         {
-            string url = pageLinkGenerator.GetPath<SynonymEditPage>(new PageParameterValues
-            {
-                { typeof(SearchTuningSectionPage), IndexIdentifier },
-                { typeof(SynonymEditPage), synonym.SynonymID },
-            });
-            return NavigateTo(url).AddSuccessMessage("Synonym created.");
-        }
-
-        // The next save compares against the version just written.
-        model.LoadedVersion = SynonymEditMapping.VersionOf(StoredSynonym.From(synonym));
-        var items = await formItems.OnlyVisible().GetClientProperties();
-        return ResponseFrom(new FormSubmissionResult(FormSubmissionStatus.ValidationSuccess) { Items = items })
-            .AddSuccessMessage("Synonym saved.");
+            { typeof(SearchTuningSectionPage), IndexIdentifier },
+            { typeof(SynonymEditPage), synonym.SynonymID },
+        });
+        return NavigateTo(url, refetchAllTemplates: EditedSynonymId is not null).AddSuccessMessage(EditedSynonymId is null ? "Synonym created." : "Synonym saved.");
     }
 
     private SynonymInfo? FindSynonym(int synonymId) =>

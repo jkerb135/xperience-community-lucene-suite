@@ -136,6 +136,10 @@ XperienceCommunity.Lucene.Suite.Admin.Rules.RuleEditModel.ValidUntilUtc.get -> S
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleEditModel.ValidUntilUtc.set -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleHiddenClientProperties
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleHiddenClientProperties.RuleHiddenClientProperties() -> void
+XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusClientProperties
+XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusClientProperties.Conflict.get -> bool
+XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusClientProperties.Conflict.set -> void
+XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusClientProperties.RuleStatusClientProperties() -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleHiddenComponentAttribute
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleHiddenComponentAttribute.RuleHiddenComponentAttribute() -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleHiddenFormComponent

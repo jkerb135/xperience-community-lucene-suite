@@ -4,6 +4,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
+| 17 | 13-02.1 | Rule/synonym edit: repeated saves work (form reloads after save); rule conflict alert with confirmed Reload | Pending |
 | 16 | 13-02 | Rule edit per handoff: sections, live status, contact-group and facet pickers, pins/hides layouts | Pending |
 | 1 | 06-01 | Public API + endpoint shape | Approved 2026-10-11 (before this process) |
 | 2 | 06-02 | Search component markup, parameters and URL names | Approved 2026-10-12 (heading labels resolved by 06-03) |
@@ -537,4 +538,36 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
      - the stale facet label ("not in the index") on the host, covered by node tests;
      - FacetValues / ContactGroups failure bars.
    - **Environment note:** the 13-02 Release build's `npm ci` hit a locked folder (my shell's working directory), and node_modules was restored by the implementer. The long-running admin dev server had cached the broken state and crashed the admin until restarted. If the Suite admin shows "Something went wrong" in Debug, restart `npm start`.
+
+---
+
+## 17. 13-02.1: Save-conflict quick fix (v0.2)
+
+1. **Where:** any rule or synonym edit page (Site search → DancingGoatSample → Rules / Synonyms).
+2. **Root causes found:**
+   - **Primary:** Kentico 31.9.1's admin client does **not** apply returned form values after a successful save (verified by capturing requests and with a debug line). The hidden concurrency token stayed at its page-load value forever. It *does* apply them after a failed save.
+   - **Secondary:** right after `Set()`, the saved object's LastModified is local-kind, so it formats with an offset unlike the DB-read value.
+   - **Your decision:** a successful **edit** save now navigates to the same edit page (`NavigateTo(..., refetchAllTemplates: true)`, the way Kentico's own field editor refreshes). The form reloads with a fresh token from the DB. Create is unchanged.
+3. **What I verified on the host:**
+   - **Repeated saves:**
+     - rule: three saves in a row → "Rule saved." ×3, the toast survives the reload, the DB holds the last description;
+     - synonym: three saves (Enabled toggled) → "Synonym saved." ×3, the DB matches.
+   - **Real conflict (simulated by a SQL LastModified bump while the form was open):**
+     - rule and synonym: two saves in a row are both refused and nothing is stored;
+     - a retry cannot overwrite the other editor's change.
+   - **Conflict alert (rule):**
+     - "This rule was changed by someone else." + RELOAD (accessible name "Reload the rule") in an aria-live polite region;
+     - Reload opens the dialog "Reload the rule? | Your unsaved changes are lost. | CANCEL | RELOAD", with focus in the dialog;
+     - Cancel returns focus to Reload and keeps the edit;
+     - confirming reloads from the DB and the alert is gone.
+   - **Unedited save of rule 4:** stored content byte-identical.
+   - **Cleanup:** temporary rule 506 and synonym #7 deleted through the UI; counts Rule 1 / Synonym 0 / Blocked 0.
+4. **Automated checks:**
+   - .NET 836–837 passed, 6 skipped. The only failure is the known RulesOverhead timing flake, which passed alone.
+   - 2 new DB tests: three save cycles with the reloaded token; refusals keep the old token with Conflict = true.
+   - Client 92/92; tsc clean; Release build embeds the bundle.
+5. **Your decisions to confirm:**
+   - **The form reloads after every successful edit save,** so scroll position and focus go back to the top.
+   - **The synonym page has no Reload alert** (message only).
+   - **Still open from 13-02:** the "Valid from/until (UTC)" labels vs Kentico's browser-local date input.
 
