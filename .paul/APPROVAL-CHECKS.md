@@ -4,6 +4,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
+| 18 | 13-03 | Search reports per handoff: sparklines, data bars, rows per page, empty state, Retry with stale fade | Pending |
 | 17 | 13-02.1 | Rule/synonym edit: repeated saves work (form reloads after save); rule conflict alert with confirmed Reload | Pending |
 | 16 | 13-02 | Rule edit per handoff: sections, live status, contact-group and facet pickers, pins/hides layouts | Pending |
 | 1 | 06-01 | Public API + endpoint shape | Approved 2026-10-11 (before this process) |
@@ -570,4 +571,35 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **The form reloads after every successful edit save,** so scroll position and focus go back to the top.
    - **The synonym page has no Reload alert** (message only).
    - **Still open from 13-02:** the "Valid from/until (UTC)" labels vs Kentico's browser-local date input.
+
+---
+
+## 18. 13-03: Search reports per handoff (v0.2)
+
+1. **Where:** Site search → DancingGoatSample → Search reports.
+2. **What changed (numbers, SQL and insights are unchanged):**
+   - **KPI tiles:** a sparkline from the series already loaded (no extra request), aria-hidden, white on the selected tile.
+   - **Query table:** data bars for Searches (scaled to the page maximum), No results and CTR; footer "1–25 of N queries" with Rows per page 10/25/50 (validated on the server, remembered per index).
+   - **Needs attention:** each finding shows the query, "{n} searches" and a data bar.
+   - **Empty period:** a Callout "No searches in this period" with "Open query tester".
+   - **Failed load:** the alert gets a Retry button, and "Showing the last loaded report." appears under it.
+3. **What I verified on the host:**
+   - **Sparklines and colours:** 6 tiles, 30 points for 30 days, data-bar track colour resolves at runtime.
+   - **Layout at both widths:**
+     - ≈670 px: rows 50 px, row actions on one line, the table scrolls inside its card;
+     - 1269 px: no overflow, rows 50 px, the table fits.
+   - **Rows per page:** footer "1–25 of 141 queries"; 10 works and persists across a reload.
+   - **Empty Callout:** shows, and the button navigates to the query tester.
+   - **Simulated failure (requests blocked in the browser):**
+     - alert + Retry + stale line;
+     - sparklines and trend bars at 0.6 opacity;
+     - text at full opacity (#525252 on white, ≈7.8:1);
+     - the query table and the insights card fade only when their own request fails, so fresh cards stay at full colour;
+     - Retry is disabled while its request is in flight, and on success the alert, stale line and fade go away.
+   - **Nothing written:** SearchEvent 30, SearchDaily 3389, Rule 1, Synonym 0, Blocked 0 (unchanged).
+4. **Automated checks:** client 100/100; tsc clean; SearchReportsPage DB tests 7/7, including the page-size validation test.
+5. **Your decisions to confirm:**
+   - **Stale fade is on graphics only** (the handoff fades the whole report to 60 %, which would drop low-emphasis text to about 3:1).
+   - **Searches bars are scaled to the page maximum,** so bar lengths aren't comparable across pages (handoff design; the number is always shown).
+   - **If the last report that loaded was empty,** a failed load shows only the alert and stale line: the empty Callout is hidden because it would describe an earlier period.
 

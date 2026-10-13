@@ -11,21 +11,21 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.2 Measure (v0.2.0)
 Phase: 13 of 13 (Enterprise Screens) — In progress
-Plan: 13-03 created + audited, awaiting approval
-Status: PLAN created, ready for APPLY
-Last activity: 2026-10-12 — Audited .paul/phases/13-enterprise-screens/13-03-PLAN.md
+Plan: 13-03 complete
+Status: Loop closed, ready for next PLAN (13-04)
+Last activity: 2026-10-12 — Unified 13-03
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
 - v0.2 Measure: [████████░░] 7 of 8 phases
-- Phase 13: [█████░░░░░] 50% (2/4 plans)
+- Phase 13: [███████░░░] 75% (3/4 plans)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Plan created, awaiting approval]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-12: 13-03 unified: search reports per handoff shipped (all 5 ACs pass; Debug+Release 0 warnings, .NET 838/6 skipped, client 100/100). Stale fade is per card (each card's own request); empty Callout suppressed while stale. /update-docs deferred to Phase 13 completion (search-reports.md: rows per page, Retry) | Phase 13 | Next: 13-04 |
+| 2026-10-12: 13-03 applied: search reports per handoff — tile sparklines, DataBars (query table + findings), range footer + rows per page 10/25/50, empty Callout with Open query tester, Retry + stale fade on graphics only (text full contrast). Host: both widths (≈670/1269 px) no overflow, 50 px rows, fade 0.6 per card by its own request, Retry disabled in flight, nothing written. APPROVAL-CHECKS #18 | Phase 13 | UNIFY next |
 | 2026-10-12: Enterprise audit on 13-03-PLAN.md. Applied 1 must-have, 2 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 13 | Stale report: 60 % opacity on graphics only, text full contrast + 'Showing the last loaded report.' (handoff deviation, WCAG 1.4.3); Retry latest-wins + disabled in flight; empty state reuses the existing No-searches condition |
 | 2026-10-12: 13-03 planned (user: keep the 11-02 insights card, apply the handoff's styling — the handoff predates Phase 11): sparklines on KPI tiles from existing series, DataBars in the query table and on findings, range footer + page size 10/25/50 (server argument), empty Callout with Open query tester, error Retry with stale report at 60 %; Spinner not skeletons (Phase 13 deviation) | Phase 13 | 13-03 created |
 | 2026-10-12: 13-02.1 unified: repeated saves fixed (form reloads after successful edit save), confirmed Reload on rule conflicts; lesson: Kentico 31.9.1 applies returned form values only on failed submits — host-verify client round-trips | Phase 13 | Next: 13-03 |
@@ -260,9 +262,9 @@ Feature branches merged: none
 ## Session Continuity
 
 Last session: 2026-10-12
-Stopped at: Plan 13-03 created
-Next action: /paul:apply .paul/phases/13-enterprise-screens/13-03-PLAN.md
-Resume file: .paul/phases/13-enterprise-screens/13-03-PLAN.md
+Stopped at: 13-03 unified
+Next action: /paul:plan (13-04 query tester)
+Resume file: .paul/phases/13-enterprise-screens/13-03-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---
