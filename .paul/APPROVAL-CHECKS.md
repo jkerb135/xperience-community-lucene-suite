@@ -4,26 +4,26 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
-| 20 | 13-04 | Query tester per handoff: summary strip with rule chips, score bars, rows per page, Compare Moved column, Try again | Pending |
-| 19 | 13-03 fixes | Rule/synonym form: row alignment with errors, red delete icons, friendly type errors, no request-driven Save flashing | Pending |
-| 18 | 13-03 | Search reports per handoff: sparklines, data bars, rows per page, empty state, Retry with stale fade | Pending |
-| 17 | 13-02.1 | Rule/synonym edit: repeated saves work (form reloads after save); rule conflict alert with confirmed Reload | Pending |
-| 16 | 13-02 | Rule edit per handoff: sections, live status, contact-group and facet pickers, pins/hides layouts | Pending |
+| 20 | 13-04 | Query tester per handoff: summary strip with rule chips, score bars, rows per page, Compare Moved column, Try again | Approved 2026-10-13 |
+| 19 | 13-03 fixes | Rule/synonym form: row alignment with errors, red delete icons, friendly type errors, no request-driven Save flashing | Approved 2026-10-13 |
+| 18 | 13-03 | Search reports per handoff: sparklines, data bars, rows per page, empty state, Retry with stale fade | Approved 2026-10-13 |
+| 17 | 13-02.1 | Rule/synonym edit: repeated saves work (form reloads after save); rule conflict alert with confirmed Reload | Approved 2026-10-13 |
+| 16 | 13-02 | Rule edit per handoff: sections, live status, contact-group and facet pickers, pins/hides layouts | Approved 2026-10-13 with follow-up: 'Valid from/until' relabelled as local time (13-05); second-save defect fixed in 13-02.1 |
 | 1 | 06-01 | Public API + endpoint shape | Approved 2026-10-11 (before this process) |
 | 2 | 06-02 | Search component markup, parameters and URL names | Approved 2026-10-12 (heading labels resolved by 06-03) |
 | 3 | 06-03 | Page Builder widgets, host Site search page, end-to-end evidence | Approved 2026-10-12 with one follow-up: host index stores readable facet values |
-| 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Pending |
-| 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Pending |
-| 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Pending |
-| 15 | 12-01 | Public API: inventory + internalized types, SearchClick, one Widgets namespace, PublicApiAnalyzers baseline, docs/public-api.md | Pending |
-| 14 | 11-01/11-02 | Search insights: Fix these first card, All insights panel, actions per kind, ranking by searches affected | Pending |
-| 13 | 10-01 | Search activities (3 custom types, installed disabled) + click contract v2 (optional query/title) | Pending |
-| 12 | 09-03 | Blocked suggestions admin (listing/create/delete) + one-click report Block suggestion | Pending |
-| 11 | 09-02 | Search box autocomplete (ARIA combobox script, opt-in, stylesheet) + admin right gutter (Convention 2b) | Pending |
-| 10 | 09-01 | Suggestions public API (ISuiteSuggestions, MapLuceneSuiteSuggestions, options) + endpoint behaviour; seeded history now public | Pending |
-| 9 | 08.1-05 | Rule/synonym editors: icon removes, condition blocks, error timing, inline errors; query tester empty column | Pending |
-| 8 | 08.1-03 | Search reports dashboard redesign, range stepping, listing-style query row actions | Pending |
-| 7 | 08.1-02 | Query tester native action bar + chips row, side-panel focus return, 24 px region gaps | Pending |
+| 4 | 07-02 | Seeded demo history on the CommunityProjects host (v0.2) | Approved 2026-10-13: keep (seeded texts keep counting toward surfacing/suggestions on the dev host) |
+| 5 | 08-01 | Search reports page (range bar, KPIs, trend, latency) | Approved 2026-10-13 |
+| 6 | 08-02 | Query table + row actions (query tester / create rule / add synonym) | Approved 2026-10-13 with follow-up: disabled row actions get a keyboard-readable reason (13-05); labelled buttons superseded by 08.1-03 icons |
+| 15 | 12-01 | Public API: inventory + internalized types, SearchClick, one Widgets namespace, PublicApiAnalyzers baseline, docs/public-api.md | Approved 2026-10-13 |
+| 14 | 11-01/11-02 | Search insights: Fix these first card, All insights panel, actions per kind, ranking by searches affected | Approved 2026-10-13 |
+| 13 | 10-01 | Search activities (3 custom types, installed disabled) + click contract v2 (optional query/title) | Approved 2026-10-13 (LogClick change superseded by LogClick(SearchClick) in Phase 12) |
+| 12 | 09-03 | Blocked suggestions admin (listing/create/delete) + one-click report Block suggestion | Approved 2026-10-13 with follow-up: add an event-log audit trail for Suite rule/synonym/blocklist changes (quick fix 13-05 before complete-milestone); rest accepted as shipped |
+| 11 | 09-02 | Search box autocomplete (ARIA combobox script, opt-in, stylesheet) + admin right gutter (Convention 2b) | Approved 2026-10-13 |
+| 10 | 09-01 | Suggestions public API (ISuiteSuggestions, MapLuceneSuiteSuggestions, options) + endpoint behaviour; seeded history now public | Approved 2026-10-13 (namespace friction fixed in Phase 12) |
+| 9 | 08.1-05 | Rule/synonym editors: icon removes, condition blocks, error timing, inline errors; query tester empty column | Approved 2026-10-13 |
+| 8 | 08.1-03 | Search reports dashboard redesign, range stepping, listing-style query row actions | Approved 2026-10-13 |
+| 7 | 08.1-02 | Query tester native action bar + chips row, side-panel focus return, 24 px region gaps | Approved 2026-10-13 (M6 overflow fixed in 08.1-05) |
 
 ---
 
