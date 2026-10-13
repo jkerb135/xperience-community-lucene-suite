@@ -5,8 +5,8 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.2 Measure** (v0.2.0)
-Status: In progress — Phase 13 Enterprise Screens added 2026-10-12 (milestone review after it)
-Phases: 7 of 8 complete
+Status: All phases complete — milestone review of APPROVAL-CHECKS #4–#20 pending
+Phases: 8 of 8 complete
 Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
 
 ## Phases
@@ -20,7 +20,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 | 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
 | 11 | Search Insights | 2/2 | ✅ Complete | 2026-10-12 |
 | 12 | Public API Audit | 1/1 | ✅ Complete | 2026-10-12 |
-| 13 | Enterprise Screens | 2/4 | In progress | - |
+| 13 | Enterprise Screens | 5/5 | ✅ Complete | 2026-10-13 |
 
 ## Phase Details
 
@@ -106,7 +106,7 @@ Focus: Marketers see how site search performs and act on it — reports on real 
 - [x] 13-02 (complete 2026-10-12): Rule edit — native form regrouped per handoff, header status, conflict Reload, condition pickers (contexts + facets)
 - [x] 13-02.1 (inserted, complete 2026-10-12): Quick fix — second Save without reload no longer a false conflict (rules + synonyms); rule conflict alert with Reload
 - [x] 13-03 (complete 2026-10-12): Search reports — sparklines, data bars, range footer, loading/empty/error states
-- [ ] 13-04: Query tester — result summary strip, score bars, rank movement in Compare, range footer, states
+- [x] 13-04 (complete 2026-10-13): Query tester — result summary strip, score bars, rank movement in Compare, range footer, states
 
 ## Completed Milestones
 

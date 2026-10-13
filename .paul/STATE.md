@@ -5,27 +5,27 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — Phase 13 Enterprise Screens (handoff), then milestone review (APPROVAL-CHECKS #4–#15)
+**Current focus:** v0.2 Measure — all phases complete; milestone review of APPROVAL-CHECKS #4–#20, then /paul:complete-milestone
 
 ## Current Position
 
 Milestone: v0.2 Measure (v0.2.0)
-Phase: 13 of 13 (Enterprise Screens) — In progress
-Plan: 13-03 complete
-Status: Loop closed, ready for next PLAN (13-04)
-Last activity: 2026-10-12 — Unified 13-03
+Phase: 13 of 13 (Enterprise Screens) — Complete
+Plan: 13-04 complete (phase complete)
+Status: v0.2 phases complete — milestone review pending
+Last activity: 2026-10-13 — Unified 13-04; Phase 13 complete (docs updated)
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [████████░░] 7 of 8 phases
-- Phase 13: [███████░░░] 75% (3/4 plans)
+- v0.2 Measure: [██████████] 8 of 8 phases (review pending)
+- Phase 13: [██████████] 100% (4/4 plans + 13-02.1)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ✓        ✓     [Loop complete - milestone review next]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,10 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-13: 13-04 unified, Phase 13 complete: four enterprise screens per handoff (rules listing, rule edit, search reports, query tester) + save-conflict quick fix + post-feedback rule-form fixes; docs updated (/update-docs) | Phase 13 | Milestone review next |
+| 2026-10-12: 13-04 applied: query tester per handoff (summary chips with action summary, score DataBars, # + Pinned tag, RangeFooter 10/25/50 committed with results, Compare tables with Moved, Try again + stale). Host fixes: page-size Select remounts after failure (resetKey); empty Callout hidden while failed. Implementer fixed pre-existing duplicate-key JSON throw in RuleSummaries. APPROVAL-CHECKS #20 | Phase 13 | UNIFY next (phase end: /update-docs) |
+| 2026-10-12: Enterprise audit on 13-04-PLAN.md. Applied 1 must-have, 5 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 13 | Page and page size committed only with a successful result (# and footer match the rows shown); Try again only for failed requests (not rejections); NaN-safe score bars; PrimaryAction null on invalid JSON; chip a11y; aria-busy |
+| 2026-10-12: 13-04 planned (user: keep configurable Compare columns and restyle them as tables with a Moved column, rather than the handoff's fixed tuned/untuned pair; rows per page 10/25/50 client-side, Search already accepts PageSize): summary strip with fired-rule chips (action summary from RuleSummaries via QueryTesterFiredRule), results table with #/Pinned tag/score DataBar/GUID + RangeFooter, Try again + stale fade | Phase 13 | 13-04 created |
 | 2026-10-12: Post-13-03 user feedback fixed on rule/synonym forms: top-aligned rows + red deletes; type errors mapped to field messages (RuleSerializer); live validation/status moved to page commands (Kentico raises form busy on form-component commands) — 1 request per pause instead of 6. APPROVAL-CHECKS #19 | Phase 13 | Next: 13-04 |
 | 2026-10-12: 13-03 unified: search reports per handoff shipped (all 5 ACs pass; Debug+Release 0 warnings, .NET 838/6 skipped, client 100/100). Stale fade is per card (each card's own request); empty Callout suppressed while stale. /update-docs deferred to Phase 13 completion (search-reports.md: rows per page, Retry) | Phase 13 | Next: 13-04 |
 | 2026-10-12: 13-03 applied: search reports per handoff — tile sparklines, DataBars (query table + findings), range footer + rows per page 10/25/50, empty Callout with Open query tester, Retry + stale fade on graphics only (text full contrast). Host: both widths (≈670/1269 px) no overflow, 50 px rows, fade 0.6 per card by its own request, Retry disabled in flight, nothing written. APPROVAL-CHECKS #18 | Phase 13 | UNIFY next |
@@ -242,6 +246,7 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 ### Blockers/Concerns
 | Concern | Impact | Resolution Path |
 |---------|--------|-----------------|
+| Phase 13: APPROVAL-CHECKS #16–#20 (rule edit + pickers, save-conflict fix, search reports per handoff, rule-form fixes, query tester per handoff) pending | Milestone review | Milestone review |
 | Phase 12: APPROVAL-CHECKS #15 (public API surface + baseline) pending | Milestone review | Milestone review |
 | Phase 11: APPROVAL-CHECKS #14 (search insights; ranking fix, cold latency) pending | Milestone review | Milestone review |
 | Phase 10: APPROVAL-CHECKS #13 (search activities + click contract v2) pending | Milestone review | Milestone review |
@@ -256,16 +261,16 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: 501063d feat(12): public API audit and baseline (v0.2 phases complete)
+Last commit: see `git log` — feat(13) phase commit after docs(13) 996f29b (v0.2 phases complete)
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
-Last session: 2026-10-12
-Stopped at: 13-03 unified
-Next action: /paul:plan (13-04 query tester)
-Resume file: .paul/phases/13-enterprise-screens/13-03-SUMMARY.md
+Last session: 2026-10-13
+Stopped at: Phase 13 complete (v0.2 phases complete)
+Next action: Milestone review of .paul/APPROVAL-CHECKS.md #4–#20, then /paul:complete-milestone
+Resume file: .paul/APPROVAL-CHECKS.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

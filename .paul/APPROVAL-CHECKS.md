@@ -4,6 +4,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
+| 20 | 13-04 | Query tester per handoff: summary strip with rule chips, score bars, rows per page, Compare Moved column, Try again | Pending |
 | 19 | 13-03 fixes | Rule/synonym form: row alignment with errors, red delete icons, friendly type errors, no request-driven Save flashing | Pending |
 | 18 | 13-03 | Search reports per handoff: sparklines, data bars, rows per page, empty state, Retry with stale fade | Pending |
 | 17 | 13-02.1 | Rule/synonym edit: repeated saves work (form reloads after save); rule conflict alert with confirmed Reload | Pending |
@@ -629,4 +630,60 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **`RuleStatus` needs View permission only,** so read-only viewers still see the status.
    - **Pins keep typed positions:** drag order was considered and dropped.
    - **Strength stays Kentico's numeric input** (type=text, inputMode numeric). Phones get no minus key, which matches Kentico's own integer fields.
+
+---
+
+## 20. 13-04: Query tester per handoff (v0.2)
+
+1. **Where:** Site search → DancingGoatSample → Query tester (try "test coffee" for rule 4, and Compare).
+2. **What changed:**
+   - **Summary card:**
+     - Total hits and Elapsed;
+     - "Fired rules (n)" as chips: icon + name + " · 1 pin", linking to the rule;
+     - "Synonyms applied (n)" as Tags that open the synonym.
+   - **Results table:**
+     - # (continues across pages);
+     - Title with a "Pinned #n" tag;
+     - Score as a blue bar relative to the page's top score, number at 4 decimals;
+     - Item GUID in small monospace.
+   - **Range footer:** "1–10 of N documents", Rows per page 10/25/50, Pagination (stops at the result window).
+   - **Compare:**
+     - Baseline and Tuned keep their own switches and contexts (your decision);
+     - each is now a table: Baseline # / Title / Score, Tuned # / Title / Moved (arrow + n, "—", "New").
+   - **Failure:** "Search failed" gets Try again; the previous results stay with faded bars.
+   - **Server:** fired rules carry the rule's action summary.
+3. **What I verified on the host:**
+   - **Summary card:**
+     - chip "Boost items for test · 1 pin" → /rules/4: product-hover text, 8 px radius, 4/10 px padding, icon hidden from screen readers;
+     - headings at levels 1 and 2.
+   - **Results table:**
+     - columns # / Title / Score / Item GUID, rows 50 px;
+     - pinned Chemex score 0 → empty bar;
+     - bars in rgb(61, 93, 255) (`--color-info-icon`) relative to the top score;
+     - Pinned tag on `--color-background-selected`.
+   - **Paging:** page 2 numbers 11–20 ("11–20 of 28 documents"); 25 per page → page 1, 25 rows.
+   - **Blocked search requests (audit check):**
+     - page 2 and a change to 50 per page left # and the footer describing the rows shown;
+     - Try again was disabled in flight, the region was aria-busy, and it recovered;
+     - bars at 0.6 opacity, text at 1;
+     - the empty state was not shown.
+   - **Compare:**
+     - Chemex "New" (pinned by the rule);
+     - others "1 place down" with an aria-hidden arrow + number in the alert colour at 600 weight, and visually hidden "1 place down";
+     - explainer shown;
+     - row → details panel; closing returns focus to the Tuned table (checked with a requestAnimationFrame shim, since the hidden pane doesn't run it).
+   - **Empty:** "No documents match" + "Try a different query.".
+   - **Synonyms:** temporary synonym (plunger ↔ zzpress) → tag "plunger → zzpress" opens /synonyms/8; deleted through the listing afterwards.
+   - **Layout:** 669 and 1269 px content width, both modes: no overflow; Compare stacks when narrow; titles truncate with an ellipsis.
+   - **Nothing written:** counts unchanged (SearchEvent 35, SearchDaily 3389, Rule 1, Synonym 0, Blocked 0, SearchInteraction 8).
+4. **Fixed during the check:**
+   - after a failed page-size change, Kentico's Select kept showing the new size; it now remounts after a failure (RangeFooter `resetKey`);
+   - the "No documents match" callout no longer shows next to "Search failed".
+5. **Found and fixed by the implementer (pre-existing):** a stored rule with duplicate JSON keys made `RuleSummaries` throw inside Search ("Search rejected"); summaries now degrade to "Invalid".
+6. **Automated checks:** .NET 857 passed / 6 skipped (the RulesOverhead flake passed alone); client 103/103; tsc clean; Debug + Release 0 warnings.
+7. **Your decisions to confirm:**
+   - **"Pinned #n" shows where the pinned item actually landed** (hits don't carry the configured pin position).
+   - **A rule with no actions shows " · None";** invalid JSON shows " · Invalid — open to fix".
+   - **Score bars are relative to the current page's top score.**
+   - **Rows per page isn't remembered** after leaving the page.
 

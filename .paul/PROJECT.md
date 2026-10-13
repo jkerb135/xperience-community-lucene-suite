@@ -14,8 +14,8 @@ Marketers tune, test and measure site search without a developer.
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
 | Version | 0.1.0 |
-| Status | v0.2 Measure: all phases (7–12, 8.1) complete; milestone review of APPROVAL-CHECKS #4–#15 pending |
-| Last Updated | 2026-10-12 |
+| Status | v0.2 Measure: all phases (7–13, 8.1) complete; milestone review of APPROVAL-CHECKS #4–#20 pending |
+| Last Updated | 2026-10-13 |
 
 ## Requirements
 
@@ -78,6 +78,11 @@ Marketers tune, test and measure site search without a developer.
 - ✓ Search insights: five rule-based finding kinds (content gap, relevance miss, buried answer, slow query, regression) over one SQL aggregation of the range and previous period, thresholds in `LuceneSuite:Analytics:Insights`, ranked by searches actually affected, annotated with the synonyms/rules already in place; shown in the Search reports "Fix these first" card + "All insights" panel with pre-filled fixes and a fallback to the no-result list — Phase 11 (11-01, 11-02)
 
 - ✓ Public API audited and frozen: 163 → 147 public types (unneeded rule/synonym models internal), LogClick(SearchClick), one Widgets namespace for MapLuceneSuite*, PublicApiAnalyzers baseline (PublicAPI.Shipped/Unshipped.txt), docs/public-api.md defining the supported boundary — Phase 12 (12-01)
+
+- ✓ Enterprise screens per the design handoff: custom rules listing (derived status, status counts, search/sort/paging, bulk enable/disable/priority/delete with partial-failure results) — Phase 13 (13-01)
+- ✓ Rule editor regrouped with a live status line, contact-group/custom context and facet value pickers, conflict alert with confirmed Reload, repeated saves (form reloads after a successful save), live validation through page commands (Save no longer flashes) and field messages for wrongly typed values — Phase 13 (13-02, 13-02.1, fixes)
+- ✓ Search reports per handoff: tile sparklines, data bars, rows per page, empty-period callout, Retry with a graphics-only stale fade — Phase 13 (13-03)
+- ✓ Query tester per handoff: summary strip with fired-rule chips (action summary), score bars, positions + rows per page, Compare tables with rank movement, Try again — Phase 13 (13-04)
 
 ### Active (In Progress)
 
@@ -174,6 +179,8 @@ Marketers tune, test and measure site search without a developer.
 | Insights: computed on read (no storage); "searches affected" = searches actually lost to the problem (regression = searches × rate change; slow = searches in latency buckets wholly at or above the cutoff); latency thresholds hold only when the whole bucket is at or above them | Phase 11 (user + host finding in 11-02) | 2026-10-12 | Active |
 | Public API: PublicApiAnalyzers baseline in the three packages (every change is a PublicAPI.Unshipped.txt diff; move to Shipped at release); admin services (reports, insights, rule/synonym/blocklist management) stay internal by design; supported boundary in docs/public-api.md | Phase 12 (user) | 2026-10-12 | Active |
 | v0.3 Relevance milestone added before Test (Test → v0.4, Instant Search → v0.5): query-time admin-managed stopwords, field-weights editor (appsettings as defaults), fuzzy typo variants below exact, Did-you-mean + curated suggestions, popularity boost with per-item click data collected first; rewrite order stopwords → synonyms → typos → field weights → rules | User decisions | 2026-10-12 | Active |
+| Phase 13 handoff deviations (npm 31.9.1 / enterprise.md precedence): Spinner instead of skeletons; text never faded (stale = graphics at 60 % + a line); Compare keeps configurable Baseline/Tuned columns instead of a fixed tuned/untuned pair; pins keep typed positions (drag order would drop fixed slots) | User decisions + audits | 2026-10-13 | Active |
+| Live validation and status in Suite admin forms use page commands, not form-component commands (Kentico marks the form busy for every form-component command); successful edit saves navigate to the same page (Kentico applies returned values only on failed submits) | 13-02.1 + post-13-03 host findings | 2026-10-13 | Active |
 | Admin cross-page prefill = one-time sessionStorage handoff bound to target, index, exact page path and expiry; consumers fill only empty forms; never URL query strings or server state | 08-01 (URL state raced the admin router) / 08-02 audit | 2026-10-12 | Active |
 
 ## Success Metrics
@@ -207,4 +214,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-12 after Phase 12 (v0.2 complete)*
+*Created: 2026-10-08 · Last updated: 2026-10-13 after Phase 13 (v0.2 phases complete)*
