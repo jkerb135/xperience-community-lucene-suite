@@ -75,6 +75,7 @@ public abstract class RuleEditPageBase(
 {
     internal const string ConcurrencyMessage = "This rule was changed by someone else. Reload to see the changes.";
     internal const string MissingMessage = "The rule no longer exists in this index.";
+    internal const string UnknownSectionMessage = "Unknown rule section.";
 
     private RuleEditModel? model;
 
@@ -137,6 +138,30 @@ public abstract class RuleEditPageBase(
     /// <summary>Form change round trips need Manage rules, like saving.</summary>
     [PageCommand(Permission = SiteSearchPermissions.MANAGE_RULES)]
     public override Task<ICommandResponse<FormChangeResult>> Change(FormChangeCommandArguments args) => base.Change(args);
+
+    /// <summary>Validates one editor field's JSON with the server rules; changes nothing. A page command, unlike a form component command, doesn't put Save in progress.</summary>
+    [PageCommand(Permission = SiteSearchPermissions.MANAGE_RULES)]
+    public Task<ICommandResponse<RuleJsonValidationResult>> ValidateSection(RuleJsonValidationArguments arguments)
+    {
+        RuleJsonSection? section = arguments.Section switch
+        {
+            nameof(RuleJsonSection.Conditions) => RuleJsonSection.Conditions,
+            nameof(RuleJsonSection.Boosts) => RuleJsonSection.Boosts,
+            nameof(RuleJsonSection.Pins) => RuleJsonSection.Pins,
+            nameof(RuleJsonSection.Hides) => RuleJsonSection.Hides,
+            _ => null,
+        };
+        IReadOnlyList<RuleError> errors = section is { } known
+            ? RuleSectionValidator.Validate(known, arguments.Value)
+            : [new RuleError("section", UnknownSectionMessage)];
+        return Task.FromResult(ResponseFrom(new RuleJsonValidationResult(errors)));
+    }
+
+    /// <summary>The status of the form's current (unsaved) Enabled and validity values, now; display only, so read-only viewers get it too.</summary>
+    [PageCommand(Permission = SystemPermissions.VIEW)]
+    public Task<ICommandResponse<RuleStatusResult>> RuleStatus(RuleStatusArguments arguments) =>
+        Task.FromResult(ResponseFrom(RuleStatusFormComponent.Describe(
+            arguments.Enabled, RuleStatusFormComponent.ParseUtc(arguments.ValidFromUtc), RuleStatusFormComponent.ParseUtc(arguments.ValidUntilUtc), DateTime.UtcNow)));
 
     /// <inheritdoc />
     protected override async Task<ICommandResponse> ProcessFormData(RuleEditModel model, ICollection<IFormItem> formItems)

@@ -7,6 +7,7 @@ using Kentico.Xperience.Admin.Base.Forms.Internal;
 using Kentico.Xperience.Lucene.Core.Indexing;
 
 using XperienceCommunity.Lucene.Suite.Admin;
+using XperienceCommunity.Lucene.Suite.Admin.Rules;
 using XperienceCommunity.Lucene.Suite.Admin.Synonyms;
 using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Synonyms;
@@ -120,6 +121,11 @@ public abstract class SynonymEditPageBase(
     /// <summary>Form change round trips (Kind switches the Input field) need Manage synonyms, like saving.</summary>
     [PageCommand(Permission = SiteSearchPermissions.MANAGE_SYNONYMS)]
     public override Task<ICommandResponse<FormChangeResult>> Change(FormChangeCommandArguments args) => base.Change(args);
+
+    /// <summary>Validates the terms with the server rules; changes nothing. A page command, unlike a form component command, doesn't put Save in progress.</summary>
+    [PageCommand(Permission = SiteSearchPermissions.MANAGE_SYNONYMS)]
+    public Task<ICommandResponse<RuleJsonValidationResult>> ValidateTerms(SynonymTermsValidationArguments arguments) =>
+        Task.FromResult(ResponseFrom(new RuleJsonValidationResult(SynonymFieldErrors.Terms(arguments.Kind, arguments.Input, arguments.Value))));
 
     /// <inheritdoc />
     protected override async Task<ICommandResponse> ProcessFormData(SynonymEditModel model, ICollection<IFormItem> formItems)

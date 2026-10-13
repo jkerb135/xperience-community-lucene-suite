@@ -46,7 +46,7 @@ export const RulePinsFormComponent = (props: RuleItemsFormComponentProps) => {
   const rows = useMemo(() => parsePins(props.value), [props.value]);
   const json = useMemo(() => serializePins(rows), [rows]);
   const editable = isEditable(props);
-  const errors = useServerErrors(props, json);
+  const errors = useServerErrors(props, json, "Pins");
   const { byPath, unmatched } = partitionErrors(errors, pinControlPaths(rows), pinAlias);
   const { ref, focus } = useFocusTargets();
   const { touch, visible, leaveGroup } = useTouched(props);

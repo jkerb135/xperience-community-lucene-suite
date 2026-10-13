@@ -1,6 +1,6 @@
 import { createRef, useCallback, useEffect, useMemo, useRef, useState, type FocusEvent, type ReactNode, type RefObject } from "react";
-import { useFormComponentCommandProvider, type FormComponentProps, type ValidationRule, type ValidationRuleProps } from "@kentico/xperience-admin-base";
-import { Button, ButtonColor, ButtonSize, FormEditMode } from "@kentico/xperience-admin-components";
+import { usePageCommandProvider, type FormComponentProps, type ValidationRule, type ValidationRuleProps } from "@kentico/xperience-admin-base";
+import { Button, ButtonColor, ButtonSize, FormEditMode, Spacing } from "@kentico/xperience-admin-components";
 import { latestRequest } from "../query-tester/state";
 import { debounce, isShown, type RuleError } from "./state";
 
@@ -14,26 +14,33 @@ export interface RuleJsonFormComponentProps extends FormComponentProps<string> {
 
 export const isEditable = (props: FormComponentProps<string>) => (props.editMode ?? FormEditMode.Default) === FormEditMode.Default && !props.disabled;
 
-/** Asks the component's server Validate command for errors 400 ms after the last change; stale answers are dropped. */
-export const useServerErrors = (props: FormComponentProps<string>, json: string) => {
-  const { executeCommand } = useFormComponentCommandProvider();
+/** The rule edit pages' ValidateSection command checks one of these. */
+export type RuleSection = "Conditions" | "Boosts" | "Pins" | "Hides";
+
+/**
+ * Asks the page's ValidateSection command for errors 400 ms after the last change; stale answers are dropped.
+ * A page command, because form component commands put the form's Save button in progress on every keystroke.
+ */
+export const useServerErrors = (props: FormComponentProps<string>, json: string, section: RuleSection) => {
+  const { executeCommand } = usePageCommandProvider();
   const [errors, setErrors] = useState<readonly RuleError[]>([]);
-  const request = useMemo(() => latestRequest(), []);
   const propsRef = useRef(props);
   propsRef.current = props;
+  // executeCommand's identity changes with the form values; the validator must not, or every component re-validates.
+  const executeRef = useRef(executeCommand);
+  executeRef.current = executeCommand;
 
-  const validate = useMemo(
-    () =>
-      debounce(async (value: string) => {
-        const { latest, value: result } = await request((abort) =>
-          executeCommand<{ errors: RuleError[] }, { value: string }>(propsRef.current, "Validate", { value }, undefined, abort),
-        );
-        if (latest) {
-          setErrors(result?.errors ?? []);
-        }
-      }, 400),
-    [executeCommand, request],
-  );
+  const validate = useMemo(() => {
+    const request = latestRequest();
+    return debounce(async (value: string) => {
+      const { latest, value: result } = await request((abort) =>
+        executeRef.current<{ errors: RuleError[] }, { section: RuleSection; value: string }>("ValidateSection", { section, value }, undefined, abort),
+      );
+      if (latest) {
+        setErrors(result?.errors ?? []);
+      }
+    }, 400);
+  }, [section]);
 
   useEffect(() => {
     if (isEditable(propsRef.current)) {
@@ -106,5 +113,11 @@ export const InlineError = ({ id, children }: { id: string; children?: ReactNode
 
 /** Listing-style icon-only remove; the label names the row it removes. */
 export const RemoveButton = ({ label, buttonRef, onClick }: { label: string; buttonRef: RefObject<HTMLButtonElement>; onClick: () => void }) => (
-  <Button icon="xp-bin" size={ButtonSize.S} color={ButtonColor.Quinary} borderless aria-label={label} title={label} buttonRef={buttonRef} onClick={onClick} />
+  <Button icon="xp-bin" size={ButtonSize.S} color={ButtonColor.Quinary} borderless destructive aria-label={label} title={label} buttonRef={buttonRef} onClick={onClick} />
 );
+
+/**
+ * Rows of labelled inputs align to the top, so a message under one input doesn't push its neighbours down.
+ * This offset (label 26 px + half of 40 − 24) centres the S remove button on the first input box.
+ */
+export const ROW_ACTION_STYLE = { paddingTop: `calc(${Spacing.XXL} + ${Spacing.XXS})` } as const;

@@ -101,11 +101,9 @@ XperienceCommunity.Lucene.Suite.Admin.Rules.RuleBoostsComponentAttribute
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleBoostsComponentAttribute.RuleBoostsComponentAttribute() -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleBoostsFormComponent
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleBoostsFormComponent.RuleBoostsFormComponent() -> void
-XperienceCommunity.Lucene.Suite.Admin.Rules.RuleBoostsFormComponent.Validate(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleConditionsComponentAttribute
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleConditionsComponentAttribute.RuleConditionsComponentAttribute() -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleConditionsFormComponent
-XperienceCommunity.Lucene.Suite.Admin.Rules.RuleConditionsFormComponent.Validate(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleEditModel
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleEditModel.Boosts.get -> string!
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleEditModel.Boosts.set -> void
@@ -185,7 +183,6 @@ XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsFormComponent
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsFormComponent.Describe(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemDescribeArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsFormComponent.RuleItemsFormComponent(CMS.Core.ILocalizationService! localizationService, Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexManager, XperienceCommunity.Lucene.Suite.Search.ISuiteSearchService! searchService, System.IServiceProvider! services) -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsFormComponent.Search(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemSearchArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsResult!>!>!
-XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsFormComponent.Validate(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsResult
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsResult.<Clone>$() -> XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsResult!
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItemsResult.Deconstruct(out System.Collections.Generic.IReadOnlyList<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleItem!>! Items, out string? Error) -> void
@@ -213,6 +210,8 @@ XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonSection.Pins = 3 -> Xperienc
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonSection.UserData = 2 -> XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonSection
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments.RuleJsonValidationArguments() -> void
+XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments.Section.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments.Section.set -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments.Value.get -> string?
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments.Value.set -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationResult
@@ -280,7 +279,6 @@ XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsComponentAttribute
 XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsComponentAttribute.SynonymTermsComponentAttribute() -> void
 XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsFormComponent
 XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsFormComponent.SynonymTermsFormComponent() -> void
-XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsFormComponent.Validate(XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsValidationArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsValidationArguments
 XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsValidationArguments.Input.get -> string?
 XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsValidationArguments.Input.set -> void
@@ -467,6 +465,8 @@ XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.IndexIdentifier.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.IndexIdentifier.set -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.RuleEditPageBase(Kentico.Xperience.Admin.Base.Forms.Internal.IFormItemCollectionProvider! formItemCollectionProvider, Kentico.Xperience.Admin.Base.Forms.IFormDataBinder! formDataBinder, Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexManager, CMS.DataEngine.IInfoProvider<XperienceCommunity.Lucene.Suite.Rules.RuleInfo!>! rules, Kentico.Xperience.Admin.Base.IUIPermissionEvaluator! permissionEvaluator, Kentico.Xperience.Admin.Base.IPageLinkGenerator! pageLinkGenerator) -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.RuleStatus(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusResult!>!>!
+XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleEditPageBase.ValidateSection(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Descending.get -> bool
 XperienceCommunity.Lucene.Suite.Admin.UIPages.RuleListArguments.Descending.set -> void
@@ -818,6 +818,7 @@ XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymEditPageBase
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymEditPageBase.IndexIdentifier.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymEditPageBase.IndexIdentifier.set -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymEditPageBase.SynonymEditPageBase(Kentico.Xperience.Admin.Base.Forms.Internal.IFormItemCollectionProvider! formItemCollectionProvider, Kentico.Xperience.Admin.Base.Forms.IFormDataBinder! formDataBinder, Kentico.Xperience.Lucene.Core.Indexing.ILuceneIndexManager! indexManager, CMS.DataEngine.IInfoProvider<XperienceCommunity.Lucene.Suite.Synonyms.SynonymInfo!>! synonyms, Kentico.Xperience.Admin.Base.IUIPermissionEvaluator! permissionEvaluator, Kentico.Xperience.Admin.Base.IPageLinkGenerator! pageLinkGenerator) -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymEditPageBase.ValidateTerms(XperienceCommunity.Lucene.Suite.Admin.Synonyms.SynonymTermsValidationArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleJsonValidationResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymListingPage
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymListingPage.IndexIdentifier.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SynonymListingPage.IndexIdentifier.set -> void
@@ -845,7 +846,6 @@ XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusComponentAttribute
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusComponentAttribute.RuleStatusComponentAttribute() -> void
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusFormComponent
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusFormComponent.RuleStatusFormComponent() -> void
-XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusFormComponent.Status(XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusArguments! arguments) -> System.Threading.Tasks.Task<Kentico.Xperience.Admin.Base.ICommandResponse<XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusResult!>!>!
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusResult
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusResult.Detail.get -> string?
 XperienceCommunity.Lucene.Suite.Admin.Rules.RuleStatusResult.Detail.init -> void

@@ -20,7 +20,7 @@ public sealed class SynonymTermsClientProperties : FormComponentClientProperties
     public int MaxTermLength { get; set; } = SynonymLimits.TermLength;
 }
 
-/// <summary>Arguments of the terms component's Validate command.</summary>
+/// <summary>Arguments of the synonym edit pages' ValidateTerms command.</summary>
 public sealed class SynonymTermsValidationArguments
 {
     /// <summary>The component's terms JSON.</summary>
@@ -39,11 +39,6 @@ public sealed class SynonymTermsFormComponent : FormComponent<SynonymTermsClient
 {
     /// <inheritdoc />
     public override string ClientComponentName => "@xperience-community/lucene-suite/SynonymTerms";
-
-    /// <summary>Validates the terms with the server rules; changes nothing.</summary>
-    [FormComponentCommand]
-    public Task<ICommandResponse<RuleJsonValidationResult>> Validate(SynonymTermsValidationArguments arguments) =>
-        Task.FromResult(ResponseFrom(new RuleJsonValidationResult(SynonymFieldErrors.Terms(arguments.Kind, arguments.Input, arguments.Value))));
 }
 
 /// <summary>Edits the property with <see cref="SynonymTermsFormComponent"/>.</summary>

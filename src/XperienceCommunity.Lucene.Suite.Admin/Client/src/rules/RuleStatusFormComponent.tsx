@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFormComponentCommandProvider, type FormComponentProps } from "@kentico/xperience-admin-base";
+import { usePageCommandProvider, type FormComponentProps } from "@kentico/xperience-admin-base";
 import { Button, ButtonColor, ButtonSize, Dialog, FormItemWrapper, NotificationBarAlert, Spacing, Spinner } from "@kentico/xperience-admin-components";
 import { latestRequest } from "../query-tester/state";
 import type { RuleStatus } from "./listing";
@@ -16,12 +16,16 @@ interface RuleStatusFormComponentProps extends FormComponentProps<string> {
   readonly conflict?: boolean;
 }
 
-/** Display only: the status of the form's current Enabled and validity values, worked out by the server like the rules listing. Never calls onChange. */
+/**
+ * Display only: the status of the form's current Enabled and validity values, worked out by the server like the rules listing. Never calls onChange.
+ * Asks the page's RuleStatus command: a form component command would put Save in progress on every form change.
+ */
 export const RuleStatusFormComponent = (props: RuleStatusFormComponentProps) => {
-  const { executeCommand } = useFormComponentCommandProvider();
+  const { executeCommand } = usePageCommandProvider();
   const request = useMemo(() => latestRequest(), []);
-  const propsRef = useRef(props);
-  propsRef.current = props;
+  // executeCommand's identity changes with the form values; only a change of the key below may ask again.
+  const executeRef = useRef(executeCommand);
+  executeRef.current = executeCommand;
   // undefined while the first answer is pending, null when the command failed.
   const [result, setResult] = useState<StatusResult | null>();
   const key = JSON.stringify(statusArguments(props.fieldValues as Record<string, unknown>));
@@ -34,13 +38,13 @@ export const RuleStatusFormComponent = (props: RuleStatusFormComponentProps) => 
   useEffect(() => {
     void (async () => {
       const { latest, value } = await request((abort) =>
-        executeCommand<StatusResult, ReturnType<typeof statusArguments>>(propsRef.current, "Status", JSON.parse(key), undefined, abort),
+        executeRef.current<StatusResult, ReturnType<typeof statusArguments>>("RuleStatus", JSON.parse(key), undefined, abort),
       );
       if (latest) {
         setResult(value?.status ? value : null);
       }
     })();
-  }, [key, executeCommand, request]);
+  }, [key, request]);
 
   return (
     <FormItemWrapper label={props.label} editMode={props.editMode}>

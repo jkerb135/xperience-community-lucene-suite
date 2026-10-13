@@ -20,7 +20,7 @@ import {
 import type { ContactGroupsState } from "../query-tester/ContextPicker";
 import type { Facet } from "../query-tester/state";
 import { clear, peek } from "../reports/handoff";
-import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
+import { InlineError, ROW_ACTION_STYLE, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched, type RuleJsonFormComponentProps } from "./shared";
 import {
   TYPED,
   anchoringOptions,
@@ -49,7 +49,7 @@ const CONTEXT_HELP = "For example a contact group code name. Letters, digits, '_
 const GROUPS_ERROR = "Contact groups could not be loaded. Type contexts instead.";
 const FACETS_ERROR = "Facet values could not be loaded.";
 
-const grid = (columns: string, align: "start" | "end"): CSSProperties => ({ display: "grid", gridTemplateColumns: columns, gap: Spacing.L, alignItems: align });
+const grid = (columns: string): CSSProperties => ({ display: "grid", gridTemplateColumns: columns, gap: Spacing.L, alignItems: "start" });
 const ROW = "minmax(0,5fr) minmax(0,5fr) auto";
 
 interface FacetValuesResult {
@@ -86,7 +86,7 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
   const rows = useMemo(() => parseConditions(props.value), [props.value]);
   const json = useMemo(() => serializeConditions(rows), [rows]);
   const editable = isEditable(props);
-  const errors = useServerErrors(props, json);
+  const errors = useServerErrors(props, json, "Conditions");
   const { byPath, unmatched } = partitionErrors(errors, conditionControlPaths(rows));
   const { ref, focus } = useFocusTargets();
   const { touch, visible, leaveGroup } = useTouched(props);
@@ -232,19 +232,21 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
     );
 
     return (
-      <div key={`facet-${j}`} style={grid(ROW, "end")}>
+      <div key={`facet-${j}`} style={grid(ROW)}>
         {dimension}
         {value}
         {editable ? (
-          <RemoveButton
-            label={`Remove facet ${j + 1} of condition ${i + 1}`}
-            buttonRef={buttonRef(`remove-facet-${i}-${j}`)}
-            onClick={() => {
-              set(i, { facets: removeAt(row.facets, j) });
-              forget(`f${i}-`);
-              focus(j > 0 ? `remove-facet-${i}-${j - 1}` : `add-facet-${i}`);
-            }}
-          />
+          <div style={ROW_ACTION_STYLE}>
+            <RemoveButton
+              label={`Remove facet ${j + 1} of condition ${i + 1}`}
+              buttonRef={buttonRef(`remove-facet-${i}-${j}`)}
+              onClick={() => {
+                set(i, { facets: removeAt(row.facets, j) });
+                forget(`f${i}-`);
+                focus(j > 0 ? `remove-facet-${i}-${j - 1}` : `add-facet-${i}`);
+              }}
+            />
+          </div>
         ) : (
           <span />
         )}
@@ -315,18 +317,20 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
     }
 
     return (
-      <div key={`context-${j}`} style={grid(ROW, "end")}>
+      <div key={`context-${j}`} style={grid(ROW)}>
         {controls}
         {editable ? (
-          <RemoveButton
-            label={`Remove context ${j + 1} of condition ${i + 1}`}
-            buttonRef={buttonRef(`remove-context-${i}-${j}`)}
-            onClick={() => {
-              set(i, { contexts: removeAt(row.contexts, j) });
-              forget(`x${i}-`);
-              focus(j > 0 ? `remove-context-${i}-${j - 1}` : `add-context-${i}`);
-            }}
-          />
+          <div style={ROW_ACTION_STYLE}>
+            <RemoveButton
+              label={`Remove context ${j + 1} of condition ${i + 1}`}
+              buttonRef={buttonRef(`remove-context-${i}-${j}`)}
+              onClick={() => {
+                set(i, { contexts: removeAt(row.contexts, j) });
+                forget(`x${i}-`);
+                focus(j > 0 ? `remove-context-${i}-${j - 1}` : `add-context-${i}`);
+              }}
+            />
+          </div>
         ) : (
           <span />
         )}
@@ -352,7 +356,7 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
           {editable && <RemoveButton label={`Remove condition ${i + 1}`} buttonRef={buttonRef(`remove-condition-${i}`)} onClick={() => removeCondition(i)} />}
         </div>
         <Stack spacing={Spacing.L}>
-          <div style={grid("minmax(0,1fr) minmax(0,2fr)", "start")}>
+          <div style={grid("minmax(0,1fr) minmax(0,2fr)")}>
             <Select
               id={id(`c${i}-anchoring`)}
               label="Query"

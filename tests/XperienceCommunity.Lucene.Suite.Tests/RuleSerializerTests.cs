@@ -104,6 +104,16 @@ public sealed class RuleSerializerTests
     }
 
     [Theory]
+    [InlineData($$"""{"pins":[{"itemGuid":"{{G1}}","position":""}]}""", "actions.pins[0].position", "Must be 1–300.")]
+    [InlineData("""{"boosts":[{"field":"Title","value":"x","strength":"abc"}]}""", "actions.boosts[0].strength", "Must be −100..100 and not 0.")]
+    public void WronglyTypedMember_GetsTheFieldMessage(string actions, string expectedPath, string expectedMessage)
+    {
+        var error = Assert.Single(RuleSerializer.Parse(Metadata, NoConditions, actions).Errors);
+
+        Assert.Equal((expectedPath, expectedMessage), (error.Path, error.Message));
+    }
+
+    [Theory]
     [MemberData(nameof(InvalidMetadata))]
     public void InvalidMetadata_ReportsThePath(object metadata, string expectedPath)
     {

@@ -9,7 +9,7 @@ export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
   const hides = useMemo(() => parseHides(props.value), [props.value]);
   const json = useMemo(() => serializeHides(hides), [hides]);
   const editable = isEditable(props);
-  const errors = useServerErrors(props, json);
+  const errors = useServerErrors(props, json, "Hides");
   const { visible, leaveGroup } = useTouched(props);
   const { byPath, unmatched } = partitionErrors(errors, hideControlPaths(hides));
   const { ref, focus } = useFocusTargets();

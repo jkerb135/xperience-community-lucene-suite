@@ -126,6 +126,9 @@ public class AdminRegistrationTests
         {
             Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.Submit)));
             Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.Change)));
+            Assert.Equal(manageRules, Command(page, nameof(RuleEditPageBase.ValidateSection)));
+            // Display only, and shown to read-only viewers of the edit page.
+            Assert.Equal(SystemPermissions.VIEW, Command(page, nameof(RuleEditPageBase.RuleStatus)));
         }
 
         static string? Command(Type page, string method) =>
@@ -166,6 +169,7 @@ public class AdminRegistrationTests
         {
             Assert.Equal(manageSynonyms, Command(page, nameof(SynonymEditPageBase.Submit)));
             Assert.Equal(manageSynonyms, Command(page, nameof(SynonymEditPageBase.Change)));
+            Assert.Equal(manageSynonyms, Command(page, nameof(SynonymEditPageBase.ValidateTerms)));
         }
 
         static string? Command(Type page, string method) =>

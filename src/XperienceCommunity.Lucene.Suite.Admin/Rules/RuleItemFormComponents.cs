@@ -68,8 +68,6 @@ public abstract class RuleItemsFormComponent(
     /// <summary>The page's bound index; set by the rule edit pages on every request, never by the client.</summary>
     internal int IndexIdentifier { get; set; }
 
-    private protected abstract RuleJsonSection Section { get; }
-
     /// <summary>Searches this index with rules off and without analytics; each ItemGuid is listed once.</summary>
     [FormComponentCommand]
     public Task<ICommandResponse<RuleItemsResult>> Search(RuleItemSearchArguments arguments)
@@ -122,11 +120,6 @@ public abstract class RuleItemsFormComponent(
         }
     }
 
-    /// <summary>Validates the component's JSON with the server rules; changes nothing.</summary>
-    [FormComponentCommand]
-    public Task<ICommandResponse<RuleJsonValidationResult>> Validate(RuleJsonValidationArguments arguments) =>
-        Task.FromResult(ResponseFrom(new RuleJsonValidationResult(RuleSectionValidator.Validate(Section, arguments.Value))));
-
     // SuiteItemLookup is internal to the package, so it cannot appear in this public constructor.
     private SuiteItemLookup Lookup => services.GetRequiredService<SuiteItemLookup>();
 
@@ -146,8 +139,6 @@ public sealed class RulePinsFormComponent(ILocalizationService localizationServi
 {
     /// <inheritdoc />
     public override string ClientComponentName => "@xperience-community/lucene-suite/RulePins";
-
-    private protected override RuleJsonSection Section => RuleJsonSection.Pins;
 }
 
 /// <summary>Editor of a rule's hidden items.</summary>
@@ -157,8 +148,6 @@ public sealed class RuleHidesFormComponent(ILocalizationService localizationServ
 {
     /// <inheritdoc />
     public override string ClientComponentName => "@xperience-community/lucene-suite/RuleHides";
-
-    private protected override RuleJsonSection Section => RuleJsonSection.Hides;
 }
 
 /// <summary>Edits the property with <see cref="RulePinsFormComponent"/>.</summary>

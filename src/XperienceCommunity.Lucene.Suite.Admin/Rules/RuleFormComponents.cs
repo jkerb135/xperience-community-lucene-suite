@@ -33,13 +33,16 @@ public sealed class RuleJsonClientProperties : FormComponentClientProperties<str
     public int MaxBoosts { get; set; } = RuleLimits.Boosts;
 }
 
-/// <summary>Errors of a component's JSON, as returned by its Validate command.</summary>
+/// <summary>Errors of a field's JSON, as returned by the edit pages' validation commands.</summary>
 /// <param name="Errors">Errors with JSON paths such as <c>conditions[1].facets[0].value</c>.</param>
 public sealed record RuleJsonValidationResult(IReadOnlyList<RuleError> Errors);
 
-/// <summary>Arguments of the Validate component command.</summary>
+/// <summary>Arguments of the rule edit pages' ValidateSection command.</summary>
 public sealed class RuleJsonValidationArguments
 {
+    /// <summary>The field's section: Conditions, Boosts, Pins or Hides.</summary>
+    public string? Section { get; set; }
+
     /// <summary>The component's current JSON.</summary>
     public string? Value { get; set; }
 }
@@ -63,11 +66,6 @@ public sealed class RuleConditionsFormComponent(
 
     /// <inheritdoc />
     public override string ClientComponentName => "@xperience-community/lucene-suite/RuleConditions";
-
-    /// <summary>Validates the conditions JSON with the server rules; changes nothing.</summary>
-    [FormComponentCommand]
-    public Task<ICommandResponse<RuleJsonValidationResult>> Validate(RuleJsonValidationArguments arguments) =>
-        Task.FromResult(ResponseFrom(new RuleJsonValidationResult(RuleSectionValidator.Validate(RuleJsonSection.Conditions, arguments.Value))));
 
     /// <summary>Contact groups offered as contexts; none unless the user may view Kentico's Contact groups application.</summary>
     [FormComponentCommand]
@@ -135,11 +133,6 @@ public sealed class RuleStatusFormComponent : FormComponent<RuleStatusClientProp
         return base.ConfigureClientProperties(clientProperties);
     }
 
-    /// <summary>The status of the form's current (unsaved) Enabled and validity values, now.</summary>
-    [FormComponentCommand]
-    public Task<ICommandResponse<RuleStatusResult>> Status(RuleStatusArguments arguments) =>
-        Task.FromResult(ResponseFrom(Describe(arguments.Enabled, ParseUtc(arguments.ValidFromUtc), ParseUtc(arguments.ValidUntilUtc), DateTime.UtcNow)));
-
     internal static RuleStatusResult Describe(bool enabled, DateTime? fromUtc, DateTime? untilUtc, DateTime nowUtc)
     {
         var status = RuleListing.Of(enabled, fromUtc, untilUtc, nowUtc);
@@ -161,7 +154,7 @@ public sealed class RuleStatusFormComponent : FormComponent<RuleStatusClientProp
         DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var date) ? date : null;
 }
 
-/// <summary>Arguments of the Status command: the form's current values as the client holds them.</summary>
+/// <summary>Arguments of the rule edit pages' RuleStatus command: the form's current values as the client holds them.</summary>
 public sealed class RuleStatusArguments
 {
     /// <summary>Whether the rule is enabled.</summary>
@@ -174,7 +167,7 @@ public sealed class RuleStatusArguments
     public string? ValidUntilUtc { get; set; }
 }
 
-/// <summary>Result of the Status command.</summary>
+/// <summary>Result of the RuleStatus command.</summary>
 public sealed class RuleStatusResult
 {
     /// <summary>Active, Scheduled, Expired or Disabled.</summary>
@@ -190,11 +183,6 @@ public sealed class RuleBoostsFormComponent : FormComponent<RuleJsonClientProper
 {
     /// <inheritdoc />
     public override string ClientComponentName => "@xperience-community/lucene-suite/RuleBoosts";
-
-    /// <summary>Validates the boosts JSON with the server rules; changes nothing.</summary>
-    [FormComponentCommand]
-    public Task<ICommandResponse<RuleJsonValidationResult>> Validate(RuleJsonValidationArguments arguments) =>
-        Task.FromResult(ResponseFrom(new RuleJsonValidationResult(RuleSectionValidator.Validate(RuleJsonSection.Boosts, arguments.Value))));
 }
 
 /// <summary>Carries a value through the form without rendering anything.</summary>

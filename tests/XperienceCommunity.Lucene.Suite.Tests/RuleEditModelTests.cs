@@ -10,6 +10,7 @@ using Kentico.Membership;
 using Kentico.Xperience.Lucene.Core.Indexing;
 
 using XperienceCommunity.Lucene.Suite.Admin.Rules;
+using XperienceCommunity.Lucene.Suite.Admin.UIPages;
 using XperienceCommunity.Lucene.Suite.Rules;
 using XperienceCommunity.Lucene.Suite.Search;
 
@@ -229,6 +230,39 @@ public sealed class RuleEditModelTests
 
         Assert.Equal((status, detail), (result.Status, result.Detail));
         Assert.Equal(RuleListing.Of(enabled, fromUtc, untilUtc, now).ToString(), result.Status);
+    }
+
+    [Theory]
+    [InlineData("Conditions", "[{\"anchoring\":\"contains\",\"pattern\":\"\"}]", "conditions[0]")]
+    [InlineData("Boosts", "[{\"field\":\"\",\"value\":\"x\",\"factor\":2}]", "actions.boosts[0]")]
+    [InlineData("Pins", "[{\"itemGuid\":\"not-a-guid\",\"position\":1}]", "actions.pins[0]")]
+    [InlineData("Hides", "[\"not-a-guid\"]", "actions.hides[0]")]
+    [InlineData("UserData", "{}", "section")]
+    [InlineData("1", "[]", "section")]
+    [InlineData(null, "[]", "section")]
+    public async Task ValidateSectionCommand_UsesTheSectionValidator_AndRejectsOtherSections(string? section, string json, string pathPrefix)
+    {
+        // The commands need no page state; the Kentico base constructor would need its IoC container.
+        var page = (RuleCreatePage)RuntimeHelpers.GetUninitializedObject(typeof(RuleCreatePage));
+
+        var result = await page.ValidateSection(new RuleJsonValidationArguments { Section = section, Value = json });
+
+        Assert.Contains(result.Result.Errors, error => error.Path.StartsWith(pathPrefix, StringComparison.Ordinal));
+        if (pathPrefix == "section")
+        {
+            Assert.Equal(RuleEditPageBase.UnknownSectionMessage, Assert.Single(result.Result.Errors).Message);
+        }
+    }
+
+    [Fact]
+    public async Task RuleStatusCommand_DescribesTheFormValues()
+    {
+        // The commands need no page state; the Kentico base constructor would need its IoC container.
+        var page = (RuleCreatePage)RuntimeHelpers.GetUninitializedObject(typeof(RuleCreatePage));
+
+        var result = await page.RuleStatus(new RuleStatusArguments { Enabled = false, ValidFromUtc = "2999-01-01T00:00:00" });
+
+        Assert.Equal(("Disabled", null), (result.Result.Status, result.Result.Detail));
     }
 
     [Theory]

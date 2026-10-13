@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFormComponentCommandProvider, type FormComponentProps } from "@kentico/xperience-admin-base";
+import { usePageCommandProvider, type FormComponentProps } from "@kentico/xperience-admin-base";
 import {
   Button,
   ButtonColor,
@@ -21,26 +21,30 @@ export interface SynonymTermsFormComponentProps extends FormComponentProps<strin
   readonly maxTermLength: number;
 }
 
-/** Asks the component's Validate command for errors 400 ms after the last change, with the form's Kind and Input; stale answers are dropped. */
+/**
+ * Asks the page's ValidateTerms command for errors 400 ms after the last change, with the form's Kind and Input; stale answers are dropped.
+ * A page command, because form component commands put the form's Save button in progress on every keystroke.
+ */
 const useTermErrors = (props: SynonymTermsFormComponentProps, json: string, kind: string | undefined, input: string | undefined) => {
-  const { executeCommand } = useFormComponentCommandProvider();
+  const { executeCommand } = usePageCommandProvider();
   const [errors, setErrors] = useState<readonly RuleError[]>([]);
-  const request = useMemo(() => latestRequest(), []);
   const propsRef = useRef(props);
   propsRef.current = props;
+  // executeCommand's identity changes with the form values; the validator must not.
+  const executeRef = useRef(executeCommand);
+  executeRef.current = executeCommand;
 
-  const validate = useMemo(
-    () =>
-      debounce(async (data: { value: string; kind?: string; input?: string }) => {
-        const { latest, value } = await request((abort) =>
-          executeCommand<{ errors: RuleError[] }, typeof data>(propsRef.current, "Validate", data, undefined, abort),
-        );
-        if (latest) {
-          setErrors(value?.errors ?? []);
-        }
-      }, 400),
-    [executeCommand, request],
-  );
+  const validate = useMemo(() => {
+    const request = latestRequest();
+    return debounce(async (data: { value: string; kind?: string; input?: string }) => {
+      const { latest, value } = await request((abort) =>
+        executeRef.current<{ errors: RuleError[] }, typeof data>("ValidateTerms", data, undefined, abort),
+      );
+      if (latest) {
+        setErrors(value?.errors ?? []);
+      }
+    }, 400);
+  }, []);
 
   useEffect(() => {
     if (isEditable(propsRef.current)) {

@@ -79,11 +79,23 @@ internal static partial class RuleSerializer
         catch (JsonException exception)
         {
             // Syntax errors carry the reader's exception as inner and belong to the whole document; member errors keep their path.
-            string path = exception.InnerException is JsonException ? root : MapPath(root, exception.Path);
-            errors.Add(new RuleError(path, exception.Message));
+            if (exception.InnerException is JsonException)
+            {
+                errors.Add(new RuleError(root, exception.Message));
+                return null;
+            }
+
+            string path = MapPath(root, exception.Path);
+            errors.Add(new RuleError(path, TypeMessage(path)));
             return null;
         }
     }
+
+    // The serializer's own message names CLR types and byte offsets, so a wrongly typed member gets the field's validation message.
+    private static string TypeMessage(string path) =>
+        path.EndsWith(".position", StringComparison.Ordinal) ? $"Must be 1–{RuleLimits.MaxPosition}."
+        : path.EndsWith(".strength", StringComparison.Ordinal) ? $"Must be −{RuleLimits.MaxStrength}..{RuleLimits.MaxStrength} and not 0."
+        : "Has the wrong type.";
 
     // "$[0].pattern" → "conditions[0].pattern"; "$.pins[1]" → "actions.pins[1]".
     private static string MapPath(string root, string? path) =>

@@ -4,6 +4,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
+| 19 | 13-03 fixes | Rule/synonym form: row alignment with errors, red delete icons, friendly type errors, no request-driven Save flashing | Pending |
 | 18 | 13-03 | Search reports per handoff: sparklines, data bars, rows per page, empty state, Retry with stale fade | Pending |
 | 17 | 13-02.1 | Rule/synonym edit: repeated saves work (form reloads after save); rule conflict alert with confirmed Reload | Pending |
 | 16 | 13-02 | Rule edit per handoff: sections, live status, contact-group and facet pickers, pins/hides layouts | Pending |
@@ -602,4 +603,30 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **Stale fade is on graphics only** (the handoff fades the whole report to 60 %, which would drop low-emphasis text to about 3:1).
    - **Searches bars are scaled to the page maximum,** so bar lengths aren't comparable across pages (handoff design; the number is always shown).
    - **If the last report that loaded was empty,** a failed load shows only the alert and stale line: the empty Callout is hidden because it would describe an earlier period.
+
+---
+
+## 19. Rule and synonym form fixes after 13-03 (v0.2, your feedback)
+
+1. **Where:** rule create/edit (conditions, boosts, pins) and synonym create/edit.
+2. **What changed:**
+   - **Row alignment:** boost, facet and context rows align to the top, so an error under one field no longer pushes its neighbours down. The delete icon is centred on the input box.
+   - **Delete icons are red:** Kentico destructive style on all rule-form row deletes.
+   - **Wrongly typed values** (empty pin position, `-` as strength): the field's own message ("Must be 1–300.", "Must be −100..100 and not 0.") instead of the raw serializer text.
+   - **Save flashing:**
+     - Live validation and the status line now use page commands (`ValidateSection`, `RuleStatus`, `ValidateTerms`). Kentico marks the form busy for every form-component command, but not for page commands.
+     - Only the field being edited validates, once per typing pause; before, every keystroke sent 6 requests.
+3. **What I verified on the host:**
+   - alignment measured with errors showing; icon colour rgb(225, 0, 7);
+   - `-` in strength shows the friendly message;
+   - typing sends one `ValidateSection` request for the edited field only;
+   - the rule create page validates and shows "Active";
+   - the synonym create page validates ("Must have 2–20 terms.");
+   - nothing was saved.
+4. **Automated checks:** .NET 847 passed / 6 skipped (the RulesOverhead flake passed alone); client 100/100; tsc clean; Debug + Release 0 warnings.
+5. **Your decisions to confirm:**
+   - **Kentico's own Save flicker remains:** a few ms per keystroke with no request. Kentico's user edit form does the same.
+   - **`RuleStatus` needs View permission only,** so read-only viewers still see the status.
+   - **Pins keep typed positions:** drag order was considered and dropped.
+   - **Strength stays Kentico's numeric input** (type=text, inputMode numeric). Phones get no minus key, which matches Kentico's own integer fields.
 
