@@ -397,3 +397,33 @@ export const blockSuggestionReason = (row: { readonly isBrowse: boolean; readonl
       : canManageSynonyms
         ? null
         : "Requires Site Search → Manage synonyms";
+
+/** A data bar's filled share, 0–1: value / max, clamped; null, NaN, negative values or a max that is not positive give 0. */
+export const barRatio = (value: number | null | undefined, max = 1): number =>
+  value == null || !(value > 0) || !(max > 0) ? 0 : Math.min(1, value / max);
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * Point lists ("x,y x,y …") of a width×height sparkline, one per run of non-null values, so nulls leave gaps.
+ * The range is scaled to the height with a 2px inset; a flat series sits in the middle, a single value in the centre.
+ */
+export const sparkPoints = (values: readonly (number | null)[], width: number, height: number): string[] => {
+  const present = values.filter((v): v is number => v != null);
+  if (present.length === 0) {
+    return [];
+  }
+  const min = Math.min(...present);
+  const span = Math.max(...present) - min;
+  const x = (i: number) => (values.length === 1 ? width / 2 : 1 + (i / (values.length - 1)) * (width - 2));
+  const y = (v: number) => (span === 0 ? height / 2 : height - 2 - ((v - min) / span) * (height - 4));
+  const runs: string[][] = [[]];
+  values.forEach((v, i) => {
+    if (v == null) {
+      runs.push([]);
+    } else {
+      runs[runs.length - 1].push(`${round2(x(i))},${round2(y(v))}`);
+    }
+  });
+  return runs.filter((run) => run.length > 0).map((run) => run.join(" "));
+};

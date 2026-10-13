@@ -77,3 +77,15 @@ test("report state is kept per index and rejected when malformed", () => {
   assert.equal(loadReportState("4", storage), null);
   assert.equal(loadReportState(null, storage), null);
 });
+
+test("a saved page size is kept only when the query table offers it", () => {
+  const storage = memory();
+  const state = { from: "2030-02-01", to: "2030-02-10", preset: "custom", sort: "Searches", page: 1 };
+  saveReportState("4", { ...state, pageSize: 50 }, storage);
+  assert.deepEqual(loadReportState("4", storage), { ...state, pageSize: 50 });
+
+  for (const pageSize of [7, "25", 0]) {
+    storage.setItem("lucene-suite:reports:4", JSON.stringify({ ...state, pageSize }));
+    assert.deepEqual(loadReportState("4", storage), state);
+  }
+});

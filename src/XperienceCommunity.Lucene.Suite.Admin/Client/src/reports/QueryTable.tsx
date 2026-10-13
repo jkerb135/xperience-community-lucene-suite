@@ -10,7 +10,6 @@ import {
   LabelWithTooltip,
   NameToggleButtons,
   NotificationBarAlert,
-  Pagination,
   Spacing,
   Spinner,
   Stack,
@@ -21,10 +20,11 @@ import {
   type TableRow,
 } from "@kentico/xperience-admin-components";
 import { adminHref, latestRequest } from "../query-tester/state.ts";
-import { give, type HandoffTarget } from "./handoff.ts";
+import { QUERY_PAGE_SIZES, give, type HandoffTarget } from "./handoff.ts";
 import type { RowAction } from "./insights.ts";
 import { cardHeadline, visuallyHidden } from "./dashboard.tsx";
-import { DASH, blockSuggestionReason, formatCount, formatPosition, formatRate, percentileLabel, type DayRange, type Percentile } from "./report.ts";
+import { DataBar, RangeFooter, Stale } from "./patterns.tsx";
+import { DASH, barRatio, blockSuggestionReason, formatCount, formatPosition, formatRate, percentileLabel, type DayRange, type Percentile } from "./report.ts";
 
 export const SORTS = [
   { id: "Searches", label: "Top", title: "Most searched queries" },
@@ -56,8 +56,11 @@ export interface QueryTableProps {
   readonly range: DayRange;
   readonly sort: string;
   readonly page: number;
+  readonly pageSize: number;
   readonly onSortChange: (sort: string) => void;
   readonly onPageChange: (page: number) => void;
+  /** Called with a new page size; the caller goes back to page 1. */
+  readonly onPageSizeChange: (pageSize: number) => void;
   readonly bucketBounds: readonly number[];
   readonly canManageRules: boolean;
   readonly canManageSynonyms: boolean;
@@ -80,11 +83,12 @@ const column = (name: string, caption: string, maxWidth = 16, minWidth = 8): Tab
 
 const cell = (value: string, columnName: string): StringCell => ({ type: CellType.String, value, columnName });
 
+// Data-bar columns: the bar track shrinks with the column, the number never does.
 const COLUMNS = [
-  column("query", "Query", 40),
-  column("searches", "Searches"),
-  column("noResults", "No results"),
-  column("ctr", "CTR"),
+  column("query", "Query", 32),
+  column("searches", "Searches", 20, 12),
+  column("noResults", "No results", 20, 12),
+  column("ctr", "CTR", 20, 12),
   column("position", "Avg. pos."),
   column("p95", "p95"),
   // Four icon buttons in one line, as in native listings.
@@ -197,8 +201,15 @@ export const RowActions = ({ row, canManageRules, canManageSynonyms, queryTester
   );
 };
 
+/** A data-bar cell; the component type depends on the row data only, never on request state. */
+const barCell = (columnName: string, value: string, ratio: number, tone: "product" | "bad" | "good"): ComponentCell => ({
+  type: CellType.Component,
+  columnName,
+  component: () => <DataBar value={value} ratio={ratio} tone={tone} />,
+});
+
 export const QueryTable = (props: QueryTableProps) => {
-  const { range, sort, page, onSortChange, onPageChange, bucketBounds } = props;
+  const { range, sort, page, pageSize, onSortChange, onPageChange, onPageSizeChange, bucketBounds } = props;
   const { executeCommand } = usePageCommandProvider();
   const [request] = useState(latestRequest);
   const [result, setResult] = useState<QueriesResult>();
@@ -209,7 +220,7 @@ export const QueryTable = (props: QueryTableProps) => {
   const load = useCallback(async () => {
     setInProgress(true);
     const { latest, value } = await request((abort) =>
-      executeCommand<QueriesResult, DayRange & { sort: string; page: number }>("Queries", { ...range, sort, page }, undefined, abort),
+      executeCommand<QueriesResult, DayRange & { sort: string; page: number; pageSize: number }>("Queries", { ...range, sort, page, pageSize }, undefined, abort),
     );
     if (!latest) {
       return;
@@ -220,7 +231,7 @@ export const QueryTable = (props: QueryTableProps) => {
     if (value !== undefined && !value.error) {
       setResult(value);
     }
-  }, [executeCommand, request, range, sort, page]);
+  }, [executeCommand, request, range, sort, page, pageSize]);
 
   useEffect(() => {
     void load();
@@ -243,22 +254,25 @@ export const QueryTable = (props: QueryTableProps) => {
     ),
   });
 
-  const rows: TableRow[] | undefined = useMemo(() => result?.rows.map((row, i) => ({
-    identifier: i,
-    disabled: false,
-    cells: [
-      cell(row.isBrowse ? BROWSE : (row.queryText ?? DASH), "query"),
-      cell(formatCount(row.searches), "searches"),
-      cell(formatRate(row.noResultRate), "noResults"),
-      cell(formatRate(row.ctr), "ctr"),
-      cell(formatPosition(row.avgClickPosition), "position"),
-      cell(percentileLabel(row.latencyP95, bucketBounds), "p95"),
-      actionsFor(row),
-    ],
-  })),
+  const rows: TableRow[] | undefined = useMemo(() => {
+    // Searches bars are scaled to the largest value on this page.
+    const most = Math.max(0, ...(result?.rows.map((row) => row.searches) ?? []));
+    return result?.rows.map((row, i) => ({
+      identifier: i,
+      disabled: false,
+      cells: [
+        cell(row.isBrowse ? BROWSE : (row.queryText ?? DASH), "query"),
+        barCell("searches", formatCount(row.searches), barRatio(row.searches, most), "product"),
+        barCell("noResults", formatRate(row.noResultRate), barRatio(row.noResultRate), "bad"),
+        barCell("ctr", formatRate(row.ctr), barRatio(row.ctr), "good"),
+        cell(formatPosition(row.avgClickPosition), "position"),
+        cell(percentileLabel(row.latencyP95, bucketBounds), "p95"),
+        actionsFor(row),
+      ],
+    }));
+  },
   // actionsFor only reads the props below.
   [result, bucketBounds, props.canManageRules, props.canManageSynonyms, props.queryTesterPath, props.ruleCreatePath, props.synonymCreatePath, props.onBlock]);
-  const totalPages = result ? Math.max(1, Math.ceil(result.totalCount / result.pageSize)) : 1;
 
   return (
     <Card headline={cardHeadline("Search terms", SORTS.find((s) => s.id === sort)?.title ?? SORTS[0].title)}>
@@ -272,9 +286,22 @@ export const QueryTable = (props: QueryTableProps) => {
             {sort === "NoResults" ? "No reported query was missing results in this period." : "No query reached the reporting threshold in this period."}
           </p>
         ) : (
-          <Table columns={COLUMNS} rows={result === undefined ? undefined : rows} />
+          <Stale.Provider value={failed || error !== undefined}>
+            <Table columns={COLUMNS} rows={result === undefined ? undefined : rows} />
+          </Stale.Provider>
         )}
-        {totalPages > 1 && <Pagination selectedPage={page} totalPages={totalPages} onPageChange={onPageChange} />}
+        {result !== undefined && result.totalCount > 0 && (
+          <RangeFooter
+            page={page}
+            pageSize={pageSize}
+            total={result.totalCount}
+            noun={result.totalCount === 1 ? "query" : "queries"}
+            sizes={QUERY_PAGE_SIZES}
+            sizeLabel="Rows per page"
+            onPageSize={onPageSizeChange}
+            onPage={onPageChange}
+          />
+        )}
         {result?.other && (
           <LabelWithTooltip
             label={`(other): ${formatCount(result.other.searches)} searches from queries below the reporting threshold`}

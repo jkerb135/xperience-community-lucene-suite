@@ -40,8 +40,11 @@ public sealed class SearchReportsPage(
     IUIPermissionEvaluator permissionEvaluator,
     IPageLinkGenerator pageLinkGenerator) : Page<SearchReportsClientProperties>
 {
-    /// <summary>Rows per page of the query table.</summary>
+    /// <summary>Default rows per page of the query table.</summary>
     internal const int QueryPageSize = 25;
+
+    /// <summary>Rows per page the query table accepts.</summary>
+    internal static readonly int[] QueryPageSizes = [10, 25, 50];
 
     private const string DayFormat = "yyyy-MM-dd";
 
@@ -152,16 +155,22 @@ public sealed class SearchReportsPage(
             return new SearchReportsQueriesResult { Error = "Page must be 1 or higher." };
         }
 
+        int pageSize = arguments.PageSize ?? QueryPageSize;
+        if (!QueryPageSizes.Contains(pageSize))
+        {
+            return new SearchReportsQueriesResult { Error = "Page size must be 10, 25 or 50." };
+        }
+
         try
         {
-            long skip = (long)(arguments.Page - 1) * QueryPageSize;
-            var page = reports.Queries(indexName, from, to, sort, (int)Math.Min(skip, int.MaxValue), QueryPageSize);
+            long skip = (long)(arguments.Page - 1) * pageSize;
+            var page = reports.Queries(indexName, from, to, sort, (int)Math.Min(skip, int.MaxValue), pageSize);
             return new SearchReportsQueriesResult
             {
                 Rows = page.Rows.Select(Row).ToList(),
                 Other = page.Other is { } other ? Row(other) : null,
                 TotalCount = page.TotalCount,
-                PageSize = QueryPageSize,
+                PageSize = pageSize,
             };
         }
         catch (ArgumentException exception)
@@ -384,6 +393,9 @@ public sealed class SearchReportsQueriesArguments
 
     /// <summary>1-based page number.</summary>
     public int Page { get; set; } = 1;
+
+    /// <summary>Rows per page: 10, 25 or 50; 25 when not set.</summary>
+    public int? PageSize { get; set; }
 }
 
 /// <summary>One page of surfaced queries; only <see cref="Error"/> is set when the request is invalid.</summary>

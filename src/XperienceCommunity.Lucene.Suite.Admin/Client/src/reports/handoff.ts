@@ -90,9 +90,17 @@ export interface SavedReportState {
   readonly page: number;
   /** Selected dashboard metric id; the caller validates it (metricById). */
   readonly metric?: string;
+  /** Rows per page of the query table; dropped on load unless one of QUERY_PAGE_SIZES. */
+  readonly pageSize?: number;
 }
 
+export const QUERY_PAGE_SIZES = [10, 25, 50] as const;
+
 const stateKey = (index: string) => `lucene-suite:reports:${index}`;
+
+/** Drops a page size the query table does not offer. */
+const withPageSize = ({ pageSize, ...state }: SavedReportState): SavedReportState =>
+  QUERY_PAGE_SIZES.some((size) => size === pageSize) ? { ...state, pageSize } : state;
 
 export const saveReportState = (index: string | null, state: SavedReportState, storage = session()): void => {
   if (index === null) {
@@ -114,7 +122,7 @@ export const loadReportState = (index: string | null, storage = session()): Save
     const raw = storage?.getItem(stateKey(index));
     const state = raw ? (JSON.parse(raw) as Partial<SavedReportState>) : null;
     return state && typeof state.from === "string" && typeof state.to === "string" && typeof state.preset === "string" && typeof state.sort === "string" && Number.isInteger(state.page) && state.page! >= 1
-      ? (state as SavedReportState)
+      ? withPageSize(state as SavedReportState)
       : null;
   } catch {
     return null;

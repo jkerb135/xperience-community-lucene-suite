@@ -8,7 +8,6 @@ import {
   Callout,
   CalloutPlacementType,
   CalloutType,
-  Card,
   CellType,
   Cols,
   Column,
@@ -38,7 +37,7 @@ import {
   type TableColumn,
   type TableRow,
 } from "@kentico/xperience-admin-components";
-import { latestRequest } from "../query-tester/state.ts";
+import { adminHref, latestRequest } from "../query-tester/state.ts";
 import { returnFocus } from "../query-tester/focus.ts";
 import {
   CUSTOM,
@@ -76,8 +75,9 @@ import {
   type Metric,
   type Percentile,
 } from "./report.ts";
-import { ACCENT, BORDER, DeltaText, Eyebrow, SectionHeading, cardHeadline, focusOnMount, panelStyle, visuallyHidden } from "./dashboard.tsx";
+import { ACCENT, BORDER, DeltaText, Eyebrow, SectionHeading, TONE_COLOR, focusOnMount, panelStyle, visuallyHidden } from "./dashboard.tsx";
 import { BarChart } from "./TrendChart.tsx";
+import { Sparkline, Stale } from "./patterns.tsx";
 import { indexFromPath, loadReportState, saveReportState } from "./handoff.ts";
 import { AllInsights, NeedsAttention, type ActionProps } from "./NeedsAttention.tsx";
 import type { InsightsResult } from "./insights.ts";
@@ -142,6 +142,7 @@ const MetricTile = ({ metric, selected, result, onSelect }: { metric: Metric; se
   const value = valueOf(metric, result.current);
   const previous = valueOf(metric, result.previous);
   const delta = deltaOf(metric, value, previous, result.previousIsPartial);
+  const tone = deltaTone(metric, delta);
   return (
     <button
       type="button"
@@ -163,9 +164,17 @@ const MetricTile = ({ metric, selected, result, onSelect }: { metric: Metric; se
       }}
     >
       <Eyebrow color={selected ? "inherit" : undefined}>{metric.caption}</Eyebrow>
-      <span style={{ fontSize: "x-large", fontWeight: 700 }}>{formatMetric(metric, value)}</span>
-      <span style={{ fontSize: "smaller" }}>
-        <DeltaText text={formatMetricDelta(metric, value, previous, result.previousIsPartial, delta)} tone={deltaTone(metric, delta)} onAccent={selected} />
+      {/* Wraps on a narrow tile; the sparkline then stays at the right. */}
+      <span style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: Spacing.S }}>
+        <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <span style={{ fontSize: "x-large", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{formatMetric(metric, value)}</span>
+          <span style={{ fontSize: "smaller" }}>
+            <DeltaText text={formatMetricDelta(metric, value, previous, result.previousIsPartial, delta)} tone={tone} onAccent={selected} />
+          </span>
+        </span>
+        <span style={{ marginLeft: "auto" }}>
+          <Sparkline values={series(result.days, metric)} color={selected ? "var(--color-text-default-on-dark)" : TONE_COLOR[tone]} />
+        </span>
       </span>
       <span style={visuallyHidden}>{metric.definition}</span>
     </button>
@@ -204,6 +213,7 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
   );
   const [sort, setSort] = useState<string>(() => saved?.sort ?? SORTS[0].id);
   const [page, setPage] = useState(() => saved?.page ?? 1);
+  const [pageSize, setPageSize] = useState<number>(() => saved?.pageSize ?? 25);
   const [metric, setMetric] = useState<Metric>(() => metricById(saved?.metric));
   const [result, setResult] = useState<ReportResult>();
   const [error, setError] = useState<string>();
@@ -260,8 +270,8 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
   );
 
   useEffect(() => {
-    saveReportState(index, { from: range.from, to: range.to, preset, sort, page, metric: metric.id });
-  }, [index, range, preset, sort, page, metric]);
+    saveReportState(index, { from: range.from, to: range.to, preset, sort, page, metric: metric.id, pageSize });
+  }, [index, range, preset, sort, page, metric, pageSize]);
 
   useEffect(() => {
     void load(range);
@@ -306,6 +316,8 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
   };
 
   const minDay = addDays(today, 1 - maxDays);
+  // A failed or rejected request leaves the last report on screen: its graphics fade, its text keeps full contrast.
+  const stale = failed || error !== undefined;
   const previous = previousRange(range);
   const current = result?.current;
   const partial = result?.previousIsPartial ?? false;
@@ -376,12 +388,19 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
             />
           </FormItemWrapper>
         )}
-        {failed && <NotificationBarAlert>The report could not be loaded. The last loaded report is shown; choose the period again to retry.</NotificationBarAlert>}
+        {failed && (
+          <NotificationBarAlert
+            actions={<Button label="Retry" size={ButtonSize.S} color={ButtonColor.Secondary} disabled={inProgress} onClick={() => void load(range)} />}
+          >
+            The report could not be loaded. The last loaded report is shown; choose the period again to retry.
+          </NotificationBarAlert>
+        )}
         {error && <NotificationBarAlert>{error}</NotificationBarAlert>}
+        {stale && result !== undefined && <span style={{ color: "var(--color-text-low-emphasis)" }}>Showing the last loaded report.</span>}
         {blockError && <NotificationBarAlert>{blockError}</NotificationBarAlert>}
         {result === undefined && !failed && !error && <Spinner />}
         {result !== undefined && current !== undefined && facts && (
-          <>
+          <Stale.Provider value={stale}>
             {partial && (
               <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnDesk} headline="No comparison">
                 {`The previous period starts before the first data${result.firstDataDay ? ` (${dayLabel(result.firstDataDay)})` : ""}, so changes are not shown.`}
@@ -395,9 +414,23 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
               </Callout>
             )}
             {current.searches === 0 ? (
-              <Card headline={cardHeadline("Overview", "No searches")}>
-                <p style={{ margin: 0, color: "var(--color-text-default-on-light)" }}>No searches were recorded on this index in the selected period.</p>
-              </Card>
+              // Not while stale: an empty report on screen then belongs to an earlier period.
+              !stale && (
+                <Callout
+                  type={CalloutType.QuickTip}
+                  placement={CalloutPlacementType.OnDesk}
+                  headline="No searches in this period"
+                  actionButton={
+                    <Button
+                      label="Open query tester"
+                      color={ButtonColor.Secondary}
+                      onClick={() => window.location.assign(adminHref(props.queryTesterPath, window.location.pathname))}
+                    />
+                  }
+                >
+                  Reports fill in once visitors search the site. Searches made in the query tester are not tracked.
+                </Callout>
+              )
             ) : (
               <>
                 <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusL}>
@@ -522,11 +555,16 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
                   range={range}
                   sort={sort}
                   page={page}
+                  pageSize={pageSize}
                   onSortChange={(next) => {
                     setSort(next);
                     setPage(1);
                   }}
                   onPageChange={setPage}
+                  onPageSizeChange={(next) => {
+                    setPageSize(next);
+                    setPage(1);
+                  }}
                   bucketBounds={bounds}
                   canManageRules={props.canManageRules}
                   canManageSynonyms={props.canManageSynonyms}
@@ -636,7 +674,7 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
                 </SidePanel>
               </>
             )}
-          </>
+          </Stale.Provider>
         )}
       </Stack>
     </div>

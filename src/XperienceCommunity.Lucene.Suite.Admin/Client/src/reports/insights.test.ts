@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { KINDS, evidence, fixLinks, groupByKind, kindInfo, summary, topFindings, type InsightRow, type InsightsResult } from "./insights.ts";
+import { KINDS, evidence, findingBar, fixLinks, groupByKind, kindInfo, summary, topFindings, type InsightRow, type InsightsResult } from "./insights.ts";
 
 const BOUNDS = [50, 100, 200, 300, 500, 750, 1000, 1500, 2000];
 
@@ -110,4 +110,25 @@ test("summary counts all findings and notes the caps", () => {
   });
   assert.equal(summary(result({}), "en-US"), "1 finding · 40 queries checked");
   assert.equal(summary(result({ omitted: 1200, considered: 1, truncated: true }), "en-US"), "1,201 findings · 1 most searched query checked · showing the top 1");
+});
+
+test("each finding's data bar shows the figure its kind is about", () => {
+  assert.deepEqual(findingBar(row({ kind: "ContentGap", noResultRate: 0.25 }), "en-US"), { ratio: 0.25, tone: "bad", label: "25.0%" });
+  assert.deepEqual(findingBar(row({ kind: "RelevanceMiss", ctr: 0.032 }), "en-US"), { ratio: 0.032, tone: "bad", label: "3.2%" });
+  assert.deepEqual(findingBar(row({ kind: "BuriedAnswer", avgClickPosition: 7.2 }), "en-US"), { ratio: 0.72, tone: "neutral", label: "7.2" });
+  // Positions past 10 fill the bar; slow share is affected / searches.
+  assert.equal(findingBar(row({ kind: "BuriedAnswer", avgClickPosition: 14 })).ratio, 1);
+  assert.deepEqual(findingBar(row({ kind: "SlowQuery", searches: 200, affected: 50 }), "en-US"), { ratio: 0.25, tone: "bad", label: "25.0%" });
+  assert.deepEqual(findingBar(row({ kind: "SlowQuery", searches: 0, affected: 0 })), { ratio: 0, tone: "bad", label: "—" });
+  assert.equal(findingBar(row({ kind: "ContentGap", noResultRate: null })).ratio, 0);
+});
+
+test("a regression's bar shows the rate that got worse by more points", () => {
+  const nr = row({ kind: "Regression", previousNoResultRate: 0.1, noResultRate: 0.4, previousCtr: 0.5, ctr: 0.45 });
+  assert.deepEqual(findingBar(nr, "en-US"), { ratio: 0.4, tone: "bad", label: "40.0%" });
+  const ctr = row({ kind: "Regression", previousNoResultRate: 0.1, noResultRate: 0.12, previousCtr: 0.6, ctr: 0.2 });
+  assert.deepEqual(findingBar(ctr, "en-US"), { ratio: 0.2, tone: "bad", label: "20.0%" });
+  // CTR missing in the previous period: only the no-result rate can have got worse.
+  assert.equal(findingBar(row({ kind: "Regression", previousNoResultRate: 0.1, noResultRate: 0.3, previousCtr: null, ctr: 0 }), "en-US").label, "30.0%");
+  assert.deepEqual(findingBar(row({ kind: "Regression", previousNoResultRate: 0.3, noResultRate: 0.1, previousCtr: 0.2, ctr: 0.5 })), { ratio: 0, tone: "neutral", label: "—" });
 });

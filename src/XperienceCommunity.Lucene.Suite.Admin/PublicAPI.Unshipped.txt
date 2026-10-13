@@ -701,6 +701,8 @@ XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.From
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.From.set -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.Page.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.Page.set -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.PageSize.get -> int?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.PageSize.set -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.SearchReportsQueriesArguments() -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.Sort.get -> string?
 XperienceCommunity.Lucene.Suite.Admin.UIPages.SearchReportsQueriesArguments.Sort.set -> void

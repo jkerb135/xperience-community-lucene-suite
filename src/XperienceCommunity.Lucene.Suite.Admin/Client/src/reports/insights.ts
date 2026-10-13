@@ -1,4 +1,4 @@
-import { formatCount, formatPosition, formatRate, percentileLabel, type Percentile } from "./report.ts";
+import { DASH, barRatio, formatCount, formatPosition, formatRate, percentileLabel, type Percentile, type Tone } from "./report.ts";
 
 export type InsightKind = "ContentGap" | "RelevanceMiss" | "BuriedAnswer" | "SlowQuery" | "Regression";
 
@@ -124,4 +124,36 @@ export const summary = (result: InsightsResult, locale?: string): string => {
   ]
     .filter(Boolean)
     .join(" · ");
+};
+
+export interface FindingBar {
+  readonly ratio: number;
+  readonly tone: Tone;
+  readonly label: string;
+}
+
+const rateBar = (rate: number | null, locale?: string): FindingBar => ({ ratio: barRatio(rate), tone: "bad", label: formatRate(rate, locale) });
+
+/** Worsening of a rate in points (positive = worse), or null without both values. */
+const worsening = (previous: number | null, current: number | null, higherIsWorse: boolean) =>
+  previous == null || current == null ? null : higherIsWorse ? current - previous : previous - current;
+
+/** The data bar of a finding: the figure its kind is about, as a 0–1 share (average position as a share of 10). */
+export const findingBar = (row: InsightRow, locale?: string): FindingBar => {
+  switch (row.kind) {
+    case "ContentGap":
+      return rateBar(row.noResultRate, locale);
+    case "RelevanceMiss":
+      return rateBar(row.ctr, locale);
+    case "BuriedAnswer":
+      return { ratio: barRatio(row.avgClickPosition, 10), tone: "neutral", label: formatPosition(row.avgClickPosition, locale) };
+    case "SlowQuery":
+      return rateBar(row.searches > 0 ? row.affected / row.searches : null, locale);
+    case "Regression": {
+      // The rate that got worse by more points, as the server's affected count does.
+      const rise = worsening(row.previousNoResultRate, row.noResultRate, true) ?? 0;
+      const fall = worsening(row.previousCtr, row.ctr, false) ?? 0;
+      return rise <= 0 && fall <= 0 ? { ratio: 0, tone: "neutral", label: DASH } : rateBar(rise >= fall ? row.noResultRate : row.ctr, locale);
+    }
+  }
 };

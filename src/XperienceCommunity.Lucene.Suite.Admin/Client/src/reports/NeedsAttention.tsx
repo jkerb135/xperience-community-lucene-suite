@@ -15,7 +15,8 @@ import {
 } from "@kentico/xperience-admin-components";
 import { adminHref, latestRequest } from "../query-tester/state.ts";
 import { BORDER, Eyebrow } from "./dashboard.tsx";
-import { evidence, fixLinks, groupByKind, kindInfo, summary, topFindings, type InsightRow, type InsightsResult } from "./insights.ts";
+import { evidence, findingBar, fixLinks, groupByKind, kindInfo, summary, topFindings, type InsightRow, type InsightsResult } from "./insights.ts";
+import { DataBar, Stale } from "./patterns.tsx";
 import { RowActions, type QueriesResult, type QueryRow, type RowActionsProps } from "./QueryTable.tsx";
 import { formatCount, formatRate, type DayRange } from "./report.ts";
 
@@ -43,14 +44,19 @@ export const FindingList = ({ rows, label, bounds, actions }: { rows: readonly I
       {rows.map((row, i) => {
         const info = kindInfo(row.kind);
         const links = fixLinks(row);
+        const bar = findingBar(row);
         const queryId = `${id}-${i}`;
         return (
           <li key={`${row.kind}-${row.queryText}`} aria-labelledby={queryId} style={{ borderTop: i === 0 ? undefined : BORDER, padding: `${Spacing.S} 0` }}>
             <Stack spacing={Spacing.XS}>
               <Eyebrow>{info.label}</Eyebrow>
-              <span id={queryId} style={{ fontWeight: 600, color: "var(--color-text-default-on-light)", overflowWrap: "anywhere" }}>
-                {row.queryText}
-              </span>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: Spacing.S }}>
+                <span id={queryId} style={{ minWidth: 0, fontWeight: 600, color: "var(--color-text-default-on-light)", overflowWrap: "anywhere" }}>
+                  {row.queryText}
+                </span>
+                <span style={{ flexShrink: 0, fontSize: "smaller", color: LOW, fontVariantNumeric: "tabular-nums" }}>{`${formatCount(row.searches)} searches`}</span>
+              </div>
+              <DataBar value={bar.label} ratio={bar.ratio} tone={bar.tone} width={160} />
               <span style={{ fontSize: "smaller", color: LOW }}>{evidence(row, bounds)}</span>
               {links.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", columnGap: Spacing.S, fontSize: "smaller", color: LOW }}>
@@ -180,23 +186,25 @@ export const NeedsAttention = (props: NeedsAttentionProps) => {
   }, [load]);
 
   return (
-    <Stack spacing={Spacing.M}>
-      {failure && <NotificationBarAlert>{failure}</NotificationBarAlert>}
-      {insights === undefined ? (
-        !failure && <Spinner />
-      ) : insights.findings.length === 0 ? (
-        <NoResultQueries range={range} actions={actions} />
-      ) : (
-        <>
-          <InsightSummary result={insights} />
-          <FindingList rows={topFindings(insights.findings, SHOWN)} label="Top findings" bounds={bucketBounds} actions={actions} />
-          {(insights.findings.length > SHOWN || insights.omitted > 0) && (
-            <div>
-              <Button label="Show all insights" icon="xp-list" size={ButtonSize.S} color={ButtonColor.Tertiary} buttonRef={showAllButton} onClick={onShowAll} />
-            </div>
-          )}
-        </>
-      )}
-    </Stack>
+    <Stale.Provider value={failure !== undefined}>
+      <Stack spacing={Spacing.M}>
+        {failure && <NotificationBarAlert>{failure}</NotificationBarAlert>}
+        {insights === undefined ? (
+          !failure && <Spinner />
+        ) : insights.findings.length === 0 ? (
+          <NoResultQueries range={range} actions={actions} />
+        ) : (
+          <>
+            <InsightSummary result={insights} />
+            <FindingList rows={topFindings(insights.findings, SHOWN)} label="Top findings" bounds={bucketBounds} actions={actions} />
+            {(insights.findings.length > SHOWN || insights.omitted > 0) && (
+              <div>
+                <Button label="Show all insights" icon="xp-list" size={ButtonSize.S} color={ButtonColor.Tertiary} buttonRef={showAllButton} onClick={onShowAll} />
+              </div>
+            )}
+          </>
+        )}
+      </Stack>
+    </Stale.Provider>
   );
 };

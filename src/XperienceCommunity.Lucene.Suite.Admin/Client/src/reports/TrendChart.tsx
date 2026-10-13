@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 import { Spacing } from "@kentico/xperience-admin-components";
 import { fractionTicks, labelEvery, niceTicks } from "./report.ts";
+import { STALE_OPACITY, Stale } from "./patterns.tsx";
 
 export interface Bar {
   readonly label: string;
@@ -64,6 +65,8 @@ export const BarChart = ({ bars, summary, valueLabel, overlayLabel, mutedLabel, 
   const y = (value: number) => TOP + plotHeight - (value / top) * plotHeight;
   const every = labelEvery(bars.length);
   const hasMuted = bars.some((bar) => bar.muted);
+  // After a failed request the bars and line fade; axis text keeps its contrast.
+  const opacity = useContext(Stale) ? STALE_OPACITY : 1;
 
   return (
     <div ref={container}>
@@ -91,10 +94,10 @@ export const BarChart = ({ bars, summary, valueLabel, overlayLabel, mutedLabel, 
                 y={y(bar.value)}
                 width={barWidth}
                 height={Math.max(0, y(0) - y(bar.value))}
-                style={{ fill: bar.muted ? `url(#${hatch})` : BAR }}
+                style={{ fill: bar.muted ? `url(#${hatch})` : BAR, opacity }}
               />
               {bar.overlay ? (
-                <rect x={x} y={y(bar.overlay)} width={barWidth} height={Math.max(0, y(0) - y(bar.overlay))} style={{ fill: "var(--color-alert-icon)" }} />
+                <rect x={x} y={y(bar.overlay)} width={barWidth} height={Math.max(0, y(0) - y(bar.overlay))} style={{ fill: "var(--color-alert-icon)", opacity }} />
               ) : null}
               {i % every === 0 && (
                 <text x={x + barWidth / 2} y={HEIGHT - BOTTOM + 16} textAnchor="middle" style={text}>
@@ -110,7 +113,7 @@ export const BarChart = ({ bars, summary, valueLabel, overlayLabel, mutedLabel, 
               .map((value, i) => (value == null ? null : `${i === 0 || line[i - 1] == null ? "M" : "L"}${LEFT + i * band + band / 2},${y(value)}`))
               .filter(Boolean)
               .join(" ")}
-            style={{ fill: "none", stroke: LINE, strokeWidth: 2 }}
+            style={{ fill: "none", stroke: LINE, strokeWidth: 2, opacity }}
           />
         )}
       </svg>

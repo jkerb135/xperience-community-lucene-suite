@@ -93,6 +93,28 @@ public sealed class SearchReportsPageDatabaseTests
     }
 
     [DatabaseFact]
+    public void Queries_PageSize_TakesAndSkipsThatManyRows_AndAcceptsOnly10_25_50()
+    {
+        var (from, to) = Seed(days: 30);
+        var service = Service();
+
+        foreach (int size in new[] { 10, 50 })
+        {
+            var expected = service.Queries(Index, from, to, QuerySort.Searches, size, size);
+            var result = SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 2, size));
+
+            Assert.Null(result.Error);
+            Assert.Equal(size, result.PageSize);
+            Assert.Equal(expected.Rows.Select(row => row.QueryText), result.Rows.Select(row => row.QueryText));
+            Assert.Equal(expected.TotalCount, result.TotalCount);
+        }
+
+        Assert.True(service.Queries(Index, from, to, QuerySort.Searches, 0, 50).Rows.Count > 10, "The seed must fill more than one 10-row page.");
+        Assert.Equal(25, SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 1)).PageSize);
+        Assert.Equal("Page size must be 10, 25 or 50.", SearchReportsPage.BuildQueries(service, Index, Queries(from, to, "Searches", 1, 7)).Error);
+    }
+
+    [DatabaseFact]
     public void Queries_InvalidInput_ReturnsAnError_AndPlaceholderTextsAreFlagged()
     {
         var (from, to) = Seed(days: 30);
@@ -169,12 +191,13 @@ public sealed class SearchReportsPageDatabaseTests
         Assert.NotNull(Error("2020-01-01", "2030-01-30"));
     }
 
-    private static SearchReportsQueriesArguments Queries(DateOnly from, DateOnly to, string sort, int page) => new()
+    private static SearchReportsQueriesArguments Queries(DateOnly from, DateOnly to, string sort, int page, int? pageSize = null) => new()
     {
         From = from.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
         To = to.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
         Sort = sort,
         Page = page,
+        PageSize = pageSize,
     };
 
     private static (DateOnly From, DateOnly To) Seed(int days)
