@@ -68,11 +68,16 @@ export const latestRequest = () => {
   };
 };
 
+export type PrimaryAction = "pin" | "boost" | "hide" | "data";
+
 export interface FiredRule {
   readonly ruleId: number;
   readonly name: string | null;
   readonly editUrl: string | null;
   readonly userData: unknown;
+  /** Action summary, e.g. "2 pins, 1 boost"; null for a rule deleted since. */
+  readonly actions?: string | null;
+  readonly primaryAction?: PrimaryAction | null;
 }
 
 export interface PinnableHit {
@@ -91,13 +96,20 @@ export const adminHref = (editUrl: string, currentPath: string) => {
   return (at > 0 ? currentPath.slice(0, at) : "") + editUrl;
 };
 
-/** Fired rules as the query tester lists them; a rule deleted since has no name or link. */
+const CHIP_ICON = { pin: "xp-pin", boost: "xp-arrow-up", hide: "xp-eye-slash", data: "xp-database" } as const;
+
+/** Icon of a fired-rule chip: what the rule mainly does. */
+export const chipIcon = (primaryAction: PrimaryAction | null | undefined) => CHIP_ICON[primaryAction ?? "data"];
+
+/** Fired rules as the query tester lists them; a rule deleted since has no name, link or summary. */
 export const firedRuleRows = (rules: readonly FiredRule[], currentPath: string) =>
   rules.map((rule) => ({
     ruleId: rule.ruleId,
     label: ruleName(rule, rule.ruleId),
     href: rule.name !== null && rule.editUrl ? adminHref(rule.editUrl, currentPath) : null,
     userData: rule.userData === null || rule.userData === undefined ? null : JSON.stringify(rule.userData, null, 2),
+    summary: rule.actions ?? null,
+    icon: chipIcon(rule.primaryAction),
   }));
 
 export interface AppliedSynonym {
@@ -121,8 +133,9 @@ export const pinningRuleName = (hit: PinnableHit, rules: readonly FiredRule[]) =
     ? null
     : ruleName(rules.find((rule) => rule.ruleId === hit.pinnedByRuleId), hit.pinnedByRuleId);
 
-/** "Pinned · <rule name>" for a pinned hit, else an empty string. */
-export const pinnedLabel = (hit: PinnableHit, rules: readonly FiredRule[]) => {
-  const name = pinningRuleName(hit, rules);
-  return name === null ? "" : `Pinned · ${name}`;
-};
+/** 1-based position of the index-th hit on a page. */
+export const position = (page: number, pageSize: number, index: number) => (page - 1) * pageSize + index + 1;
+
+/** A score bar's share of the page's top score; 0 (empty bar) for non-finite or non-positive values. */
+export const scoreRatio = (score: number, top: number) =>
+  Number.isFinite(score) && Number.isFinite(top) && score > 0 && top > 0 ? Math.min(1, score / top) : 0;

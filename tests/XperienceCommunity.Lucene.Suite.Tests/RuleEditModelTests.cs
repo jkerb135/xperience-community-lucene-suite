@@ -168,7 +168,20 @@ public sealed class RuleEditModelTests
     [InlineData("{}", "None")]
     [InlineData($$$"""{"pins":[{{{Pin}}}],"hides":["{{{Hide}}}","{{{Hide}}}"],"boosts":[{"field":"a","value":"b","strength":1}],"userData":{}}""", "1 pin, 2 hides, 1 boost, data")]
     [InlineData("{", RuleSummaries.Invalid)]
+    [InlineData("""{"pins":[],"pins":[1]}""", RuleSummaries.Invalid)]
     public void ActionsSummary(string json, string expected) => Assert.Equal(expected, RuleSummaries.Actions(json));
+
+    [Theory]
+    [InlineData("""{"pins":[{"itemGuid":"x","position":1}],"boosts":[{"field":"a","value":"b","strength":1}]}""", "pin")]
+    [InlineData("""{"pins":[],"boosts":[{"field":"a","value":"b","strength":1}],"hides":["x"]}""", "boost")]
+    [InlineData("""{"hides":["x"],"userData":{"a":1}}""", "hide")]
+    [InlineData("""{"userData":{"a":1}}""", "data")]
+    [InlineData("{}", null)]
+    [InlineData("", null)]
+    [InlineData("{", null)]
+    [InlineData("[]", null)]
+    [InlineData("""{"pins":[],"pins":[1]}""", null)]
+    public void PrimaryAction(string json, string? expected) => Assert.Equal(expected, RuleSummaries.PrimaryAction(json));
 
     [Fact]
     public void FieldMessage_SummarizesStructuredSections_AndShowsCustomDataErrors()

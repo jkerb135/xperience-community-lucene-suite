@@ -78,10 +78,12 @@ public class SiteSearchAccessTests
             UserData = [new SuiteRuleUserData(3, JsonDocument.Parse("""{"banner":"x"}""").RootElement)],
         };
 
-        var rules = QueryTesterPage.FiredRules(response, new Dictionary<int, string> { [3] = "Coffee" }, id => $"/rules/{id}");
+        var stored = new Dictionary<int, (string, string?)> { [3] = ("Coffee", """{"pins":[{"itemGuid":"x","position":1},{"itemGuid":"y","position":2}],"boosts":[{"field":"a","value":"b","strength":1}]}""") };
+        var rules = QueryTesterPage.FiredRules(response, stored, id => $"/rules/{id}");
 
-        Assert.Equal([new QueryTesterFiredRule(9, null, null, null)], rules.Take(1));
+        Assert.Equal([new QueryTesterFiredRule(9, null, null, null, null, null)], rules.Take(1));
         Assert.Equal((3, "Coffee", "/rules/3", "x"), (rules[1].RuleId, rules[1].Name, rules[1].EditUrl, rules[1].UserData!.Value.GetProperty("banner").GetString()));
+        Assert.Equal(("2 pins, 1 boost", "pin"), (rules[1].Actions, rules[1].PrimaryAction));
     }
 
     [Fact]

@@ -143,13 +143,19 @@ public sealed class QueryTesterPage(
             : exception.Message;
     }
 
-    /// <summary>Fired rules in run order, with their custom data; a rule missing from <paramref name="names"/> was deleted since and gets no name or link.</summary>
-    internal static IReadOnlyList<QueryTesterFiredRule> FiredRules(SuiteSearchResponse response, IReadOnlyDictionary<int, string> names, Func<int, string> editUrl) =>
-        [.. response.FiredRuleIds.Select(id => new QueryTesterFiredRule(
-            id,
-            names.GetValueOrDefault(id),
-            names.ContainsKey(id) ? editUrl(id) : null,
-            response.UserData.FirstOrDefault(data => data.RuleId == id)?.Data))];
+    /// <summary>Fired rules in run order, with their custom data and action summary; a rule missing from <paramref name="rules"/> was deleted since and gets no name, link or summary.</summary>
+    internal static IReadOnlyList<QueryTesterFiredRule> FiredRules(SuiteSearchResponse response, IReadOnlyDictionary<int, (string Name, string? Actions)> rules, Func<int, string> editUrl) =>
+        [.. response.FiredRuleIds.Select(id =>
+        {
+            bool exists = rules.TryGetValue(id, out var rule);
+            return new QueryTesterFiredRule(
+                id,
+                exists ? rule.Name : null,
+                exists ? editUrl(id) : null,
+                response.UserData.FirstOrDefault(data => data.RuleId == id)?.Data,
+                exists ? RuleSummaries.Actions(rule.Actions) : null,
+                exists ? RuleSummaries.PrimaryAction(rule.Actions) : null);
+        })];
 
     /// <summary>Applied synonyms in order; one missing from <paramref name="existing"/> was deleted since and gets no link.</summary>
     internal static IReadOnlyList<QueryTesterAppliedSynonym> AppliedSynonyms(SuiteSearchResponse response, IReadOnlySet<int> existing, Func<int, string> editUrl) =>
@@ -177,14 +183,14 @@ public sealed class QueryTesterPage(
         { typeof(SynonymEditPage), synonymId },
     });
 
-    private Dictionary<int, string> RuleNames(IReadOnlyList<int> ids, string indexName) =>
+    private Dictionary<int, (string Name, string? Actions)> RuleNames(IReadOnlyList<int> ids, string indexName) =>
         ids.Count == 0
             ? []
             : rules.Get()
                 .WhereIn(nameof(RuleInfo.RuleID), [.. ids])
                 .WhereEquals(nameof(RuleInfo.IndexName), indexName)
-                .Columns(nameof(RuleInfo.RuleID), nameof(RuleInfo.DisplayName))
-                .ToDictionary(rule => rule.RuleID, rule => rule.DisplayName);
+                .Columns(nameof(RuleInfo.RuleID), nameof(RuleInfo.DisplayName), nameof(RuleInfo.Actions))
+                .ToDictionary(rule => rule.RuleID, rule => (rule.DisplayName, (string?)rule.Actions));
 
     private string EditUrl(int ruleId) => RuleEditUrl(pageLinkGenerator, IndexIdentifier, ruleId);
 
@@ -300,4 +306,6 @@ public sealed record QueryTesterAppliedSynonym(int SynonymId, string Term, strin
 /// <param name="Name">Display name; null when the rule was deleted since.</param>
 /// <param name="EditUrl">Path of the rule's edit page; null when the rule was deleted since.</param>
 /// <param name="UserData">Custom data the rule returned, or null.</param>
-public sealed record QueryTesterFiredRule(int RuleId, string? Name, string? EditUrl, JsonElement? UserData);
+/// <param name="Actions">Summary of the rule's actions, e.g. "2 pins, 1 boost"; null when the rule was deleted since.</param>
+/// <param name="PrimaryAction">"pin", "boost", "hide" or "data" (first that applies, in that order); null when the rule was deleted since, has no actions or invalid action JSON.</param>
+public sealed record QueryTesterFiredRule(int RuleId, string? Name, string? EditUrl, JsonElement? UserData, string? Actions, string? PrimaryAction);

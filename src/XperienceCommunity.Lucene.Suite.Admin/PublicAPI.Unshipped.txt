@@ -382,13 +382,17 @@ XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterContactGroups.Truncated
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterContactGroups.Truncated.init -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.<Clone>$() -> XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule!
-XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.Deconstruct(out int RuleId, out string? Name, out string? EditUrl, out System.Text.Json.JsonElement? UserData) -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.Actions.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.Actions.init -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.Deconstruct(out int RuleId, out string? Name, out string? EditUrl, out System.Text.Json.JsonElement? UserData, out string? Actions, out string? PrimaryAction) -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.EditUrl.get -> string?
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.EditUrl.init -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.Equals(XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule? other) -> bool
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.Name.get -> string?
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.Name.init -> void
-XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.QueryTesterFiredRule(int RuleId, string? Name, string? EditUrl, System.Text.Json.JsonElement? UserData) -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.PrimaryAction.get -> string?
+XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.PrimaryAction.init -> void
+XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.QueryTesterFiredRule(int RuleId, string? Name, string? EditUrl, System.Text.Json.JsonElement? UserData, string? Actions, string? PrimaryAction) -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.RuleId.get -> int
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.RuleId.init -> void
 XperienceCommunity.Lucene.Suite.Admin.UIPages.QueryTesterFiredRule.UserData.get -> System.Text.Json.JsonElement?

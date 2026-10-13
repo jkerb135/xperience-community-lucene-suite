@@ -51,6 +51,21 @@ internal static class RuleSummaries
         return parts.Count == 0 ? "None" : string.Join(", ", parts);
     }
 
+    /// <summary>The action a fired-rule chip shows: "pin", "boost", "hide" or "data", first that applies; null for no actions or invalid JSON, never throws.</summary>
+    public static string? PrimaryAction(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json) || Parse(json) is not JsonObject actions)
+        {
+            return null;
+        }
+
+        return actions["pins"] is JsonArray { Count: > 0 } ? "pin"
+            : actions["boosts"] is JsonArray { Count: > 0 } ? "boost"
+            : actions["hides"] is JsonArray { Count: > 0 } ? "hide"
+            : actions["userData"] is JsonObject ? "data"
+            : null;
+    }
+
     private static string Describe(JsonObject? condition)
     {
         if (condition is null)
@@ -94,9 +109,13 @@ internal static class RuleSummaries
     {
         try
         {
-            return JsonNode.Parse(json);
+            var node = JsonNode.Parse(json);
+
+            // A JsonObject builds its dictionary on first access and throws there on duplicate property names.
+            _ = (node as JsonObject)?.Count;
+            return node;
         }
-        catch (JsonException)
+        catch (Exception exception) when (exception is JsonException or ArgumentException)
         {
             return null;
         }

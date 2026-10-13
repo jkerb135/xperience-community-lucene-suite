@@ -53,8 +53,8 @@ test("contact groups merge with free text by code name; chips show display names
 });
 
 test("marker labels are readable and announced", () => {
-  assert.deepEqual(markerLabel({ kind: "up", by: 1 }), { text: "↑1", aria: "Moved up 1 place" });
-  assert.deepEqual(markerLabel({ kind: "down", by: 3 }), { text: "↓3", aria: "Moved down 3 places" });
-  assert.deepEqual(markerLabel({ kind: "new" }), { text: "New", aria: "Not in Baseline" });
-  assert.equal(markerLabel({ kind: "same" }), null);
+  assert.deepEqual(markerLabel({ kind: "up", by: 1 }), { text: "1", hidden: "1 place up" });
+  assert.deepEqual(markerLabel({ kind: "down", by: 3 }), { text: "3", hidden: "3 places down" });
+  assert.deepEqual(markerLabel({ kind: "new" }), { text: "New", hidden: "Not in Baseline" });
+  assert.deepEqual(markerLabel({ kind: "same" }), { text: "—", hidden: "Unchanged" });
 });

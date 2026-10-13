@@ -8,9 +8,9 @@ import { barRatio, sparkPoints, type Tone } from "./report.ts";
 export const Stale = createContext(false);
 export const STALE_OPACITY = 0.6;
 
-export type BarTone = Tone | "product";
+export type BarTone = Tone | "product" | "info";
 
-const BAR_COLOR: Record<BarTone, string> = { ...TONE_COLOR, product: "var(--color-product)" };
+const BAR_COLOR: Record<BarTone, string> = { ...TONE_COLOR, product: "var(--color-product)", info: "var(--color-info-icon)" };
 
 /** A number with a small bar of its share; the bar is decorative, the number is the readable text. */
 export const DataBar = ({ value, ratio, tone, width = 72 }: { value: string; ratio: number; tone: BarTone; width?: number }) => {
@@ -59,23 +59,27 @@ export interface RangeFooterProps {
   readonly sizeLabel: string;
   readonly onPageSize: (size: number) => void;
   readonly onPage: (page: number) => void;
+  /** Most pages offered (e.g. the search result window); the range text still shows the real total. */
+  readonly pageLimit?: number;
+  /** Changes after a failed request; Kentico's Select keeps a picked size its `value` never confirmed, so it is remounted. */
+  readonly resetKey?: number;
 }
 
 /** "1–25 of 1,240 queries", a page-size Select and Pagination (when there is more than one page). */
-export const RangeFooter = ({ page, pageSize, total, noun, sizes, sizeLabel, onPageSize, onPage }: RangeFooterProps) => {
+export const RangeFooter = ({ page, pageSize, total, noun, sizes, sizeLabel, onPageSize, onPage, pageLimit = Infinity, resetKey }: RangeFooterProps) => {
   const sizeRef = useRef<HTMLInputElement>(null);
   // Kentico's Select takes no aria-label prop; it is set on the native input.
   useEffect(() => {
     sizeRef.current?.setAttribute("aria-label", sizeLabel);
   });
   const { from, to } = pageRange(page, pageSize, total);
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = Math.max(1, Math.min(Math.ceil(total / pageSize), pageLimit));
   return (
     <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: Spacing.L }}>
       <span style={{ color: "var(--color-text-default-on-light)", fontVariantNumeric: "tabular-nums" }}>{rangeText(from, to, total, noun)}</span>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: Spacing.L }}>
         <div style={{ width: "140px" }}>
-          <Select inputRef={sizeRef} value={String(pageSize)} onChange={(value) => value && onPageSize(Number(value))}>
+          <Select key={resetKey} inputRef={sizeRef} value={String(pageSize)} onChange={(value) => value && onPageSize(Number(value))}>
             {sizes.map((size) => (
               <MenuItem key={size} primaryLabel={`${size} per page`} value={String(size)} selected={size === pageSize} />
             ))}

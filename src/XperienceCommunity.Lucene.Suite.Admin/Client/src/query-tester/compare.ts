@@ -122,15 +122,15 @@ export const withGroups = (contexts: readonly string[], groups: readonly Contact
 export const contextLabel = (context: string, groups: readonly ContactGroup[]) =>
   groups.find((group) => group.name === context)?.displayName ?? context;
 
-export const markerLabel = (change: RankChange): { text: string; aria: string } | null => {
+/** The Moved cell: visible text plus the hidden text a screen reader gets instead of the arrow or dash. */
+export const markerLabel = (change: RankChange): { text: string; hidden: string } => {
   switch (change.kind) {
     case "up":
-      return { text: `↑${change.by}`, aria: `Moved up ${change.by} ${change.by === 1 ? "place" : "places"}` };
     case "down":
-      return { text: `↓${change.by}`, aria: `Moved down ${change.by} ${change.by === 1 ? "place" : "places"}` };
+      return { text: String(change.by), hidden: `${change.by} ${change.by === 1 ? "place" : "places"} ${change.kind}` };
     case "new":
-      return { text: "New", aria: "Not in Baseline" };
+      return { text: "New", hidden: "Not in Baseline" };
     default:
-      return null;
+      return { text: "—", hidden: "Unchanged" };
   }
 };

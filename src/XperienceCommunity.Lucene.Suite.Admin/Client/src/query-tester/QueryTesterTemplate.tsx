@@ -1,46 +1,42 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { usePageCommandProvider } from "@kentico/xperience-admin-base";
 import {
+  BorderRadius,
   Button,
   ButtonColor,
   ButtonSize,
   Callout,
   CalloutPlacementType,
   CalloutType,
-  CellType,
   Checkbox,
-  Column,
-  ColumnContentType,
   Headline,
   HeadlineSize,
   Icon,
   Inline,
   Input,
-  LinkButton,
   NotificationBarWarning,
-  Pagination,
-  Row,
+  Paper,
+  PaperElevation,
   SidePanel,
   SidePanelSize,
   Spacing,
+  Spinner,
   Stack,
   Switch,
   SwitchSize,
   Table,
   Tag,
   TextWithLabel,
-  type StringCell,
-  type TableColumn,
   type TableRow,
 } from "@kentico/xperience-admin-components";
 import {
-  appliedSynonymRows,
   firedRuleRows,
   humanizeFieldName,
   latestRequest,
   mergeSelectedIntoFacets,
-  pinnedLabel,
   pinningRuleName,
+  position,
+  scoreRatio,
   toggleSelection,
   visibleValues,
   type FacetSelection,
@@ -48,7 +44,9 @@ import {
 } from "./state";
 import type { Hit, SearchResult } from "./compare";
 import { CompareView } from "./CompareView";
+import { RuleChips, SynonymTags, TitleCell, cell, column, componentCell } from "./ResultParts";
 import { clear, peek } from "../reports/handoff";
+import { DataBar, RangeFooter, Stale } from "../reports/patterns";
 import { openerOrFallback, returnFocus } from "./focus";
 import { pageStyle } from "../layout";
 
@@ -68,21 +66,31 @@ interface OpenDetail {
   readonly returnTo: HTMLElement | null;
 }
 
+interface SearchArgs {
+  readonly query: string;
+  readonly page: number;
+  readonly facets: FacetSelection;
+  readonly size: number;
+}
+
 const collapsedFacetValues = 5;
+const PAGE_SIZES = [10, 25, 50];
 
-const column = (name: string, caption: string): TableColumn => ({
-  name,
-  caption,
-  visible: true,
-  minWidth: 12,
-  maxWidth: 40,
-  contentType: ColumnContentType.Text,
-  sortable: false,
-  searchable: false,
-});
-
-// Stored fields can hold content HTML: they are only ever passed as plain strings (StringCell, TextWithLabel without valueAsHtml).
-const cell = (value: string, columnName: string): StringCell => ({ type: CellType.String, value, columnName });
+const GuidText = ({ guid }: { guid: string | null }) => (
+  <span
+    style={{
+      display: "block",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      fontFamily: "monospace",
+      fontSize: "12px",
+      color: "var(--color-text-low-emphasis)",
+    }}
+  >
+    {guid ?? "(none)"}
+  </span>
+);
 
 const fieldText = (hit: Hit, field: string) => (hit.fields[field] ?? []).join(", ");
 
@@ -91,7 +99,7 @@ const focusOnMount = (element: HTMLElement | null) => element?.focus();
 
 export const QueryTesterTemplate = ({
   isFaceted,
-  pageSize,
+  pageSize: defaultPageSize,
   maxResultWindow,
   keyFields,
   maxContexts,
@@ -103,10 +111,14 @@ export const QueryTesterTemplate = ({
   const [handedQuery] = useState(() => peek("queryTester", window.location.pathname));
   const [query, setQuery] = useState(handedQuery ?? "");
   const [submittedQuery, setSubmittedQuery] = useState(handedQuery ?? "");
+  // Page and size describe the rows on screen: both are committed only with a successful result.
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(defaultPageSize);
+  const lastSearch = useRef<SearchArgs>(undefined);
   const [selection, setSelection] = useState<FacetSelection>({});
   const [result, setResult] = useState<SearchResult>();
   const [failed, setFailed] = useState(false);
+  const [failures, setFailures] = useState(0);
   const [inProgress, setInProgress] = useState(false);
   const [expandedFacets, setExpandedFacets] = useState<Record<string, boolean>>({});
   const [detail, setDetail] = useState<OpenDetail>();
@@ -122,12 +134,13 @@ export const QueryTesterTemplate = ({
   const filterOpener = useRef<HTMLElement | null>(null);
 
   const search = useCallback(
-    async (searchQuery: string, searchPage: number, facets: FacetSelection) => {
+    async (searchQuery: string, searchPage: number, facets: FacetSelection, size: number) => {
+      lastSearch.current = { query: searchQuery, page: searchPage, facets, size };
       setInProgress(true);
       const { latest, value } = await request((abort) =>
-        executeCommand<SearchResult, { query: string; page: number; facets: FacetSelection; applyRules: boolean; applySynonyms: boolean }>(
+        executeCommand<SearchResult, { query: string; page: number; pageSize: number; facets: FacetSelection; applyRules: boolean; applySynonyms: boolean }>(
           "Search",
-          { query: searchQuery, page: searchPage, facets, applyRules: applyRulesRef.current, applySynonyms: applySynonymsRef.current },
+          { query: searchQuery, page: searchPage, pageSize: size, facets, applyRules: applyRulesRef.current, applySynonyms: applySynonymsRef.current },
           undefined,
           abort,
         ),
@@ -137,9 +150,13 @@ export const QueryTesterTemplate = ({
       }
       setInProgress(false);
       setFailed(value === undefined);
+      if (value === undefined) {
+        setFailures((count) => count + 1);
+      }
       if (value !== undefined) {
         setResult(value);
         setPage(searchPage);
+        setPageSize(size);
         setDetail(undefined);
       }
     },
@@ -148,30 +165,38 @@ export const QueryTesterTemplate = ({
 
   useEffect(() => {
     clear("queryTester", window.location.pathname);
-    void search(handedQuery ?? "", 1, {});
-  }, [search, handedQuery]);
+    void search(handedQuery ?? "", 1, {}, defaultPageSize);
+  }, [search, handedQuery, defaultPageSize]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setSubmittedQuery(query);
-    void search(query, 1, selection);
+    void search(query, 1, selection, pageSize);
   };
 
   const applySelection = (next: FacetSelection) => {
     setSelection(next);
-    void search(submittedQuery, 1, next);
+    void search(submittedQuery, 1, next, pageSize);
   };
 
   const toggleRules = (value: boolean) => {
     applyRulesRef.current = value;
     setApplyRules(value);
-    void search(submittedQuery, page, selection);
+    void search(submittedQuery, page, selection, pageSize);
   };
 
   const toggleSynonyms = (value: boolean) => {
     applySynonymsRef.current = value;
     setApplySynonyms(value);
-    void search(submittedQuery, page, selection);
+    void search(submittedQuery, page, selection, pageSize);
+  };
+
+  // Re-runs the last request as sent (query, page, size, filters) with the current switches.
+  const retry = () => {
+    const last = lastSearch.current;
+    if (last) {
+      void search(last.query, last.page, last.facets, last.size);
+    }
   };
 
   const closeDetail = () => {
@@ -197,30 +222,44 @@ export const QueryTesterTemplate = ({
   const hits = result?.hits ?? [];
   const firstField = keyFields[0];
   const firedRules = result?.firedRules ?? [];
-  const showPinned = hits.some((hit) => hit.pinnedByRuleId != null);
-  // A key field no hit on this page has a value for (e.g. Body without a summary field) gets no empty column.
-  const shownFields = hits.length === 0 ? keyFields : keyFields.filter((f) => hits.some((hit) => fieldText(hit, f) !== ""));
-  const columns = [
-    ...(showPinned ? [column("pinned", "Pinned")] : []),
-    ...shownFields.map((f) => column(f, humanizeFieldName(f))),
-    column("score", "Score"),
-    column("itemGuid", "Item GUID"),
-  ];
-  const rows: TableRow[] = hits.map((hit, i) => ({
-    identifier: i,
-    disabled: false,
-    cells: [
-      ...(showPinned ? [cell(pinnedLabel(hit, firedRules), "pinned")] : []),
-      ...shownFields.map((f) => cell(fieldText(hit, f), f)),
-      cell(hit.score.toFixed(4), "score"),
-      cell(hit.itemGuid ?? "(none)", "itemGuid"),
-    ],
-  }));
-  const totalPages = Math.min(Math.ceil((result?.totalHits ?? 0) / pageSize), Math.floor(maxResultWindow / pageSize));
+  const { columns, rows } = useMemo(() => {
+    const pageHits = result?.hits ?? [];
+    const rules = result?.firedRules ?? [];
+    // A key field no hit on this page has a value for (e.g. Body without a summary field) gets no empty column.
+    const otherFields = keyFields.slice(1).filter((f) => pageHits.length === 0 || pageHits.some((hit) => fieldText(hit, f) !== ""));
+    const top = Math.max(0, ...pageHits.map((hit) => hit.score));
+    return {
+      columns: [
+        column("position", "#", 5, 5),
+        ...(firstField ? [column("title", "Title")] : []),
+        ...otherFields.map((f) => column(f, humanizeFieldName(f), 16)),
+        column("score", "Score", 22, 20),
+        column("itemGuid", "Item GUID", 18),
+      ],
+      rows: pageHits.map((hit, i): TableRow => {
+        const at = position(page, pageSize, i);
+        const pinnedBy = pinningRuleName(hit, rules);
+        return {
+          identifier: i,
+          disabled: false,
+          cells: [
+            cell(String(at), "position"),
+            ...(firstField
+              ? [componentCell("title", () => <TitleCell title={fieldText(hit, firstField)} pinnedAt={pinnedBy === null ? null : at} pinnedBy={pinnedBy} />)]
+              : []),
+            ...otherFields.map((f) => cell(fieldText(hit, f), f)),
+            componentCell("score", () => <DataBar value={hit.score.toFixed(4)} ratio={scoreRatio(hit.score, top)} tone="info" />),
+            componentCell("itemGuid", () => <GuidText guid={hit.itemGuid} />),
+          ],
+        };
+      }),
+    };
+  }, [result, page, pageSize, keyFields, firstField]);
+  const sizes = [...new Set([defaultPageSize, ...PAGE_SIZES])].sort((a, b) => a - b);
   const detailHit = detail?.hit;
   const facets = isFaceted ? mergeSelectedIntoFacets(result?.facets ?? [], selection) : [];
   const applied = Object.entries(selection).flatMap(([dimension, labels]) => labels.map((label) => ({ dimension, label })));
-  const noHits = result !== undefined && !result.error && result.totalHits === 0 && !inProgress;
+  const noHits = result !== undefined && !result.error && result.totalHits === 0 && !inProgress && !failed;
 
   return (
     <div style={pageStyle}>
@@ -229,7 +268,12 @@ export const QueryTesterTemplate = ({
           <Headline size={HeadlineSize.M}>Query tester</Headline>
         </div>
         {failed && (
-          <Callout type={CalloutType.FriendlyWarning} placement={CalloutPlacementType.OnDesk} headline="Search failed">
+          <Callout
+            type={CalloutType.FriendlyWarning}
+            placement={CalloutPlacementType.OnDesk}
+            headline="Search failed"
+            actionButton={<Button label="Try again" color={ButtonColor.Secondary} disabled={inProgress} onClick={retry} />}
+          >
             The previous results are still shown. Try again.
           </Callout>
         )}
@@ -293,6 +337,7 @@ export const QueryTesterTemplate = ({
           <Switch label="Compare" size={SwitchSize.M} value={compare} onChange={setCompare} />
           {!compare && <Switch label="Apply rules" size={SwitchSize.M} value={applyRules} onChange={toggleRules} />}
           {!compare && <Switch label="Apply synonyms" size={SwitchSize.M} value={applySynonyms} onChange={toggleSynonyms} />}
+          {!compare && inProgress && hits.length > 0 && <Spinner />}
         </Inline>
         {compare ? (
           <CompareView
@@ -304,108 +349,110 @@ export const QueryTesterTemplate = ({
             onOpenHit={(hit, rules, returnTo) => setDetail({ hit, firedRules: rules, returnTo })}
           />
         ) : (
-          <>
-            {result && !result.error && (
-              // Row sets its own inline margin-top, which would cancel the Stack spacing; the wrapper takes the spacing instead.
-              <div>
-                <Row spacingX={Spacing.XL}>
-                  <Column>
-                    <TextWithLabel label="Total hits" value={result.totalHits.toLocaleString()} />
-                  </Column>
-                  <Column>
-                    <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
-                  </Column>
-                </Row>
-              </div>
-            )}
-            {result && !result.error && applyRules && !result.rulesFailed && (
-              <section aria-labelledby="fired-rules-heading">
-                <Stack spacing={Spacing.S}>
-                  <div role="heading" aria-level={2} id="fired-rules-heading">
-                    <Headline size={HeadlineSize.S}>{`Fired rules (${firedRules.length})`}</Headline>
-                  </div>
-                  {firedRules.length === 0 ? (
-                    <span style={{ color: "var(--color-text-low-emphasis)" }}>No rules fired for this search.</span>
-                  ) : (
-                    firedRuleRows(firedRules, window.location.pathname).map((rule) => (
-                      <Stack key={rule.ruleId} spacing={Spacing.XS}>
-                        {rule.href ? (
-                          <div>
-                            <LinkButton label={rule.label} href={rule.href} color={ButtonColor.Tertiary} />
-                          </div>
-                        ) : (
-                          <span>{`${rule.label} (deleted)`}</span>
-                        )}
-                        {rule.userData && (
-                          <pre
-                            aria-label={`Custom data of ${rule.label}`}
-                            style={{
-                              margin: 0,
-                              padding: Spacing.S,
-                              overflowX: "auto",
-                              fontFamily: "monospace",
-                              color: "var(--color-text-high-emphasis)",
-                              background: "var(--color-background-shelf-solid)",
-                              border: `${Spacing.Micro} solid var(--color-border-default)`,
-                            }}
-                          >
-                            {rule.userData}
-                          </pre>
-                        )}
-                      </Stack>
-                    ))
-                  )}
-                </Stack>
-              </section>
-            )}
-            {result && !result.error && applySynonyms && !result.synonymsFailed && submittedQuery.trim() !== "" && (
-              <section aria-labelledby="applied-synonyms-heading">
-                <Stack spacing={Spacing.S}>
-                  <div role="heading" aria-level={2} id="applied-synonyms-heading">
-                    <Headline size={HeadlineSize.S}>{`Synonyms applied (${result.appliedSynonyms.length})`}</Headline>
-                  </div>
-                  {result.appliedSynonyms.length === 0 ? (
-                    <span style={{ color: "var(--color-text-low-emphasis)" }}>No synonyms applied to this search.</span>
-                  ) : (
-                    <Inline spacingX={Spacing.S} spacingY={Spacing.S}>
-                      {appliedSynonymRows(result.appliedSynonyms, window.location.pathname).map((row) =>
-                        row.href ? (
-                          <LinkButton key={row.key} label={row.label} href={row.href} color={ButtonColor.Tertiary} />
-                        ) : (
-                          <span key={row.key}>{`${row.label} (deleted)`}</span>
-                        ),
+          <Stale.Provider value={failed}>
+            {/* Old rows stay visible while a search runs, so the region says it is updating. */}
+            <div aria-busy={inProgress}>
+              <Stack spacing={Spacing.XL}>
+                {result && !result.error && (
+                  <Paper elevation={PaperElevation.S} borderRadius={BorderRadius.RadiusM}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: Spacing.L, padding: `${Spacing.L} ${Spacing.XL}` }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: Spacing.XXXL }}>
+                        <TextWithLabel label="Total hits" value={result.totalHits.toLocaleString()} />
+                        <TextWithLabel label="Elapsed" value={`${result.elapsedMilliseconds.toFixed(1)} ms`} />
+                      </div>
+                      {applyRules && !result.rulesFailed && (
+                        <section aria-labelledby="fired-rules-heading">
+                          <Stack spacing={Spacing.S}>
+                            <div role="heading" aria-level={2} id="fired-rules-heading">
+                              <Headline size={HeadlineSize.S}>{`Fired rules (${firedRules.length})`}</Headline>
+                            </div>
+                            {firedRules.length === 0 ? (
+                              <span style={{ color: "var(--color-text-low-emphasis)" }}>No rules fired for this search.</span>
+                            ) : (
+                              <>
+                                <RuleChips rules={firedRules} />
+                                {firedRuleRows(firedRules, window.location.pathname)
+                                  .filter((rule) => rule.userData)
+                                  .map((rule) => (
+                                    <pre
+                                      key={rule.ruleId}
+                                      aria-label={`Custom data of ${rule.label}`}
+                                      style={{
+                                        margin: 0,
+                                        padding: Spacing.S,
+                                        overflowX: "auto",
+                                        fontFamily: "monospace",
+                                        color: "var(--color-text-high-emphasis)",
+                                        background: "var(--color-background-shelf-solid)",
+                                        border: `${Spacing.Micro} solid var(--color-border-default)`,
+                                      }}
+                                    >
+                                      {rule.userData}
+                                    </pre>
+                                  ))}
+                              </>
+                            )}
+                          </Stack>
+                        </section>
                       )}
-                    </Inline>
-                  )}
-                </Stack>
-              </section>
-            )}
-            {noHits ? (
-              <Callout
-                type={CalloutType.QuickTip}
-                placement={CalloutPlacementType.OnDesk}
-                headline="No documents match"
-                actionButton={
-                  applied.length > 0 ? (
-                    <Button label="Clear filters" color={ButtonColor.Secondary} onClick={() => applySelection({})} />
-                  ) : undefined
-                }
-              >
-                {applied.length > 0 ? "Try removing a filter or changing the query." : "Try a different query."}
-              </Callout>
-            ) : (
-              <div ref={tableArea} tabIndex={-1} style={{ outline: "none" }}>
-                <Table
-                  columns={columns}
-                  rows={inProgress || (result === undefined && !failed) ? undefined : rows}
-                  onRowClick={(id) => setDetail({ hit: hits[id as number], firedRules, returnTo: null })}
-                />
-              </div>
-            )}
-            {totalPages > 1 && !noHits && (
-              <Pagination selectedPage={page} totalPages={totalPages} onPageChange={(p) => void search(submittedQuery, p, selection)} />
-            )}
-          </>
+                      {applySynonyms && !result.synonymsFailed && submittedQuery.trim() !== "" && (
+                        <section aria-labelledby="applied-synonyms-heading">
+                          <Stack spacing={Spacing.S}>
+                            <div role="heading" aria-level={2} id="applied-synonyms-heading">
+                              <Headline size={HeadlineSize.S}>{`Synonyms applied (${result.appliedSynonyms.length})`}</Headline>
+                            </div>
+                            {result.appliedSynonyms.length === 0 ? (
+                              <span style={{ color: "var(--color-text-low-emphasis)" }}>No synonyms applied to this search.</span>
+                            ) : (
+                              <SynonymTags synonyms={result.appliedSynonyms} />
+                            )}
+                          </Stack>
+                        </section>
+                      )}
+                    </div>
+                  </Paper>
+                )}
+                {noHits ? (
+                  <Callout
+                    type={CalloutType.QuickTip}
+                    placement={CalloutPlacementType.OnDesk}
+                    headline="No documents match"
+                    actionButton={
+                      applied.length > 0 ? (
+                        <Button label="Clear filters" color={ButtonColor.Secondary} onClick={() => applySelection({})} />
+                      ) : undefined
+                    }
+                  >
+                    {applied.length > 0 ? "Try removing a filter or changing the query." : "Try a different query."}
+                  </Callout>
+                ) : inProgress && hits.length === 0 ? (
+                  <Spinner />
+                ) : (
+                  <div ref={tableArea} tabIndex={-1} style={{ outline: "none", minWidth: 0, overflowX: "auto" }}>
+                    <Table
+                      columns={columns}
+                      rows={rows}
+                      onRowClick={(id) => setDetail({ hit: hits[id as number], firedRules, returnTo: null })}
+                    />
+                  </div>
+                )}
+                {result && !result.error && result.totalHits > 0 && !noHits && (
+                  <RangeFooter
+                    page={page}
+                    pageSize={pageSize}
+                    resetKey={failures}
+                    total={result.totalHits}
+                    noun={result.totalHits === 1 ? "document" : "documents"}
+                    sizes={sizes}
+                    sizeLabel="Rows per page"
+                    pageLimit={Math.floor(maxResultWindow / pageSize)}
+                    onPageSize={(size) => void search(submittedQuery, 1, selection, size)}
+                    onPage={(p) => void search(submittedQuery, p, selection, pageSize)}
+                  />
+                )}
+              </Stack>
+            </div>
+          </Stale.Provider>
         )}
         <SidePanel
           headline="Filters"
