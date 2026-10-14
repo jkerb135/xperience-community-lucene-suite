@@ -10,9 +10,9 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 ## Current Position
 
 Milestone: v0.3 Relevance (v0.3.0) — not started
-Phase: 14 of 19 (Item Popularity Data) — Not started
-Plan: None
-Status: v0.2 Measure complete — ready to plan Phase 14
+Phase: 14 of 19 (Item Popularity Data) — In progress
+Plan: 14-01 complete
+Status: Loop closed, ready for next PLAN (14-02)
 Last activity: 2026-10-13 — Milestone v0.2 Measure completed
 
 Progress:
@@ -25,7 +25,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Milestone complete - ready to plan Phase 14]
+  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,10 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-13: 14-01 unified: item popularity data live (v8), seeded item history, invariant holds | Phase 14 | Next: 14-02 |
+| 2026-10-13: 14-01 applied: ItemDaily (v8) from the attribution pass, job gate installed != Version, seed runner writes items; host upgraded to v8, seeded range backed up then re-seeded with identical totals (7,725/2,344/203) and 1,027 item rows, invariant 0 mismatches. APPROVAL-CHECKS #22 | Phase 14 | UNIFY next |
+| 2026-10-13: Enterprise audit on 14-01-PLAN.md. Applied 1 must-have, 1 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 14 | Rollup job gate becomes installed != Version (an older node must never roll against a newer schema and drop item history); host re-seed records before/after totals of the seeded range |
+| 2026-10-13: Phase 14 planned (user): store clicked searches + click-position sum + conversions per (day, index, item) — raw repeat clicks not stored (engine counts an item once per logical search, same as SearchDaily.Clicks); start fresh at v8 (no backfill); seed runner seeds items; 'Top clicked items' report card as 14-02 | Phase 14 | 14-01 created |
 | 2026-10-13: 13-05 unified, Phase 13 complete again: audit trail (SuiteChangeLog) + local-time labels shipped; all v0.2 checks approved | Phase 13 | complete-milestone next |
 | 2026-10-13: 13-05 applied: SuiteChangeLog (Core object events → one LuceneSuite event-log entry per change, user stamped by Kentico), bulk loops muted with summary kept, local-time validity labels; host: single edits + synonym (user), bulk = summary only, labels; blocklist via DB test. APPROVAL-CHECKS #21 | Phase 13 | UNIFY next |
 | 2026-10-13: Enterprise audit on 13-05-PLAN.md. Applied 1 must-have, 3 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 13 | Retention of the trail follows Kentico's CMSLogSize — documented, not overclaimed; description capped at 1,000 chars; no-user changes still logged; test fixtures muted if they write per item |
@@ -263,8 +267,8 @@ Feature branches merged: none
 
 Last session: 2026-10-13
 Stopped at: Milestone v0.2 Measure complete (2026-10-13, tag v0.2.0)
-Next action: /paul:plan (Phase 14 Item Popularity Data)
-Resume file: .paul/ROADMAP.md
+Next action: /paul:plan (14-02 Top clicked items card)
+Resume file: .paul/phases/14-item-popularity-data/14-01-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

@@ -4,6 +4,7 @@ Human-verify checkpoints no longer block APPLY (user decision 2026-10-11). Each 
 
 | # | Plan | Check | Status |
 |---|------|-------|--------|
+| 22 | 14-01 | Per-item daily popularity (ItemDaily, schema v8), version gate both directions, seeded item history | Pending |
 | 21 | 13-05 | Audit trail for rule/synonym/blocklist changes (Kentico event log) + local-time validity labels | Approved 2026-10-13 (user ran single-edit and synonym checks; bulk and labels checked by me in the signed-in pane) |
 | 20 | 13-04 | Query tester per handoff: summary strip with rule chips, score bars, rows per page, Compare Moved column, Try again | Approved 2026-10-13 |
 | 19 | 13-03 fixes | Rule/synonym form: row alignment with errors, red delete icons, friendly type errors, no request-driven Save flashing | Approved 2026-10-13 |
@@ -724,3 +725,32 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - #6: sighted keyboard users get no reason on disabled report row actions.
    - All are in docs and KNOWN-LIMITATIONS.
 
+---
+
+## 22. 14-01: Per-item daily popularity (v0.3)
+
+1. **What changed:**
+   - **New table:** `LuceneSuite.ItemDaily` (schema v8): one row per day, index and item with ClickedSearches, ClickPositionSum and Conversions. The rollup counts them in the same attribution pass and transaction as SearchDaily, with the same retention.
+   - **Version gate:** the rollup job now runs only when the installed schema matches its build. A newer database makes it stand down with a warning at most once an hour per node.
+   - **Seed runner:** the dev-only runner seeds and clears item rows too.
+2. **Host evidence (comm_projects):**
+   - **Upgrade:** installer reached v8 and the `LuceneSuite.ItemDaily` class exists.
+     - The first start after stopping the running host timed out in Kentico's own startup update (`CMS_ScheduledTaskConfiguration`), with no blocking session left afterwards. A restart succeeded.
+   - **Backup:** before the re-seed, the 3,386 seeded SearchDaily rows were exported to `project-sidecar/backups/14-01/searchdaily-seeded.dat` (bcp native).
+   - **Re-seed of 2026-08-12..2026-10-10:**
+     - same index content (39 documents, 114 texts) and seed 2026;
+     - totals identical to the approved history (#4): 7,725 searches, 2,344 clicks, 2,335 clicked searches, 203 conversions;
+     - rows 3,477 (unfolded, as in 07-02) instead of 3,386: retention had folded rare seeded queries into "(other)" and will fold them again on its next run.
+   - **ItemDaily:** 1,027 rows, 36 items, Σ ClickedSearches 2,344, Σ Conversions 203.
+   - **Invariant:** for every seeded day, item clicks, conversions and position sums equal the query rows' totals (0 mismatching days).
+   - **Real days untouched:** 5 rows, 15 searches, 4 clicks after 2026-10-10.
+   - **No new real day to roll yet:** watermark 2026-10-12, and today isn't complete.
+3. **Automated checks:**
+   - .NET 868 passed, 6 skipped (the first run had the known RulesOverhead flake);
+   - Debug and Release 0 warnings; admin client 103/103; Widgets JS 45/45;
+   - shared analytics vectors unchanged.
+4. **Your decisions to confirm:**
+   - **Raw repeat clicks aren't stored.** The engine counts an item once per search, as every report does.
+   - **No backfill:** days rolled before v8 have no item rows.
+   - **The seeded rows came back unfolded** until retention runs again.
+   - **`docs/search-reports.md`** got two seeder lines updated (outside the plan's file list).

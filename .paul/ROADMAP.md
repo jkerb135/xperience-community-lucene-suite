@@ -5,7 +5,7 @@ Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Luc
 
 ## Current Milestone
 **v0.3 Relevance** (v0.3.0)
-Status: Not started — next: /paul:plan for Phase 14
+Status: In progress — Phase 14 planning
 Phases: 0 of 6 complete
 
 **Focus:** Marketers control how queries are read and ranked, beyond rules and synonyms: words that don't matter, which fields count most, forgiving typos, guiding visitors to better queries, and lifting what visitors actually click.
@@ -32,6 +32,10 @@ Phases: 0 of 6 complete
 | 17 | Typo Tolerance | Fuzzy variants per query word (min length, max edits, max expansions, weight below exact) through the query factory, fail-open; per-index settings in the admin; query tester shows matched corrections; analytics unchanged | 15, 16 (rewrite order) |
 | 18 | Suggestions: Did You Mean + Curated | "Did you mean" corrections for zero/low-result searches (surfaced queries + index vocabulary), shown by the results widget and in ISuiteSuggestions/endpoint; curated per-index suggestions (add, pin, reorder) merged with analytics-derived ones; blocklist still wins | 17 (shares edit-distance logic) |
 | 19 | Popularity Boost | Per-index opt-in boost from the Phase 14 click data (window, weight, decay, minimum clicks), applied like a rule boost below pins; query tester shows the effect; insights flag items boosted without recent clicks | 14 (≥ several weeks of data) |
+
+**Phase 14 plans:**
+- [x] 14-01 (complete 2026-10-13): ItemDaily (installer v8) from the rollup's attribution pass — clicked searches, click-position sum, conversions per day/index/item; same transaction and retention; seeded demo history
+- [ ] 14-02: Search reports "Top clicked items" card
 
 **Plans:** created by `/paul:plan` when each phase starts.
 
