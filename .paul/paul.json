@@ -11,12 +11,10 @@
                   "number":  14,
                   "name":  "Item Popularity Data",
                   "status":  "in_progress",
-                  "plans_completed":  1
+                  "plans_completed":  2
               },
     "loop":  {
-                 "position":  "PLAN",
-                 "plan":  "14-02",
-                 "plan_path":  "phases/14-item-popularity-data/14-02-PLAN.md"
+                 "position":  "IDLE"
              },
     "timestamps":  {
                        "created_at":  "2026-10-08T00:00:00Z",

@@ -754,3 +754,25 @@ Summary: `.paul/phases/06-widgets-package/06-03-SUMMARY.md`.
    - **No backfill:** days rolled before v8 have no item rows.
    - **The seeded rows came back unfolded** until retention runs again.
    - **`docs/search-reports.md`** got two seeder lines updated (outside the plan's file list).
+
+
+## 23. 14-02: Top clicked items (v0.3)
+
+1. **What changed:**
+   - **Card:** Search reports has a **Top clicked items** card: top 10 items for the range from `ItemDaily` (Item, Content type, Clicked searches with a bar, Avg. position, Conversions), sortable by the three numeric columns.
+   - **Panel:** **Show all** opens **All clicked items** (10/25/50 per page); items no longer indexed show **Not in this index**.
+   - **Row actions:** **Pin in a new rule** and **Hide in a new rule** open rule create with the item pre-filled (pin at position 1); nothing is saved. The rule form warns **No conditions: this rule applies to every search.** while conditions are empty.
+   - **Docs:** `docs/search-reports.md` and `docs/rules-and-synonyms.md` updated (7e42481).
+2. **Not verified in review (all deferred to you):**
+   - **DB tests were not executed:** `LUCENESUITE_TEST_CONNECTIONSTRING` was unset, so the 84 Database-category tests (including the new TopItems tests in `SearchReportDatabaseTests` and `SearchReportsPageDatabaseTests`) were skipped. Risk accepted by Josh; re-run before release.
+   - **`RulesOverhead_StaysUnderTenMillisecondsAtP95`** failed at p95 10.8-16.3 ms with 48% background CPU (14-02 touches no search or rule code). Re-run on a quiet machine.
+3. **Host checks to do (index 4, last 30 days and the seeded range):**
+   - The card's rows match a SQL aggregation of `ItemDaily` (top 10) for all three sorts.
+   - **Show all** pages (10/25/50) and focus returns to **Show all** on close.
+   - **Pin in a new rule** opens create with the item at position 1, empty conditions and the "applies to every search" warning visible; **Hide in a new rule** likewise; leave without saving and confirm nothing is stored.
+   - A disabled reason without Manage rules (code/test only if no such user exists); keyboard-readable reason.
+   - A simulated failure shows the stale card and **Retry**; a first-load failure shows no empty table.
+   - Both widths (about 670 and 1269 px): no overflow, the Actions column fits; design tokens; DB row counts unchanged.
+4. **Your decisions to confirm:**
+   - **Bundled commit:** Tasks 1-2 landed in one commit (6e67cc5 "reporting") instead of per task; history is pushed-safe and not rewritten.
+   - **Deferred minor:** changing the range in **All clicked items** fires two requests (old page, then page 1); latest-wins discards the first.

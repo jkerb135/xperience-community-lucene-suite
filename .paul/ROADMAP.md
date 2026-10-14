@@ -35,7 +35,7 @@ Phases: 0 of 6 complete
 
 **Phase 14 plans:**
 - [x] 14-01 (complete 2026-10-13): ItemDaily (installer v8) from the rollup's attribution pass — clicked searches, click-position sum, conversions per day/index/item; same transaction and retention; seeded demo history
-- [ ] 14-02: Search reports "Top clicked items" card
+- [x] 14-02 (complete 2026-10-13): Search reports "Top clicked items" card
 
 **Plans:** created by `/paul:plan` when each phase starts.
 
