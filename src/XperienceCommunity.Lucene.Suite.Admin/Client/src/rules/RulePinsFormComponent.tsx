@@ -12,6 +12,7 @@ import {
   Stack,
   Tag,
 } from "@kentico/xperience-admin-components";
+import { clear, peek } from "../reports/handoff";
 import { ItemPicker, useItemTitles } from "./ItemPicker";
 import { InlineError, RemoveButton, isEditable, useFocusTargets, useServerErrors, useTouched } from "./shared";
 import {
@@ -55,6 +56,15 @@ export const RulePinsFormComponent = (props: RuleItemsFormComponentProps) => {
 
   const hidden = new Set(parseHides(fieldValue(props.fieldValues as Record<string, unknown>, "Hides")).map(sameGuid));
   const update = (next: readonly PinRow[]) => props.onChange?.(serializePins(next));
+  // An item handed over by a Search reports row action becomes the first pin; only an empty list on Create rule takes it.
+  const [handedItem] = useState(() => (editable && rows.length === 0 ? peek("rulePin", window.location.pathname) : null));
+  useEffect(() => {
+    clear("rulePin", window.location.pathname);
+    if (handedItem !== null) {
+      update([{ itemGuid: handedItem, position: "1" }]);
+    }
+    // Runs once on mount: the handoff is a one-time prefill.
+  }, []);
   const remove = (index: number) => {
     update(removeAt(rows, index));
     focus(index > 0 ? `remove-${index - 1}` : "add");

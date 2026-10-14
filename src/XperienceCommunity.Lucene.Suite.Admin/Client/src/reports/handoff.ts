@@ -1,8 +1,13 @@
-// A one-time hand-over of a report query to the page a row action opens. It lives in sessionStorage (this tab
+// A one-time hand-over of a report query (or an item's GUID) to the page a row action opens. It lives in sessionStorage (this tab
 // only) because admin URLs cannot carry state, and it is bound to the exact target page so it can never fill an
 // existing rule or synonym.
 
-export type HandoffTarget = "queryTester" | "ruleCreate" | "synonymCreate";
+export type HandoffTarget = "queryTester" | "ruleCreate" | "synonymCreate" | "rulePin" | "ruleHide";
+
+const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The item targets carry an ItemGuid; anything else in them is refused on read. */
+const validPayload = (target: HandoffTarget, payload: string) => (target === "rulePin" || target === "ruleHide" ? GUID.test(payload) : true);
 
 export interface StorageLike {
   getItem(key: string): string | null;
@@ -50,6 +55,7 @@ export const peek = (target: HandoffTarget, currentPath: string, now = Date.now(
       entry.path.length > 0 &&
       currentPath.endsWith(entry.path) &&
       typeof entry.query === "string" &&
+      validPayload(target, entry.query) &&
       typeof entry.expires === "number" &&
       entry.expires >= now
       ? entry.query

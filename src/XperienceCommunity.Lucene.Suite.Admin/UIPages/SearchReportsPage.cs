@@ -46,6 +46,9 @@ public sealed class SearchReportsPage(
     /// <summary>Rows per page the query table accepts.</summary>
     internal static readonly int[] QueryPageSizes = [10, 25, 50];
 
+    /// <summary>Default rows per page of the clicked-items table (the card's top 10).</summary>
+    internal const int ItemPageSize = 10;
+
     private const string DayFormat = "yyyy-MM-dd";
 
     /// <summary>Identifier of the reported Lucene index, bound from the parent section.</summary>
@@ -84,6 +87,15 @@ public sealed class SearchReportsPage(
     {
         string indexName = (indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.")).IndexName;
         return Task.FromResult(ResponseFrom(BuildQueries(serviceProvider.GetRequiredService<SearchReportService>(), indexName, arguments)));
+    }
+
+    /// <summary>One page of the items clicked or converted on, with titles from the index; invalid input comes back as <see cref="SearchReportsTopItemsResult.Error"/>.</summary>
+    [PageCommand(Permission = SystemPermissions.VIEW)]
+    public Task<ICommandResponse<SearchReportsTopItemsResult>> TopItems(SearchReportsTopItemsArguments arguments)
+    {
+        string indexName = (indexManager.GetIndex(IndexIdentifier) ?? throw new InvalidOperationException($"Lucene index {IndexIdentifier} does not exist.")).IndexName;
+        var lookup = serviceProvider.GetRequiredService<SuiteItemLookup>();
+        return Task.FromResult(ResponseFrom(BuildTopItems(serviceProvider.GetRequiredService<SearchReportService>(), guids => lookup.Describe(indexName, guids), indexName, arguments)));
     }
 
     /// <summary>Ranked insight findings of the page's index with links to the fixes that already apply; invalid ranges come back as <see cref="SearchInsightsResult.Error"/>.</summary>
@@ -176,6 +188,60 @@ public sealed class SearchReportsPage(
         catch (ArgumentException exception)
         {
             return new SearchReportsQueriesResult { Error = QueryTesterPage.ValidationMessage(exception) };
+        }
+    }
+
+    /// <summary>Maps one page of <see cref="SearchReportService.TopItems"/> to the client shape; <paramref name="describe"/> runs once for the page's items, and an item it leaves out gets a null title.</summary>
+    internal static SearchReportsTopItemsResult BuildTopItems(
+        SearchReportService reports, Func<IReadOnlyCollection<Guid>, IReadOnlyList<SuiteItem>> describe, string indexName, SearchReportsTopItemsArguments arguments)
+    {
+        if (!TryDay(arguments.From, out var from) || !TryDay(arguments.To, out var to))
+        {
+            return new SearchReportsTopItemsResult { Error = "From and To must be dates in the yyyy-MM-dd format." };
+        }
+
+        // Enum.TryParse also accepts numbers; only the names are part of the contract.
+        if (int.TryParse(arguments.Sort, out _) || !Enum.TryParse<ItemSort>(arguments.Sort, ignoreCase: true, out var sort) || !Enum.IsDefined(sort))
+        {
+            return new SearchReportsTopItemsResult { Error = $"Unknown sort '{arguments.Sort}'." };
+        }
+
+        if (arguments.Page < 1)
+        {
+            return new SearchReportsTopItemsResult { Error = "Page must be 1 or higher." };
+        }
+
+        int pageSize = arguments.PageSize ?? ItemPageSize;
+        if (!QueryPageSizes.Contains(pageSize))
+        {
+            return new SearchReportsTopItemsResult { Error = "Page size must be 10, 25 or 50." };
+        }
+
+        try
+        {
+            long skip = (long)(arguments.Page - 1) * pageSize;
+            var page = reports.TopItems(indexName, from, to, sort, (int)Math.Min(skip, int.MaxValue), pageSize);
+            var items = page.Rows.Count == 0 ? [] : describe(page.Rows.Select(row => row.ItemGuid).ToList()).ToDictionary(item => item.ItemGuid);
+            return new SearchReportsTopItemsResult
+            {
+                Rows = page.Rows.Select(row => new SearchReportsItemRow
+                {
+                    ItemGuid = row.ItemGuid,
+                    Title = items.GetValueOrDefault(row.ItemGuid)?.Title,
+                    ContentType = items.GetValueOrDefault(row.ItemGuid)?.ContentType,
+                    ClickedSearches = row.ClickedSearches,
+                    Conversions = row.Conversions,
+                    AvgClickPosition = row.AvgClickPosition,
+                }).ToList(),
+                TotalCount = page.TotalCount,
+                PageSize = pageSize,
+                ClickedSearches = page.ClickedSearches,
+                Conversions = page.Conversions,
+            };
+        }
+        catch (ArgumentException exception)
+        {
+            return new SearchReportsTopItemsResult { Error = QueryTesterPage.ValidationMessage(exception) };
         }
     }
 
@@ -452,6 +518,69 @@ public sealed class SearchReportsQueryRow
 
     /// <summary>95th-percentile latency bucket.</summary>
     public SearchReportsPercentile? LatencyP95 { get; set; }
+}
+
+/// <summary>Requested clicked-items page.</summary>
+public sealed class SearchReportsTopItemsArguments
+{
+    /// <summary>First day (yyyy-MM-dd, UTC).</summary>
+    public string? From { get; set; }
+
+    /// <summary>Last day (yyyy-MM-dd, UTC), inclusive.</summary>
+    public string? To { get; set; }
+
+    /// <summary>ClickedSearches, Conversions or AvgPosition.</summary>
+    public string? Sort { get; set; }
+
+    /// <summary>1-based page number.</summary>
+    public int Page { get; set; } = 1;
+
+    /// <summary>Rows per page: 10, 25 or 50; 10 when not set.</summary>
+    public int? PageSize { get; set; }
+}
+
+/// <summary>One page of clicked items; only <see cref="Error"/> is set when the request is invalid.</summary>
+public sealed class SearchReportsTopItemsResult
+{
+    /// <summary>Validation message for an invalid request; nothing else is set.</summary>
+    public string? Error { get; set; }
+
+    /// <summary>The page's items.</summary>
+    public IReadOnlyList<SearchReportsItemRow> Rows { get; set; } = [];
+
+    /// <summary>Items clicked or converted on in the range, before paging.</summary>
+    public int TotalCount { get; set; }
+
+    /// <summary>Rows per page.</summary>
+    public int PageSize { get; set; }
+
+    /// <summary>Clicked searches of every item in the range.</summary>
+    public long ClickedSearches { get; set; }
+
+    /// <summary>Conversions of every item in the range.</summary>
+    public long Conversions { get; set; }
+}
+
+/// <summary>One clicked item.</summary>
+public sealed class SearchReportsItemRow
+{
+    /// <summary>ItemGuid of the indexed item.</summary>
+    public Guid ItemGuid { get; set; }
+
+    /// <summary>Title from the index; null when the item is no longer in it.</summary>
+    public string? Title { get; set; }
+
+    /// <summary>Content type from the index, when stored.</summary>
+    public string? ContentType { get; set; }
+
+    /// <summary>Logical searches with a click on the item.</summary>
+    public long ClickedSearches { get; set; }
+
+    /// <summary>Conversions on the item.</summary>
+    public long Conversions { get; set; }
+
+    /// <summary>Sum of click positions ÷ clicked searches; null without clicked searches.</summary>
+    public double? AvgClickPosition { get; set; }
 }
 
 /// <summary>Insight findings of one range; only <see cref="Error"/> is set when the request is invalid.</summary>

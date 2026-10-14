@@ -92,6 +92,20 @@ internal sealed record ReportQueryPage(IReadOnlyList<ReportQueryRow> Rows, Repor
 
 internal sealed record ReportLatency(LatencyPercentile? P50, LatencyPercentile? P95, LatencyPercentile? P99, IReadOnlyList<long> Buckets, DateOnly? CompleteThrough);
 
+/// <summary>An item's sums over a range; <see cref="AvgClickPosition"/> is null without clicked searches.</summary>
+internal sealed record ReportItemRow(Guid ItemGuid, long ClickedSearches, long Conversions, double? AvgClickPosition);
+
+/// <summary>A page of items; <see cref="TotalCount"/> and the sums cover every item in range.</summary>
+internal sealed record ReportItemPage(IReadOnlyList<ReportItemRow> Rows, int TotalCount, long ClickedSearches, long Conversions);
+
+/// <summary>Item orders: the counts descending, the average position ascending with items without clicks last; ties by ItemGuid.</summary>
+internal enum ItemSort
+{
+    ClickedSearches,
+    Conversions,
+    AvgPosition,
+}
+
 internal enum QuerySort
 {
     Searches,

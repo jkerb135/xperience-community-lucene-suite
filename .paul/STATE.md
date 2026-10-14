@@ -11,8 +11,8 @@ See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 Milestone: v0.3 Relevance (v0.3.0) — not started
 Phase: 14 of 19 (Item Popularity Data) — In progress
-Plan: 14-01 complete
-Status: Loop closed, ready for next PLAN (14-02)
+Plan: 14-02 created + audited, awaiting approval
+Status: PLAN created, ready for APPLY
 Last activity: 2026-10-13 — Milestone v0.2 Measure completed
 
 Progress:
@@ -25,7 +25,7 @@ Progress:
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - ready for next PLAN]
+  ✓        ○        ○     [Plan created, awaiting approval]
 ```
 
 ## Accumulated Context
@@ -35,6 +35,8 @@ See PROJECT.md Key Decisions.
 
 | Decision | Phase | Impact |
 |----------|-------|--------|
+| 2026-10-13: Enterprise audit on 14-02-PLAN.md. Applied 1 must-have, 1 strongly-recommended. Deferred 3. Verdict: conditionally acceptable → acceptable | Phase 14 | Rule form warns 'No conditions: this rule applies to every search.' whenever conditions are empty (engine matches all searches); TopItems sort mapped to fixed ORDER BY expressions |
+| 2026-10-13: 14-02 planned (user): Top clicked items card (top 10, sortable by clicked searches / conversions / avg position) + All clicked items side panel (paged); row actions Pin / Hide in a new rule via new handoff targets rulePin/ruleHide (item pre-filled, conditions left to the marketer) | Phase 14 | 14-02 created |
 | 2026-10-13: 14-01 unified: item popularity data live (v8), seeded item history, invariant holds | Phase 14 | Next: 14-02 |
 | 2026-10-13: 14-01 applied: ItemDaily (v8) from the attribution pass, job gate installed != Version, seed runner writes items; host upgraded to v8, seeded range backed up then re-seeded with identical totals (7,725/2,344/203) and 1,027 item rows, invariant 0 mismatches. APPROVAL-CHECKS #22 | Phase 14 | UNIFY next |
 | 2026-10-13: Enterprise audit on 14-01-PLAN.md. Applied 1 must-have, 1 strongly-recommended. Deferred 2. Verdict: conditionally acceptable → acceptable | Phase 14 | Rollup job gate becomes installed != Version (an older node must never roll against a newer schema and drop item history); host re-seed records before/after totals of the seeded range |
@@ -267,8 +269,8 @@ Feature branches merged: none
 
 Last session: 2026-10-13
 Stopped at: Milestone v0.2 Measure complete (2026-10-13, tag v0.2.0)
-Next action: /paul:plan (14-02 Top clicked items card)
-Resume file: .paul/phases/14-item-popularity-data/14-01-SUMMARY.md
+Next action: /paul:apply .paul/phases/14-item-popularity-data/14-02-PLAN.md
+Resume file: .paul/phases/14-item-popularity-data/14-02-PLAN.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
 ---

@@ -82,6 +82,7 @@ import { indexFromPath, loadReportState, saveReportState } from "./handoff.ts";
 import { AllInsights, NeedsAttention, type ActionProps } from "./NeedsAttention.tsx";
 import type { InsightsResult } from "./insights.ts";
 import { QueryTable, SORTS } from "./QueryTable.tsx";
+import { TopItems } from "./TopItems.tsx";
 import { pageStyle } from "../layout.ts";
 
 interface SearchReportsProps {
@@ -573,6 +574,7 @@ export const SearchReportsTemplate = (props: SearchReportsProps) => {
                   synonymCreatePath={props.synonymCreatePath}
                   onBlock={block}
                 />
+                <TopItems range={range} canManageRules={props.canManageRules} ruleCreatePath={props.ruleCreatePath} />
                 <SidePanel
                   headline={`${metric.caption}: period breakdown`}
                   size={SidePanelSize.Stackable}

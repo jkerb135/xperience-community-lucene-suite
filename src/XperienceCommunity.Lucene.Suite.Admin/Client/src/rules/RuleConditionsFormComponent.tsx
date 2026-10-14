@@ -13,6 +13,7 @@ import {
   Input,
   MenuItem,
   NotificationBarAlert,
+  NotificationBarWarning,
   Select,
   Spacing,
   Stack,
@@ -26,6 +27,7 @@ import {
   anchoringOptions,
   canAdd,
   conditionControlPaths,
+  conditionsWarning,
   contextChoice,
   contextFromSelect,
   contextOptions,
@@ -430,12 +432,15 @@ export const RuleConditionsFormComponent = (props: RuleJsonFormComponentProps) =
   };
 
   const loadErrors = [groupsResult === null ? GROUPS_ERROR : undefined, facetsError ?? undefined].filter(Boolean).join(" ");
+  const warning = conditionsWarning(rows);
 
   return (
     <FormItemWrapper label={props.label} invalid={props.invalid} validationMessage={props.validationMessage} editMode={props.editMode}>
       <div onBlur={leaveGroup("")} aria-describedby={id("errors")}>
         <Stack spacing={Spacing.M}>
           {loadErrors && <NotificationBarAlert>{loadErrors}</NotificationBarAlert>}
+          {/* The 31.9.1 bar has no live region of its own; this one stays mounted so the warning is announced when it appears. */}
+          <div role="status">{warning && <NotificationBarWarning>{warning}</NotificationBarWarning>}</div>
           <Callout type={CalloutType.QuickTip} placement={CalloutPlacementType.OnPaper} headline="How conditions match">
             The rule fires when any condition matches. Within one condition, the text, every facet and at least one context must match. A rule
             without conditions fires on every search.

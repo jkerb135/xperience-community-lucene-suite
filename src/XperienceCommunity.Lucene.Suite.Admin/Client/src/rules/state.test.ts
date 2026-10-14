@@ -5,6 +5,7 @@ import {
   boostControlPaths,
   canAdd,
   conditionControlPaths,
+  conditionsWarning,
   debounce,
   isShown,
   parseBoosts,
@@ -258,4 +259,12 @@ test("status arguments carry picked dates as UTC instants and server strings unt
   assert.deepEqual(statusArguments({ Enabled: false, ValidFromUtc: "", ValidUntilUtc: null }), { enabled: false, validFromUtc: null, validUntilUtc: null });
   assert.deepEqual(statusArguments(undefined), { enabled: false, validFromUtc: null, validUntilUtc: null });
   assert.equal(statusArguments({ validFromUtc: new Date(NaN) }).validFromUtc, null);
+});
+
+test("the conditions section warns exactly while the rule has no condition", () => {
+  assert.equal(conditionsWarning([]), "No conditions: this rule applies to every search.");
+  assert.equal(conditionsWarning(parseConditions(undefined)), "No conditions: this rule applies to every search.");
+  assert.equal(conditionsWarning(parseConditions("[]")), "No conditions: this rule applies to every search.");
+  assert.equal(conditionsWarning(parseConditions('[{"anchoring":"any"}]')), null);
+  assert.equal(conditionsWarning(parseConditions('[{"anchoring":"is","pattern":"tea"}]')), null);
 });

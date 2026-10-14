@@ -8,6 +8,9 @@ import {
   dayLabel,
   defaultRange,
   isAllowed,
+  itemActionReason,
+  itemAriaSort,
+  itemSortOf,
   labelEvery,
   lengthOf,
   niceTicks,
@@ -101,4 +104,25 @@ test("block suggestion is unavailable for the browse row, placeholder rows and w
   assert.equal(blockSuggestionReason({ ...row, hasPlaceholder: true }, true), "Contains a removed value; it is never suggested");
   // The row's own reason wins over the permission.
   assert.equal(blockSuggestionReason({ ...row, hasPlaceholder: true }, false), "Contains a removed value; it is never suggested");
+});
+
+test("clicked-item headers map to the server sorts, with aria-sort only on sortable columns", () => {
+  assert.equal(itemSortOf("clicked"), "ClickedSearches");
+  assert.equal(itemSortOf("conversions"), "Conversions");
+  assert.equal(itemSortOf("position"), "AvgPosition");
+  assert.equal(itemSortOf("title"), null);
+  assert.equal(itemSortOf("actions"), null);
+
+  assert.equal(itemAriaSort("clicked", "ClickedSearches"), "descending");
+  assert.equal(itemAriaSort("position", "AvgPosition"), "ascending");
+  assert.equal(itemAriaSort("conversions", "AvgPosition"), "none");
+  assert.equal(itemAriaSort("title", "ClickedSearches"), null);
+});
+
+test("pin and hide are unavailable for an item no longer indexed or without Manage rules", () => {
+  assert.equal(itemActionReason("Coffee", true), null);
+  assert.equal(itemActionReason("Coffee", false), "Requires Site Search → Manage rules");
+  // The item's own reason wins over the permission.
+  assert.equal(itemActionReason(null, false), "The item is no longer in this index");
+  assert.equal(itemActionReason(null, true), "The item is no longer in this index");
 });

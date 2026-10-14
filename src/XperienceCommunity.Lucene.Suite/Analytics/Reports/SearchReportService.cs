@@ -1,3 +1,4 @@
+using System.Data;
 using System.Globalization;
 
 using CMS.DataEngine;
@@ -108,6 +109,61 @@ internal sealed class SearchReportService(
             otherTotals.Searches == 0 ? null : ToRow(null, otherTotals),
             rows.Count,
             store.ReadWatermark());
+    }
+
+    /// <summary>One page of the items clicked or converted on in the range, with the item count and range sums; one statement over <see cref="ItemDailyInfo"/>.</summary>
+    public ReportItemPage TopItems(string indexName, DateOnly from, DateOnly to, ItemSort sort, int skip, int take)
+    {
+        var range = Validate(indexName, from, to);
+        ArgumentOutOfRangeException.ThrowIfNegative(skip);
+        ArgumentOutOfRangeException.ThrowIfLessThan(take, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(take, MaxTake);
+
+        // Constant expressions only: the client's sort never reaches the SQL text.
+        string orderBy = sort switch
+        {
+            ItemSort.ClickedSearches => "ClickedSearches DESC, ItemGuid",
+            ItemSort.Conversions => "Conversions DESC, ItemGuid",
+            ItemSort.AvgPosition => "CASE WHEN AvgPosition IS NULL THEN 1 ELSE 0 END, AvgPosition, ItemGuid",
+            _ => throw new ArgumentOutOfRangeException(nameof(sort), sort, "Unknown sort."),
+        };
+
+        // The totals row always comes back, so the count and sums are known even for a page past the end.
+        string sql = $"""
+            WITH Items AS (
+                SELECT ItemGuid,
+                    SUM(CAST(ClickedSearches AS bigint)) AS ClickedSearches,
+                    SUM(CAST(Conversions AS bigint)) AS Conversions,
+                    CAST(SUM(ClickPositionSum) AS decimal(19, 0)) / NULLIF(SUM(CAST(ClickedSearches AS bigint)), 0) AS AvgPosition
+                FROM LuceneSuite_ItemDaily
+                WHERE IndexName = @IndexName AND Day >= @From AND Day <= @To
+                GROUP BY ItemGuid
+                HAVING SUM(CAST(ClickedSearches AS bigint)) + SUM(CAST(Conversions AS bigint)) > 0)
+            SELECT Totals.TotalCount, Totals.TotalClickedSearches, Totals.TotalConversions, Page.ItemGuid, Page.ClickedSearches, Page.Conversions, Page.AvgPosition
+            FROM (SELECT COUNT(*) AS TotalCount, ISNULL(SUM(ClickedSearches), 0) AS TotalClickedSearches, ISNULL(SUM(Conversions), 0) AS TotalConversions FROM Items) AS Totals
+            OUTER APPLY (SELECT ItemGuid, ClickedSearches, Conversions, AvgPosition FROM Items ORDER BY {orderBy} OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY) AS Page
+            ORDER BY {orderBy}
+            """;
+        var parameters = new QueryDataParameters
+        {
+            { "@IndexName", range.IndexName },
+            { "@From", RollupScheduler.Midnight(range.From) },
+            { "@To", RollupScheduler.Midnight(range.To) },
+            { "@Skip", skip },
+            { "@Take", take },
+        };
+
+        var rows = ConnectionHelper.ExecuteQuery(sql, parameters, QueryTypeEnum.SQLQuery).Tables[0].Rows.Cast<DataRow>().ToList();
+        var first = rows[0];
+        return new ReportItemPage(
+            rows.Where(row => row["ItemGuid"] is Guid).Select(row => new ReportItemRow(
+                (Guid)row["ItemGuid"],
+                (long)row["ClickedSearches"],
+                (long)row["Conversions"],
+                row["AvgPosition"] is decimal average ? (double)average : null)).ToList(),
+            (int)first["TotalCount"],
+            (long)first["TotalClickedSearches"],
+            (long)first["TotalConversions"]);
     }
 
     public ReportLatency Latency(string indexName, DateOnly from, DateOnly to)

@@ -123,6 +123,10 @@ export const replaceAt = <T>(items: readonly T[], index: number, item: T): T[] =
 export const removeAt = <T>(items: readonly T[], index: number): T[] => items.filter((_, i) => i !== index);
 export const canAdd = (count: number, limit: number) => count < limit;
 
+/** A rule without conditions fires on every search (RuleEngine), so the Conditions section warns while the list is empty; saving stays allowed. */
+export const conditionsWarning = (rows: readonly ConditionRow[]): string | null =>
+  rows.length === 0 ? "No conditions: this rule applies to every search." : null;
+
 /** Calls `run` after `delayMs` of quiet; a newer call cancels the pending one. */
 export const debounce = <A extends unknown[]>(run: (...args: A) => void, delayMs: number) => {
   let timer: ReturnType<typeof setTimeout> | undefined;

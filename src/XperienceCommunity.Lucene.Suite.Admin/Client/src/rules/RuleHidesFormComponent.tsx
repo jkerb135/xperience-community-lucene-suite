@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, ButtonColor, FormItemWrapper, NotificationBarAlert, Spacing, Stack, Tag } from "@kentico/xperience-admin-components";
+import { clear, peek } from "../reports/handoff";
 import { ItemPicker, useItemTitles } from "./ItemPicker";
 import { ITEM_ERROR_STYLE, itemLabel, type RuleItemsFormComponentProps } from "./RulePinsFormComponent";
 import { InlineError, isEditable, useFocusTargets, useServerErrors, useTouched } from "./shared";
@@ -18,6 +19,15 @@ export const RuleHidesFormComponent = (props: RuleItemsFormComponentProps) => {
 
   const pinned = new Set(parsePins(fieldValue(props.fieldValues as Record<string, unknown>, "Pins")).map((pin) => sameGuid(pin.itemGuid)));
   const update = (next: readonly string[]) => props.onChange?.(serializeHides(next));
+  // An item handed over by a Search reports row action becomes the hidden item; only an empty list on Create rule takes it.
+  const [handedItem] = useState(() => (editable && hides.length === 0 ? peek("ruleHide", window.location.pathname) : null));
+  useEffect(() => {
+    clear("ruleHide", window.location.pathname);
+    if (handedItem !== null) {
+      update([handedItem]);
+    }
+    // Runs once on mount: the handoff is a one-time prefill.
+  }, []);
   // The tags' own remove buttons take no ref, so focus goes to the button that adds items.
   const remove = (index: number) => {
     update(removeAt(hides, index));

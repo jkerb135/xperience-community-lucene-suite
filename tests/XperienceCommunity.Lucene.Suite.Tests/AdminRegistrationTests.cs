@@ -84,6 +84,7 @@ public class AdminRegistrationTests
         Assert.Equal(SystemPermissions.VIEW, typeof(QueryTesterPage).GetMethod(nameof(QueryTesterPage.Search))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
         Assert.Equal(SystemPermissions.VIEW, typeof(SearchReportsPage).GetMethod(nameof(SearchReportsPage.Report))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
         Assert.Equal(SystemPermissions.VIEW, typeof(SearchReportsPage).GetMethod(nameof(SearchReportsPage.Queries))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
+        Assert.Equal(SystemPermissions.VIEW, typeof(SearchReportsPage).GetMethod(nameof(SearchReportsPage.TopItems))!.GetCustomAttribute<PageCommandAttribute>()!.Permission);
     }
 
     [Fact]

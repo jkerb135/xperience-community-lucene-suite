@@ -135,6 +135,57 @@ public sealed class SearchReportsPageDatabaseTests
     }
 
     [DatabaseFact]
+    public void TopItems_MapThePage_WithOneTitleLookupForItsItems_AndKeepMissingItems()
+    {
+        SearchReportDatabaseTests.SeedItems();
+        var service = Service();
+        var lookups = new List<IReadOnlyCollection<Guid>>();
+        IReadOnlyList<SuiteItem> Describe(IReadOnlyCollection<Guid> guids)
+        {
+            lookups.Add(guids);
+            // ItemC is no longer in the index.
+            return guids.Where(guid => guid != SearchReportDatabaseTests.ItemC).Select(guid => new SuiteItem(guid, $"title {guid}", "Article")).ToList();
+        }
+
+        var result = SearchReportsPage.BuildTopItems(service, Describe, SearchReportDatabaseTests.Index, TopItems("conversions", 1));
+
+        Assert.Null(result.Error);
+        Assert.Equal((5, 10, 13L, 7L), (result.TotalCount, result.PageSize, result.ClickedSearches, result.Conversions));
+        var expected = service.TopItems(SearchReportDatabaseTests.Index, ItemsFrom, ItemsTo, ItemSort.Conversions, 0, 10).Rows;
+        Assert.Equal(
+            expected.Select(row => (row.ItemGuid, row.ClickedSearches, row.Conversions, row.AvgClickPosition)),
+            result.Rows.Select(row => (row.ItemGuid, row.ClickedSearches, row.Conversions, row.AvgClickPosition)));
+        Assert.Equal(expected.Select(row => row.ItemGuid), Assert.Single(lookups));
+        var missing = result.Rows[0];
+        Assert.Equal((SearchReportDatabaseTests.ItemC, null, null), (missing.ItemGuid, missing.Title, missing.ContentType));
+        Assert.All(result.Rows.Skip(1), row => Assert.Equal(($"title {row.ItemGuid}", "Article"), (row.Title, row.ContentType)));
+
+        var second = SearchReportsPage.BuildTopItems(service, Describe, SearchReportDatabaseTests.Index, TopItems("AvgPosition", 2, 25));
+        Assert.Equal((25, 5), (second.PageSize, second.TotalCount));
+        Assert.Empty(second.Rows);
+        // An empty page makes no lookup.
+        Assert.Single(lookups);
+    }
+
+    [DatabaseFact]
+    public void TopItems_InvalidInput_ReturnsAnError()
+    {
+        SearchReportDatabaseTests.SeedItems();
+        var service = Service();
+        string? Error(SearchReportsTopItemsArguments arguments) => SearchReportsPage.BuildTopItems(service, guids => [], SearchReportDatabaseTests.Index, arguments).Error;
+
+        Assert.Equal("Unknown sort 'popular'.", Error(TopItems("popular", 1)));
+        Assert.Equal("Unknown sort '1'.", Error(TopItems("1", 1)));
+        Assert.Equal("Unknown sort ''.", Error(TopItems(null, 1)));
+        Assert.Equal("Page must be 1 or higher.", Error(TopItems("ClickedSearches", 0)));
+        Assert.Equal("Page size must be 10, 25 or 50.", Error(TopItems("ClickedSearches", 1, 7)));
+        Assert.Equal("Page size must be 10, 25 or 50.", Error(TopItems("ClickedSearches", 1, 200)));
+        Assert.Equal("From and To must be dates in the yyyy-MM-dd format.", Error(new SearchReportsTopItemsArguments { From = "1/21/2030", To = "2030-01-30", Sort = "ClickedSearches" }));
+        Assert.NotNull(Error(new SearchReportsTopItemsArguments { From = "2030-01-30", To = "2030-01-21", Sort = "ClickedSearches" }));
+        Assert.Null(Error(TopItems("clickedsearches", 1, 50)));
+    }
+
+    [DatabaseFact]
     public void Insights_MapTheFindings_WithEditUrlsOfTheFixesThatApply_AndWriteNothing()
     {
         SearchInsightDatabaseTests.Seed();
@@ -190,6 +241,18 @@ public sealed class SearchReportsPageDatabaseTests
         Assert.NotNull(Error("2030-01-30", "2030-01-01"));
         Assert.NotNull(Error("2020-01-01", "2030-01-30"));
     }
+
+    private static readonly DateOnly ItemsFrom = new(2030, 1, 21);
+    private static readonly DateOnly ItemsTo = new(2030, 1, 30);
+
+    private static SearchReportsTopItemsArguments TopItems(string? sort, int page, int? pageSize = null) => new()
+    {
+        From = ItemsFrom.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        To = ItemsTo.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        Sort = sort,
+        Page = page,
+        PageSize = pageSize,
+    };
 
     private static SearchReportsQueriesArguments Queries(DateOnly from, DateOnly to, string sort, int page, int? pageSize = null) => new()
     {

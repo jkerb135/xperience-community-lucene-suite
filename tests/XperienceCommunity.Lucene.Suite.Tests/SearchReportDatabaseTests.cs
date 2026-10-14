@@ -1,3 +1,4 @@
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -19,7 +20,7 @@ namespace XperienceCommunity.Lucene.Suite.Tests;
 [Collection(DatabaseCollection.Name)]
 public sealed class SearchReportDatabaseTests(ITestOutputHelper output)
 {
-    private const string Index = "report-test";
+    internal const string Index = "report-test";
     private static readonly DateOnly From = new(2030, 1, 21);
     private static readonly DateOnly To = new(2030, 1, 30);
 
@@ -132,6 +133,41 @@ public sealed class SearchReportDatabaseTests(ITestOutputHelper output)
     }
 
     [DatabaseFact]
+    public void TopItems_SumTheRangeOfTheIndex_SortStablyAndPage()
+    {
+        SeedItems();
+        var service = Service();
+        List<Guid> Order(ItemSort sort, int skip = 0, int take = 50) => service.TopItems(Index, From, To, sort, skip, take).Rows.Select(row => row.ItemGuid).ToList();
+        // Ties break by SQL Server's uniqueidentifier order.
+        (Guid, Guid) Tie(Guid x, Guid y) => new SqlGuid(x) < new SqlGuid(y) ? (x, y) : (y, x);
+
+        var page = service.TopItems(Index, From, To, ItemSort.ClickedSearches, 0, 50);
+        Assert.Equal((5, 13L, 7L), (page.TotalCount, page.ClickedSearches, page.Conversions));
+        Assert.Equal(
+            [(ItemA, 5L, 1L, (double?)2.0), (ItemB, 5L, 0L, 1.0), (ItemC, 1L, 3L, 9.0), (ItemD, 0L, 2L, null), (ItemE, 2L, 1L, 1.0)],
+            page.Rows.OrderBy(row => row.ItemGuid).Select(row => (row.ItemGuid, row.ClickedSearches, row.Conversions, row.AvgClickPosition)));
+        var (ab1, ab2) = Tie(ItemA, ItemB);
+        Assert.Equal([ab1, ab2, ItemE, ItemC, ItemD], Order(ItemSort.ClickedSearches));
+        var (ae1, ae2) = Tie(ItemA, ItemE);
+        Assert.Equal([ItemC, ItemD, ae1, ae2, ItemB], Order(ItemSort.Conversions));
+        var (be1, be2) = Tie(ItemB, ItemE);
+        Assert.Equal([be1, be2, ItemA, ItemC, ItemD], Order(ItemSort.AvgPosition));
+
+        Assert.Equal([ItemE, ItemC], Order(ItemSort.ClickedSearches, 2, 2));
+        var beyond = service.TopItems(Index, From, To, ItemSort.ClickedSearches, 10, 10);
+        Assert.Empty(beyond.Rows);
+        Assert.Equal((5, 13L, 7L), (beyond.TotalCount, beyond.ClickedSearches, beyond.Conversions));
+
+        var empty = service.TopItems(Index, new DateOnly(2030, 1, 1), new DateOnly(2030, 1, 10), ItemSort.ClickedSearches, 0, 10);
+        Assert.Equal((0, 0, 0L, 0L), (empty.Rows.Count, empty.TotalCount, empty.ClickedSearches, empty.Conversions));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => service.TopItems(Index, From, To, (ItemSort)99, 0, 10));
+        Assert.Throws<ArgumentOutOfRangeException>(() => service.TopItems(Index, From, To, ItemSort.ClickedSearches, 0, 201));
+        Assert.Throws<ArgumentOutOfRangeException>(() => service.TopItems(Index, From, To, ItemSort.ClickedSearches, -1, 10));
+        Assert.Equal("to", Assert.Throws<ArgumentException>(() => service.TopItems(Index, From, new DateOnly(2030, 2, 1), ItemSort.ClickedSearches, 0, 10)).ParamName);
+    }
+
+    [DatabaseFact]
     public void Latency_PercentilesComeFromTheSummedHistogram()
     {
         Seed();
@@ -189,6 +225,43 @@ public sealed class SearchReportDatabaseTests(ITestOutputHelper output)
         run();
         output.WriteLine($"{section}: {watch.Elapsed.TotalMilliseconds:N0} ms");
         Assert.True(watch.Elapsed < TimeSpan.FromSeconds(1), $"{section} took {watch.Elapsed}.");
+    }
+
+    internal static readonly Guid ItemA = new("0a000000-0000-0000-0000-00000000000a");
+    internal static readonly Guid ItemB = new("0b000000-0000-0000-0000-00000000000b");
+    internal static readonly Guid ItemC = new("0c000000-0000-0000-0000-00000000000c");
+    internal static readonly Guid ItemD = new("0d000000-0000-0000-0000-00000000000d");
+    internal static readonly Guid ItemE = new("0e000000-0000-0000-0000-00000000000e");
+
+    /// <summary>Item rows of the index for 2030-01-21..30 (A–E), plus rows outside the range, of another index and with nothing counted.</summary>
+    internal static void SeedItems()
+    {
+        RollupDb.Reset();
+        static ItemDailyInfo Item(string day, Guid item, int clicked, long positions, int conversions, string index = Index) => new()
+        {
+            Day = DateTime.Parse(day, CultureInfo.InvariantCulture),
+            IndexName = index,
+            ItemGuid = item,
+            ClickedSearches = clicked,
+            ClickPositionSum = positions,
+            Conversions = conversions,
+        };
+
+        KenticoServices.Value.GetRequiredService<IInfoProvider<ItemDailyInfo>>().BulkInsert(
+        [
+            Item("2030-01-21", ItemA, 3, 6, 1),
+            Item("2030-01-22", ItemA, 2, 4, 0),
+            Item("2030-01-23", ItemB, 5, 5, 0),
+            Item("2030-01-24", ItemC, 1, 9, 3),
+            Item("2030-01-25", ItemD, 0, 0, 2),
+            Item("2030-01-30", ItemE, 2, 2, 1),
+            // Outside the range, another index, nothing counted.
+            Item("2030-01-20", ItemA, 100, 100, 100),
+            Item("2030-01-20", new Guid("0f000000-0000-0000-0000-00000000000f"), 7, 7, 7),
+            Item("2030-01-21", ItemA, 50, 50, 50, "report-other"),
+            Item("2030-01-21", new Guid("01000000-0000-0000-0000-000000000001"), 9, 9, 9, "report-other"),
+            Item("2030-01-26", new Guid("02000000-0000-0000-0000-000000000002"), 0, 0, 0),
+        ]);
     }
 
     private static List<string> Texts(ReportQueryPage page) =>

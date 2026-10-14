@@ -30,6 +30,31 @@ test("another target, another index or an edit page never takes it, and it stays
   assert.equal(take("ruleCreate", AT_CREATE, NOW, storage), "pizza");
 });
 
+test("an item reaches the pin or hide consumer of its create page once", () => {
+  const storage = memory();
+  const guid = "0A1B2C3D-0000-4000-8000-00000000000A";
+  give("rulePin", CREATE, guid, NOW, storage);
+
+  assert.equal(take("ruleHide", AT_CREATE, NOW, storage), null);
+  assert.equal(take("ruleCreate", AT_CREATE, NOW, storage), null);
+  assert.equal(take("rulePin", "/admin/site-search/indexes/4/rules/12", NOW, storage), null);
+  assert.equal(take("rulePin", AT_CREATE, NOW, storage), guid);
+  assert.equal(take("rulePin", AT_CREATE, NOW, storage), null);
+
+  give("ruleHide", CREATE, guid, NOW, storage);
+  assert.equal(take("ruleHide", AT_CREATE, NOW, storage), guid);
+});
+
+test("an item handoff without a GUID is refused on read", () => {
+  const storage = memory();
+  for (const payload of ["pizza", "", "0a1b2c3d-0000-4000-8000-00000000000a; drop", "{0a1b2c3d-0000-4000-8000-00000000000a}"]) {
+    give("rulePin", CREATE, payload, NOW, storage);
+    assert.equal(take("rulePin", AT_CREATE, NOW, storage), null, payload);
+    give("ruleHide", CREATE, payload, NOW, storage);
+    assert.equal(take("ruleHide", AT_CREATE, NOW, storage), null, payload);
+  }
+});
+
 test("an expired handoff is discarded unused", () => {
   const storage = memory();
   give("queryTester", "/site-search/indexes/4/query-tester", "tea", NOW, storage);

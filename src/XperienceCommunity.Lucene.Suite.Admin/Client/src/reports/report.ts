@@ -402,6 +402,26 @@ export const blockSuggestionReason = (row: { readonly isBrowse: boolean; readonl
 export const barRatio = (value: number | null | undefined, max = 1): number =>
   value == null || !(value > 0) || !(max > 0) ? 0 : Math.min(1, value / max);
 
+/** The clicked-items sorts: the table column, the server's sort name and its fixed direction. */
+export const ITEM_SORTS = [
+  { id: "ClickedSearches", column: "clicked", direction: "descending" },
+  { id: "Conversions", column: "conversions", direction: "descending" },
+  { id: "AvgPosition", column: "position", direction: "ascending" },
+] as const;
+
+/** The sort a header click on `column` asks for; null for a column that does not sort. */
+export const itemSortOf = (column: string): string | null => ITEM_SORTS.find((s) => s.column === column)?.id ?? null;
+
+/** aria-sort of a column header: the direction of the current sort, "none" on the other sortable columns, null elsewhere. */
+export const itemAriaSort = (column: string, sort: string): "ascending" | "descending" | "none" | null => {
+  const match = ITEM_SORTS.find((s) => s.column === column);
+  return match === undefined ? null : match.id === sort ? match.direction : "none";
+};
+
+/** Why "Pin in a new rule" and "Hide in a new rule" are unavailable for an item (null title: no longer indexed), or null. */
+export const itemActionReason = (title: string | null, canManageRules: boolean): string | null =>
+  title === null ? "The item is no longer in this index" : canManageRules ? null : "Requires Site Search → Manage rules";
+
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
