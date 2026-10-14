@@ -25,6 +25,7 @@ internal sealed class AnalyticsRollupJob(
     internal static readonly TimeSpan StartDelay = TimeSpan.FromMinutes(1);
 
     private readonly LogThrottle failureThrottle = new(timeProvider, TimeSpan.FromHours(1));
+    private readonly LogThrottle newerSchemaThrottle = new(timeProvider, TimeSpan.FromHours(1));
 
     /// <summary>One run: lock, installed-version gate, watermark, schedule, roll each day, retention. Returns without work when another node holds the lock.</summary>
     internal RollupRun RunOnce(CancellationToken cancellationToken)
@@ -36,8 +37,18 @@ internal sealed class AnalyticsRollupJob(
         }
 
         var store = serviceProvider.GetRequiredService<DailyRollupStore>();
-        if (store.ReadInstalledVersion() < AnalyticsModuleInstaller.Version)
+        int installed = store.ReadInstalledVersion();
+        // Older: the installer has not finished yet. Newer: a newer node upgraded the schema; rolling here would skip its tables.
+        if (installed != AnalyticsModuleInstaller.Version)
         {
+            if (installed > AnalyticsModuleInstaller.Version && newerSchemaThrottle.ShouldLog())
+            {
+                logger.LogWarning(
+                    "Lucene Suite analytics schema version {Installed} is newer than this build's version {Version}; this node does not roll up (further warnings suppressed for an hour).",
+                    installed,
+                    AnalyticsModuleInstaller.Version);
+            }
+
             return new RollupRun(true, false, null, []);
         }
 

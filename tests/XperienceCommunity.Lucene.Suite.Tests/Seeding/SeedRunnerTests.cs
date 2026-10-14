@@ -21,7 +21,7 @@ public sealed class SeedFactAttribute : FactAttribute
 }
 
 /// <summary>
-/// Seeds or clears demo SearchDaily history. Variables: LUCENESUITE_SEED_CONNECTIONSTRING, LUCENESUITE_SEED_CONFIRM (database name),
+/// Seeds or clears demo SearchDaily and ItemDaily history. Variables: LUCENESUITE_SEED_CONNECTIONSTRING, LUCENESUITE_SEED_CONFIRM (database name),
 /// LUCENESUITE_SEED_INDEX, LUCENESUITE_SEED_INDEXPATH, LUCENESUITE_SEED_TITLEFIELD (Title), LUCENESUITE_SEED_DAYS (60),
 /// LUCENESUITE_SEED_PERDAY (150), LUCENESUITE_SEED_RANDOM (2026), LUCENESUITE_SEED_CLEAR (yyyy-MM-dd..yyyy-MM-dd).
 /// </summary>
@@ -39,8 +39,8 @@ public sealed class SeedRunnerTests(ITestOutputHelper output)
         if (Environment.GetEnvironmentVariable("LUCENESUITE_SEED_CLEAR") is { Length: > 0 } clear)
         {
             string[] parts = clear.Split("..");
-            var deleted = SearchSeeder.Clear(connectionString, index, Day(parts[0]), Day(parts[^1]));
-            output.WriteLine($"Cleared {deleted.Values.Sum()} rows of '{index}' from {clear}.");
+            var (deleted, items) = SearchSeeder.Clear(connectionString, index, Day(parts[0]), Day(parts[^1]));
+            output.WriteLine($"Cleared {deleted.Values.Sum()} SearchDaily rows and {items} ItemDaily rows of '{index}' from {clear}.");
             foreach (var (day, count) in deleted)
             {
                 output.WriteLine($"  {day:yyyy-MM-dd}: {count}");
@@ -58,14 +58,14 @@ public sealed class SeedRunnerTests(ITestOutputHelper output)
         int seed = Number("LUCENESUITE_SEED_RANDOM", 2026);
         var options = new SuiteAnalyticsOptions();
 
-        var (from, to, rows) = SearchSeeder.Seed(
+        var (from, to, rows, itemRows) = SearchSeeder.Seed(
             connectionString,
             index,
             days,
             DateOnly.FromDateTime(DateTime.UtcNow),
             (first, last) => SearchSeeder.Roll(SearchSeeder.Generate(vocabulary, first, last, perDay, seed, options), index, options));
 
-        output.WriteLine($"Seeded '{index}' {from:yyyy-MM-dd}..{to:yyyy-MM-dd}: {rows} SearchDaily rows from {vocabulary.DocumentCount} documents / {vocabulary.Texts.Count} texts, {perDay} searches per weekday, random seed {seed}.");
+        output.WriteLine($"Seeded '{index}' {from:yyyy-MM-dd}..{to:yyyy-MM-dd}: {rows} SearchDaily rows and {itemRows} ItemDaily rows from {vocabulary.DocumentCount} documents / {vocabulary.Texts.Count} texts, {perDay} searches per weekday, random seed {seed}.");
         output.WriteLine($"Clear with LUCENESUITE_SEED_CLEAR={from:yyyy-MM-dd}..{to:yyyy-MM-dd}");
     }
 

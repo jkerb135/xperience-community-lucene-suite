@@ -2,6 +2,8 @@
 const XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes.ResultClick = "lucenesuite_resultclick" -> string!
 const XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes.Search = "lucenesuite_search" -> string!
 const XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes.SearchNoResults = "lucenesuite_search_noresults" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.CLASS_NAME = "LuceneSuite.ItemDaily" -> string!
+const XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.OBJECT_TYPE = "lucenesuite.itemdaily" -> string!
 const XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.CLASS_NAME = "LuceneSuite.SearchDaily" -> string!
 const XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.LatencyBucketCount = 10 -> int
 const XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.OBJECT_TYPE = "lucenesuite.searchdaily" -> string!
@@ -53,6 +55,7 @@ override XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.ToString() ->
 override XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.Equals(object? obj) -> bool
 override XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.GetHashCode() -> int
 override XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.ToString() -> string!
+static readonly XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
 static readonly XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
 static readonly XperienceCommunity.Lucene.Suite.Analytics.SearchEventInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
 static readonly XperienceCommunity.Lucene.Suite.Analytics.SearchInteractionInfo.TYPEINFO -> CMS.DataEngine.ObjectTypeInfo!
@@ -78,6 +81,20 @@ static XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.operator !=(Xpe
 static XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchRequest? right) -> bool
 static XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.operator !=(XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? right) -> bool
 static XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse.operator ==(XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? left, XperienceCommunity.Lucene.Suite.Search.SuiteSearchResponse? right) -> bool
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ClickedSearches.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ClickedSearches.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ClickPositionSum.get -> long
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ClickPositionSum.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.Conversions.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.Conversions.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.Day.get -> System.DateTime
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.Day.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.IndexName.get -> string!
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.IndexName.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ItemDailyID.get -> int
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ItemDailyID.set -> void
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ItemGuid.get -> System.Guid
+virtual XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ItemGuid.set -> void
 virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ClickedSearches.get -> int
 virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ClickedSearches.set -> void
 virtual XperienceCommunity.Lucene.Suite.Analytics.SearchDailyInfo.ClickPositionSum.get -> long
@@ -228,6 +245,9 @@ XperienceCommunity.Lucene.Suite.Activities.SuiteActivityTypes
 XperienceCommunity.Lucene.Suite.Analytics.ISearchInteractionLogger
 XperienceCommunity.Lucene.Suite.Analytics.ISearchInteractionLogger.LogClick(XperienceCommunity.Lucene.Suite.Analytics.SearchClick! click) -> void
 XperienceCommunity.Lucene.Suite.Analytics.ISearchInteractionLogger.LogConversion(System.Guid searchId, int sequence, System.Guid itemGuid, int? position = null, System.Guid? eventId = null) -> void
+XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo
+XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ItemDailyInfo() -> void
+XperienceCommunity.Lucene.Suite.Analytics.ItemDailyInfo.ItemDailyInfo(System.Data.DataRow! dr) -> void
 XperienceCommunity.Lucene.Suite.Analytics.SearchClick
 XperienceCommunity.Lucene.Suite.Analytics.SearchClick.<Clone>$() -> XperienceCommunity.Lucene.Suite.Analytics.SearchClick!
 XperienceCommunity.Lucene.Suite.Analytics.SearchClick.Deconstruct(out System.Guid SearchId, out int Sequence, out System.Guid ItemGuid, out int Position, out System.Guid? EventId, out string? QueryText, out string? ResultTitle) -> void

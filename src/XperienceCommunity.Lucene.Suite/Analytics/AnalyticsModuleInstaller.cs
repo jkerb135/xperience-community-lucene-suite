@@ -33,13 +33,15 @@ internal sealed class AnalyticsModuleInstaller(
     internal const string WatermarkKeyName = "LuceneSuiteRollupWatermark";
 
     /// <summary>Schema version this build installs; bump it and add a migration step when the schema changes.</summary>
-    internal const int Version = 7;
+    internal const int Version = 8;
 
     internal const string ReceivedIndexName = "IX_LuceneSuite_SearchEvent_ReceivedUtc_SearchId";
 
     internal const string InteractionReceivedIndexName = "IX_LuceneSuite_SearchInteraction_ReceivedUtc_SearchId";
 
     internal const string DailyKeyIndexName = "IX_LuceneSuite_SearchDaily_Day_IndexName_QueryText";
+
+    internal const string ItemDailyKeyIndexName = "IX_LuceneSuite_ItemDaily_Day_IndexName_ItemGuid";
 
     internal const string RuleIndexName = "IX_LuceneSuite_Rule_IndexName";
     internal const string SynonymIndexName = "IX_LuceneSuite_Synonym_IndexName";
@@ -114,6 +116,16 @@ internal sealed class AnalyticsModuleInstaller(
             "Search result clicked",
             "A visitor clicked a site search result. Title: the result and its position; value: the search text with emails and long numbers removed. Logged only for contacts tracked with consent.");
 
+        // Version 8: per-item daily popularity.
+        EnsureClass(resource, ItemDailyInfo.TYPEINFO, "Lucene Suite item daily popularity", ItemDailyForm());
+        CreateAscendingIndex(
+            ItemDailyKeyIndexName,
+            ItemDailyInfo.CLASS_NAME,
+            true,
+            nameof(ItemDailyInfo.Day),
+            nameof(ItemDailyInfo.IndexName),
+            nameof(ItemDailyInfo.ItemGuid));
+
         if (installed < Version)
         {
             versionKey.KeyValue = Version.ToString(CultureInfo.InvariantCulture);
@@ -176,6 +188,18 @@ internal sealed class AnalyticsModuleInstaller(
             Add(form, $"LatencyBucket{i}", FieldDataType.Integer);
         }
 
+        return form;
+    }
+
+    internal static FormInfo ItemDailyForm()
+    {
+        var form = FormHelper.GetBasicFormDefinition(nameof(ItemDailyInfo.ItemDailyID));
+        Add(form, nameof(ItemDailyInfo.Day), FieldDataType.Date);
+        Add(form, nameof(ItemDailyInfo.IndexName), FieldDataType.Text, SearchEventInfo.IndexNameMaxLength);
+        Add(form, nameof(ItemDailyInfo.ItemGuid), FieldDataType.Guid);
+        Add(form, nameof(ItemDailyInfo.ClickedSearches), FieldDataType.Integer);
+        Add(form, nameof(ItemDailyInfo.ClickPositionSum), FieldDataType.LongInteger);
+        Add(form, nameof(ItemDailyInfo.Conversions), FieldDataType.Integer);
         return form;
     }
 

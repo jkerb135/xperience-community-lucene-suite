@@ -397,14 +397,85 @@ public sealed class RollupEngineTests
                 .OrderBy(_ => random.Next())
                 .ToList();
 
-            string actual = JsonSerializer.Serialize(Roll(allSearches, allInteractions));
+            string actual = JsonSerializer.Serialize(RollAll(allSearches, allInteractions));
             expected ??= actual;
             Assert.Equal(expected, actual);
         }
 
-        var baseline = Roll(searches, interactions);
-        Assert.Equal(JsonSerializer.Serialize(baseline), expected);
+        var rollup = RollAll(searches, interactions);
+        var baseline = rollup.Kpis;
+        Assert.Equal(JsonSerializer.Serialize(rollup), expected);
+        Assert.True(rollup.Items.Count > 10, "scenario has item rows");
         Assert.True(baseline.Count > 6 && baseline.Sum(k => k.Clicks) > 10 && baseline.Sum(k => k.Conversions) > 5 && baseline.Sum(k => k.ZeroResultSearches) > 0, "scenario is non-trivial");
+    }
+
+    [Fact]
+    public void Items_CountOncePerLogicalSearch_AcrossSearches_WithTheirPositions()
+    {
+        var a = Guid.NewGuid();
+        var b = Guid.NewGuid();
+        var x = new Guid("00000000-0000-0000-0000-000000000001");
+        var y = new Guid("00000000-0000-0000-0000-000000000002");
+
+        var items = RollAll(
+            [Row(a, 1, 0, "coffee"), Row(b, 1, 100, "tea")],
+            [Click(a, 1, 5, 2, x), Click(a, 1, 6, 2, x), Click(a, 1, 7, 4, y), Click(b, 1, 105, 1, x)]).Items;
+
+        Assert.Equal([new ItemKpi(Day, Index, x, 2, 3, 0), new ItemKpi(Day, Index, y, 1, 4, 0)], items);
+    }
+
+    [Theory]
+    [InlineData(11, 30.0)]
+    [InlineData(1, 3600.001)]
+    public void Items_ClickOffThePageOrPastTheWindow_IsNotCounted(int position, double afterSeconds)
+    {
+        var id = Guid.NewGuid();
+
+        var rollup = RollAll([Row(id, 1, 0, "coffee")], [Click(id, 1, afterSeconds, position), Conversion(id, 1, 3600.001)]);
+
+        Assert.Equal(0, Single(rollup.Kpis).Clicks);
+        Assert.Empty(rollup.Items);
+    }
+
+    [Fact]
+    public void Items_ConversionWithoutAClick_IsCounted()
+    {
+        var id = Guid.NewGuid();
+        var item = Guid.NewGuid();
+
+        var items = RollAll([Row(id, 1, 0, "coffee")], [Conversion(id, 1, 30, item), Conversion(id, 1, 31, item)]).Items;
+
+        Assert.Equal([new ItemKpi(Day, Index, item, 0, 0, 2)], items);
+    }
+
+    [Fact]
+    public void Items_KeepIndexesApart_OrderedByIndexThenItemGuid()
+    {
+        var a = Guid.NewGuid();
+        var b = Guid.NewGuid();
+        var low = new Guid("00000000-0000-0000-0000-000000000001");
+        var high = new Guid("00000000-0000-0000-0000-000000000002");
+
+        var items = RollAll(
+            [Row(a, 1, 0, "coffee"), Row(b, 1, 1, "coffee") with { IndexName = "articles" }],
+            [Click(a, 1, 5, 1, high), Click(a, 1, 6, 2, low), Click(b, 1, 7, 3, high)]).Items;
+
+        Assert.Equal([("articles", high, 1), (Index, low, 1), (Index, high, 1)], items.Select(i => (i.IndexName, i.ItemGuid, i.ClickedSearches)));
+    }
+
+    [Fact]
+    public void Items_SumToTheQueryKpis_PerIndex()
+    {
+        var (searches, interactions) = Scenario();
+        var other = SyntheticTraffic.Generate(5, [Day], "articles");
+
+        var rollup = RollAll([.. searches, .. other.Searches], [.. interactions, .. other.Interactions]);
+
+        var fromKpis = rollup.Kpis.GroupBy(k => k.IndexName).ToDictionary(g => g.Key, g => (g.Sum(k => k.Clicks), g.Sum(k => k.ClickPositionSum), g.Sum(k => k.Conversions)));
+        var fromItems = rollup.Items.GroupBy(i => i.IndexName).ToDictionary(g => g.Key, g => (g.Sum(i => i.ClickedSearches), g.Sum(i => i.ClickPositionSum), g.Sum(i => i.Conversions)));
+        Assert.True(fromKpis.Count >= 2 && fromItems.Values.All(sums => sums.Item1 > 0));
+        Assert.Equal(fromKpis.OrderBy(e => e.Key, StringComparer.Ordinal), fromItems.OrderBy(e => e.Key, StringComparer.Ordinal));
+        Assert.All(rollup.Items, i => Assert.True(i.ClickedSearches + i.Conversions > 0));
     }
 
     internal static RawSearchRow RowAt(
@@ -442,6 +513,9 @@ public sealed class RollupEngineTests
         new(NextId(), searchId, sequence, item ?? Guid.NewGuid(), null, SearchInteractionType.Conversion, eventId ?? Guid.NewGuid(), T0.AddSeconds(seconds));
 
     private static IReadOnlyList<DailyKpi> Roll(IEnumerable<RawSearchRow> searches, IEnumerable<RawInteractionRow>? interactions = null, RollupSettings? settings = null, DateOnly? day = null) =>
+        RollAll(searches, interactions, settings, day).Kpis;
+
+    private static DailyRollup RollAll(IEnumerable<RawSearchRow> searches, IEnumerable<RawInteractionRow>? interactions = null, RollupSettings? settings = null, DateOnly? day = null) =>
         RollupEngine.Roll(day ?? Day, searches, interactions ?? [], settings ?? Defaults);
 
     private static IReadOnlyList<DailyKpi> Roll(IEnumerable<RawSearchRow> searches, RollupSettings settings) => Roll(searches, null, settings);

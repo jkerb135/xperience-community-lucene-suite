@@ -53,11 +53,15 @@ public sealed class RollupJobDatabaseTests
 
         store.Replace(March1, store.Compute(March1, settings));
         var first = RollupDb.Daily();
+        var firstItems = RollupDb.Items();
         store.Replace(March1, store.Compute(March1, settings));
 
         Assert.NotEmpty(first);
+        Assert.NotEmpty(firstItems);
         Assert.Equal(first, RollupDb.Daily());
-        Assert.Equal(RollupDb.Format(traffic.Expected(March1, settings)), first);
+        Assert.Equal(firstItems, RollupDb.Items());
+        Assert.Equal(RollupDb.Format(traffic.Expected(March1, settings).Kpis), first);
+        Assert.Equal(RollupDb.Format(traffic.Expected(March1, settings).Items), firstItems);
         Assert.Equal(March1, store.ReadWatermark());
     }
 
@@ -67,15 +71,19 @@ public sealed class RollupJobDatabaseTests
         RollupDb.Reset();
         RollupDb.Insert(SyntheticTraffic.Generate(8, [March1], RollupDb.Index));
         var store = RollupDb.Store();
-        var kpis = store.Compute(March1, RollupSettings.From(new SuiteAnalyticsOptions()));
-        store.Replace(March1, kpis);
-        var before = RollupDb.Daily();
+        var rollup = store.Compute(March1, RollupSettings.From(new SuiteAnalyticsOptions()));
+        store.Replace(March1, rollup);
+        var before = (Daily: RollupDb.Daily(), Items: RollupDb.Items());
         store.WriteWatermark(March1.AddDays(-1));
 
-        // A duplicate (Day, Index, Query) makes BulkInsert fail after the delete and the watermark update ran.
-        Assert.ThrowsAny<Exception>(() => store.Replace(March1, [.. kpis, kpis[0]]));
+        // A duplicate (Day, Index, Query) fails the SearchDaily insert after both deletes and the watermark update ran;
+        // a duplicate (Day, Index, ItemGuid) fails the last write, the ItemDaily insert.
+        Assert.ThrowsAny<Exception>(() => store.Replace(March1, rollup with { Kpis = [.. rollup.Kpis, rollup.Kpis[0]] }));
+        Assert.ThrowsAny<Exception>(() => store.Replace(March1, rollup with { Items = [.. rollup.Items, rollup.Items[0]] }));
 
-        Assert.Equal(before, RollupDb.Daily());
+        Assert.NotEmpty(before.Items);
+        Assert.Equal(before.Daily, RollupDb.Daily());
+        Assert.Equal(before.Items, RollupDb.Items());
         Assert.Equal(March1.AddDays(-1), store.ReadWatermark());
     }
 
@@ -121,7 +129,8 @@ public sealed class RollupJobDatabaseTests
         }))).GetAwaiter().GetResult();
 
         Assert.Equal(days, runs.SelectMany(run => run.Rolled).Order());
-        Assert.Equal(RollupDb.Format(days.SelectMany(day => traffic.Expected(day, RollupSettings.From(options.Analytics)))), RollupDb.Daily());
+        Assert.Equal(RollupDb.Format(days.SelectMany(day => traffic.Expected(day, RollupSettings.From(options.Analytics)).Kpis)), RollupDb.Daily());
+        Assert.Equal(RollupDb.Format(days.SelectMany(day => traffic.Expected(day, RollupSettings.From(options.Analytics)).Items)), RollupDb.Items());
     }
 
     [DatabaseFact]
@@ -160,6 +169,35 @@ public sealed class RollupJobDatabaseTests
             Assert.Equal((true, false), (run.LockAcquired, run.Installed));
             Assert.Empty(RollupDb.Daily());
             Assert.Null(RollupDb.Store().ReadWatermark());
+        }
+        finally
+        {
+            Execute($"UPDATE CMS_SettingsKey SET KeyValue = '{AnalyticsModuleInstaller.Version}' WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}'");
+        }
+    }
+
+    [DatabaseFact]
+    public void NewerInstalledVersion_TheJobStandsDown_WarningAtMostHourly()
+    {
+        RollupDb.Reset();
+        RollupDb.Insert(SyntheticTraffic.Generate(13, [March1], RollupDb.Index));
+        Execute($"UPDATE CMS_SettingsKey SET KeyValue = '{AnalyticsModuleInstaller.Version + 1}' WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}'");
+        try
+        {
+            var logger = new RecordingLogger<AnalyticsRollupJob>();
+            var clock = new ManualClock(At("2030-03-02T03:00:00"));
+            var job = RollupDb.Job(clock, logger: logger);
+
+            var runs = new List<RollupRun> { job.RunOnce(CancellationToken.None), job.RunOnce(CancellationToken.None) };
+            clock.Now = clock.Now.AddHours(1);
+            runs.Add(job.RunOnce(CancellationToken.None));
+
+            Assert.All(runs, run => Assert.Equal((true, false, 0), (run.LockAcquired, run.Installed, run.Rolled.Count)));
+            Assert.Equal(2, logger.Entries.Count(entry => entry.Level == LogLevel.Warning && entry.Message.Contains("is newer than this build", StringComparison.Ordinal)));
+            Assert.Empty(RollupDb.Daily());
+            Assert.Empty(RollupDb.Items());
+            Assert.Null(RollupDb.Store().ReadWatermark());
+            Assert.NotEqual(0, Scalar("SELECT COUNT(*) FROM LuceneSuite_SearchEvent"));
         }
         finally
         {
@@ -210,7 +248,7 @@ public sealed class RollupJobDatabaseTests
         // A repeated tick at the same time finds nothing new.
         Assert.Empty(job.RunOnce(CancellationToken.None).Rolled);
 
-        var expected = days.SelectMany(day => traffic.Expected(day, settings)).ToList();
+        var expected = days.SelectMany(day => traffic.Expected(day, settings).Kpis).ToList();
         var actual = RollupDb.Daily();
         var expectedRows = RollupDb.Format(expected);
 
@@ -218,6 +256,7 @@ public sealed class RollupJobDatabaseTests
         Assert.All(actual.Where(row => !row.Contains("|<other>|", StringComparison.Ordinal)), row => Assert.Contains(row, expectedRows));
         Assert.Contains(actual, row => row.Contains("|<other>|", StringComparison.Ordinal));
         Assert.Equal(RollupDb.DayTotals(expectedRows), RollupDb.DayTotals(actual));
+        Assert.Equal(RollupDb.Format(days.SelectMany(day => traffic.Expected(day, settings).Items)), RollupDb.Items());
         Assert.Equal(
             expectedRows.Where(row => row.Contains("||", StringComparison.Ordinal)),
             actual.Where(row => row.Contains("||", StringComparison.Ordinal)));
@@ -256,7 +295,7 @@ internal static class RollupDb
             NullLogger<AnalyticsModuleInstaller>.Instance).Install();
         Execute(
             $"""
-            DELETE FROM LuceneSuite_SearchEvent; DELETE FROM LuceneSuite_SearchInteraction; DELETE FROM LuceneSuite_SearchDaily;
+            DELETE FROM LuceneSuite_SearchEvent; DELETE FROM LuceneSuite_SearchInteraction; DELETE FROM LuceneSuite_SearchDaily; DELETE FROM LuceneSuite_ItemDaily;
             UPDATE CMS_SettingsKey SET KeyValue = '' WHERE KeyName = '{AnalyticsModuleInstaller.WatermarkKeyName}';
             """);
     }
@@ -268,6 +307,7 @@ internal static class RollupDb
             services.GetRequiredService<IInfoProvider<SearchEventInfo>>(),
             services.GetRequiredService<IInfoProvider<SearchInteractionInfo>>(),
             services.GetRequiredService<IInfoProvider<SearchDailyInfo>>(),
+            services.GetRequiredService<IInfoProvider<ItemDailyInfo>>(),
             services.GetRequiredService<IInfoProvider<SettingsKeyInfo>>());
     }
 
@@ -278,6 +318,7 @@ internal static class RollupDb
             services.GetRequiredService<IInfoProvider<SearchEventInfo>>(),
             services.GetRequiredService<IInfoProvider<SearchInteractionInfo>>(),
             services.GetRequiredService<IInfoProvider<SearchDailyInfo>>(),
+            services.GetRequiredService<IInfoProvider<ItemDailyInfo>>(),
             logger ?? NullLogger<AnalyticsRetention>.Instance);
     }
 
@@ -312,6 +353,28 @@ internal static class RollupDb
             rows.Add(Row(DateOnly.FromDateTime(reader.GetDateTime(0)), reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2), values));
         }
 
+        rows.Sort(StringComparer.Ordinal);
+        return rows;
+    }
+
+    /// <summary>All ItemDaily rows as "day|index|item|clickedSearches,clickPositionSum,conversions", ordered.</summary>
+    public static List<string> Items()
+    {
+        using var connection = Open();
+        using var command = new SqlCommand("SELECT Day, IndexName, ItemGuid, ClickedSearches, ClickPositionSum, Conversions FROM LuceneSuite_ItemDaily", connection);
+        using var reader = command.ExecuteReader();
+        var rows = new List<ItemKpi>();
+        while (reader.Read())
+        {
+            rows.Add(new ItemKpi(DateOnly.FromDateTime(reader.GetDateTime(0)), reader.GetString(1), reader.GetGuid(2), reader.GetInt32(3), reader.GetInt64(4), reader.GetInt32(5)));
+        }
+
+        return Format(rows);
+    }
+
+    public static List<string> Format(IEnumerable<ItemKpi> items)
+    {
+        var rows = items.Select(item => $"{item.Day:yyyy-MM-dd}|{item.IndexName}|{item.ItemGuid}|{item.ClickedSearches},{item.ClickPositionSum},{item.Conversions}").ToList();
         rows.Sort(StringComparer.Ordinal);
         return rows;
     }
@@ -442,8 +505,8 @@ internal sealed record SyntheticTraffic(List<RawSearchRow> Searches, List<RawInt
         return new SyntheticTraffic(shuffledSearches, shuffledInteractions);
     }
 
-    /// <summary>The engine's KPIs for <paramref name="day"/> over these rows (the generated texts never collide under the collation).</summary>
-    public IReadOnlyList<DailyKpi> Expected(DateOnly day, RollupSettings settings) =>
+    /// <summary>The engine's rollup of <paramref name="day"/> over these rows (the generated texts never collide under the collation).</summary>
+    public DailyRollup Expected(DateOnly day, RollupSettings settings) =>
         RollupEngine.Roll(day, Searches, Interactions, settings);
 }
 

@@ -59,17 +59,21 @@ public sealed class RetentionDatabaseTests
     }
 
     [DatabaseFact]
-    public void DailyRowsOlderThanDailyRetention_ArePurged()
+    public void DailyAndItemRowsOlderThanDailyRetention_ArePurged_InBatches()
     {
         RollupDb.Reset();
-        var options = Options();
+        var options = Options(batchSize: 2);
         options.Retention.DailyRetention = TimeSpan.FromDays(100);
         // today 2030-01-10 − 100 days = 2029-10-02.
         InsertDaily(Row("2029-10-01", "popular", 50), Row("2029-10-02", "popular", 50));
+        KenticoServices.Value.GetRequiredService<IInfoProvider<ItemDailyInfo>>().BulkInsert(
+            new[] { "2029-09-30", "2029-10-01", "2029-10-01", "2029-10-02", "2029-10-03" }
+                .Select((day, i) => DailyRollupStore.ToInfo(new ItemKpi(DateOnly.Parse(day, CultureInfo.InvariantCulture), RollupDb.Index, new Guid(i + 1, 0, 0, new byte[8]), 1, 1, 0))));
 
         RollupDb.Retention().Run(Now, null, options);
 
         Assert.Equal(["2029-10-02"], RollupDb.Daily().Select(row => row.Split('|')[0]));
+        Assert.Equal(["2029-10-02", "2029-10-03"], RollupDb.Items().Select(row => row.Split('|')[0]));
     }
 
     [DatabaseFact]

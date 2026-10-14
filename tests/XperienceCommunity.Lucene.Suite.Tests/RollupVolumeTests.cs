@@ -40,7 +40,7 @@ public sealed class RollupVolumeTests(ITestOutputHelper output)
     public void Engine_RollsOneHundredThousandRowsAndTwentyThousandInteractions_WithinLimits()
     {
         var traffic = Generate();
-        var (kpis, elapsed, allocated, heap) = Measure(() => RollupEngine.Roll(Day, traffic.Searches, traffic.Interactions, RollupSettings.From(new SuiteAnalyticsOptions())));
+        var (kpis, elapsed, allocated, heap) = Measure(() => RollupEngine.Roll(Day, traffic.Searches, traffic.Interactions, RollupSettings.From(new SuiteAnalyticsOptions())).Kpis);
 
         Report("engine (in-process)", kpis, elapsed, allocated, heap);
         Assert.True(elapsed < MaxEngineTime && heap < MaxMemoryBytes, "Thresholds exceeded: stream per SearchId batch.");
@@ -62,7 +62,7 @@ public sealed class RollupVolumeTests(ITestOutputHelper output)
         {
             var computed = store.Compute(Day, settings);
             store.Replace(Day, computed);
-            return computed;
+            return computed.Kpis;
         });
 
         Report("store (load + engine + transactional replace)", kpis, elapsed, allocated, heap);

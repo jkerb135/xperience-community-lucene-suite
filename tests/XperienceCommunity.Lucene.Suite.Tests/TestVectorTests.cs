@@ -120,8 +120,9 @@ public sealed class TestVectorTests
         var actual = RollupEngine.Segment(rows, engineSettings).Select(l => string.Join(",", l.Rows.Select(r => r.Id))).Order().ToList();
         Assert.Equal(expected, actual);
 
-        var kpis = RollupEngine.Roll(DateOnly.FromDateTime(start), rows, clicks, engineSettings);
-        Assert.Equal((rows.Select(r => r.SearchId).Distinct().Count(), attributed), (kpis.Sum(k => k.Searches), kpis.Sum(k => k.Clicks)));
+        var rollup = RollupEngine.Roll(DateOnly.FromDateTime(start), rows, clicks, engineSettings);
+        Assert.Equal((rows.Select(r => r.SearchId).Distinct().Count(), attributed), (rollup.Kpis.Sum(k => k.Searches), rollup.Kpis.Sum(k => k.Clicks)));
+        Assert.Equal(attributed, rollup.Items.Sum(i => i.ClickedSearches));
     }
 
     [Theory]

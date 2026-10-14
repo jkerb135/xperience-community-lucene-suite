@@ -259,6 +259,57 @@ public sealed class AnalyticsInstallerDatabaseTests
     }
 
     [DatabaseFact]
+    public void Version7Database_UpgradesToVersion8_CreatingItemDaily_LeavingVersion7ObjectsUntouched()
+    {
+        var services = KenticoServices.Value;
+        CreateInstaller(services).Install();
+        string[] kept = [SearchEventInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME, RuleInfo.CLASS_NAME, SynonymInfo.CLASS_NAME, BlockedSuggestionInfo.CLASS_NAME];
+        RemoveSuiteObjects(keep: kept);
+        SetInstalledVersion(7);
+        string[] definitions = kept.Select(ClassDefinition).ToArray();
+
+        CreateInstaller(services).Install();
+        CreateInstaller(services).Install();
+
+        AssertInstalledOnce();
+        Assert.Equal(definitions, kept.Select(ClassDefinition).ToArray());
+        Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{ItemDailyInfo.CLASS_NAME}' AND ClassDisplayName = 'Lucene Suite item daily popularity'"));
+        Assert.Equal(
+            "ClickedSearches:int,ClickPositionSum:bigint,Conversions:int,Day:date,IndexName:nvarchar,ItemDailyID:int,ItemGuid:uniqueidentifier",
+            string.Join(',', Strings(
+                """
+                SELECT c.name + ':' + t.name FROM sys.columns c JOIN sys.types t ON t.user_type_id = c.user_type_id
+                WHERE c.object_id = OBJECT_ID('LuceneSuite_ItemDaily') AND c.is_nullable = 0 ORDER BY c.name
+                """)));
+        Assert.Equal(
+            "Day,IndexName,ItemGuid",
+            string.Join(',', Strings(
+                $"""
+                SELECT c.name FROM sys.indexes i JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+                JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+                WHERE i.name = '{AnalyticsModuleInstaller.ItemDailyKeyIndexName}' AND i.is_unique = 1 ORDER BY ic.key_ordinal
+                """)));
+        Assert.False(ItemDailyInfo.TYPEINFO.ContinuousIntegrationSettings.Enabled);
+        Assert.False(ItemDailyInfo.TYPEINFO.LogEvents);
+    }
+
+    [DatabaseFact]
+    public void ItemDaily_RejectsADuplicateDayIndexAndItem()
+    {
+        CreateInstaller(KenticoServices.Value).Install();
+        Execute("DELETE FROM LuceneSuite_ItemDaily WHERE IndexName = 'unique-test'");
+        const string insert =
+            """
+            INSERT INTO LuceneSuite_ItemDaily (Day, IndexName, ItemGuid, ClickedSearches, ClickPositionSum, Conversions)
+            VALUES ('2026-10-09', 'unique-test', '00000000-0000-0000-0000-000000000001', 1, 1, 0)
+            """;
+        Execute(insert);
+
+        Assert.Throws<SqlException>(() => Execute(insert));
+        Execute("DELETE FROM LuceneSuite_ItemDaily WHERE IndexName = 'unique-test'");
+    }
+
+    [DatabaseFact]
     public void ActivityLookups_WorkOnKenticosProviders()
     {
         var services = KenticoServices.Value;
@@ -362,7 +413,7 @@ public sealed class AnalyticsInstallerDatabaseTests
         CreateInstaller(services, logger).Install();
 
         Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Warning);
-        Assert.Equal(0, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName IN ('{SearchInteractionInfo.CLASS_NAME}', '{SearchDailyInfo.CLASS_NAME}', '{RuleInfo.CLASS_NAME}')"));
+        Assert.Equal(0, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName IN ('{SearchInteractionInfo.CLASS_NAME}', '{SearchDailyInfo.CLASS_NAME}', '{RuleInfo.CLASS_NAME}', '{ItemDailyInfo.CLASS_NAME}')"));
         Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_SettingsKey WHERE KeyName = '{AnalyticsModuleInstaller.VersionKeyName}' AND KeyValue = '{AnalyticsModuleInstaller.Version + 1}'"));
 
         // Leave the database fully installed for the other tests.
@@ -391,7 +442,7 @@ public sealed class AnalyticsInstallerDatabaseTests
     // Raw SQL because Kentico refuses to delete a class whose Info type is compiled in; the caches are cleared afterwards.
     private static void RemoveSuiteObjects(string[] keep)
     {
-        string[] all = [BlockedSuggestionInfo.CLASS_NAME, SynonymInfo.CLASS_NAME, RuleInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
+        string[] all = [ItemDailyInfo.CLASS_NAME, BlockedSuggestionInfo.CLASS_NAME, SynonymInfo.CLASS_NAME, RuleInfo.CLASS_NAME, SearchDailyInfo.CLASS_NAME, SearchInteractionInfo.CLASS_NAME, SearchEventInfo.CLASS_NAME];
         foreach (string className in all.Except(keep))
         {
             Execute($"DROP TABLE IF EXISTS [{className.Replace('.', '_')}]; DELETE FROM CMS_Class WHERE ClassName = '{className}';");
@@ -424,6 +475,20 @@ public sealed class AnalyticsInstallerDatabaseTests
         keys.Set(key);
     }
 
+    private static List<string> Strings(string sql)
+    {
+        using var connection = Open();
+        using var command = new SqlCommand(sql, connection);
+        using var reader = command.ExecuteReader();
+        var values = new List<string>();
+        while (reader.Read())
+        {
+            values.Add(reader.GetString(0));
+        }
+
+        return values;
+    }
+
     private static string ClassDefinition(string className)
     {
         using var connection = Open();
@@ -448,6 +513,7 @@ public sealed class AnalyticsInstallerDatabaseTests
             (RuleInfo.CLASS_NAME, AnalyticsModuleInstaller.RuleIndexName, 1, 0),
             (SynonymInfo.CLASS_NAME, AnalyticsModuleInstaller.SynonymIndexName, 1, 0),
             (BlockedSuggestionInfo.CLASS_NAME, AnalyticsModuleInstaller.BlockedSuggestionIndexName, 1, 0),
+            (ItemDailyInfo.CLASS_NAME, AnalyticsModuleInstaller.ItemDailyKeyIndexName, 3, 1),
         })
         {
             Assert.Equal(1, Scalar($"SELECT COUNT(*) FROM CMS_Class WHERE ClassName = '{className}'"));

@@ -14,6 +14,7 @@ internal sealed class AnalyticsRetention(
     IInfoProvider<SearchEventInfo> searchEvents,
     IInfoProvider<SearchInteractionInfo> interactions,
     IInfoProvider<SearchDailyInfo> daily,
+    IInfoProvider<ItemDailyInfo> itemDaily,
     ILogger<AnalyticsRetention> logger)
 {
     // Two parameters per folded group; SQL Server allows 2100 per command.
@@ -27,16 +28,14 @@ internal sealed class AnalyticsRetention(
         .. Enumerable.Range(0, SearchDailyInfo.LatencyBucketCount).Select(i => $"LatencyBucket{i}"),
     ];
 
-    /// <summary>Runs raw purge, daily purge and the fold, in that order; <paramref name="watermark"/> is the last rolled day.</summary>
+    /// <summary>Runs raw purge, daily (query and item) purge and the fold, in that order; <paramref name="watermark"/> is the last rolled day.</summary>
     public void Run(DateTimeOffset now, DateOnly? watermark, SuiteAnalyticsOptions options)
     {
         PurgeRaw(now, watermark, options);
         var today = RollupScheduler.Midnight(DateOnly.FromDateTime(now.UtcDateTime));
-        DeleteBatched(
-            daily,
-            nameof(SearchDailyInfo.SearchDailyID),
-            new WhereCondition().WhereLessThan(nameof(SearchDailyInfo.Day), RollupScheduler.Midnight(RollupScheduler.CeilingDay(today - options.Retention.DailyRetention))),
-            options.BatchSize);
+        var dailyCut = RollupScheduler.Midnight(RollupScheduler.CeilingDay(today - options.Retention.DailyRetention));
+        DeleteBatched(daily, nameof(SearchDailyInfo.SearchDailyID), new WhereCondition().WhereLessThan(nameof(SearchDailyInfo.Day), dailyCut), options.BatchSize);
+        DeleteBatched(itemDaily, nameof(ItemDailyInfo.ItemDailyID), new WhereCondition().WhereLessThan(nameof(ItemDailyInfo.Day), dailyCut), options.BatchSize);
         Fold(RollupScheduler.CeilingDay(today - options.Retention.SubThresholdPruneAfter), options);
     }
 

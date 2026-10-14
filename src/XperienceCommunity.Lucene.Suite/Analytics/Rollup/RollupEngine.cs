@@ -1,4 +1,8 @@
+using System.Runtime.InteropServices;
+
 using XperienceCommunity.Lucene.Suite.Search;
+
+using ItemCounts = (int ClickedSearches, long ClickPositionSum, int Conversions);
 
 namespace XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 
@@ -13,7 +17,7 @@ internal sealed record RollupSettings(TimeSpan TextChangeWindow, TimeSpan Attrib
         new(options.Merge.TextChangeWindow, options.Attribution.AttributionWindow);
 }
 
-/// <summary>Pure, deterministic rollup of one UTC day of raw rows into daily KPIs: no I/O, no clock.</summary>
+/// <summary>Pure, deterministic rollup of one UTC day of raw rows into daily query and item KPIs: no I/O, no clock.</summary>
 /// <remarks>
 /// Input contract for <see cref="Roll"/>: every raw search row of each SearchId that has at least one row in
 /// [day start − AttributionWindow, day end + AttributionWindow], and the interactions received in
@@ -21,8 +25,11 @@ internal sealed record RollupSettings(TimeSpan TextChangeWindow, TimeSpan Attrib
 /// </remarks>
 internal static class RollupEngine
 {
-    /// <summary>Rolls up the logical searches that start on <paramref name="day"/> (UTC), ordered by index then query text.</summary>
-    public static IReadOnlyList<DailyKpi> Roll(
+    /// <summary>
+    /// Rolls up the logical searches that start on <paramref name="day"/> (UTC): query KPIs ordered by index then query text, and item KPIs
+    /// ordered by index then ItemGuid, counted at the same points as the query KPIs' clicks and conversions.
+    /// </summary>
+    public static DailyRollup Roll(
         DateOnly day,
         IEnumerable<RawSearchRow> searches,
         IEnumerable<RawInteractionRow> interactions,
@@ -44,14 +51,21 @@ internal static class RollupEngine
             }
         }
 
-        Attribute(interactions, rowOwners, settings);
+        var items = new Dictionary<(string IndexName, Guid ItemGuid), ItemCounts>();
+        Attribute(interactions, rowOwners, items, settings);
 
-        return owned
+        var kpis = owned
             .GroupBy(tally => (tally.Search.First.IndexName, tally.CountedText))
             .Select(group => Kpi(day, group.Key.IndexName, group.Key.CountedText, group.ToList()))
             .OrderBy(kpi => kpi.IndexName, StringComparer.Ordinal)
             .ThenBy(kpi => kpi.QueryText, StringComparer.Ordinal)
             .ToList();
+        var itemKpis = items
+            .OrderBy(item => item.Key.IndexName, StringComparer.Ordinal)
+            .ThenBy(item => item.Key.ItemGuid)
+            .Select(item => new ItemKpi(day, item.Key.IndexName, item.Key.ItemGuid, item.Value.ClickedSearches, item.Value.ClickPositionSum, item.Value.Conversions))
+            .ToList();
+        return new DailyRollup(kpis, itemKpis);
     }
 
     /// <summary>Deduplicates rows per (SearchId, Sequence) and splits each SearchId into logical searches.</summary>
@@ -98,6 +112,7 @@ internal static class RollupEngine
     private static void Attribute(
         IEnumerable<RawInteractionRow> interactions,
         Dictionary<(Guid SearchId, int Sequence), (Tally Tally, RawSearchRow Row)> rowOwners,
+        Dictionary<(string IndexName, Guid ItemGuid), ItemCounts> items,
         RollupSettings settings)
     {
         var seenEvents = new HashSet<Guid>();
@@ -110,9 +125,11 @@ internal static class RollupEngine
                 continue;
             }
 
+            // Items are counted exactly where the query KPIs count, so per index and day their sums match SearchDaily's Clicks and Conversions.
             if (interaction.Type == SearchInteractionType.Conversion)
             {
                 owner.Tally.Conversions++;
+                ItemOf(items, owner.Tally, interaction).Conversions++;
             }
             else if (interaction.Type == SearchInteractionType.Click
                 && interaction.Position is int position
@@ -122,9 +139,15 @@ internal static class RollupEngine
             {
                 owner.Tally.ClickPositionSum += position;
                 owner.Tally.ClickedSequences.Add(owner.Row.Sequence);
+                ref var item = ref ItemOf(items, owner.Tally, interaction);
+                item.ClickedSearches++;
+                item.ClickPositionSum += position;
             }
         }
     }
+
+    private static ref ItemCounts ItemOf(Dictionary<(string IndexName, Guid ItemGuid), ItemCounts> items, Tally tally, RawInteractionRow interaction) =>
+        ref CollectionsMarshal.GetValueRefOrAddDefault(items, (tally.Search.First.IndexName, interaction.ItemGuid), out _);
 
     private static DailyKpi Kpi(DateOnly day, string indexName, string queryText, List<Tally> tallies)
     {

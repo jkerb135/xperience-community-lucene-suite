@@ -4,11 +4,12 @@ using CMS.DataEngine;
 
 namespace XperienceCommunity.Lucene.Suite.Analytics.Rollup;
 
-/// <summary>Loads a day's raw rows per the engine input contract and replaces the day's <see cref="SearchDailyInfo"/> rows together with the watermark.</summary>
+/// <summary>Loads a day's raw rows per the engine input contract and replaces the day's <see cref="SearchDailyInfo"/> and <see cref="ItemDailyInfo"/> rows together with the watermark.</summary>
 internal sealed class DailyRollupStore(
     IInfoProvider<SearchEventInfo> searchEvents,
     IInfoProvider<SearchInteractionInfo> interactions,
     IInfoProvider<SearchDailyInfo> daily,
+    IInfoProvider<ItemDailyInfo> itemDaily,
     IInfoProvider<SettingsKeyInfo> settingsKeys)
 {
     private const string DayFormat = "yyyy-MM-dd";
@@ -49,7 +50,7 @@ internal sealed class DailyRollupStore(
     }
 
     /// <summary>Rolls <paramref name="day"/> from the raw rows its input contract needs.</summary>
-    public IReadOnlyList<DailyKpi> Compute(DateOnly day, RollupSettings settings)
+    public DailyRollup Compute(DateOnly day, RollupSettings settings)
     {
         var dayStart = RollupScheduler.Midnight(day);
         var window = settings.AttributionWindow;
@@ -70,7 +71,8 @@ internal sealed class DailyRollupStore(
             .GetEnumerableTypedResult()
             .Select(ToRow)
             .ToList();
-        return MergeCollationDuplicates(RollupEngine.Roll(day, searchRows, interactionRows, settings), CollationCanonicalTexts(touchingIds));
+        var rollup = RollupEngine.Roll(day, searchRows, interactionRows, settings);
+        return rollup with { Kpis = MergeCollationDuplicates(rollup.Kpis, CollationCanonicalTexts(touchingIds)) };
     }
 
     /// <summary>
@@ -107,15 +109,21 @@ internal sealed class DailyRollupStore(
             .ToList();
     }
 
-    /// <summary>In one transaction: deletes the day's rows (including "(other)"), advances the watermark to the day and inserts <paramref name="kpis"/>.</summary>
-    public void Replace(DateOnly day, IReadOnlyList<DailyKpi> kpis)
+    /// <summary>In one transaction: deletes the day's query rows (including "(other)") and item rows, advances the watermark to the day and inserts <paramref name="rollup"/>.</summary>
+    public void Replace(DateOnly day, DailyRollup rollup)
     {
         using var scope = new CMSTransactionScope();
         daily.BulkDelete(new WhereCondition().WhereEquals(nameof(SearchDailyInfo.Day), RollupScheduler.Midnight(day)));
+        itemDaily.BulkDelete(new WhereCondition().WhereEquals(nameof(ItemDailyInfo.Day), RollupScheduler.Midnight(day)));
         WriteWatermark(day);
-        if (kpis.Count > 0)
+        if (rollup.Kpis.Count > 0)
         {
-            daily.BulkInsert(kpis.Select(ToInfo));
+            daily.BulkInsert(rollup.Kpis.Select(ToInfo));
+        }
+
+        if (rollup.Items.Count > 0)
+        {
+            itemDaily.BulkInsert(rollup.Items.Select(ToInfo));
         }
 
         scope.Commit();
@@ -182,4 +190,15 @@ internal sealed class DailyRollupStore(
 
         return info;
     }
+
+    /// <summary>Maps an engine item KPI onto a new <see cref="ItemDailyInfo"/>.</summary>
+    internal static ItemDailyInfo ToInfo(ItemKpi item) => new()
+    {
+        Day = RollupScheduler.Midnight(item.Day),
+        IndexName = item.IndexName,
+        ItemGuid = item.ItemGuid,
+        ClickedSearches = item.ClickedSearches,
+        ClickPositionSum = item.ClickPositionSum,
+        Conversions = item.Conversions,
+    };
 }

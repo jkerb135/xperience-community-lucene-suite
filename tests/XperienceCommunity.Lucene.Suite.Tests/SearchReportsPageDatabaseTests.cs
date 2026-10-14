@@ -204,7 +204,7 @@ public sealed class SearchReportsPageDatabaseTests
     {
         RollupDb.Reset();
         var options = new SuiteAnalyticsOptions();
-        var (from, to, _) = SearchSeeder.Seed(
+        var (from, to, _, _) = SearchSeeder.Seed(
             Environment.GetEnvironmentVariable(DatabaseFactAttribute.Variable)!,
             Index,
             days,

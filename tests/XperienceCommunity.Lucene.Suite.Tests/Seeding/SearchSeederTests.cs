@@ -31,7 +31,7 @@ public sealed class SearchSeederTests
     public void RolledSearchesPerDay_EqualTheGeneratedLogicalSearches()
     {
         var traffic = Generate(seed: 3);
-        var kpis = SearchSeeder.Roll(traffic, "seed", Options);
+        var kpis = SearchSeeder.Roll(traffic, "seed", Options).Kpis;
 
         foreach (var (day, count) in traffic.LogicalSearches)
         {
@@ -43,7 +43,7 @@ public sealed class SearchSeederTests
     public void Traffic_LooksLikeASite()
     {
         var traffic = Generate(seed: 5);
-        var kpis = SearchSeeder.Roll(traffic, "seed", Options);
+        var kpis = SearchSeeder.Roll(traffic, "seed", Options).Kpis;
         double searches = kpis.Sum(kpi => kpi.Searches);
 
         double noResults = kpis.Sum(kpi => kpi.ZeroResultSearches) / searches;
@@ -72,7 +72,7 @@ public sealed class SearchSeederTests
     [Fact]
     public void LongTail_SomeQueriesSurface_OthersStayBelowTheThreshold()
     {
-        var byText = SearchSeeder.Roll(Generate(seed: 1), "seed", Options)
+        var byText = SearchSeeder.Roll(Generate(seed: 1), "seed", Options).Kpis
             .Where(kpi => kpi.QueryText.Length > 0)
             .GroupBy(kpi => kpi.QueryText)
             .Select(group => (Searches: group.Sum(kpi => kpi.Searches), Days: group.Count()))
@@ -148,7 +148,7 @@ public sealed class SearchSeederTests
 
     private static SeedTraffic Generate(int seed) => SearchSeeder.Generate(SeedVocabulary.BuiltIn(), From, To, 120, seed, Options);
 
-    private static List<Analytics.Rollup.DailyKpi> Kpis(int seed) => SearchSeeder.Roll(Generate(seed), "seed", Options);
+    private static IReadOnlyList<Analytics.Rollup.DailyKpi> Kpis(int seed) => SearchSeeder.Roll(Generate(seed), "seed", Options).Kpis;
 
     private static string Format(Analytics.Rollup.DailyKpi kpi) =>
         $"{kpi.Day}|{kpi.QueryText}|{kpi.Searches}|{kpi.ZeroResultSearches}|{kpi.ClickedSearches}|{kpi.Clicks}|{kpi.ClickPositionSum}|{kpi.Conversions}|{kpi.SessionCount}|{string.Join(',', kpi.LatencyBuckets)}";

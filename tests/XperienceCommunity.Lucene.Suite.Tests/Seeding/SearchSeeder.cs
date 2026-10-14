@@ -12,7 +12,7 @@ namespace XperienceCommunity.Lucene.Suite.Tests.Seeding;
 /// <summary>Raw rows generated for a range, with the number of logical searches started per day.</summary>
 internal sealed record SeedTraffic(List<RawSearchRow> Searches, List<RawInteractionRow> Interactions, IReadOnlyDictionary<DateOnly, int> LogicalSearches);
 
-/// <summary>Dev-only demo history: contract-faithful raw searches rolled by the real <see cref="RollupEngine"/> and written to SearchDaily without Kentico.</summary>
+/// <summary>Dev-only demo history: contract-faithful raw searches rolled by the real <see cref="RollupEngine"/> and written to SearchDaily and ItemDaily without Kentico.</summary>
 internal static class SearchSeeder
 {
     public const int PageSize = 10;
@@ -89,14 +89,15 @@ internal static class SearchSeeder
         return traffic;
     }
 
-    /// <summary>Rolls each day with the real engine.</summary>
-    public static List<DailyKpi> Roll(SeedTraffic traffic, string indexName, SuiteAnalyticsOptions options)
+    /// <summary>Rolls each day with the real engine; returns every day's query and item KPIs.</summary>
+    public static DailyRollup Roll(SeedTraffic traffic, string indexName, SuiteAnalyticsOptions options)
     {
         var settings = RollupSettings.From(options);
         var searches = traffic.Searches.Select(row => row with { IndexName = indexName }).ToList();
-        return traffic.LogicalSearches.Keys.Order()
-            .SelectMany(day => RollupEngine.Roll(day, searches.Where(row => DateOnly.FromDateTime(row.ReceivedUtc) == day), traffic.Interactions.Where(row => DateOnly.FromDateTime(row.ReceivedUtc) == day), settings))
+        var days = traffic.LogicalSearches.Keys.Order()
+            .Select(day => RollupEngine.Roll(day, searches.Where(row => DateOnly.FromDateTime(row.ReceivedUtc) == day), traffic.Interactions.Where(row => DateOnly.FromDateTime(row.ReceivedUtc) == day), settings))
             .ToList();
+        return new DailyRollup(days.SelectMany(day => day.Kpis).ToList(), days.SelectMany(day => day.Items).ToList());
     }
 
     /// <summary>Refuses unless <paramref name="confirm"/> is the target's database name.</summary>
@@ -112,9 +113,9 @@ internal static class SearchSeeder
     /// <summary>The <paramref name="days"/> days ending before the first day that real data or the rollup job can own.</summary>
     public static (DateOnly From, DateOnly To) Range(SqlConnection connection, SqlTransaction? transaction, string indexName, int days, DateOnly today)
     {
-        if (!int.TryParse(Scalar(connection, transaction, "SELECT KeyValue FROM CMS_SettingsKey WHERE KeyName = @key", ("@key", AnalyticsModuleInstaller.VersionKeyName)) as string, out int version) || version < 3)
+        if (!int.TryParse(Scalar(connection, transaction, "SELECT KeyValue FROM CMS_SettingsKey WHERE KeyName = @key", ("@key", AnalyticsModuleInstaller.VersionKeyName)) as string, out int version) || version < 8)
         {
-            throw new InvalidOperationException("Lucene Suite analytics (installer version 3 or later) is not installed in the target database.");
+            throw new InvalidOperationException("Lucene Suite analytics (installer version 8 or later) is not installed in the target database.");
         }
 
         var limits = new List<DateOnly> { today };
@@ -137,8 +138,8 @@ internal static class SearchSeeder
         return (to.AddDays(1 - days), to);
     }
 
-    /// <summary>Seeds the range under the rollup lock in one serializable transaction; returns the range and the rows written.</summary>
-    public static (DateOnly From, DateOnly To, int Rows) Seed(string connectionString, string indexName, int days, DateOnly today, Func<DateOnly, DateOnly, IReadOnlyList<DailyKpi>> kpis)
+    /// <summary>Seeds the range under the rollup lock in one serializable transaction; returns the range and the SearchDaily and ItemDaily rows written.</summary>
+    public static (DateOnly From, DateOnly To, int Rows, int ItemRows) Seed(string connectionString, string indexName, int days, DateOnly today, Func<DateOnly, DateOnly, DailyRollup> rollup)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(days, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(days, 400);
@@ -147,48 +148,50 @@ internal static class SearchSeeder
         connection.Open();
         using var transaction = connection.BeginTransaction(IsolationLevel.Serializable);
         var (from, to) = Range(connection, transaction, indexName, days, today);
-        if ((int)Scalar(connection, transaction, "SELECT COUNT(*) FROM LuceneSuite_SearchDaily WHERE IndexName = @index AND Day BETWEEN @from AND @to", ("@index", indexName), ("@from", Day(from)), ("@to", Day(to)))! > 0)
+        foreach (string table in (string[])["LuceneSuite_SearchDaily", "LuceneSuite_ItemDaily"])
         {
-            throw new InvalidOperationException($"SearchDaily already has rows for '{indexName}' between {from:yyyy-MM-dd} and {to:yyyy-MM-dd}.");
+            if ((int)Scalar(connection, transaction, $"SELECT COUNT(*) FROM {table} WHERE IndexName = @index AND Day BETWEEN @from AND @to", ("@index", indexName), ("@from", Day(from)), ("@to", Day(to)))! > 0)
+            {
+                throw new InvalidOperationException($"{table} already has rows for '{indexName}' between {from:yyyy-MM-dd} and {to:yyyy-MM-dd}.");
+            }
         }
 
-        var rows = kpis(from, to);
-        if (rows.Any(kpi => kpi.Day < from || kpi.Day > to || kpi.IndexName != indexName))
+        var (kpis, items) = rollup(from, to);
+        if (kpis.Any(kpi => kpi.Day < from || kpi.Day > to || kpi.IndexName != indexName) || items.Any(item => item.Day < from || item.Day > to || item.IndexName != indexName))
         {
             throw new InvalidOperationException("Generated rows fall outside the seed range or index.");
         }
 
-        using var bulk = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction) { DestinationTableName = "LuceneSuite_SearchDaily" };
-        var table = ToTable(rows);
-        foreach (DataColumn column in table.Columns)
-        {
-            bulk.ColumnMappings.Add(column.ColumnName, column.ColumnName);
-        }
-
-        bulk.WriteToServer(table);
+        BulkCopy(connection, transaction, "LuceneSuite_SearchDaily", ToTable(kpis));
+        BulkCopy(connection, transaction, "LuceneSuite_ItemDaily", ToTable(items));
         transaction.Commit();
-        return (from, to, rows.Count);
+        return (from, to, kpis.Count, items.Count);
     }
 
-    /// <summary>Deletes the index's SearchDaily rows in the range under the rollup lock; returns rows deleted per day.</summary>
-    public static SortedDictionary<DateOnly, int> Clear(string connectionString, string indexName, DateOnly from, DateOnly to)
+    /// <summary>Deletes the index's SearchDaily and ItemDaily rows in the range under the rollup lock, in one transaction; returns SearchDaily rows deleted per day and the ItemDaily rows deleted.</summary>
+    public static (SortedDictionary<DateOnly, int> Daily, int Items) Clear(string connectionString, string indexName, DateOnly from, DateOnly to)
     {
         using var rollupLock = RollupLock.TryAcquire(connectionString) ?? throw new InvalidOperationException("The rollup job holds the rollup lock; try again when it has finished.");
         using var connection = new SqlConnection(connectionString);
         connection.Open();
-        using var command = new SqlCommand("DELETE FROM LuceneSuite_SearchDaily OUTPUT deleted.Day WHERE IndexName = @index AND Day BETWEEN @from AND @to", connection);
-        command.Parameters.AddWithValue("@index", indexName);
-        command.Parameters.AddWithValue("@from", Day(from));
-        command.Parameters.AddWithValue("@to", Day(to));
+        using var transaction = connection.BeginTransaction();
+        int items = (int)Scalar(connection, transaction, "DELETE FROM LuceneSuite_ItemDaily WHERE IndexName = @index AND Day BETWEEN @from AND @to; SELECT @@ROWCOUNT", ("@index", indexName), ("@from", Day(from)), ("@to", Day(to)))!;
         var perDay = new SortedDictionary<DateOnly, int>();
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
+        using (var command = new SqlCommand("DELETE FROM LuceneSuite_SearchDaily OUTPUT deleted.Day WHERE IndexName = @index AND Day BETWEEN @from AND @to", connection, transaction))
         {
-            var day = DateOnly.FromDateTime(reader.GetDateTime(0));
-            perDay[day] = perDay.GetValueOrDefault(day) + 1;
+            command.Parameters.AddWithValue("@index", indexName);
+            command.Parameters.AddWithValue("@from", Day(from));
+            command.Parameters.AddWithValue("@to", Day(to));
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var day = DateOnly.FromDateTime(reader.GetDateTime(0));
+                perDay[day] = perDay.GetValueOrDefault(day) + 1;
+            }
         }
 
-        return perDay;
+        transaction.Commit();
+        return (perDay, items);
     }
 
     private static string PickText(Random random, List<string> texts, double[] cumulative)
@@ -272,6 +275,34 @@ internal static class SearchSeeder
         }
 
         return n;
+    }
+
+    private static void BulkCopy(SqlConnection connection, SqlTransaction transaction, string tableName, DataTable table)
+    {
+        using var bulk = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction) { DestinationTableName = tableName };
+        foreach (DataColumn column in table.Columns)
+        {
+            bulk.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+        }
+
+        bulk.WriteToServer(table);
+    }
+
+    private static DataTable ToTable(IEnumerable<ItemKpi> items)
+    {
+        var table = new DataTable();
+        table.Columns.Add(nameof(ItemDailyInfo.Day), typeof(DateTime));
+        table.Columns.Add(nameof(ItemDailyInfo.IndexName), typeof(string));
+        table.Columns.Add(nameof(ItemDailyInfo.ItemGuid), typeof(Guid));
+        table.Columns.Add(nameof(ItemDailyInfo.ClickedSearches), typeof(int));
+        table.Columns.Add(nameof(ItemDailyInfo.ClickPositionSum), typeof(long));
+        table.Columns.Add(nameof(ItemDailyInfo.Conversions), typeof(int));
+        foreach (var item in items)
+        {
+            table.Rows.Add(RollupScheduler.Midnight(item.Day), item.IndexName, item.ItemGuid, item.ClickedSearches, item.ClickPositionSum, item.Conversions);
+        }
+
+        return table;
     }
 
     private static DataTable ToTable(IEnumerable<DailyKpi> kpis)
