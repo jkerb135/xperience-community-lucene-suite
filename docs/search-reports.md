@@ -5,7 +5,7 @@ nav_order: 70
 
 # Search reports
 
-How the Site Search report numbers are defined. All of them are computed from the daily rollup table `LuceneSuite_SearchDaily`, never from raw events, so a report shows only what the rollup kept.
+How the Site Search report numbers are defined. All of them are computed from the daily rollup tables, never from raw events, so a report shows only what the rollup kept: `LuceneSuite_SearchDaily` for searches and queries, and `LuceneSuite_ItemDaily` for the [top clicked items](#top-clicked-items).
 
 ## Days and ranges
 
@@ -83,6 +83,28 @@ Each search's latency is stored in a fixed histogram:
 - **Rows per page:** 10, 25 (the default) or 50. The choice is kept per index, with the period, sort and page, for the browser tab's session.
 - **No searches:** when the period has no searches, the page shows **No searches in this period** with an **Open query tester** button. Searches made in the query tester are not tracked, so they never fill a report.
 - **Load failures:** when the report cannot be loaded, the last loaded report stays on screen, with its charts and bars faded and a **Retry** button. When only the query table fails, the last loaded table stays; change the sort or period to retry.
+
+### Top clicked items
+
+The **Top clicked items** card shows what visitors open from the results: the 10 items with the most clicked searches in the period. Above the table, a summary line gives the number of items and their clicked searches and conversions in the period.
+
+| Column | Meaning |
+|---|---|
+| Item | The item's title. An item that is no longer in the index shows its item GUID and a **Not in this index** tag; it stays in the list, so the totals still add up. |
+| Content type | The item's content type, or **—** when it is no longer in the index |
+| Clicked searches | Logical searches with a counted click on the item, with a data bar relative to the largest value in the table |
+| Avg. position | Sum of the item's click positions (1-based) ÷ its clicked searches, to one decimal; **—** when it has no clicked searches |
+| Conversions | Counted conversions on the item, whether or not it was clicked |
+| Actions | **Pin in a new rule** and **Hide in a new rule** (see below) |
+
+- **What counts:** clicks and conversions are attributed exactly as for the query table, so a search counts once per item however many times that item was clicked. Summed over all items, clicked searches equal the period's Clicks and conversions equal its Conversions (see [Counts](#counts)). Items with neither a click nor a conversion in the period are left out.
+- **When the data starts:** per-item rows are recorded from analytics schema version 8 on. Days rolled up before the upgrade have no item rows and are not backfilled, so a period reaching back before the upgrade shows only the items clicked since. Retention removes item rows on the same schedule as the search rows.
+- **Sorting:** select the **Clicked searches**, **Conversions** or **Avg. position** header to sort by it. Clicked searches and conversions sort most first, average position lowest first with empty positions last; ties are broken by item GUID. Clicked searches is the default.
+- **Show all** opens the **All clicked items** side panel with the same columns for every item in the period, starting from the card's sort. Show 10, 25 (the default) or 50 items per page. Closing the panel returns focus to **Show all**.
+- **No data:** when no item was clicked or converted on in the period, the card shows **No clicked items in this period.** and no **Show all** button.
+- **Load failures:** when the items cannot be loaded, the card says **The clicked items could not be loaded. The last loaded items are shown.**, keeps the last loaded rows faded, and offers **Retry**.
+
+**Pin in a new rule** and **Hide in a new rule** open **Create rule** for the same index with the item already added under **Pinned items**, at position 1, or under **Hidden items**. Nothing is saved: choose the rule's conditions and save it yourself (see [Rules and synonyms](rules-and-synonyms#the-rule-form)). The actions are disabled, with the reason in their tooltip, without Site search → **Manage rules** (*Requires Site Search → Manage rules*) or for an item no longer in the index (*The item is no longer in this index*).
 
 The **Fix these first** card on the same page is described in [Search insights](insights).
 

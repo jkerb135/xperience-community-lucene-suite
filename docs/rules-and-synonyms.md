@@ -40,7 +40,12 @@ Open **Site search → Indexes → (index) → Rules** or **→ Synonyms**. Kent
 | Create, edit and delete rules | Site search → **Manage rules** |
 | Create, edit and delete synonyms | Site search → **Manage synonyms** |
 
-Two shortcuts from **Search reports**: in the query table, **Create rule for "…"** opens a new rule whose first condition is *Is* that query, and **Add synonym for "…"** opens a new synonym with that query as its first term.
+Shortcuts from **Search reports**:
+
+- In the query table, **Create rule for "…"** opens a new rule whose first condition is *Is* that query, and **Add synonym for "…"** opens a new synonym with that query as its first term.
+- In the **Top clicked items** card, **Pin in a new rule** opens a new rule with that item in **Pinned items** at position 1, and **Hide in a new rule** opens one with the item in **Hidden items**. The rule has no conditions yet, so choose them before you save (see [Conditions](#conditions)).
+
+A shortcut only fills the new form; nothing is saved until you save it.
 
 If someone else saved the same rule or synonym after you opened it, your save is refused, so their change is not lost silently. On a rule, the status line at the top of the form then shows **This rule was changed by someone else.** with a **Reload** button. Reload asks first, because your unsaved changes are lost, and then loads their version.
 
@@ -105,7 +110,9 @@ A rule needs at least one action: a pin, a hide, a boost or custom data. Enabled
 
 ### Conditions
 
-A rule fires when **any** of its conditions matches. A rule with **no** conditions fires on every search of the index. Within one condition, **every** part that is set must match:
+A rule fires when **any** of its conditions matches. A rule with **no** conditions fires on every search of the index. While the list is empty, the form shows the warning **No conditions: this rule applies to every search.** on create and edit. It is only a warning: the rule can still be saved without conditions, for example to pin an item on every search.
+
+Within one condition, **every** part that is set must match:
 
 | Part | Matches when |
 |---|---|
@@ -152,11 +159,11 @@ In the editor, **Add context** adds a **Visitor context**:
 - A pin is skipped when the item is not in the index, when any fired rule hides it, or, with **Pinned items must match the applied filters** on, when it does not match the request's facet filters.
 - `SuiteSearchHit.PinnedByRuleId` names the rule. A pinned hit that did not rank by itself within the fetched window has `Score` 0.
 
-In the editor, **Pin items** searches the index (rules off, no analytics; the first 20 results) to pick items. New pins take the lowest free positions. An item that has left the index is shown as **Not in this index**.
+In the editor, **Pin items** searches the index (rules off, no analytics; the first 20 results) to pick items. New pins take the lowest free positions. An item that has left the index is shown as **Not in this index**. **Pin in a new rule** on the Search reports **Top clicked items** card opens a new rule with that item already pinned at position 1.
 
 #### Hides
 
-Hidden items are removed from results, totals and facet counts. A hide beats any pin, from any rule. In the editor, **Hide items** picks items the same way as **Pin items**.
+Hidden items are removed from results, totals and facet counts. A hide beats any pin, from any rule. In the editor, **Hide items** picks items the same way as **Pin items**. **Hide in a new rule** on the Search reports **Top clicked items** card opens a new rule with that item already in **Hidden items**.
 
 #### Boosts and buries
 
