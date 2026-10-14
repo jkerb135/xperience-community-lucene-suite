@@ -1,135 +1,13 @@
 # Roadmap: XperienceCommunity.Lucene.Suite
 
 ## Overview
-Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Lucene. Ships in three milestones: tune and start capturing data (v0.1), measure (v0.2), test (v0.3). Event capture starts in v0.1 because reports need accumulated history.
+Marketer-facing search tuning, measurement and testing for Kentico.Xperience.Lucene. Milestones: tune and start capturing data (v0.1), measure (v0.2), relevance (v0.3), test (v0.4), instant search (v0.5). Event capture starts in v0.1 because reports need accumulated history.
 
 ## Current Milestone
-**v0.2 Measure** (v0.2.0)
-Status: All phases complete, all checks approved — ready for complete-milestone
-Phases: 8 of 8 complete
-Focus: Marketers see how site search performs and act on it — reports on real (or seeded) history, suggestions that steer visitors, and search behaviour in Kentico contacts.
+**v0.3 Relevance** (v0.3.0)
+Status: Not started — next: /paul:plan for Phase 14
+Phases: 0 of 6 complete
 
-## Phases
-
-| Phase | Name | Plans | Status | Completed |
-|-------|------|-------|--------|-----------|
-| 7 | Report Data | 2/2 | ✅ Complete | 2026-10-12 |
-| 8 | Reports Admin | 2/2 | ✅ Complete | 2026-10-12 |
-| 8.1 | Admin UI Consistency Audit | 5/5 | ✅ Complete | 2026-10-12 |
-| 9 | Suggestions | 3/3 | ✅ Complete | 2026-10-12 |
-| 10 | Custom Activities | 1/1 | ✅ Complete | 2026-10-12 |
-| 11 | Search Insights | 2/2 | ✅ Complete | 2026-10-12 |
-| 12 | Public API Audit | 1/1 | ✅ Complete | 2026-10-12 |
-| 13 | Enterprise Screens | 6/6 | ✅ Complete | 2026-10-13 |
-
-## Phase Details
-
-### Phase 7: Report Data
-**Focus:** Report query service over `SearchDaily` (KPIs, top queries, no-results, CTR, slowest from the latency histogram; date range; `(other)` handling) and a dev-only seed generator that writes contract-faithful synthetic events across many days and runs the real rollup.
-**Depends on:** v0.1 (capture, rollup, retention)
-**Decisions (2026-10-12):** seed generator = opt-in test runner; vocabulary from the index; seed the host (~60 removable days); overview compares with the previous period
-
-**Plans:**
-- [x] 07-01: Report query service (overview + previous period, trend, surfaced query tables + (other), latency percentiles)
-- [x] 07-02: Seed generator (contract-faithful synthetic sessions → RollupEngine → SearchDaily before the job start, --clear) + host seeding
-
-### Phase 8: Reports Admin
-**Focus:** Report pages per index in the Site Search app, recomputed on condition change; links into rules and synonyms (e.g. create a rule for a no-results query).
-**Admin UI:** design via /xbyk-admin-ui:design-screen (SPECIAL-FLOWS)
-**Depends on:** Phase 7
-**Decisions (2026-10-12):** token SVG trend chart + table view; presets + custom range; row actions: query tester, create rule, add synonym
-
-**Plans:**
-- [x] 08-01: Search reports page — range bar, KPI tiles with deltas, trend chart, latency
-- [x] 08-02: Query tables (4 sorts, paging, (other)) + row actions (query tester / create rule / add synonym prefill)
-
-### Phase 8.1: Admin UI Consistency Audit (inserted)
-**Focus:** Enterprise design audit of every Suite admin screen against the Kentico admin design system (31.9.1 runtime): query tester (search bar and filter chips sit outside a card, look unlike native screens), compare mode, rules editors (conditions, boosts, pins/hides picker), synonyms terms editor, search reports. Findings ranked; non-uniform parts fixed so all screens share one layout/card/spacing/chip vocabulary before Phase 9 adds more admin UI.
-**Admin UI:** /xbyk-admin-ui:design-screen + admin UI design validation (SPECIAL-FLOWS)
-**Depends on:** Phase 8
-**Plans:**
-- [x] 08.1-01: Design audit (read-only) — captures vs native Kentico + kit, ranked findings, Suite admin UI conventions, user-chosen fix split
-- [x] 08.1-02: Action bar + applied-filter chips (native listing layout), side-panel focus return, Row-in-Stack spacing (M3, M4, M5, S1)
-- [x] 08.1-03: Reports dashboard redesign after the Kentico Community Portal reporting screen (period toolbar, focus panel with six selectable KPI tiles + 7-day rolling line, insight notes; daily series for every KPI) + query table headers and scroll (M2, S2)
-- [x] 08.1-04: (merged into 08.1-03 at user request: listing-style icon row actions, M1)
-- [x] 08.1-05: Editors and polish — rule-row overflow (M6), heading scale (S3), validation pattern/timing (S4), C1–C3
-
-### Phase 9: Suggestions
-**Focus:** Query suggestions from surfaced queries; a rate-limited suggest endpoint in the Widgets package returning strings only (untracked); a progressive-enhancement search box script (accessible combobox); a per-index blocked-suggestions list with admin editor (blocks suggestions only, not reports).
-**Depends on:** Phase 7 (surfaced queries); Widgets package; Phase 8.1 (admin UI conventions)
-**Decisions (2026-10-12):** suggest surfaced queries (90 days) by searches, skip ≥ 50% no-result and placeholder texts; block per entry by exact query or contained word; native blocklist listing + report "Block suggestion" action
-
-**Plans:**
-- [x] 09-01: Blocklist model (installer v6) + cached suggestion source + rate-limited GET suggest endpoint (strings only, untracked)
-- [x] 09-02: Accessible combobox script (progressive enhancement) wired into the search box
-- [x] 09-03: Blocked-suggestions admin (listing/create/delete) + one-click report "Block suggestion" action
-
-### Phase 10: Custom Activities
-**Focus:** Kentico custom activity types — search performed (one per logical search, scrubbed text), result clicked, no results — logged only with a current contact and Kentico consent/cookie level allowing it.
-**Depends on:** v0.1 capture pipeline
-**Decisions (2026-10-12):** types installed disabled; no-results in addition; click contract v2 (optional query/title, activity-only); Core, submitted searches only
-
-**Plans:**
-- [x] 10-01: Activity types (installer v7) + search/no-results/click activities in Core + click contract v2
-
-### Phase 11: Search Insights
-**Focus:** Rules-based findings over the existing report data, each linking straight to its fix. Rules run per surfaced query (on top of the surfacing threshold) only when the query reaches a minimum search count in the selected range: content gap (high no-result rate → add synonym), relevance miss (results but low CTR → create rule / pin), buried answer (high average click position → create rule / pin), slow query (p95 over a cutoff or overflow bucket → query tester), regression (period-over-period worsening of no-result rate or CTR; skipped when the previous period is partial). Findings are computed on read from `SearchReportService` (no new tables) and replace/extend the reports "Needs attention" panel; actions reuse the 08-02 row-action prefill (query tester, create rule, add synonym) and the 09-03 "Block suggestion" command.
-**Admin UI:** /xbyk-admin-ui:design-screen (SPECIAL-FLOWS), Conventions 1–10 from Phase 8.1
-**Depends on:** Phase 7 (report service), Phase 8 / 8.1 (reports page, row actions), Phase 9 (block suggestion)
-**Decisions (2026-10-12, user):** every threshold is configurable per site in appsettings (`LuceneSuite:Analytics:Insights` — minimum searches, rate cutoffs, click-position cutoff, latency cutoff, regression %) with sensible defaults, so small and large sites can tune it (no admin settings page, per milestone constraint); every finding links directly to its fix, pre-filled. Not in scope: LLM/AIRA analysis (no public bring-your-own-agent API in Xperience as of 2026-10-12), typo-pair detection, stored findings.
-**Decisions (planning):** Needs attention card (top 5) + "Show all insights" side panel; findings annotated with existing synonyms/rules
-
-**Plans:**
-- [x] 11-01: Insights core — options, one SQL aggregation (current + previous), pure engine, existing-fix annotations
-- [x] 11-02: Reports UI — Needs attention findings + all-insights panel, pre-filled fix actions, host check
-
-### Phase 12: Public API Audit
-**Focus:** Make Core + Admin alone sufficient to build a custom search UI, and Widgets extensible: inventory every public type in Core/Admin/Widgets, close gaps (e.g. rule/synonym/report/insight services usable outside the admin), XML docs everywhere, a public-API baseline (shipped/unshipped list) so later changes are deliberate, and a "build your own UI / author your own widget" guide.
-**Depends on:** Phases 9–11 (their public APIs are included)
-**Decision (2026-10-12, user):** layered packages; instant search goes to v0.4
-**Decisions (planning):** PublicApiAnalyzers baseline; admin services stay internal; LogClick(SearchClick) + one Widgets namespace now. XML docs and the custom-UI guide already exist.
-
-**Plans:**
-- [x] 12-01: Inventory + internalize, SearchClick + Widgets namespace, PublicApiAnalyzers baseline + docs/public-api.md
-
-**Constraints (from discussion 2026-10-12):** Suite analytics stay identity-free; reports read rollups only and respect the surfacing threshold; the suggest endpoint serves no results and only threshold-surfaced text; the seed generator is dev-only; settings stay in appsettings (no admin settings page); checkpoints go to `.paul/APPROVAL-CHECKS.md`.
-
-### Phase 13: Enterprise Screens
-**Focus:** Implement `project-sidecar/design/design_handoff_lucene_suite_enterprise/README.md` with `@kentico/xperience-admin-components`: loading/empty/error states on every screen, bulk actions and paging for ~500 rules, data-dense tables.
-**Admin UI:** design via /xbyk-admin-ui:design-screen + enterprise.md (SPECIAL-FLOWS)
-**Depends on:** Phases 3, 8, 8.1, 11
-**Decisions (2026-10-12, user):** rules listing becomes a custom client template (reverses the native-listing decision for that page only); rule edit stays the native ModelEditPage (no sticky save bar — Kentico's Save and unsaved-changes prompt); the condition editor gains contact-group/custom context Selects (bare code names, matching the shipped Widgets resolver) and facet dimension/value Selects from the index
-**Deviations from the handoff (npm 31.9.1 / enterprise.md precedence):** no SearchInput/SimpleStatus/Snackbar/ConfirmationDialog exports → labelled Input, icon + text status, Kentico toasts, Dialog; Spinner instead of hex-gradient skeletons; page title Headline M (native size)
-
-**Plans:**
-- [x] 13-01 (complete 2026-10-12): Rules listing — custom template, derived status + counts, search/sort/paging, bulk enable/disable/priority/delete with partial-failure results
-- [x] 13-02 (complete 2026-10-12): Rule edit — native form regrouped per handoff, header status, conflict Reload, condition pickers (contexts + facets)
-- [x] 13-02.1 (inserted, complete 2026-10-12): Quick fix — second Save without reload no longer a false conflict (rules + synonyms); rule conflict alert with Reload
-- [x] 13-03 (complete 2026-10-12): Search reports — sparklines, data bars, range footer, loading/empty/error states
-- [x] 13-04 (complete 2026-10-13): Query tester — result summary strip, score bars, rank movement in Compare, range footer, states
-- [x] 13-05 (inserted from the milestone review, complete 2026-10-13): Pre-release follow-ups — event-log audit trail for Suite admin changes, local-time validity labels (#6 dropped by user)
-
-## Completed Milestones
-
-<details>
-<summary>v0.1 Tune & Capture - 2026-10-12 (6 phases, 21 plans)</summary>
-
-| Phase | Name | Plans | Completed |
-|-------|------|-------|-----------|
-| 1 | Foundation | 3/3 | 2026-10-09 |
-| 2 | Event Capture | 4/4 | 2026-10-09 |
-| 3 | Rules Engine | 7/7 | 2026-10-11 |
-| 4 | Synonyms | 2/2 | 2026-10-11 |
-| 5 | Preview Sandbox | 1/1 | 2026-10-11 |
-| 6 | Widgets Package | 4/4 | 2026-10-12 |
-
-Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.md`
-
-</details>
-
-## Later Milestones
-
-### v0.3 Relevance (planned 2026-10-12)
 **Focus:** Marketers control how queries are read and ranked, beyond rules and synonyms: words that don't matter, which fields count most, forgiving typos, guiding visitors to better queries, and lifting what visitors actually click.
 **Depends on:** v0.2 (insights, suggestions, analytics pipeline, public API baseline)
 **Decisions (2026-10-12, user):**
@@ -157,6 +35,44 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 
 **Plans:** created by `/paul:plan` when each phase starts.
 
+## Completed Milestones
+
+<details>
+<summary>v0.2 Measure - 2026-10-13 (8 phases, 21 plans)</summary>
+
+| Phase | Name | Plans | Completed |
+|-------|------|-------|-----------|
+| 7 | Report Data | 2/2 | 2026-10-12 |
+| 8 | Reports Admin | 2/2 | 2026-10-12 |
+| 8.1 | Admin UI Consistency Audit | 4/4 (08.1-04 merged into 03) | 2026-10-12 |
+| 9 | Suggestions | 3/3 | 2026-10-12 |
+| 10 | Custom Activities | 1/1 | 2026-10-12 |
+| 11 | Search Insights | 2/2 | 2026-10-12 |
+| 12 | Public API Audit | 1/1 | 2026-10-12 |
+| 13 | Enterprise Screens | 6/6 (incl. 13-02.1, 13-05) | 2026-10-13 |
+
+Full detail: `.paul/milestones/v0.2.0-ROADMAP.md` · Summary: `.paul/MILESTONES.md`
+
+</details>
+
+<details>
+<summary>v0.1 Tune & Capture - 2026-10-12 (6 phases, 21 plans)</summary>
+
+| Phase | Name | Plans | Completed |
+|-------|------|-------|-----------|
+| 1 | Foundation | 3/3 | 2026-10-09 |
+| 2 | Event Capture | 4/4 | 2026-10-09 |
+| 3 | Rules Engine | 7/7 | 2026-10-11 |
+| 4 | Synonyms | 2/2 | 2026-10-11 |
+| 5 | Preview Sandbox | 1/1 | 2026-10-11 |
+| 6 | Widgets Package | 4/4 | 2026-10-12 |
+
+Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.md`
+
+</details>
+
+## Later Milestones
+
 ### Further milestones
 
 | Milestone | Contents |
@@ -165,4 +81,4 @@ Full detail: `.paul/milestones/v0.1.0-ROADMAP.md` · Summary: `.paul/MILESTONES.
 | v0.5 Instant Search | Public opt-in search endpoint (index + field allow-list, rate limit, searchId analytics via the JS client contract) + Algolia-InstantSearch-style JS widget library (search box, hits, refinements, pagination, stats) building on Phase 9 suggestions |
 
 ---
-*Roadmap created: 2026-10-08 · Updated: 2026-10-12 (Phase 10 complete; Phase 11 Search Insights added, Public API Audit → Phase 12)*
+*Roadmap created: 2026-10-08 · Updated: 2026-10-13 (v0.2 Measure complete; v0.3 Relevance current)*

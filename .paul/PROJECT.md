@@ -13,8 +13,8 @@ Marketers tune, test and measure site search without a developer.
 | Attribute | Value |
 |-----------|-------|
 | Type | Application (XbyK add-on library: admin + live site) |
-| Version | 0.1.0 |
-| Status | v0.2 Measure: all phases (7–13, 8.1) complete; APPROVAL-CHECKS #4–#21 approved; ready to complete the milestone |
+| Version | 0.2.0 |
+| Status | v0.2 Measure complete (2026-10-13); v0.3 Relevance next (Phase 14) |
 | Last Updated | 2026-10-13 |
 
 ## Requirements
@@ -88,7 +88,7 @@ Marketers tune, test and measure site search without a developer.
 ### Active (In Progress)
 
 ### Planned (Next)
-- v0.3 Relevance: per-item popularity data (14), query-time stopwords (15), field-weights editor (16), typo tolerance (17), "Did you mean" + curated suggestions (18), popularity boost (19)
+- v0.3 Relevance (current milestone, not started): per-item popularity data (14), query-time stopwords (15), field-weights editor (16), typo tolerance (17), "Did you mean" + curated suggestions (18), popularity boost (19)
 - v0.4 Test: A/B testing of rule sets + comparison reports
 - v0.5 Instant Search: public, opt-in search endpoint (index + field allow-list, rate limit, searchId analytics) and an Algolia-InstantSearch-style JS widget library
 
@@ -216,4 +216,4 @@ Marketers tune, test and measure site search without a developer.
 | Research | project-sidecar/docs/research/ (git-ignored) |
 
 ---
-*Created: 2026-10-08 · Last updated: 2026-10-13 after Phase 13 (v0.2 phases complete)*
+*Created: 2026-10-08 · Last updated: 2026-10-13 after v0.2 Measure*

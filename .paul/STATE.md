@@ -5,27 +5,27 @@
 See: .paul/PROJECT.md (updated 2026-10-12) · Milestones: .paul/MILESTONES.md
 
 **Core value:** Marketers tune, test and measure site search without a developer.
-**Current focus:** v0.2 Measure — all phases complete, review done, follow-ups shipped; /paul:complete-milestone next
+**Current focus:** v0.3 Relevance — Phase 14 Item Popularity Data (start click history early for Phase 19)
 
 ## Current Position
 
-Milestone: v0.2 Measure (v0.2.0)
-Phase: 13 of 13 (Enterprise Screens) — Complete
-Plan: 13-05 complete (phase complete)
-Status: v0.2 ready to complete (all checks approved)
-Last activity: 2026-10-13 — Unified 13-04; Phase 13 complete (docs updated)
+Milestone: v0.3 Relevance (v0.3.0) — not started
+Phase: 14 of 19 (Item Popularity Data) — Not started
+Plan: None
+Status: v0.2 Measure complete — ready to plan Phase 14
+Last activity: 2026-10-13 — Milestone v0.2 Measure completed
 
 Progress:
 - v0.1 Tune & Capture: [██████████] 100% ✓
-- v0.2 Measure: [██████████] 8 of 8 phases (review done)
-- Phase 13: [██████████] 6/6 plans
+- v0.2 Measure: [██████████] 100% ✓
+- v0.3 Relevance: [░░░░░░░░░░] 0 of 6 phases
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - milestone ready to complete]
+  ○        ○        ○     [Milestone complete - ready to plan Phase 14]
 ```
 
 ## Accumulated Context
@@ -255,15 +255,15 @@ Plans 03-03, 03-04, 03-05, 03-07, 04-01, 04-02, 05-01, 06-01, 06-02, 06-03, 07-0
 | Resolved 2026-10-10: admin UI design-validation concern — design review fixes shipped in 03-02 (58c3126, f014963) and design validation is now required in SPECIAL-FLOWS | — | — |
 
 ### Git State
-Last commit: see `git log` — feat(13) phase commit after docs(13) 996f29b (v0.2 phases complete)
+Last commit: see `git log` — v0.2.0 tagged
 Branch: main (not pushed)
 Feature branches merged: none
 
 ## Session Continuity
 
 Last session: 2026-10-13
-Stopped at: Phase 13 complete (v0.2 phases complete)
-Next action: /paul:complete-milestone (v0.2 Measure)
+Stopped at: Milestone v0.2 Measure complete (2026-10-13, tag v0.2.0)
+Next action: /paul:plan (Phase 14 Item Popularity Data)
 Resume file: .paul/ROADMAP.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 

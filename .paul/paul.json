@@ -2,16 +2,16 @@
   "name": "XperienceCommunity.Lucene.Suite",
   "version": "0.2.0",
   "milestone": {
-    "name": "v0.2 Measure",
-    "version": "0.2.0",
-    "status": "in_progress",
-    "phases": 7
+    "name": "v0.3 Relevance",
+    "version": "0.3.0",
+    "status": "not_started",
+    "phases": 6
   },
   "phase": {
-    "number": 13,
-    "name": "Enterprise Screens",
-    "status": "complete",
-    "plans_completed": 6
+    "number": 14,
+    "name": "Item Popularity Data",
+    "status": "not_started",
+    "plans_completed": 0
   },
   "loop": {
     "position": "IDLE"
