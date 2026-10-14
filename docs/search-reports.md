@@ -88,7 +88,7 @@ The **Fix these first** card on the same page is described in [Search insights](
 
 ## Seeding demo history
 
-The test project contains a dev-only seed runner that fills `LuceneSuite_SearchDaily` with plausible history, so reports can be built and demonstrated before real traffic exists. Nothing from it ships in a package.
+The test project contains a dev-only seed runner that fills `LuceneSuite_SearchDaily` and `LuceneSuite_ItemDaily` with plausible history, so reports can be built and demonstrated before real traffic exists. Nothing from it ships in a package.
 
 **How it builds the data:**
 
@@ -98,7 +98,7 @@ The test project contains a dev-only seed runner that fills `LuceneSuite_SearchD
 
 **What it writes:**
 
-- Only `SearchDaily` rows for the given index, and only on days that are empty and that the rollup job will never roll. The range is the N days ending before the earliest of: today (UTC), watermark + 1, the earliest raw search day, and the index's first `SearchDaily` day.
+- Only `SearchDaily` and `ItemDaily` rows for the given index, and only on days that are empty and that the rollup job will never roll. The range is the N days ending before the earliest of: today (UTC), watermark + 1, the earliest raw search day, and the index's first `SearchDaily` day.
 - It never touches the watermark, the raw tables or other indexes.
 - It holds the rollup lock while it runs and writes in one serializable transaction.
 - It does not initialize Kentico against the target database; it uses plain SQL.

@@ -94,7 +94,7 @@ The client-facing settings (`Merge`, `Attribution`) must match what your search 
 | `LuceneSuite:Analytics:Attribution:AttributionWindow` | `01:00:00` | > 0 | A click or conversion counts only within this time of the response it refers to. Also the longest a logical search lasts. |
 | `LuceneSuite:Analytics:Retention:RawRetention` | `2.00:00:00` (48 h) | ≥ 1 day + 3 × `AttributionWindow` + `FlushInterval` + 5 min + `RollupInterval` + 1 h (1.04:20:02 with the defaults) | How long raw search and interaction rows are kept |
 | `LuceneSuite:Analytics:Retention:RawHardLimit` | `7.00:00:00` | ≥ `RawRetention` | Raw rows older than this are deleted even when the rollup is stuck, so query text is never kept indefinitely |
-| `LuceneSuite:Analytics:Retention:DailyRetention` | `762.00:00:00` (25 months) | ≥ 1 day | How long daily rollup rows are kept. Also the longest report range and the upper bound of `Suggestions:WindowDays`. |
+| `LuceneSuite:Analytics:Retention:DailyRetention` | `762.00:00:00` (25 months) | ≥ 1 day | How long daily rollup rows are kept, both the per-query rows and the per-item popularity rows. Also the longest report range and the upper bound of `Suggestions:WindowDays`. |
 | `LuceneSuite:Analytics:Retention:SubThresholdPruneAfter` | `30.00:00:00` | > 0 | Daily rows of a query still below the surfacing threshold are folded into the day's "(other)" row this long after it was last seen |
 | `LuceneSuite:Analytics:Surfacing:MinSearches` | 5 | ≥ 1 | Fewest logical searches before a query is named in reports and can be suggested |
 | `LuceneSuite:Analytics:Surfacing:MinDistinctDays` | 2 | ≥ 1 | Fewest distinct UTC days with a search, on top of `MinSearches` |
