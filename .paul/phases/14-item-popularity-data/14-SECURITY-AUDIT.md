@@ -41,3 +41,19 @@ Verdict: no Critical or High findings were introduced by Phase 14. There is one 
 
 1. P14-01 (optional, Low): before trusting item KPIs for editorial decisions, consider counting at most one conversion per (logical search, item). Alternatively, attribute an item only if it appeared in the search's result page; that would need result GUIDs to be captured, which is a design change. If not addressed, record it in KNOWN-LIMITATIONS.
 2. P14-08: pin a patched `System.Security.Cryptography.Pkcs` centrally in Directory.Packages.props, or take the Kentico refresh that carries it. Track this outside Phase 14.
+
+## Triage (Fable, against the code, 2026-10-13)
+
+| Id | Triage | Reason |
+|----|--------|--------|
+| P14-01 | ACCEPTED_RISK → Phase 19 | Real: RollupEngine.Attribute counts any item GUID on a matched (SearchId, Sequence) and conversions per distinct EventId, by design so ItemDaily sums equal SearchDaily (14-01 invariant). Today it only skews an admin report; pinning a fake GUID is blocked (not in index) and saving needs MANAGE_RULES. Phase 19 (popularity boost) acts on this data automatically and must bound per-search/per-item contributions before using it. |
+| P14-02 | REJECTED | Test-only SQL helpers with compile-time constant inputs; not shipped. |
+| P14-03 | REJECTED | No flaw: ORDER BY comes from a constant switch over a validated enum; all values are parameters. |
+| P14-04 | ACCEPTED_RISK → existing posture | Same VIEW gate as every report command; titles come from the public site-search index; rule save enforces MANAGE_RULES server-side. |
+| P14-05 | REJECTED | No flaw: GUID-validated, path-bound, 2-minute, single-use handoff; nothing persisted without a MANAGE_RULES save. |
+| P14-06 | REJECTED | No flaw: no PII columns; retention covers ItemDaily. |
+| P14-07 | ACCEPTED_RISK → existing posture | Bounded paging and range, admin-only; uncached re-aggregation is a performance note, not a vulnerability. |
+| P14-08 | ACCEPTED_RISK → Needs Josh before v0.3.0 release | Real High advisory, transitive via Kentico.Xperience.Core 31.9.1, pre-dates Phase 14. A central Pkcs pin changes Kentico's dependency graph: Josh decides between the pin and a Kentico update. |
+| P14-09 | ACCEPTED_RISK | Dev dependencies only; `npm audit --omit=dev` is clean. |
+
+Confirmed: 0 → no SEC-FIX plan. Still open: P14-08 (Needs Josh).
