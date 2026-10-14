@@ -272,7 +272,7 @@ Feature branches merged: none
 
 Last session: 2026-10-13
 Stopped at: 14-02 unified (Phase 14 plans complete; transition-phase not run)
-Next action: Phase 14 security audit, then Josh's phase UAT review
+Next action: Josh reviews .paul/phases/14-item-popularity-data/14-PHASE-UAT.md, then transition-phase
 Resume file: .paul/phases/14-item-popularity-data/14-02-SUMMARY.md
 Environment: 2026-10-10: test host is CommunityProjects (http://localhost:27340, DB comm_projects at 31.9.1, Suite schema v7 since 10-01; Widgets wired since 06-03, Site search page /site-search). Disposable DB comm_projects_test (restored from the pre-31.9.1 backup, updated to 31.9.1, Suite v7 via the DB tests) for LUCENESUITE_TEST_CONNECTIONSTRING. Admin client in Debug needs `npm start` in src/XperienceCommunity.Lucene.Suite.Admin/Client (Proxy 3011)
 
