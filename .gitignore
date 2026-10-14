@@ -5,3 +5,6 @@ obj/
 node_modules/
 src/XperienceCommunity.Lucene.Suite.Admin/Client/dist/
 project-sidecar/
+
+# AEGIS audit state (generated)
+.aegis/
