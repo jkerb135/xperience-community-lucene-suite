@@ -254,7 +254,7 @@ const ItemsView = ({ state, sort, onSort, actions }: { state: ItemsState; sort: 
       )}
       {error && <NotificationBarAlert>{error}</NotificationBarAlert>}
       {inProgress && <Spinner />}
-      {result !== undefined && result.totalCount === 0 ? (
+      {result === undefined ? null : result.totalCount === 0 ? (
         <p style={{ margin: 0, color: LOW }}>No clicked items in this period.</p>
       ) : (
         <Stale.Provider value={failed || error !== undefined}>
